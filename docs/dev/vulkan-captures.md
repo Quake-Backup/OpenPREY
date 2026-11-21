@@ -138,6 +138,36 @@ that route and was offset twice. Reports and engine images:
 `.tmp/vk-roadmap/nov6/tiled-fix/{gl,nvidia,intel}/` and
 `comparison-{nvidia,intel}/`.
 
+**The scene at the capture's size (21 November 2026).** PREY's main view has
+no game-owned target, so it still drew to the window moved by the offset, and
+every copy of it failed: the scene, `_currentRender` and post-process copies
+clamp to the window, and the passes that sample them stretch the window's
+1280x720 back over the 2560x1440 view, once per pass. Each tile showed a
+heavily magnified piece of the view. While a capture larger than the window
+draws (`VK_TiledCapture_Rect`), the root scene view, and the portal-sky and
+`SS_SUBVIEW` views drawn into its viewport, now render into the backend scene
+target sized to the whole capture, moved back to its origin. The composite
+draws the target through the spatial presentation shader over the capture's
+rectangle at the tile offset, one-to-one; captures keep no temporal history,
+and a failed composite abandons the scene rather than blitting it.
+
+**Fresh geometry per tile.** `VK_GuiExecutor_ReadPixels` submits the frame,
+waits and resumes recording in the same frame while a screenshot is taken.
+The vertex, index and GPU-skinning upload memos were cleared only when a frame
+opened, so the next tile, a new front-end frame whose frame-temp vertex cache
+recycles the headers those memos are keyed by, drew some animated and
+deformed surfaces with the previous tile's vertices: stray bright wedges in
+every tile after the first. The resume now clears them.
+
+In `feedingtowerb` on the RTX 4060 Laptop (1280x720 window, Enhanced),
+captures box-filtered to the window differ from a one-pass shot by 2.99
+(2560x1440), 3.05 (3840x2160) and 3.15 (1300x760) display levels, against
+2.87, 2.86 and 3.25 on OpenGL; with post-processing off, 2.66 against 2.57.
+`levelshotProbe` lines of 2560x1440 and 3840x2160 differ by 2.08 and 2.24,
+against 1.98 and 2.08. Per-tile differences match OpenGL's; what remains is
+resampling and the HUD, which both renderers draw at window size into the
+top-left tile.
+
 ## Nested, cropped and offset views (6 November 2026)
 
 `renderer_view_capture.py` adds six cases to the same laboratory scene at 4x

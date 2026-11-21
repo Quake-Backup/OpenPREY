@@ -135,7 +135,8 @@ VkDescriptorSet VK_Exec_InteractionUniformSet( void );
 int VK_Exec_InteractionUniformAlloc( const void *data, int bytes );
 static bool VK_TemporalPresentation_DrawPendingSceneSpatial(
 	const viewDef_t *viewDef, idImage *sceneImage, vkImageEntry_t *sceneEntry,
-	idImage *depthImage, vkImageEntry_t *depthEntry );
+	idImage *depthImage, vkImageEntry_t *depthEntry,
+	const VkViewport *outputViewport = NULL );
 struct vkSceneScaleState_s;
 static bool VK_WindowView_Begin( const viewDef_t *viewDef, struct vkSceneScaleState_s &state );
 static void VK_WindowView_End( struct vkSceneScaleState_s &state );
@@ -606,6 +607,9 @@ typedef struct vkGuiExecutor_s {
 	int				temporalSceneFrame;
 	const viewDef_t *	temporalSceneRoot;
 	bool				temporalScenePendingComposite;
+	// The pending scene holds a whole larger-than-window capture, drawn at the
+	// target's origin; its composite takes the tile offset (VK_TiledCapture_Rect).
+	bool				temporalSceneTiled;
 	bool				temporalSceneAllocationWarned;
 	// Multisampled stand-in for the window while a 3D view that would draw
 	// straight to it renders (VK_WindowView_Begin), and its single-sample
@@ -5309,6 +5313,50 @@ static bool VK_TemporalPresentation_RootCoversNativeOutput(
 		&& height == (int)VK_Exec_DefaultExtent().height;
 }
 
+/*
+====================
+VK_TiledCapture_Rect
+
+A capture larger than the window (R_ReadTiledPixels) draws the frame once per
+window-sized tile, with tr.viewportOffset moved to the tile and the views on
+the window moved with it (VK_Backend_ApplyTileOffset). Copying and
+re-sampling a view that hangs off the window cannot work: the scene and
+post-process copies clamp to the window and stretch it back over the whole
+view, magnifying each tile. As OpenGL does (RB_TileOffsetX), the main scene
+therefore renders into a scene target sized to the whole capture, at the
+target's origin, and only its composite to the window takes the tile offset.
+
+Returns the capture's rectangle in window pixels (bottom-left origin) while
+such a capture is drawing. False for ordinary frames, captures that fit the
+window, and rectangles the device cannot express as one viewport.
+====================
+*/
+static bool VK_TiledCapture_Rect( int &x, int &y, int &width, int &height ) {
+	x = tr.viewportOffset[0];
+	y = tr.viewportOffset[1];
+	width = tr.tiledViewport[0];
+	height = tr.tiledViewport[1];
+	if ( width <= 0 || height <= 0 || vkExecVROutputActive || vkExec.windowless
+			|| ( width <= (int)VK_Exec_DefaultExtent().width
+				&& height <= (int)VK_Exec_DefaultExtent().height ) ) {
+		return false;
+	}
+	const VkPhysicalDeviceLimits &limits = vkCtx.deviceProperties.limits;
+	return width <= (int)limits.maxViewportDimensions[0]
+		&& height <= (int)limits.maxViewportDimensions[1]
+		&& (float)x >= limits.viewportBoundsRange[0]
+		&& (float)( x + width ) <= limits.viewportBoundsRange[1]
+		&& (float)( (int)VK_Exec_DefaultExtent().height - height - y ) >= limits.viewportBoundsRange[0]
+		&& (float)( (int)VK_Exec_DefaultExtent().height - y ) <= limits.viewportBoundsRange[1];
+}
+
+// The view is the whole capture of VK_TiledCapture_Rect, moved to the tile.
+static bool VK_TiledCapture_ViewCovers( const viewDef_t *view, int x, int y,
+		int width, int height ) {
+	return view != NULL && view->viewport.x1 == x && view->viewport.y1 == y
+		&& view->viewport.x2 == x + width - 1 && view->viewport.y2 == y + height - 1;
+}
+
 // Direct engine captures (envshot/probe faces) do not pass through the game's
 // scene target. Keep an in-frame capture in the same float attachment as an
 // ordinary HDR view, without scaling its smaller viewport to the whole window.
@@ -6139,16 +6187,34 @@ static bool VK_TemporalPresentation_CompositePendingScene( void ) {
 			? VK_TemporalPresentation_DepthCurrentForCapture( sampledTarget, sampledTarget->GetDepthImage() )
 			: VK_TemporalPresentation_DepthStampMatches( sampledTarget,
 				sampledTarget->GetDepthImage(), R_TemporalPresentation_HistoryGeneration() ) );
+	// A tile of a larger-than-window capture shows its part of the whole
+	// capture's scene: the scene is drawn over the capture's rectangle, which
+	// the root view still holds in window pixels (bottom-left origin), so the
+	// window receives it one-to-one. The pass uses a positive, top-down
+	// viewport (DrawResolve). Captures keep no temporal history.
+	const bool tiled = vkExec.temporalSceneTiled && sceneRoot != NULL;
+	VkViewport tileViewport;
+	memset( &tileViewport, 0, sizeof( tileViewport ) );
+	if ( tiled ) {
+		const int width = sceneRoot->viewport.x2 - sceneRoot->viewport.x1 + 1;
+		const int height = sceneRoot->viewport.y2 - sceneRoot->viewport.y1 + 1;
+		tileViewport.x = (float)sceneRoot->viewport.x1;
+		tileViewport.y = (float)( (int)VK_Exec_DefaultExtent().height
+			- sceneRoot->viewport.y1 - height );
+		tileViewport.width = (float)width;
+		tileViewport.height = (float)height;
+		tileViewport.maxDepth = 1.0f;
+	}
 	// Let the resolver validate the exact depth-success stamp. A missing or
 	// stale depth image is a spatial/no-write result that must advance the
 	// shared invalidation generation rather than silently bypassing ownership.
-	const bool temporalPresented =
-		VK_TemporalPresentation_ResolvePendingSceneTemporal( sceneRoot );
+	const bool temporalPresented = !tiled
+		&& VK_TemporalPresentation_ResolvePendingSceneTemporal( sceneRoot );
 	const bool presented = temporalPresented
 		|| VK_TemporalPresentation_DrawPendingSceneSpatial( sceneRoot,
 			sampledTarget->GetColorImage( 0 ), sceneColor,
 			depthReady ? sampledTarget->GetDepthImage() : NULL,
-			depthReady ? sceneDepth : NULL );
+			depthReady ? sceneDepth : NULL, tiled ? &tileViewport : NULL );
 	if ( presented ) {
 		vkExec.temporalScenePendingComposite = false;
 		vkExec.temporalSceneRoot = NULL;
@@ -6172,9 +6238,10 @@ static bool VK_TemporalPresentation_CompositePendingScene( void ) {
 			R_TemporalPresentation_HistoryGeneration();
 		vkExec.temporalSceneCompositeInvalidatedFrame = backEnd.frameCount;
 	}
-	if ( sceneRoot != NULL && sceneRoot->temporalJitterEnabled ) {
+	if ( tiled || ( sceneRoot != NULL && sceneRoot->temporalJitterEnabled ) ) {
 		// VkImageBlit cannot express the fractional projection recenter required
-		// by a jittered scene. Fail closed instead of exposing an unstable frame;
+		// by a jittered scene, nor place a capture tile that hangs off the
+		// window. Fail closed instead of exposing an unstable frame;
 		// abandon this scene so a later frame cannot retry stale command-arena
 		// view state after the source frame has already been submitted.
 		vkExec.temporalScenePendingComposite = false;
@@ -6270,7 +6337,25 @@ static bool VK_TemporalPresentation_BeginView( const viewDef_t *viewDef,
 	int targetWidth = 0;
 	int targetHeight = 0;
 	bool captureScene = false;
-	if ( !VK_TemporalPresentation_BackendSceneRequested( rootView, targetWidth, targetHeight ) ) {
+	int tileX = 0;
+	int tileY = 0;
+	int tileWidth = 0;
+	int tileHeight = 0;
+	// A larger-than-window capture always takes the scene target, sized to
+	// the whole capture, whatever the presentation settings: see
+	// VK_TiledCapture_Rect. Its views come back to the target's origin below.
+	const bool tiledScene = VK_TiledCapture_Rect( tileX, tileY, tileWidth, tileHeight )
+		&& VK_TiledCapture_ViewCovers( rootView, tileX, tileY, tileWidth, tileHeight )
+		&& VK_TiledCapture_ViewCovers( viewDef, tileX, tileY, tileWidth, tileHeight );
+	if ( tiledScene ) {
+		if ( vkExec.temporalResolveVertModule == VK_NULL_HANDLE
+				|| vkExec.temporalResolveFragModule == VK_NULL_HANDLE
+				|| VK_TemporalPresentation_GetResolvePipeline() == VK_NULL_HANDLE ) {
+			return false;
+		}
+		targetWidth = tileWidth;
+		targetHeight = tileHeight;
+	} else if ( !VK_TemporalPresentation_BackendSceneRequested( rootView, targetWidth, targetHeight ) ) {
 		if ( !VK_TemporalPresentation_HDRCaptureInFrame( rootView )
 				|| vkExec.temporalResolveVertModule == VK_NULL_HANDLE
 				|| vkExec.temporalResolveFragModule == VK_NULL_HANDLE
@@ -6299,6 +6384,7 @@ static bool VK_TemporalPresentation_BeginView( const viewDef_t *viewDef,
 		vkExec.temporalSceneRoot = rootView;
 	}
 	vkExec.temporalScenePendingComposite = true;
+	vkExec.temporalSceneTiled = tiledScene;
 	// The attachment stays window-sized so the spatial presenter copies it
 	// one-to-one. Only the capture's original rectangle is rendered/read back.
 	const int viewWidth = captureScene ? viewDef->viewport.x2 - viewDef->viewport.x1 + 1 : targetWidth;
@@ -6307,8 +6393,17 @@ static bool VK_TemporalPresentation_BeginView( const viewDef_t *viewDef,
 			viewWidth, viewHeight, true ) ) {
 		(void)VK_Exec_SetRenderTarget( NULL );
 		vkExec.temporalScenePendingComposite = false;
+		vkExec.temporalSceneTiled = false;
 		vkExec.temporalSceneRoot = NULL;
 		return false;
+	}
+	if ( tiledScene ) {
+		// Same size, so BeginScale kept the viewport; it restores it at EndView.
+		viewDef_t *mutableView = const_cast<viewDef_t *>( viewDef );
+		mutableView->viewport.x1 -= tileX;
+		mutableView->viewport.x2 -= tileX;
+		mutableView->viewport.y1 -= tileY;
+		mutableView->viewport.y2 -= tileY;
 	}
 	return true;
 }
@@ -7995,6 +8090,16 @@ bool VK_GuiExecutor_ReadPixels( int x, int y, int width, int height, void *pixel
 		// The captured composition was submitted and retired above. The clear
 		// starts a new composition on this acquired image, with fresh draw state.
 		vkExec.displayColorMapped = false;
+		// What is recorded next comes from a new front-end frame: the next tile
+		// of a larger-than-window capture (R_ReadTiledPixels), or the real
+		// frame after a save-preview crop. Its frame-temp vertex cache
+		// recycles the headers these memos are keyed by, so a hit would draw
+		// a surface of the frame just read back: animated and deformed entity
+		// surfaces of every tile after the first came out as stray bright
+		// wedges. Forget the uploads, as opening a frame does.
+		memset( vkExec.vertMemo, 0, sizeof( vkExec.vertMemo ) );
+		memset( vkExec.idxMemo, 0, sizeof( vkExec.idxMemo ) );
+		memset( vkExec.gpuSkinningMemo, 0, sizeof( vkExec.gpuSkinningMemo ) );
 		// The screenshot path explicitly retired this same slot; start a fresh
 		// timing epoch for the real frame recorded after the crop.
 		VK_GpuFrameTiming_BeginFrame( vkExec.cmd, submittedSlot, backEnd.frameCount );
@@ -9709,7 +9814,8 @@ static bool VK_TemporalPresentation_DrawResolve(
 		idImage *sceneImage, vkImageEntry_t *sceneEntry,
 		idImage *depthImage, vkImageEntry_t *depthEntry,
 		idImage *historyImage, vkImageEntry_t *historyEntry,
-		const vkTemporalResolveBlock_t &block, idImage *velocityImage = NULL ) {
+		const vkTemporalResolveBlock_t &block, idImage *velocityImage = NULL,
+		const VkViewport *outputViewport = NULL ) {
 	if ( sceneImage == NULL || sceneEntry == NULL
 			|| !VK_Exec_SetRenderTarget( NULL ) ) {
 		return false;
@@ -9769,6 +9875,10 @@ static bool VK_TemporalPresentation_DrawResolve(
 	viewport.width = (float)vkExec.activeExtent.width;
 	viewport.height = (float)vkExec.activeExtent.height;
 	viewport.maxDepth = 1.0f;
+	if ( outputViewport != NULL ) {
+		// a tile of a larger-than-window capture: the whole capture, offset
+		viewport = *outputViewport;
+	}
 	VkRect2D scissor;
 	memset( &scissor, 0, sizeof( scissor ) );
 	scissor.extent = vkExec.activeExtent;
@@ -9916,11 +10026,13 @@ bool VK_GuiExecutor_PresentScaledScene( const presentScaledSceneCommand_t &comma
 static bool VK_TemporalPresentation_DrawPendingSceneSpatial(
 		const viewDef_t *viewDef, idImage *sceneImage,
 		vkImageEntry_t *sceneEntry, idImage *depthImage,
-		vkImageEntry_t *depthEntry ) {
+		vkImageEntry_t *depthEntry, const VkViewport *outputViewport ) {
 	if ( viewDef == NULL || sceneImage == NULL || sceneEntry == NULL ) {
 		return false;
 	}
-	if ( VK_TemporalPresentation_DrawScaledScene( viewDef, sceneImage, sceneEntry ) ) {
+	// A capture tile is never upscaled: its scene is the capture's own size.
+	if ( outputViewport == NULL
+			&& VK_TemporalPresentation_DrawScaledScene( viewDef, sceneImage, sceneEntry ) ) {
 		return true;
 	}
 	resolveTemporalPresentationCommand_t command;
@@ -9933,8 +10045,13 @@ static bool VK_TemporalPresentation_DrawPendingSceneSpatial(
 	VK_TemporalPresentation_FillResolveBlock( command,
 		sceneEntry->width, sceneEntry->height, false, depthEntry != NULL,
 		true, 0, block );
+	if ( outputViewport != NULL ) {
+		// the output is the whole capture, not the window it is drawn through
+		block.sceneOutputExtent[2] = idMath::Fabs( outputViewport->width );
+		block.sceneOutputExtent[3] = idMath::Fabs( outputViewport->height );
+	}
 	return VK_TemporalPresentation_DrawResolve( NULL, sceneImage, sceneEntry,
-		depthImage, depthEntry, NULL, NULL, block );
+		depthImage, depthEntry, NULL, NULL, block, NULL, outputViewport );
 }
 
 static bool VK_TemporalPresentation_DrawResolvedColorToSwap(

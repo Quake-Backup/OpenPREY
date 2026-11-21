@@ -178,6 +178,11 @@ capture instead of repeating the first. Only views drawn to the window move:
 a view drawn into a render texture (a game-owned post target sized to the
 whole capture) stays at the texture's origin, and the view that composites
 the texture to the window moves instead, as RB_TileOffsetX does on OpenGL.
+The main scene view, and the portal-sky and subview contributors drawn into
+its viewport, are moved back when they begin: they render into a scene target
+sized to the whole capture and only its composite takes the offset
+(VK_TiledCapture_Rect, vk_GuiExecutor.cpp), since their scene and
+post-process copies cannot read the part of the view off the window.
 Scissors cut at the attachment edge (vkCmdSetScissorClamped). Ordinary frames
 have a zero offset and are untouched.
 ====================

@@ -3,7 +3,7 @@
 Usage:
     python tools/assets/fonts/embed_atlas_fonts.py
 
-Subsets ``content/basepr/pak0/fonts/{menu,english,alien}.ttf`` to the Latin
+Subsets ``content/basepr/pak0/fonts/{menu,talon-ui-condensed,alien}.ttf`` to the Latin
 range the pages draw and packs each as WOFF. It then rewrites the ``@font-face``
 block between each target's markers:
 
@@ -35,16 +35,16 @@ WOFF_DIR = ROOT / "assets" / "docs" / "fonts"
 # CSS family name -> (shipped face, file written to WOFF_DIR or None)
 FACES = {
     "openPREY Menu": ("menu.ttf", "openprey-menu.woff"),
-    "openPREY Default": ("english.ttf", "openprey-default.woff"),
+    "Talon UI Condensed": ("talon-ui-condensed.ttf", "talon-ui-condensed.woff"),
     "openPREY Alien": ("alien.ttf", None),
 }
 
 # page -> (marker name, families embedded in it)
 TARGETS = (
     (ROOT / "docs" / "dev" / "prey-ui" / "atlas" / "prey-interface-atlas.html", "openprey-atlas-fonts",
-     ("openPREY Menu", "openPREY Default", "openPREY Alien")),
+     ("openPREY Menu", "Talon UI Condensed", "openPREY Alien")),
     (ROOT / "assets" / "release" / "README.html", "openprey-release-fonts",
-     ("openPREY Menu", "openPREY Default")),
+     ("openPREY Menu", "Talon UI Condensed")),
 )
 
 # Basic Latin, Latin-1, general punctuation, arrows, multiplication and minus.

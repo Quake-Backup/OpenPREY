@@ -43,7 +43,7 @@ CANVAS_W, CANVAS_H = 640, 480
 
 # The faces a document may name (EngineHost::FontFamily in src/ui/RetainedUI.cpp):
 # "menu" is Prey's display face; "chain" folds onto Prey's body face
-# (R_CanonicalFontName), fonts/english.ttf.
+# (R_CanonicalFontName), fonts/talon-ui-condensed.ttf.
 DISPLAY, BODY = "menu", "chain"
 # Stock `textscale s` draws a 48 s u em (section 1), so 72 s dp.
 EM = 48

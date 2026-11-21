@@ -2,8 +2,9 @@
 
 openPREY renders GUI, HUD and console text from scalable TrueType faces. The
 menu, alien and console faces are reconstructed from Prey (2006)'s retail
-bitmap fonts; the default face is Talon, drawn for openPREY (see
-[Talon](#talon-the-default-face)). The renderer rasterises them at the
+bitmap fonts; Prey's narrow body face is replaced by Talon UI Condensed, drawn
+for openPREY (see [Talon UI Condensed](#talon-ui-condensed-the-body-face)).
+The renderer rasterises them at the
 display's resolution instead of magnifying the fixed 12/24/48-pixel atlases.
 The original bitmap path remains available as the compatibility fallback.
 
@@ -14,7 +15,7 @@ the renderer resolves after a GUI requests a font.
 
 | File | GUI / engine consumer | Source |
 | --- | --- | --- |
-| `english.ttf` | `fonts` (the default UI/HUD face) | Talon, drawn in `tools/assets/fonts/talon/`; no retail source |
+| `talon-ui-condensed.ttf` | `fonts`, Prey's narrow body face (UI and HUD text), loaded by name through `R_TTF_BODY_FACE_FILE` | Talon UI Condensed, drawn in `tools/assets/fonts/talon/`; no retail source |
 | `menu.ttf` | `fonts/menu` | `fonts/english/menu/fontImage_48.dat` and five atlas pages |
 | `alien.ttf` | `fonts/alien` | `fonts/english/alien/fontImage_48.dat` and three atlas pages |
 | `bigchars.ttf` | `textures/bigchars` (console and loading text) | `textures/gfx/bigchars.tga` |
@@ -25,8 +26,8 @@ scripts. The other three faces carry the extended Latin, Greek, Cyrillic,
 Arabic, Hebrew, punctuation and HUD-symbol coverage supplied by the shared
 generator.
 
-`english.ttf` is licensed under the SIL Open Font License 1.1
-([LICENSES/OFL-1.1.txt](../../LICENSES/OFL-1.1.txt)): Talon is openPREY's own
+`talon-ui-condensed.ttf` is licensed under the SIL Open Font License 1.1
+([LICENSES/OFL-1.1.txt](../../LICENSES/OFL-1.1.txt)): Talon UI Condensed is openPREY's own
 drawing, and its glyphs for the scripts it does not draw are derived from the
 Noto fonts, which are under the same licence. The traced faces keep the
 attribution to the retail bitmap fonts in their name tables.
@@ -63,12 +64,13 @@ python tools/assets/fonts/build_openprey_fonts.py `
   --output content/basepr/pak0/fonts
 ```
 
-Pass `--faces english,menu,alien,bigchars` to rebuild a selected subset. The
-output must contain all four files before a runtime package is made. Talon
-needs no retail extraction, so the default face alone rebuilds with:
+Pass `--faces talon-ui-condensed,menu,alien,bigchars` to rebuild a selected
+subset. The output must contain all four files before a runtime package is
+made. Talon UI Condensed needs no retail extraction, so it alone rebuilds
+with:
 
 ```powershell
-python tools/assets/fonts/build_openprey_fonts.py --faces english `
+python tools/assets/fonts/build_openprey_fonts.py --faces talon-ui-condensed `
   --donors .tmp/fontdonors --output content/basepr/pak0/fonts
 ```
 
@@ -76,7 +78,7 @@ Talon's construction needs [Shapely](https://pypi.org/project/shapely/) 2.x
 besides FontTools, NumPy and Pillow. The build is deterministic: rebuilding
 from the same sources gives the same bytes.
 
-`english.ttf` is Talon build 2.000 (21 November 2026). The current `menu.ttf`
+`talon-ui-condensed.ttf` is Talon UI Condensed build 2.000 (21 November 2026). The current `menu.ttf`
 and `alien.ttf` are build 1.100 (10 November 2026; `menu.ttf` regenerated
 11 November 2026 with the image-rect stretch described under Pipeline).
 Against the retail 48-point coverage of every traced slot, as the bitmap path
@@ -130,9 +132,16 @@ atlas's `@font-face` block, so the atlas always draws what the engine ships.
 6. `bigchars` is traced from its 16×16 source grid and forced to one-cell
    advances, matching the console's existing fixed-cell indexing.
 
-## Talon, the default face
+## Talon UI Condensed, the body face
 
-Talon replaced the traced retail default face on 21 November 2026. The retail
+Talon UI Condensed replaced the tracing of Prey's narrow body face on
+21 November 2026. The name says what it is: *Talon* for its place in
+openPREY's identity (Prey's hawk, and the PREY wordmark its bowls are drawn
+from), *UI* for its job as the interface and HUD text face rather than a
+display face, and *Condensed* for its narrow frame. It ships as
+`fonts/talon-ui-condensed.ttf`, not under the retail face's language-folder
+name `english.ttf`, and the renderer loads it for the body face by name (see
+Runtime). In the sections below, Talon means this face. The retail
 face was condensed and heavy, with counters so narrow that small HUD text
 clogged; its tracing inherited that. Talon keeps the retail layout and the
 Prey look, and fixes legibility:
@@ -189,6 +198,23 @@ to load. The high Windows-1252 byte range is translated to its Unicode
 codepoints before lookup, so the TTF uses normal Unicode mappings while legacy
 GUI text keeps its original byte encoding.
 
+`q4TTFFontManager::FindFace` tries a request's language folder first and then
+the shared file: `fonts/polish/menu` looks for `fonts/polish/menu.ttf`, then
+`fonts/menu.ttf`. Prey's body face is the bare `fonts` face, which resolves to `fonts/english`
+(the Western languages share that folder) or `fonts/<language>`; its file is
+Talon UI Condensed, `fonts/talon-ui-condensed.ttf` (`R_TTF_BODY_FACE_FILE`),
+tried last so a `fonts/<language>.ttf` could still override it. That
+candidate is added only for the body face (`fonts/english` or
+`fonts/<sys_lang>`); the display,
+alien and console faces, and any other one-level name such as a mod's own
+face, keep their own files. Until 21 November 2026 the body face was `english.ttf`, matched by name, and
+had no such candidate. Every language not folded onto
+English (`openQ4_NormalizeFontLanguage`) found no `.ttf` for its body text, so
+a localised install that ships `fonts/<language>/` atlases drew the retail body
+face instead of Talon. With `sys_lang polish` and the English atlases copied to
+`fonts/polish/`, the log now shows `font register: 'fonts/polish' -> TrueType`
+and no bitmap registration.
+
 ### Fitting each size to its retail atlas
 
 Prey's 12, 24 and 48 point atlases are drawn separately and are not rescales of
@@ -218,7 +244,7 @@ exist (always, for a Prey install):
   em against its 24), so it is rasterised that much finer to stay sharp.
 
 Widths and advances are not fitted. With `r_ttfFontDebug 1` the log reports each
-slot's fit; the current faces give english (Talon) 1.071 / 1.071 / 1.000 and
+slot's fit; the current faces give the body face (Talon) 1.071 / 1.071 / 1.000 and
 menu 0.662 / 0.834 / 1.000 at 12 / 24 / 48 point. The traced default face
 Talon replaced gave 0.970 / 1.031 / 1.000. With that face, on the main menu and
 the opening caption at 1440x1080, TTF and bitmap text started and ended on the

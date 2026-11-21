@@ -2272,6 +2272,8 @@ def copy_release_collateral(source_root: Path, package_root: Path, platform: str
         (source_root / "LICENSES" / "DOOM-3-ADDITIONAL-TERMS.txt", package_root / "licenses" / "DOOM-3-ADDITIONAL-TERMS.txt"),
         (source_root / "LICENSES" / "DOOM-3-BFG-ADDITIONAL-TERMS.txt", package_root / "licenses" / "DOOM-3-BFG-ADDITIONAL-TERMS.txt"),
         (source_root / "LICENSES" / "KHRONOS-GLES-MIT.txt", package_root / "licenses" / "KHRONOS-GLES-MIT.txt"),
+        # Talon UI Condensed, in pak0 and the README's embedded web face.
+        (source_root / "LICENSES" / "OFL-1.1.txt", package_root / "licenses" / "OFL-1.1.txt"),
         (source_root / "CONTRIBUTORS.md", package_root / "CONTRIBUTORS.md"),
     )
 

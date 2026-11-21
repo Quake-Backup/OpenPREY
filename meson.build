@@ -3556,6 +3556,8 @@ install_data('LICENSES/RmlUi.txt', install_dir: install_root_dir / 'licenses')
 install_data('LICENSES/JsonCpp.txt', install_dir: install_root_dir / 'licenses')
 install_data('LICENSES/libtess2.txt', install_dir: install_root_dir / 'licenses')
 install_data('LICENSES/MD4.txt', install_dir: install_root_dir / 'licenses')
+# Talon UI Condensed (pak0's fonts/talon-ui-condensed.ttf) is under the SIL OFL.
+install_data('LICENSES/OFL-1.1.txt', install_dir: install_root_dir / 'licenses')
 if build_openxr
   # the client links the Khronos OpenXR loader statically
   install_data('LICENSES/openxr-sdk.txt', install_dir: install_root_dir / 'licenses')

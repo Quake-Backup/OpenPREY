@@ -594,8 +594,28 @@ q4TTFFontManager::FindFace
 'fontName' arrives as the resolved bitmap path, e.g. "fonts/english/chain".
 The .ttf files are language independent, so the language folder is tried first
 and then the shared location.
+
+The default face - Prey's narrow body face, which resolves to "fonts/english"
+or "fonts/<language>" - is drawn by openPREY's own Talon UI Condensed, shipped
+under its own name (R_TTF_BODY_FACE_FILE) rather than as "english.ttf". It is
+the last candidate for exactly that request, so a "fonts/<language>.ttf" still
+overrides it and every other face keeps its own file. Without it, a language
+not folded onto English fell through to the bitmap atlases, and a localised
+install that ships its own "fonts/<language>/" art drew the retail body face.
 ================
 */
+static const char *const R_TTF_BODY_FACE_FILE = "fonts/talon-ui-condensed.ttf";
+
+static bool R_TTFIsBodyFaceRequest( const idStr &key ) {
+	if ( idStr::Icmpn( key.c_str(), "fonts/", 6 ) != 0 || key.Find( '/', 6 ) >= 0 ) {
+		return false;
+	}
+	// Western languages share the English folder (openQ4_NormalizeFontLanguage);
+	// the retained interface asks under sys_lang itself.
+	const char *language = key.c_str() + 6;
+	return idStr::Icmp( language, "english" ) == 0 || idStr::Icmp( language, cvarSystem->GetCVarString( "sys_lang" ) ) == 0;
+}
+
 idTrueTypeFont *q4TTFFontManager::FindFace( const char *fontName ) {
 	// The retained interface reaches here without going through RegisterFont,
 	// so fold Quake 4 face names here as well.
@@ -609,7 +629,8 @@ idTrueTypeFont *q4TTFFontManager::FindFace( const char *fontName ) {
 		}
 	}
 
-	idStr candidates[2];
+	static const int MAX_CANDIDATES = 3;
+	idStr candidates[MAX_CANDIDATES];
 	candidates[0] = key + ".ttf";
 
 	// "fonts/english/chain" -> "fonts/chain"
@@ -621,13 +642,23 @@ idTrueTypeFont *q4TTFFontManager::FindFace( const char *fontName ) {
 	}
 	candidates[1] = shared + ".ttf";
 
+	// "fonts/english" or "fonts/polish" -> Talon UI Condensed. Any other name,
+	// a mod's own face for one, keeps its own .ttf or bitmap atlas.
+	if ( R_TTFIsBodyFaceRequest( key ) ) {
+		candidates[2] = R_TTF_BODY_FACE_FILE;
+	}
+
 	q4TTFFace *entry = new q4TTFFace();
 	entry->name = key;
 	faces.Append( entry );
 
-	for ( int i = 0; i < 2; i++ ) {
-		if ( i == 1 && candidates[1].Icmp( candidates[0] ) == 0 ) {
-			break;
+	for ( int i = 0; i < MAX_CANDIDATES; i++ ) {
+		bool tried = candidates[i].IsEmpty();
+		for ( int j = 0; j < i && !tried; j++ ) {
+			tried = candidates[i].Icmp( candidates[j] ) == 0;
+		}
+		if ( tried ) {
+			continue;
 		}
 		void *buffer = NULL;
 		const int length = fileSystem->ReadFile( candidates[i].c_str(), &buffer );

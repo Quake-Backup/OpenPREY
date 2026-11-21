@@ -1,4 +1,4 @@
-"""Talon, openPREY's drawn body face (``fonts/english``).
+"""Talon UI Condensed, openPREY's interface and HUD face (``fonts/talon-ui-condensed.ttf``).
 
 ``outlines()`` returns every drawn glyph as a font-unit Path2D with its
 advance, the code points that share another glyph, and the combining marks.

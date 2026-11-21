@@ -40,7 +40,7 @@ SITE_CSS = r"""
    space, claw-cornered frames, side tabs for navigation and Prey's own display and body faces, which
    tools/assets/fonts/embed_atlas_fonts.py writes to assets/docs/fonts/ and this site ships in fonts/. */
 @font-face{font-family:"openPREY Menu";src:url("fonts/openprey-menu.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:"openPREY Default";src:url("fonts/openprey-default.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Talon UI Condensed";src:url("fonts/talon-ui-condensed.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
 
 :root {
   color-scheme: dark;
@@ -60,7 +60,7 @@ SITE_CSS = r"""
   --wash: rgba(166, 196, 230, 0.15);
   --separator: rgba(189, 207, 224, 0.35);
   --f-display: "openPREY Menu", "Eurostile Extended", "Microgramma", "Bahnschrift", sans-serif;
-  --f-body: "openPREY Default", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+  --f-body: "Talon UI Condensed", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
   --f-prose: "Bahnschrift", "Saira Condensed", "Roboto Condensed", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "Cascadia Code", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
   --claw-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23576272'/%3E%3Cstop offset='.55' stop-color='%233B4351'/%3E%3Cstop offset='1' stop-color='%232E3541'/%3E%3C/linearGradient%3E%3CradialGradient id='s'%3E%3Cstop offset='0' stop-color='%2314171B'/%3E%3Cstop offset='.72' stop-color='%23171B20'/%3E%3Cstop offset='1' stop-color='%23363E4A'/%3E%3C/radialGradient%3E%3CclipPath id='c'%3E%3Cpath d='M47 0H128V7.5C116 9.5 103 14.5 93 18.5C89 42 84 74 71.5 106C64 115 36 117 17 104.5C6 96 1 79 2 60C3 42 10 28 19 19C28 10 37 3.5 47 0Z'/%3E%3C/clipPath%3E%3C/defs%3E%3Cpath d='M47 0H128V7.5C116 9.5 103 14.5 93 18.5C89 42 84 74 71.5 106C64 115 36 117 17 104.5C6 96 1 79 2 60C3 42 10 28 19 19C28 10 37 3.5 47 0Z' fill='url(%23b)'/%3E%3Cellipse cx='43.5' cy='66.5' rx='16.5' ry='21.5' fill='url(%23s)'/%3E%3Cpath d='M47 0H128V7.5C116 9.5 103 14.5 93 18.5C89 42 84 74 71.5 106C64 115 36 117 17 104.5C6 96 1 79 2 60C3 42 10 28 19 19C28 10 37 3.5 47 0Z' fill='none' stroke='%23B3C6E2' stroke-width='14' clip-path='url(%23c)'/%3E%3C/svg%3E");
@@ -1449,6 +1449,8 @@ def generate_release_docs_site(
         Path("LICENSES/PREY-SDK-EULA.rtf"),
         Path("LICENSES/DOOM-3-ADDITIONAL-TERMS.txt"),
         Path("LICENSES/DOOM-3-BFG-ADDITIONAL-TERMS.txt"),
+        # The site's body web face is Talon UI Condensed, under the SIL OFL.
+        Path("LICENSES/OFL-1.1.txt"),
         Path("src/game/LICENSE"),
     ):
         copy_docs_auxiliary_file(source_root, auxiliary, output_root / auxiliary)

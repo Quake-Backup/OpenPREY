@@ -881,7 +881,9 @@ The HUD plays no sound for weapon switches or pickups; the player entity plays
   solid red `#BF0000` and blue `#0000A6` heading strips carrying each team's
   score. The local player's row takes a `#B3CCE6` 0.2 bar. Rows use the body
   face at 0.25, headings 0.3.
-- Chat shows ten lines (600x15 u from 0,220) at 0.25 with shadow; the message
+- Chat shows ten lines (600x15 u from 0,220) at 0.25 with shadow, pinned to
+  the screen's left edge under aspect expansion as the health figure is
+  (`chat.gui`'s `History`, `screenalignx left`); the message
   field is a tabbed panel (Global, Team) in `#4A5263` with a `#B3CCE6`
   bordered field.
 

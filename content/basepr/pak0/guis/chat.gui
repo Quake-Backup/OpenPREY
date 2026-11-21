@@ -8,6 +8,7 @@ windowDef desktop {
 
 	windowDef History {
 		rect		0, 220, 600, 150
+		screenalignx	left		// openPR06: hugs the screen's left edge under aspect expansion, as the HUD's left groups do
 
 		windowDef history9 {
 			rect		0, 0, 600, 15

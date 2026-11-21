@@ -12961,11 +12961,15 @@ static bool RB_GlowEnabledForCurrentView( void ) {
 		&& globalImages->glowCompositeImage != NULL;
 }
 
+// The glow passes draw where the view is drawn: a tiled capture's offset moves
+// only a view drawn to the window, never one in a render target sized to the
+// whole capture (RB_TileOffsetX). Taking tr.viewportOffset there copied and
+// composited a rect off the target, and every tile but the first came out black.
 static void RB_GlowSetScreenRect( void ) {
 	const int viewportWidth = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
 	const int viewportHeight = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
-	const int viewportX = tr.viewportOffset[0] + backEnd.viewDef->viewport.x1;
-	const int viewportY = tr.viewportOffset[1] + backEnd.viewDef->viewport.y1;
+	const int viewportX = RB_TileOffsetX() + backEnd.viewDef->viewport.x1;
+	const int viewportY = RB_TileOffsetY() + backEnd.viewDef->viewport.y1;
 	glViewport( viewportX, viewportY, viewportWidth, viewportHeight );
 	glScissor(
 		viewportX + backEnd.viewDef->scissor.x1,
@@ -12985,11 +12989,18 @@ against stays the view's own) and box-filtered down to that 256x256 image.
 */
 static const int GLOW_IMAGE_SIZE = 256;
 
-// Viewport and scissor for a width x height rect at the view's origin, where
-// the glow image is reduced and blurred (the composite overwrites it).
+// The corner of the view where the glow image is reduced and blurred (the
+// composite overwrites it). A window-drawn capture tile can leave the view's
+// origin off the window, so the corner is the first visible pixel of the view.
+static void RB_GlowCornerOrigin( int &x, int &y ) {
+	x = Max( 0, RB_TileOffsetX() + backEnd.viewDef->viewport.x1 );
+	y = Max( 0, RB_TileOffsetY() + backEnd.viewDef->viewport.y1 );
+}
+
+// Viewport and scissor for a width x height rect at the glow corner.
 static void RB_GlowSetCornerRect( int width, int height ) {
-	const int viewportX = tr.viewportOffset[0] + backEnd.viewDef->viewport.x1;
-	const int viewportY = tr.viewportOffset[1] + backEnd.viewDef->viewport.y1;
+	int viewportX, viewportY;
+	RB_GlowCornerOrigin( viewportX, viewportY );
 	glViewport( viewportX, viewportY, width, height );
 	glScissor( viewportX, viewportY, width, height );
 }
@@ -13036,19 +13047,21 @@ static void RB_GlowDrawScreenQuad( float offsetX, float offsetY ) {
 	glEnd();
 }
 
+// Copies the whole view, or with a size the glow corner, into image.
 static void RB_GlowCopyViewToImage( idImage *image, int width = 0, int height = 0 ) {
 	if ( image == NULL ) {
 		return;
 	}
+	int x = RB_TileOffsetX() + backEnd.viewDef->viewport.x1;
+	int y = RB_TileOffsetY() + backEnd.viewDef->viewport.y1;
 	if ( width <= 0 || height <= 0 ) {
 		width = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
 		height = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+	} else {
+		RB_GlowCornerOrigin( x, y );
 	}
 	if ( width > 0 && height > 0 ) {
-		image->CopyFramebuffer(
-			tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
-			tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
-			width, height );
+		image->CopyFramebuffer( x, y, width, height );
 	}
 }
 

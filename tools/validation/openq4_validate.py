@@ -603,6 +603,7 @@ def run_python_tests(args: argparse.Namespace, root: Path, env: dict[str, str]) 
         root / "tools" / "tests" / "async_client_resume.py",
         root / "tools" / "tests" / "async_session_command_contract.py",
         root / "tools" / "tests" / "async_usercmd_window_contract.py",
+        root / "tools" / "tests" / "capture_run_defects_contract.py",
         root / "tools" / "tests" / "chat_history.py",
         root / "tools" / "tests" / "choice_gui_value_contract.py",
         root / "tools" / "tests" / "list_window_selection_contract.py",

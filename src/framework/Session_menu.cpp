@@ -6927,6 +6927,10 @@ void idSessionLocal::MenuEvent( const sysEvent_t *event ) {
 	SyncMainMenuSettingsScrollPages( guiActive );
 }
 
+#ifndef ID_DEDICATED
+static void Session_SyncPreyOptionsVideoPreset( idUserInterface *page );
+#endif
+
 /*
 =================
 idSessionLocal::GuiFrameEvents
@@ -6970,6 +6974,11 @@ void idSessionLocal::GuiFrameEvents() {
 	UpdateRetainedMultiplayerPage();
 	UpdateRetainedJoinGame();
 	UpdateRetainedSettingsPage();
+#ifndef ID_DEDICATED
+	if ( guiRetainedSettingsPage != NULL && guiActive == guiRetainedSettingsPage ) {
+		Session_SyncPreyOptionsVideoPreset( guiActive );
+	}
+#endif
 	PrefetchRetainedNextPages();
 	UpdateRetainedNotices();
 	UpdateBrowserTooltip();
@@ -9451,6 +9460,36 @@ static void Session_PublishPreyChoiceList( idUserInterface *page, const char *pr
 	page->SetStateInt( prefix, selected );
 }
 
+// The Quality Preset row's entry for com_performancePreset.
+static int Session_PreyVideoPresetIndex( void ) {
+	int preset = 0;
+	for ( int i = 0; i < PREY_VIDEO_PRESET_COUNT; ++i ) {
+		if ( !idStr::Icmp( PREY_VIDEO_PRESETS[ i ], cvarSystem->GetCVarString( "com_performancePreset" ) ) ) {
+			preset = i;
+		}
+	}
+	return preset;
+}
+
+/*
+The Quality Preset row is the page's own state, not a CVar binding, so a
+preset applied from elsewhere (the console's applyPerformancePreset) left it
+naming the old preset while the rows the preset sets moved. Each frame the
+page is up, the row follows com_performancePreset. Apply Changes still lights,
+as it does for a preset picked on the page: the applied preset is unchanged
+until the video restart.
+*/
+static void Session_SyncPreyOptionsVideoPreset( idUserInterface *page ) {
+	if ( page == NULL ) {
+		return;
+	}
+	const int preset = Session_PreyVideoPresetIndex();
+	if ( page->State().GetInt( "video.preset" ) != preset ) {
+		page->SetStateInt( "video.preset", preset );
+		page->StateChanged( common->GetPresentationTime() );
+	}
+}
+
 static void Session_PublishPreyOptionsVideo( idUserInterface *page, bool applied ) {
 	if ( page == NULL ) {
 		return;
@@ -9468,13 +9507,7 @@ static void Session_PublishPreyOptionsVideo( idUserInterface *page, bool applied
 	Session_PublishPreyChoiceList( page, "video.refresh", PREY_VIDEO_REFRESH, names, values, cvarSystem->GetCVarString( "r_displayRefresh" ) );
 	BuildMainMenuFrameLimitChoices( names, values );
 	Session_PublishPreyChoiceList( page, "video.maxfps", PREY_VIDEO_MAXFPS, names, values, cvarSystem->GetCVarString( "com_maxfps" ) );
-	int preset = 0;
-	for ( int i = 0; i < PREY_VIDEO_PRESET_COUNT; ++i ) {
-		if ( !idStr::Icmp( PREY_VIDEO_PRESETS[ i ], cvarSystem->GetCVarString( "com_performancePreset" ) ) ) {
-			preset = i;
-		}
-	}
-	page->SetStateInt( "video.preset", preset );
+	page->SetStateInt( "video.preset", Session_PreyVideoPresetIndex() );
 	static idStr startedWithApi;
 	static bool haveStartedWithApi = false;
 	if ( !haveStartedWithApi ) {

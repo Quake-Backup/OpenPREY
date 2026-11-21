@@ -52,6 +52,13 @@ const int MP_PLAYER_MAXFRAGS = 100;
 const int MP_PLAYER_MAXWINS	= 100;
 const int MP_PLAYER_MAXPING	= 999;
 
+// openPR06: a message event's parameters travel as bytes, and -1 (no
+// parameter) as 0xFF, the byte retail's WriteByte( -1 ) put on the wire. Sent
+// unmapped, -1 tripped idBitMsg's overflow warning (MSG_FRAGLIMIT's unused
+// second parameter at every frag-limit win).
+ID_INLINE int MP_EventParmToByte( int parm ) { return parm < 0 ? 0xFF : parm; }
+ID_INLINE int MP_EventParmFromByte( int value ) { return value == 0xFF ? -1 : value; }
+
 // HUMANHEAD pdm: Reworked for our chat system
 typedef struct mpChatLine_s {
 	idStr			line;

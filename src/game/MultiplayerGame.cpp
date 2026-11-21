@@ -1753,6 +1753,14 @@ void idMultiplayerGame::Run() {
 	// don't update the ping every frame to save bandwidth
 	if ( gameLocal.time > pingUpdateTime ) {
 		for ( i = 0; i < gameLocal.numClients; i++ ) {
+			// openPR06: a bot is an entity in a client slot the server never
+			// connected, whose ping it reports as 99999; it runs in the
+			// server's own frame, so it has none.
+			idEntity *ent = gameLocal.entities[ i ];
+			if ( ent != NULL && ent->IsType( hhArtificialPlayer::Type ) ) {
+				playerState[i].ping = 0;
+				continue;
+			}
 			playerState[i].ping = networkSystem->ServerGetClientPing( i );
 		}
 		pingUpdateTime = gameLocal.time + 1000;
@@ -3130,8 +3138,8 @@ void idMultiplayerGame::PrintDeathMessageEvent( int to, msg_evt_t evt, int parm1
 		outMsg.Init( msgBuf, sizeof( msgBuf ) );
 		outMsg.WriteByte( GAME_RELIABLE_MESSAGE_DB_DEATH );
 		outMsg.WriteByte( evt );
-		outMsg.WriteByte( parm1 );
-		outMsg.WriteByte( parm2 );
+		outMsg.WriteByte( MP_EventParmToByte( parm1 ) );
+		outMsg.WriteByte( MP_EventParmToByte( parm2 ) );
 		outMsg.WriteBits(gameLocal.ServerRemapDecl(-1, DECL_ENTITYDEF, inflictorDef ), gameLocal.entityDefBits);
 		networkSystem->ServerSendReliableMessage( to, outMsg );
 	}
@@ -3194,8 +3202,8 @@ void idMultiplayerGame::PrintMessageEvent( int to, msg_evt_t evt, int parm1, int
 		outMsg.Init( msgBuf, sizeof( msgBuf ) );
 		outMsg.WriteByte( GAME_RELIABLE_MESSAGE_DB );
 		outMsg.WriteByte( evt );
-		outMsg.WriteByte( parm1 );
-		outMsg.WriteByte( parm2 );
+		outMsg.WriteByte( MP_EventParmToByte( parm1 ) );
+		outMsg.WriteByte( MP_EventParmToByte( parm2 ) );
 		networkSystem->ServerSendReliableMessage( to, outMsg );
 	}
 }

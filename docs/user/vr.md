@@ -55,9 +55,9 @@ The engine-side parts described below still apply.
    saved, so the next launch starts in VR on its own. You can also launch with
    `+set vr_enable 1`.
 
-PREY's stock menus have no VR settings. openQ4's **Virtual Reality** settings
-tab is part of the retained interface (`ui_retained 1`), which hasn't been
-checked with PREY; the console settings below cover everything it sets.
+openPR06's menus have no VR settings: openQ4's **Virtual Reality** settings tab
+isn't part of openPR06's retained Options page. The console settings below
+cover everything it sets.
 
 When VR is on, the desktop window shows what your left eye sees. To turn VR
 off again, enter `vr_enable 0`.

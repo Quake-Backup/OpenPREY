@@ -7,14 +7,14 @@ This guide covers openPR06's display and window settings: the renderer, performa
 
 ## Where the Settings Live
 
-openPR06 starts with PREY's own menus (`ui_retained 0`), which openPR06 extends. **Options -> Video** has these tabs:
+openPR06's menus are PREY's own, drawn by its retained interface by default (`ui_retained 1`; `ui_retained 0` brings back the stock screens). **Options -> Video** has these tabs:
 
 - The first tab sets the resolution, fullscreen, render scale, vertical sync, brightness and gamma, and has **Auto Detect** and the **Quality Preset** row, which offers all nine presets.
 - The two advanced tabs set shader detail, shadows, specular and bump maps, vertical sync, anti-aliasing (`r_multiSamples`), glow overlays, particle detail, fast skinning and anisotropy.
 - openPR06's **Post FX** tab adds MSAA samples, post anti-aliasing, SSAO, bloom, the CRT filter, HDR tone mapping and exposure.
 - openPR06's **Advanced FX** tab tunes them: MSAA alpha coverage, SSAO radius and intensity, bloom radius, HDR white point, saturation and contrast, and CRT strength and chromatic aberration.
 
-Everything else on this page is a console setting. The retained interface (`ui_retained 1`) rebuilds these same **Options -> Video** pages; openQ4's `Settings -> System` page isn't used in openPR06.
+Everything else on this page is a console setting. The stock menus (`ui_retained 0`) have the same **Options -> Video** pages; openQ4's `Settings -> System` page isn't used in openPR06.
 
 ## Quick Start
 

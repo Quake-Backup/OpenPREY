@@ -208,6 +208,7 @@ static idCVar ui_autoSwitchDefaultMigrated( "ui_autoSwitchDefaultMigrated", "0",
 static idCVar vr_weaponOffsetDefaultMigrated( "vr_weaponOffsetDefaultMigrated", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "one-time migration flag for the VR weapon offsets that held weapons replaced" );
 static idCVar s_audioDefaultsMigrated( "s_audioDefaultsMigrated", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "number of one-time audio default migrations already applied" );
 static idCVar r_preyDefaultsMigrated( "r_preyDefaultsMigrated", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "number of one-time openPR06 renderer default migrations already applied" );
+static idCVar ui_retainedDefaultMigrated( "ui_retainedDefaultMigrated", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "one-time migration flag for openPR06's retained interface default" );
 
 static void Common_MigrateLegacyConsoleAllowCVar( void ) {
 	idCVar *legacyAllowConsole = cvarSystem->Find( "com_allowConsole" );
@@ -453,6 +454,38 @@ static void Common_MigratePreyRendererDefaults( void ) {
 		}
 	}
 	r_preyDefaultsMigrated.SetInteger( OPENPR06_RENDERER_DEFAULTS_MIGRATION_STEPS );
+}
+
+/*
+==================
+Common_MigratePreyRetainedInterfaceDefault
+
+OPENPR06: ui_retained is archived and defaulted to 0 until 0.15.0, so every
+configuration written before then saved 0 and would keep the stock menus.
+Move it to the retained interface once. A startup "+set ui_retained ..." is a
+deliberate choice for this run and is left alone (the migration then waits for
+a run without it); later "ui_retained 0" from the console sticks.
+==================
+*/
+int Com_GetNumStartupCommandLines( void );
+const idCmdArgs *Com_GetStartupCommandLine( int index );
+
+static void Common_MigratePreyRetainedInterfaceDefault( void ) {
+	if ( ui_retainedDefaultMigrated.GetBool() ) {
+		return;
+	}
+	for ( int i = 0; i < Com_GetNumStartupCommandLines(); i++ ) {
+		const idCmdArgs *args = Com_GetStartupCommandLine( i );
+		if ( args != NULL && args->Argc() >= 2 && !idStr::Icmpn( args->Argv( 0 ), "set", 3 )
+			&& !idStr::Icmp( args->Argv( 1 ), "ui_retained" ) ) {
+			return;
+		}
+	}
+	if ( !cvarSystem->GetCVarBool( "ui_retained" ) ) {
+		common->Printf( "Migrating legacy interface config: ui_retained 0 -> 1 (the retained interface is the default)\n" );
+		cvarSystem->SetCVarBool( "ui_retained", true, CVAR_ARCHIVE );
+	}
+	ui_retainedDefaultMigrated.SetBool( true );
 }
 
 static int commonLastPresentationCap = -1;
@@ -8771,6 +8804,7 @@ void idCommonLocal::InitGame( void ) {
 	Common_MigrateLegacyAutoSwitchDefault();
 	Common_MigrateLegacyAudioDefaults();
 	Common_MigratePreyRendererDefaults();	// OPENPR06
+	Common_MigratePreyRetainedInterfaceDefault();	// OPENPR06
 
 	// cvars are initialized, but not the rendering system. Allow preference startup dialog
 	Sys_DoPreferences();

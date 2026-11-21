@@ -104,7 +104,7 @@ player's PVS and stays dormant: it never thinks and never presents a model. In
   target's origin, one way. A portal pair (`portal_buddy`) links both ways
   unless `portal_noTeleport` is set, and starts closed. Camera links start open.
 - **An origin in solid:** retail tests the origin alone and drops the link with
-  a warning. openPREY then tries the centre of the entity's map-compiled model,
+  a warning. openPR06 then tries the centre of the entity's map-compiled model,
   and then the first area that model's bounds touch, and warns only if both
   fail (`GamePortalModelPoint`). In `game/lotaa` the origin of
   `func_skybox_portal_36` lies on the solid edge of its own sky strip, so

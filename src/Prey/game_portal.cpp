@@ -124,7 +124,7 @@ void hhPortal::Spawn(void) {
 		distanceToggle = MP_PORTAL_RANGE_DEFAULT;
 	}
 	if (distanceToggle != 0.0f && bGlowPortal) {
-		// openPREY: Think spawns this closed-state fx once the game portal is
+		// openPR06: Think spawns this closed-state fx once the game portal is
 		// found, and its default is not a spawnArg that CacheDictionaryMedia
 		// sees, so precache it (and the particles it names) with the level.
 		const char *portalIdleFx = spawnArgs.GetString("fx_idleclosed", "fx/portal_closed_idle");

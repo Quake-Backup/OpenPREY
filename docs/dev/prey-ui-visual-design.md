@@ -1,6 +1,6 @@
 # openPR06 UI Visual Design
 
-Specification version 1.27, 21 November 2026.
+Specification version 1.28, 21 November 2026.
 
 Status: reference survey and design contract. openPR06 renders the stock Prey
 GUIs by default. A vector replacement of every front-end screen, the home
@@ -1710,7 +1710,7 @@ by a script from this specification and committed.
 | `guis/menu/savegame.rui` | Save Game, from the pause | The saves table, the name field, Save, the overwrite confirmation and the refusal notice |
 | `guis/menu/restartmenu.rui` | The death screen | The frame with Load, Restart and Main Menu and the line under each that says what it does |
 | `guis/menu/credits.rui` | Credits, from either home | The stock credits sheet rising through the page |
-| `guis/menu/settings.rui` | Options, from either home | The four top tabs, Controls' seven pages, Game Options' two, Video's six and the Audio page, and the Reset Defaults dialog |
+| `guis/menu/settings.rui` | Options, from either home | The four top tabs, Controls' six pages, Game Options' four, Video's four and the Audio page in two columns under section headings, the prompts on the bottom bar, and the Reset Defaults dialog |
 | `guis/menu/presetcheck.rui` | The system check, before the main menu | The claw frame with the detected hardware, the nine presets as a ladder (recommended lit, current outlined), the recommendation's scale and frame cap, Apply Recommended (Continue when nothing would change), Keep Current and Ask Me Next Time |
 | `guis/loading/loading.rui` | Every level load, in place of `guis/map/loading.gui` | The level's art across the screen, the name notch with the level's name, the author line, the objectives panel, the progress bar in its claw-ended outline and the loader's phase |
 | `guis/menu/multiplayer.rui` | MultiPrey, from the title | Player Settings, Create Server (Create and Advanced) and Find Servers (the server list, Selected Server, Filters and IP Connect) |
@@ -1921,32 +1921,94 @@ their bonus panel are not carried over.
 #### Options
 
 A full page on the Options page's 0.50 body, with the stock tab furniture
-(section 6) as vectors: four top tabs at 125,35 (117.5x20 u each), the
-570x370 u tab page at 25,55 with its wash, its shading from the top and from
-the leading edge of the inner page, and its `prey.separator` outline, and a
-100 u column of side tabs that share the height below a 40 u margin. The
-active tab and its page are one surface: the outline is drawn in runs, and
-the run beside or under a tab shows only while that tab is inactive.
+(section 6) as vectors: four top tabs at 125,35 (110x20 u each, 440 u in all,
+short of the page's end so the next-tab key fits after them), the 570x370 u
+tab page at 25,55 with its wash, its shading from the top and from the
+leading edge of the inner page, and its `prey.separator` outline, and a 100 u
+column of side tabs that share the height below a 40 u margin. The active tab
+and its page are one surface: the outline is drawn in runs, and the run
+beside or under a tab shows only while that tab is inactive.
 
-**Every tab is rebuilt**, and so is the Reset Defaults dialog. The page opens
-on Controls, as the stock page does.
+The page's tree is its own (`tools/ui/retained_options_tree.py`), not the
+stock script's: the stock page still presents the retail tree under
+`ui_retained 0`, and the retained page adds openPR06's settings to it. It
+opens on Controls, as the stock page does.
 
-- **Controls.** The stock page's seven side tabs (Movement, Combat, Weapons,
-  Look, System, MultiPrey and Profiles), 47 u tall each. A binding page's
-  header bar with its two headings (Action, Key Assignment), its rows and the
-  line at its foot are read from the stock script. A row is the setting
-  row's plate with the action in the leading half and its keys in the
-  trailing half in `prey.text.value`: named as the language names them,
-  joined with a middle dot, or `<empty>`.
-  - *Binding.* Accept or a click waits for a key, and the keys read "Press
-    any key...". The next key pressed joins the action's keys, two of each
-    device family, as the stock field binds them, and plays
-    `guisounds_menu_tick`. Escape, Start or Back cancel; Backspace or Delete
-    clear the row. Out of a wait, Delete, Backspace or the west face button
-    clears the focused row. The session takes the key
-    (`idSessionLocal::RetainedControlsKey`) and knows each row by its place in
-    `PREY_CONTROLS_BINDINGS`. The generator refuses to write the page while
-    that list differs from the stock script's rows.
+**Layout.** Each page holds two columns of rows under inline section
+headings, where the stock page held one column of 25 u rows on a 30 u pitch.
+The density is section 3's minimum target reached by a shorter plate, not a
+smaller target: a row is the graded `prey.plate.row` plate 21 u tall on a 24 u
+pitch (36 dp, the whole pitch the target), so a column holds 14 slots and a
+page up to 28.
+
+- *Columns.* The inner page less 8 u at each side and a 10 u gap: 222 u
+  beside the side tabs, 272 u on Audio, which has none.
+- *Rows.* The label at the leading edge, 8 u in, in the body face at 0.28 and
+  `prey.text.label`; the value in the trailing part, from 53% of the row (57%
+  for a choice, whose values are short; 50% for a binding), centred, in
+  `prey.text.value`. Every text is centred on the row's height. A label or
+  value too long for its box ends in an ellipsis.
+- *Headings.* One slot each: the display face at 0.27 in `prey.text.nav` at
+  the column's leading edge, over a 1 u `prey.separator` rule at 0.40. They
+  replace the stock page's header bar, which spent a 30 u band on a page
+  title.
+- *Sliders.* The stock rail with its tick dots and ring knob (`prey.slider`)
+  in the value part, less 44 u for the number after it.
+
+**The tree.** Rows marked *new* were not on the stock page.
+
+| Top tab | Side tab | First column | Second column |
+| --- | --- | --- | --- |
+| Controls | Movement | Movement: Forward, Backward, Move Left, Move Right, Jump, Crouch, Walk / Run (`_speed`, new), Strafe | Look: Turn Left, Turn Right, Look Up, Look Down, Mouse Look, Center View |
+| | Combat | Combat: Attack, Alternate Attack, Previous Weapon, Next Weapon, Zoom View, Crawler Grenade; Abilities: Toggle Light, Spirit Walk | Weapons: the seven weapon slots |
+| | System | System: Quick Save, Quick Load, Screenshot | Multiplayer: Chat, Team Chat, Switch Teams, Spectate, Ready, Vote Yes, Vote No, Scoreboard |
+| | Mouse (new) | Aim: Free Look, Invert Mouse, Toggle Zoom; Mouse: Mouse Sensitivity, Mouse Smoothness; Keyboard: Always Run, Toggle Crouch (new) | Acceleration (new): Mouse Acceleration, Acceleration Offset, Acceleration Curve, Sensitivity Cap |
+| | Controller (new) | Sticks: Use Controller, Stick Layout, Dead Zone, Look Sensitivity, Look Curve, Move Curve, Invert Look; Prompts: Button Prompts, Swap Confirm/Back | Triggers and Rumble: Trigger Press Point, Rumble, Rumble Strength; Gyro and Touchpad: Gyro Aiming, Gyro Sensitivity, Touchpad, Touchpad Sensitivity |
+| | Profiles | The stock Profiles page (below) | |
+| Game Options | General | Gameplay: Adaptive Difficulty, Auto Switch Weapons (new); View: Field of View, Weapon Field of View, Weapon Aspect Fix, Show Weapon, Player Shadow (new but Show Weapon) | Detail: Show Decals, Blood Effects, Ragdoll Blood, Ejected Shells, Muzzle Flashes, Projectile Lights (new but Show Decals), Allow Profanity |
+| | HUD (new) | HUD: Show HUD, Gameplay Tips, FPS Counter; Crosshair: Crosshair | Chat: Chat Size, Chat Lines, Chat Opacity, Chat Duration |
+| | Accessibility (new) | Subtitles: Subtitles, Mark Missing Captions; Comfort: Damage Double Vision, Underwater Warp | Interface: Reduced Motion, Opaque Dialogs, Text Backing |
+| | System (new) | System: 3D Menu Backdrop, Console Key, Screenshot Format | Startup: Skip Logo Videos, Check for Updates |
+| Video | Display | Screen: Rendering API, Monitor, Video Resolution, Full Screen, Fullscreen Mode, Borderless Window, Refresh Rate, Span All Monitors, Window Size, Custom Resolution | Frame and Scaling: Vertical Sync, Frame Rate Limit, Render Scale, Upscaling and Upscale Sharpness (new); Picture: Brightness, Gamma |
+| | Quality | The Detect box, Quality Preset; Lighting: Use Shader Programs, Shader Detail, Enable Shadows, Shadow Maps, Shadow Map Size and Shadow Filtering (new) | Surfaces: Enable Specular, Enable Bump Maps, High Quality Specular, Sharpen Bumpmaps, Use Glow, Image Anisotropy, Soft Particles (new), High Quality Skinning |
+| | Post FX | Anti-Aliasing: MSAA Samples, MSAA Alpha Coverage, Post Anti-Aliasing, Temporal AA (new); Ambient Occlusion: SSAO, SSAO Radius, SSAO Intensity | Bloom and HDR: Bloom, Bloom Intensity, Bloom Radius, Bloom Threshold (new), HDR Tone Mapping, HDR Exposure, HDR White Point, Color Saturation, Color Contrast |
+| | Advanced FX | Motion Blur: Motion Blur, Motion Blur Strength (new); CRT Monitor: CRT Monitor, CRT Strength, Chromatic Aberration | Glow: Glow Strength (new) |
+| Audio | — | Volume: Effect Volume, Music Volume, Dialogue Volume (new), Level Load Music; Output: Sound System, Speaker Setup or Sound Device, Reverse Channels or EAX | 3D Audio (new): Occlusion, Air Absorption, Output Limiter, Mute When Unfocused |
+
+The stock Controls page's Help row is left out: its `togglehelp` command is
+not registered and Prey's in-game help screen is not loaded. Left out on
+purpose as well: settings nothing in Prey reads (the weapon-wheel settings,
+`ui_subtitles` and its siblings, which Prey's `g_subtitles` replaces,
+`ui_reducedFlashing`, `ui_cinematicShake`, `r_lowParticleDetail`), the
+remastered-HUD settings, which no Prey HUD document reads yet, and HRTF
+(`s_openALHRTF`), which needs the sound device reopened and has no verb yet.
+
+- **Controls.** A binding row's action takes the leading half and its keys
+  the trailing half, drawn as glyphs (`tools/ui/retained_key_glyphs.py`,
+  ported from openQ4 and recoloured): up to two keyboard or mouse keys, then up
+  to two controller buttons a little apart, `+N` for any more and a dim dash
+  for none.
+  - *Glyphs.* A keyboard key is a keycap with a 45-degree cut at its lower
+    leading corner: a dark `#111A25` plate at 0.88 under a 1.2 dp
+    `prey.rail` edge, the key's name in the body face in `#DCE7F5`. The
+    arrow keys draw their arrow; the mouse is drawn from above with the bound
+    button, the wheel or a side button's nub lit in `prey.rail`; a
+    controller button is the glyph of the family in use (Xbox and Nintendo
+    letters on a disc, PlayStation's symbols, Steam Deck's ringed letters, a
+    generic controller's four positions as a diamond with one lit, bumpers,
+    triggers, the d-pad's lit arm, sticks, paddles and the menu buttons) in
+    the same plate, edge and ink. No glyph adds a hue: every mark is the
+    rail's pale blue-white. A chip is 20 dp tall and drawn in em of its
+    strip; every glyph's art is a shared symbol of the document.
+  - *Binding.* Accept or a click waits for a key, and the glyphs give way to
+    "Press any key..." in white. The next key pressed joins the action's
+    keys, two of each device family, and plays `guisounds_menu_tick`.
+    Escape, Start or Back cancel; Backspace or Delete clear the row. Out of
+    a wait, Delete, Backspace or the west face button clears the focused
+    row. The session takes the key (`idSessionLocal::RetainedControlsKey`)
+    and knows each row by its place in `PREY_CONTROLS_BINDINGS`, which lists
+    the tree's binding rows in page order; the generator refuses to write the
+    page while the two differ.
   - *Profiles.* At the stock places: what profiles are for, the saved
     profiles in a list on a black 0.50 ground in a picture frame with its
     scroll bar (32 at most), the name field, and Delete, Load and Save As. A
@@ -1955,92 +2017,107 @@ on Controls, as the stock page does.
     selected, Save As while there is a name. They act as the stock buttons do
     (Appendix C.2). The list is read again when the tab is chosen and when
     the page opens.
-
-- **Rows from the stock script.** The generator reads Game Options' side
-  tabs, headings and rows from `guis/mainmenu/mainmenu_options.guifragment`:
-  each row's rectangle, label, setting, choices and slider range. A row is
-  the graded `prey.plate.row` plate with its label centred in the leading
-  half and its value in the trailing half.
-- **Choices.** The value shows the current option, named from the stock
-  choice string. Left and Right cycle it, as a click cycles the stock
-  control; Accept or a click unfolds a list across the row, black with the
-  `prey.separator` outline, 18 u a row, with each option under the value. The
-  list is the retained control's addition.
-- **Sliders.** The stock 100x16 u rail with its tick dots and ring knob
-  (`prey.slider`), and the number after it, which the stock does not show.
+  - *Controller defaults.* Prey's `default.cfg` binds only the keyboard and
+    mouse. `basepr/openpr06_bindings.cfg` runs after it at a first launch
+    and on Reset Defaults' Controls box: the triggers attack and alternate
+    attack, south and east jump and crouch, west the lighter, north spirit
+    walk, the bumpers and the d-pad's sides step the weapons, the d-pad's up
+    and down throw a crawler grenade and zoom, the sticks walk and centre the
+    view, the touchpad shows the scoreboard and the paddles repeat the face
+    buttons. Start and Back open the menu and stay unbound.
+- **Choices.** The value shows the current option, named from its language
+  list. Left and Right cycle it, as a click cycles the stock control; Accept
+  or a click unfolds a list across the row, black with the `prey.separator`
+  outline, 18 u a row, with each option under the value.
 - **Settings change at once**, as the stock controls' do, through the
   engine's list of settings a page may change (`FindPlayerSetting`), which
-  bounds each one to the values its stock control offers.
-- **Video.** The six side tabs of section 12.1 (Video, Display, Advanced 1,
-  Advanced 2, Post FX, Advanced FX), each 55 u tall, with their rows read
-  from the stock script like the others:
-  - *Plain settings* (most choices and every slider) change at once.
+  bounds each one to the values its row offers. The generator refuses to
+  write the page while a row names a setting the list does not hold, or one
+  no Reset Defaults box resets.
+- **Video.** Four side tabs (Display, Quality, Post FX, Advanced FX), 82.5 u
+  tall each:
   - *Lists the session builds.* Video Resolution, Monitor, Refresh Rate and
     Frame Rate Limit show what the selected display reports, as the stock
     rows do; the row sends the entry's index and the session applies it with
     the stock menu command. A list shows eight entries and scrolls the rest.
   - *Quality Preset* applies the preset through the stock command; *Detect*
-    loads the recommended one. The Detect plate is the group box: rounded, a
-    horizontal `prey.plate.row` fade with its rim.
+    loads the recommended one. The Detect box is the group box (rounded, a
+    horizontal `prey.plate.row` fade with its rim), two slots tall: its
+    caption across the top and its button at the trailing end beneath.
   - *Window Size and Custom Resolution* are two number fields either side of
-    an "x", on `prey.list.wash`, taking 320 to 16384 across and 240 to 16384
-    down.
+    an "x" in the value part, on `prey.list.wash`, taking 320 to 16384 across
+    and 240 to 16384 down.
   - *Full Screen* is held on the page until Apply Changes, as the stock row
     is; every other row writes its setting when it changes.
-  - *Apply Changes* sits on every page and is lit while a setting that takes
-    a video restart differs from what is in effect: the resolution, the
-    monitor, Fullscreen Mode, Borderless Window, Refresh Rate, Span All
-    Monitors, either size, MSAA Samples, the preset or Full Screen. Changing
-    one back puts it out again, where the stock button stays lit once
-    anything has touched it. It restarts the video system; the page comes
-    back with the focus on the side tab it shows.
+  - *Apply Changes* sits at the foot of every Video page's second column and
+    is lit while a setting that takes a video restart differs from what is in
+    effect: the resolution, the monitor, Fullscreen Mode, Borderless Window,
+    Refresh Rate, Span All Monitors, either size, MSAA Samples, the preset or
+    Full Screen. Changing one back puts it out again. It restarts the video
+    system; the page comes back with the focus on the side tab it shows.
   - *Rendering API* takes the game restarted: while the choice differs from
     the API the process started with, the stock dialog's line shows at the
-    foot of the Display page.
+    foot of the Display page's first column.
   - *Shader Detail* is drawn at 0.40 and takes no input while shader programs
     are off or the Vulkan backend is active (section 12.1).
-- **Audio.** One page with no side tabs, as in the stock. Its rows are read
-  from the stock script like the others, with these differences in how they
-  act:
+- **Audio.** One page with no side tabs, as in the stock.
   - *Volume.* Effect Volume and Music Volume run 0 to 100 in steps of 5 over
     the stock sliders' 0 to 1, and the session maps them onto decibels as the
     stock `volumeslider` does (`6 log2 v`, silence at 0). The effect slider
-    plays `guisounds_menu_volumetick`.
+    plays `guisounds_menu_volumetick`. Dialogue Volume sets
+    `s_dialogueVolume` directly.
   - *Rows the sound system acts on.* Sound System, Speaker Setup, Sound Device
     and EAX send the session a verb with their value; it sets what the stock
     control sets and runs the stock control's own `sound` command, which
     restarts the sound system where the stock page does and may answer with
-    the stock message box.
+    the stock message box. Speaker Setup offers Automatic (the device's own
+    layout, the CVar's default) beside the stock Stereo and Surround.
   - *Sound Device.* The list is the session's, as the stock page's is: up to
-    16 devices with the one in use chosen. A name too long for the value
-    column ends in an ellipsis, and the list gives names the row's width.
+    16 devices with the one in use chosen; its list gives names the row's
+    width.
   - *What shows and what dims.* The software-mixing rows (Speaker Setup,
-    Reverse Channels) show while OpenAL is off and the OpenAL rows (Sound
-    Device, EAX) while it is on, each under its own heading. Sound System is
-    drawn at 0.40 and takes no input unless a mixer choice is offered, and
-    EAX likewise unless the device supports it, as the stock page dims them.
-    The EAX mark shows while EAX is in use.
-- **Reset Defaults.** Reset to defaults on the bottom bar opens the stock
-  dialog, rebuilt from the stock overlay (`Overlay_ResetDefaults`): a 0.80
-  black scrim, the 360x250 u claw frame at 142,100, its title and line, five
-  check boxes (Controls, Game Options, Video Settings, Audio Settings, Reset
-  all settings), and Reset and Cancel. It appears and disappears at once,
-  with every box clear and the focus on Cancel. A check box is the 12 u
-  ground with its border and the cross while it is ticked; the pointer
-  whitens the border and focus adds an outline in `prey.rail`. Reset is lit
-  while a box is ticked and resets what is ticked as the stock button does;
-  Reset all settings resets every part and every setting (`cvar_restart`).
-  The page shows the result at once, and a video setting that takes a
-  restart lights Apply Changes.
+    Reverse Channels) and the OpenAL rows (Sound Device, EAX) share two
+    slots: the first pair shows while OpenAL is off, the second while it is
+    on. Sound System is drawn at 0.40 and takes no input unless a mixer
+    choice is offered, and EAX likewise unless the device supports it. The
+    EAX mark shows at the page's trailing foot while EAX is in use.
+- **Reset Defaults.** Reset to defaults on the bottom bar, or the north face
+  button, opens the stock dialog, rebuilt from the stock overlay
+  (`Overlay_ResetDefaults`): a 0.80 black scrim, the 360x250 u claw frame at
+  142,100, its title and line, five check boxes (Controls, Game Options,
+  Video Settings, Audio Settings, Reset all settings), and Reset and Cancel.
+  It appears and disappears at once, with every box clear and the focus on
+  Cancel. Reset is lit while a box is ticked and resets what is ticked:
+  Controls the bindings (Prey's `default.cfg` and the controller defaults,
+  run at once so the page shows them) and the Mouse and Controller tabs'
+  settings; the other boxes their tabs' settings
+  (`MAINMENU_RESET_*_CVARS` in `src/framework/Session_menu.cpp`); Reset all
+  settings every part and every setting (`cvar_restart`). The page shows
+  the result at once, and a video setting that takes a restart lights Apply
+  Changes.
 - **Feedback.** The plate is unchanged; the value turns white under the
   pointer or focus, and focus adds the plate's outline at full `prey.rail`.
   A tab's label turns `prey.text.tabHover`; a tab change plays
   `guisounds_menu_tabflip`.
-- **Keys.** The arrow keys and a controller step to the nearest control that
-  way, except where the page names the step: Up from a page's first control
-  reaches its own top tab (the nearest was often a neighbour, Video from
-  Audio's first row), and Return to Main Menu and Reset to defaults step to
-  each other and stop at the bottom bar's ends.
+- **Prompts.** The bottom bar carries principle 5's controller prompts
+  (section 12.3) in the display face at 0.27 to 0.30, each with the glyph of
+  the device in use, the keyboard's keycap or the controller's face button
+  (`prompt.glyphs`; south and east trade places while Swap Confirm/Back is in
+  effect, `prompt.swapped`): Back (Escape or east) before Return to Main
+  Menu; Accept (Enter or south) with the focused control's verb, Change on a
+  binding row and Select elsewhere (`prompt.accept`); Clear (Delete or west)
+  while a binding row has the focus; and north before Reset to defaults,
+  shown for a controller only. Q and E, or the bumpers, are drawn at the
+  ends of the top tabs; a controller's triggers above the side tabs.
+- **Keys.** The arrow keys and a controller step down and up each column in
+  reading order. Up from a column's first control reaches its own top tab;
+  Left from the first column reaches the side tab that shows the page; a
+  column's last control steps down to the bottom bar (the second column's
+  to Apply Changes on a Video page). Left and Right on a choice or slider
+  change it, as on the stock page; elsewhere they cross to the other column's
+  control at the nearest slot. Q and E, or the bumpers, page the top tabs
+  and the triggers the side tabs; both wrap. Return to Main Menu and Reset to
+  defaults step to each other and stop at the bottom bar's ends.
 
 #### The death screen
 
@@ -2893,6 +2970,17 @@ carries their summaries.
   read "Map: Shuttle 1", "Time Limit: 10", "Frag Limit: 10", "Team Damage:
   No", "Auto Balance Teams: No", "Pure: Yes" and "Allow Spectators: Yes".
 
+- **Options settings that did not hold or did nothing** (uncommitted,
+  21 November 2026): Adaptive Difficulty (`g_useDDA`) and Field of View
+  (`g_fov`) were not archived, so a choice was lost on restart; both are now
+  `CVAR_ARCHIVE`. The Chromatic Aberration slider ran 0 to 8 over a CVar
+  clamped to 0.35, so all but its first 4% did nothing; both pages now run
+  0 to 0.35. Speaker Setup offered only Stereo and Surround, so the CVar's
+  default, the device's own layout (0), could not be chosen again once
+  changed; the retained row offers it as Automatic. The Controls page's Help
+  row bound `togglehelp`, which nothing registers; the retained page leaves
+  it out, and the stock page still shows it.
+
 ### C.3 Retail data
 
 - The Earth layer's last texel column (`preymenu/background2.tga`) is brighter
@@ -2913,6 +3001,29 @@ carries their summaries.
   (`def/consoles.def:497,534`), which are not in the archives.
 
 ## Appendix D. Change record
+
+### Version 1.28, 21 November 2026
+
+- Section 12.5, Options: the retained page has a tree of its own
+  (`tools/ui/retained_options_tree.py`) in place of the stock script's. Each
+  page holds two columns of 21 u rows on a 24 u pitch under inline section
+  headings, labels at the leading edge. Controls gains Mouse and Controller
+  tabs and loses the unregistered Help row; Game Options gains HUD,
+  Accessibility and System; Video folds its six side tabs into four; Audio
+  gains Dialogue Volume and a 3D Audio column. Sixty-two settings openPR06 had
+  added without a row are reachable, and the list of those left out, and
+  why, is recorded.
+- Section 12.5, Options: bound keys are glyphs, ported from openQ4 and
+  recoloured to the steel-glass palette: a dark keycap with a `prey.rail`
+  edge and pale ink, the mouse, and each controller family's buttons.
+- Section 12.5, Options: the bottom bar carries principle 5's prompts (Back,
+  Accept with the focused control's verb, Clear on a binding row, Reset on
+  north) with the device's glyph; Q and E or the bumpers page the top tabs and
+  the triggers the side tabs.
+- Section 12.5, Options: controller defaults (`basepr/openpr06_bindings.cfg`)
+  run after Prey's `default.cfg`, which binds no controller button, and Reset
+  Defaults' Controls box resets them with the mouse and controller settings.
+- Appendix C.2: four Options settings that did not hold or did nothing.
 
 ### Version 1.27, 21 November 2026
 

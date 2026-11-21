@@ -452,8 +452,21 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		{"r_bloomIntensity",{0,0,2,false}},{"r_crt",{1}},{"r_hdrToneMap",{1}},{"r_hdrExposure",{0,0.25,3,false}},{"r_motionBlur",{1}},
 		{"r_msaaAlphaToCoverage",{1}},{"r_ssaoRadius",{0,4,256,false}},{"r_ssaoIntensity",{0,0,4,false}},
 		{"r_bloomRadius",{0,0.1,8,false}},{"r_hdrWhitePoint",{0,1,16,false}},{"r_hdrSaturation",{0,0,2,false}},
-		{"r_hdrContrast",{0,0.5,3,false}},{"r_crtAmount",{0,0,1,false}},{"r_crtChromatic",{0,0,8,false}},
+		{"r_hdrContrast",{0,0.5,3,false}},{"r_crtAmount",{0,0,1,false}},{"r_crtChromatic",{0,0,0.35,false}},
 		{"g_crosshair",{0,0,8,true,{},{0,1,2,3,4,5,6,7,8}}},
+		// openPR06: the rows the retained Options page adds to the stock
+		// tree (tools/ui/retained_options_tree.py), tab by tab.
+		{"in_alwaysRun",{1}},{"in_toggleCrouch",{1}},{"in_joystickMoveCurve",{0,1,3,false}},
+		{"g_fov",{0,70,130,true}},{"g_showPlayerShadow",{1}},{"g_bloodEffects",{1}},{"g_ragdollDecals",{1}},{"g_showBrass",{1}},
+		{"g_muzzleFlash",{1}},{"g_projectileLights",{1}},{"g_tips",{1}},{"com_showFPS",{0,0,2,true,{},{0,1,2}}},
+		{"ui_chatScale",{0,0.75,2,false}},{"ui_chatLines",{0,2,16,true}},{"ui_chatAlpha",{0,0,1,false}},{"ui_chatTime",{0,0,60,false}},
+		{"ui_subtitleUntranscribed",{1}},{"g_doubleVision",{1}},{"r_underwater",{1}},{"ui_retainedReducedMotion",{1}},
+		{"gui_textBackground",{0,0,1,false}},{"ui_menuScene",{1}},{"com_skipLogoVideos",{1}},{"com_updateCheck",{1}},
+		{"r_shadowMapSize",{0,512,4096,true,{},{512,1024,2048,4096}}},{"r_shadowMapFilterMode",{0,0,2,true,{},{0,1,2}}},
+		{"r_softParticles",{1}},{"r_temporalAA",{0,0,2,true,{},{0,1,2}}},{"r_resolutionScaleMode",{0,0,3,true,{},{0,1,2,3}}},
+		{"r_resolutionScaleSharpness",{0,0,1.5,false}},{"r_bloomThreshold",{0,0,16,false}},{"r_motionBlurStrength",{0,0,2,false}},
+		{"r_glowStrength",{0,0,4,false}},{"s_dialogueVolume",{0,0,1,false}},{"s_useEAXOcclusion",{1}},{"s_airAbsorption",{1}},
+		{"s_outputLimiter",{1}},{"s_muteUnfocused",{1}},
 		// Its MultiPrey page: Player Settings' data rate, Create Server's
 		// advanced rows that are not Create Server verbs, and Find Servers'
 		// filters (the players filter as the browser reads it: 1 hides full

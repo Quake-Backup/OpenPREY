@@ -4486,8 +4486,8 @@
 									forecolor	EDITABLE_FORECOLOR_COMMA
 									hovercolor	EDITABLE_HOVERCOLOR_COMMA
 									low			0.0
-									high		8.0
-									step		0.05
+									high		0.35
+									step		0.01
 									thumbShader	"guis/assets/sliderbutton.tga"
 									cvar		"r_crtChromatic"
 								}

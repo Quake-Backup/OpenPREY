@@ -401,12 +401,15 @@ static const int RETAINED_CONTROLS_ROWS = sizeof( RETAINED_CONTROLS_BINDINGS ) /
 // of its rows (the stock page's side tabs in turn). bind_row in
 // tools/ui/build_retained_screens.py names each row by its place here and
 // refuses to write the page while this list differs.
+// The retained Options page's binding rows in page order
+// (tools/ui/retained_options_tree.py, whose generator checks this list):
+// Movement and Look, Combat, Abilities and Weapons, System and Multiplayer.
 static const char *const PREY_CONTROLS_BINDINGS[] = {
-	"_forward", "_back", "_moveLeft", "_moveRight", "_moveUp", "_moveDown", "_strafe",
-	"_attack", "_attackAlt", "_impulse15", "_impulse14", "_impulse16", "_impulse54", "_impulse25",
+	"_forward", "_back", "_moveLeft", "_moveRight", "_moveUp", "_moveDown", "_speed", "_strafe",
+	"_left", "_right", "_lookUp", "_lookDown", "_mlook", "_impulse18",
+	"_attack", "_attackAlt", "_impulse15", "_impulse14", "_zoom", "_impulse25", "_impulse16", "_impulse54",
 	"_impulse1", "_impulse2", "_impulse3", "_impulse4", "_impulse5", "_impulse6", "_impulse7",
-	"_left", "_right", "_lookUp", "_lookDown", "_mlook", "_impulse18", "_zoom",
-	"savegame quick", "loadgame quick", "screenshot", "togglehelp",
+	"savegame quick", "loadgame quick", "screenshot",
 	"clientMessageMode", "clientMessageMode 1", "_impulse20", "_impulse22", "_impulse17", "_impulse28", "_impulse29", "_impulse19"
 };
 static const int PREY_CONTROLS_ROWS = sizeof( PREY_CONTROLS_BINDINGS ) / sizeof( PREY_CONTROLS_BINDINGS[0] );
@@ -4750,14 +4753,31 @@ CVAR_GAME, CVAR_RENDERER or CVAR_SOUND; here each box resets the cvars its
 Options page shows, so the player name, server settings, developer cvars and
 other unlisted state keep their values. Keep these lists in step with the
 `cvar` keys under Options_GameOptions, Options_Video and Options_Audio in
-guis/mainmenu/mainmenu_options.guifragment.
+guis/mainmenu/mainmenu_options.guifragment, and with the retained page's tree
+(tools/ui/retained_options_tree.py), whose generator checks that every row's
+setting is in one of them. The Controls box resets the bindings and
+MAINMENU_RESET_CONTROLS_CVARS.
 ==============
 */
 static const char *const MAINMENU_RESET_GAME_CVARS[] = {
 	// Look
 	"g_decals", "g_showHud", "ui_showGun", "g_subtitles", "com_profanity", "g_crosshair", "g_useDDA",
 	// Feel
-	"m_pitch", "m_smooth", "sensitivity", "in_freelook", "in_toggleZoom"
+	"m_pitch", "m_smooth", "sensitivity", "in_freelook", "in_toggleZoom",
+	// The retained page's General, HUD, Accessibility and System tabs
+	"ui_autoSwitch", "g_fov", "cl_gunfov", "cl_gunfov_adjust", "g_showPlayerShadow", "g_bloodEffects", "g_ragdollDecals",
+	"g_showBrass", "g_muzzleFlash", "g_projectileLights", "g_tips", "com_showFPS", "ui_chatScale", "ui_chatLines",
+	"ui_chatAlpha", "ui_chatTime", "ui_subtitleUntranscribed", "g_doubleVision", "r_underwater", "ui_retainedReducedMotion",
+	"ui_retainedOpaqueBacking", "gui_textBackground", "ui_menuScene", "con_allowConsole", "r_screenshotFormat",
+	"com_skipLogoVideos", "com_updateCheck"
+};
+
+// The retained page's Mouse and Controller tabs, beyond Feel's rows above.
+static const char *const MAINMENU_RESET_CONTROLS_CVARS[] = {
+	"in_alwaysRun", "in_toggleCrouch", "cl_mouseAccel", "cl_mouseAccelOffset", "cl_mouseAccelPower", "cl_mouseSensCap",
+	"in_joystick", "in_joystickSouthpaw", "in_joystickDeadZone", "in_joystickLookSensitivity", "in_joystickLookCurve",
+	"in_joystickMoveCurve", "in_joystickInvertLook", "in_promptStyle", "in_swapConfirmBack", "in_joystickTriggerThreshold",
+	"in_joystickRumble", "in_joystickRumbleScale", "in_gyro", "in_gyroSensitivity", "in_touchpadMode", "in_touchpadSensitivity"
 };
 
 static const char *const MAINMENU_RESET_VIDEO_CVARS[] = {
@@ -4773,8 +4793,56 @@ static const char *const MAINMENU_RESET_VIDEO_CVARS[] = {
 	// Post FX and Advanced FX
 	"r_multiSamples", "r_postAA", "r_ssao", "r_bloom", "r_bloomIntensity", "r_crt", "r_hdrToneMap",
 	"r_hdrExposure", "r_motionBlur", "r_msaaAlphaToCoverage", "r_ssaoRadius", "r_ssaoIntensity",
-	"r_bloomRadius", "r_hdrWhitePoint", "r_hdrSaturation", "r_hdrContrast", "r_crtAmount", "r_crtChromatic"
+	"r_bloomRadius", "r_hdrWhitePoint", "r_hdrSaturation", "r_hdrContrast", "r_crtAmount", "r_crtChromatic",
+	// The retained page's rows beyond the stock ones
+	"r_resolutionScaleMode", "r_resolutionScaleSharpness", "r_shadowMapSize", "r_shadowMapFilterMode", "r_softParticles",
+	"r_temporalAA", "r_bloomThreshold", "r_motionBlurStrength", "r_glowStrength"
 };
+
+/*
+==============
+Session_ExecConfigNow
+
+OPENPR06: run a config file's commands now, one by one. "exec" inserts the
+file into the command buffer, which runs only after the menu command that
+asked for it, so the Options pages would read the bindings before the file
+had set them (the Reset Defaults dialog's Controls box).
+==============
+*/
+static bool Session_ExecConfigNow( const char *name ) {
+	char *text = NULL;
+	if ( fileSystem->ReadFile( name, reinterpret_cast<void **>( &text ), NULL ) < 0 || text == NULL ) {
+		return false;
+	}
+	idStr line;
+	bool quoted = false;
+	for ( const char *c = text; ; c++ ) {
+		if ( !quoted && c[0] == '/' && c[1] == '/' ) {
+			while ( *c != '\0' && *c != '\n' ) {
+				c++;
+			}
+		}
+		if ( *c == '\0' || *c == '\n' || *c == '\r' || ( *c == ';' && !quoted ) ) {
+			line.Strip( ' ' );
+			line.Strip( '\t' );
+			if ( !line.IsEmpty() ) {
+				cmdSystem->BufferCommandText( CMD_EXEC_NOW, line.c_str() );
+			}
+			line.Clear();
+			quoted = false;
+			if ( *c == '\0' ) {
+				break;
+			}
+			continue;
+		}
+		if ( *c == '"' ) {
+			quoted = !quoted;
+		}
+		line.Append( *c );
+	}
+	fileSystem->FreeFile( text );
+	return true;
+}
 
 // The video cvars whose rows light Apply Changes (NeedVidRestart) when changed.
 static const char *const MAINMENU_RESET_VIDEO_RESTART_CVARS[] = {
@@ -4784,7 +4852,9 @@ static const char *const MAINMENU_RESET_VIDEO_RESTART_CVARS[] = {
 
 static const char *const MAINMENU_RESET_AUDIO_CVARS[] = {
 	"s_volume_dB", "s_musicvolume_dB", "g_levelloadmusic", "s_useOpenAL", "s_numberOfSpeakers",
-	"s_reverse", "s_deviceName", "s_useEAXReverb"
+	"s_reverse", "s_deviceName", "s_useEAXReverb",
+	// The retained page's rows beyond the stock ones
+	"s_dialogueVolume", "s_useEAXOcclusion", "s_airAbsorption", "s_outputLimiter", "s_muteUnfocused"
 };
 
 // The audio cvars the sound system reads only when it starts.
@@ -5547,9 +5617,16 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 		}
 
 		// OPENPR06: Prey's Reset Defaults dialog sends this for its Controls
-		// box. Prey's default.cfg is its key layout: unbindall, then the binds.
+		// box. Prey's default.cfg is its key layout: unbindall, then the binds;
+		// openPR06's controller layout follows it, as at a first launch. The
+		// box also resets the mouse, keyboard and controller settings the
+		// retained page's Controls tab shows.
 		if ( !idStr::Icmp( cmd, "resetbindings" ) ) {
-			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "exec default.cfg" );
+			// Run now rather than through "exec", which queues the file in the
+			// command buffer: the pages read the key names straight after.
+			Session_ExecConfigNow( "default.cfg" );
+			Session_ExecConfigNow( "openpr06_bindings.cfg" );
+			Session_ResetMainMenuCVars( MAINMENU_RESET_CONTROLS_CVARS, static_cast<int>( sizeof( MAINMENU_RESET_CONTROLS_CVARS ) / sizeof( MAINMENU_RESET_CONTROLS_CVARS[0] ) ) );
 			guiMainMenu->SetKeyBindingNames();
 			continue;
 		}
@@ -10539,7 +10616,8 @@ void idSessionLocal::HandleRetainedSettingsPageRequest( idUserInterface *gui, co
 			} else if ( !idStr::Icmp( verb, "audioBackend" ) ) {
 				HandleMainMenuCommands( "sound system" );
 			} else if ( !idStr::Icmp( verb, "audioSpeakers" ) ) {
-				if ( value == 2 || value == 6 ) {
+				// 0 takes the device's own layout, as the CVar's default does.
+				if ( value == 0 || value == 2 || value == 6 ) {
 					cvarSystem->SetCVarInteger( "s_numberOfSpeakers", value );
 					HandleMainMenuCommands( "sound speakers" );
 				}

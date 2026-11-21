@@ -29,6 +29,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import retained_key_glyphs as glyphs          # noqa: E402
+import retained_options_tree as options_tree  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import loading_notch as notch  # noqa: E402  (the loading screen's name notch, shared with its stock textures)
 OUT = ROOT / "content" / "basepr" / "pak0" / "guis"
 
@@ -1016,7 +1019,8 @@ def navigate(nodes: list[dict], ident: str, **directions: str) -> None:
 
 
 def full_page(doc: Document, title_key: str, contents: list[dict], back: str, focus: list[dict], *, alpha: float = 0.7,
-              back_scale: float = 0.40, foot: tuple = (), back_navigation: dict | None = None) -> dict:
+              back_scale: float = 0.40, foot: tuple = (), back_navigation: dict | None = None,
+              back_box: tuple = (32 + 8, 432, 250, 19)) -> dict:
     """A full-screen page's frame (section 8). As the session presents the
     page it widens from the bottom bar to the full-width bar over 200 ms and
     then rises to 620x460 u at 10,10 over 500 ms with the even ease-in-out;
@@ -1071,7 +1075,7 @@ def full_page(doc: Document, title_key: str, contents: list[dict], back: str, fo
             *label("page-title", title_key, (32, 8, 556, 24), DISPLAY, 0.55, TEXT_NAV, shadow=True, ty=-8)]),
         title_bar("page-foot-bar", (32, 432, 556, 19), inverted=True),
         *contents,
-        link(doc, "page_back", RETURN_KEY, (32 + 8, 432, 250, 19), action=back, scale=back_scale, ty=-6,
+        link(doc, "page_back", RETURN_KEY, back_box, action=back, scale=back_scale, ty=-6,
              **({"navigation": back_navigation} if back_navigation else {})),
         *foot,
     ])
@@ -1605,7 +1609,7 @@ def credits_document() -> dict:
 
 OPTIONS_SOURCE = ROOT / "content" / "basepr" / "pak0" / "guis" / "mainmenu" / "mainmenu_options.guifragment"
 OPTIONS_BOOK = (25, 55, 570, 370)        # the tab page, in the frame (Options_TabContainer less its 20 u of tabs)
-OPTIONS_TOP_TABS = (125, 35, 470, 20)    # tabMargins 100, 0: the four top tabs share what is left
+OPTIONS_TOP_TABS = (125, 35, 440, 20)    # the four top tabs, short of the page's end to leave the next-tab key room
 OPTIONS_SIDE_W, OPTIONS_SIDE_MARGIN = 100, 40   # the side-tab column; its tabs share the height below this margin
 # The top tabs in order: label and that tab's stock window.
 OPTIONS_TABS = (("#str_20210", "Options_Controls"), ("#str_20262", "Options_GameOptions"),
@@ -1962,7 +1966,7 @@ def row_setting(doc: Document, row: dict) -> dict:
             doc.actions[via["verb"]] = {"input": kind, "operation": "session.menuValue",
                                         "arguments": {"command": via["verb"], "value": {"input": "value"}}}
         return {"state": state, "action": via["verb"], "kind": kind, **via}
-    name, kind = OPTION_SETTINGS[cvar]
+    name, kind = OPTION_SETTINGS[cvar] if cvar in OPTION_SETTINGS else (row["cvar"], row["type"])
     state, action = f"cv.{name}", f"set.{name}"
     doc.state[state] = {"type": kind, "initial": {"boolean": False, "number": 0, "string": ""}[kind], "cvar": name}
     doc.actions[action] = {"input": kind, "operation": "settings.player.set", "arguments": {"cvar": name, "value": {"input": "value"}}}
@@ -1989,7 +1993,8 @@ def setting_row(doc: Document, ident: str, row: dict, origin) -> dict:
             (0, rgb(PLATE_ROW, 0.77)), (1, rgb(PLATE_ROW, 0.06))]), stroke=stroke(solid(rgb(PLATE_ROW)), 1 * U, join="round"))]),
         vector(f"{ident}-rim", {**size, "opacity": number(0)}, [svg("rim", d, stroke=stroke(solid(RAIL), 1.5 * U, join="round"))]),
         *label(f"{ident}-label", row["label"], row["label_rect"], BODY, row.get("label_scale", 0.33), TEXT_LABEL, shadow=True,
-               ty=row["label_ty"], align=row.get("label_align", "center")),
+               ty=row["label_ty"], align=row.get("label_align", "center"), centre=row.get("centre", False),
+               **({"overflow": keyword("hidden"), **ELLIPSIS} if row.get("centre") else {})),
     ]
     if row.get("plain"):     # a filter row: no plate, as the stock filters are bare text; focus outlines it
         children = [box_fill(f"{ident}-rim", (0, 0, w, h), [0, 0, 0, 0], border=RAIL, opacity=number(0)), *children[2:]]
@@ -2013,7 +2018,8 @@ def setting_row(doc: Document, ident: str, row: dict, origin) -> dict:
             entries = [((choices, index), typed(index)) for index in range(count)]
         # A row taller than the stock 25 u seats its value in the middle.
         value = label(f"{ident}-value", PLACEHOLDER, (cx, cy, cw, ch), BODY, row.get("value_scale", 0.33), TEXT_VALUE,
-                      centre=ch > 30, align=row.get("value_align", "center"), overflow=keyword("hidden"), **ELLIPSIS)
+                      centre=ch > 30 or row.get("centre", False), align=row.get("value_align", "center"), overflow=keyword("hidden"),
+                      **ELLIPSIS)
         # Names the session supplies (sound devices) can be long: their list
         # gives them the row's width, where a stock list sits under the value.
         named = any(isinstance(caption, dict) for caption, _ in entries)
@@ -2042,7 +2048,9 @@ def setting_row(doc: Document, ident: str, row: dict, origin) -> dict:
             group(f"{ident}-thumb", {"position": keyword("absolute"), "left": length(0), "top": length(0), "width": length(knob),
                                      "height": ul(ch)}, [vector(f"{ident}-knob", {**FULL, **PASSIVE}, ring)]),
         ])
-        value = label(f"{ident}-value", PLACEHOLDER, (cx + cw + 6, 0, 40, h), BODY, 0.28, TEXT_VALUE, align="left", centre=True)
+        number_x = cx + cw + row.get("number_gap", 6)
+        value = label(f"{ident}-value", PLACEHOLDER, (number_x, 0, row.get("number_w", 40), h), BODY, row.get("number_scale", 0.28),
+                      TEXT_VALUE, align="left", centre=True)
         children += [track_node, *value]
         decimals = 0 if step == int(step) else (1 if step * 10 == int(step * 10) else 2)
         spec.update(role="slider", states=setting_states(doc, ident, f"{ident}-value"), minimum=low, maximum=high,
@@ -2109,7 +2117,8 @@ def plain_row(ident: str, row: dict, origin) -> tuple[dict, list[dict]]:
     return ({"box": (origin[0] + x, origin[1] + y, w, h)}, [
         vector(f"{ident}-plate", dict(size), [svg("plate", row_d(w, h), fill=linear([0, 0], [w * U, 0], [
             (0, rgb(PLATE_ROW, 0.77)), (1, rgb(PLATE_ROW, 0.06))]), stroke=stroke(solid(rgb(PLATE_ROW)), 1 * U, join="round"))]),
-        *label(f"{ident}-label", row["label"], row["label_rect"], BODY, 0.33, TEXT_LABEL, shadow=True, ty=row["label_ty"])])
+        *label(f"{ident}-label", row["label"], row["label_rect"], BODY, row.get("label_scale", 0.33), TEXT_LABEL, shadow=True,
+               ty=row["label_ty"], align=row.get("label_align", "center"), centre=row.get("centre", False))])
 
 
 def size_row(doc: Document, ident: str, row: dict, origin) -> tuple[dict, str]:
@@ -2138,8 +2147,10 @@ def detect_box(doc: Document, row: dict, origin) -> tuple[dict, str]:
     d = f"M4 0.5H{w - 4}Q{w - .5} 0.5 {w - .5} 4V{h - 4}Q{w - .5} {h - .5} {w - 4} {h - .5}H4Q0.5 {h - .5} 0.5 {h - 4}V4Q0.5 0.5 4 0.5Z"
     plate = vector("video-detect-plate", {**absolute(0, 0, w, h), **PASSIVE}, [svg("plate", d, fill=linear(
         [0, 0], [w * U, 0], [(0, rgb(PLATE_BOX, 0.62)), (1, rgb(PLATE_BOX, 0.05))]), stroke=stroke(solid(rgb(PLATE_BOX)), 1 * U, join="round"))])
-    press = button(doc, "video_detect", row["button"], row["button_rect"], action=doc.session("videoDetect"), scale=0.33)
-    caption = label("video-detect-label", row["label"], row["label_rect"], BODY, 0.33, TEXT_LABEL, shadow=True, ty=row["label_ty"])
+    press = button(doc, "video_detect", row["button"], row["button_rect"], action=doc.session("videoDetect"),
+                   scale=row.get("button_scale", 0.33))
+    caption = label("video-detect-label", row["label"], row["label_rect"], BODY, row.get("label_scale", 0.33), TEXT_LABEL,
+                    shadow=True, ty=row["label_ty"], align=row.get("label_align", "center"), centre=row.get("centre", False))
     return group("video-detect", absolute(origin[0] + x, origin[1] + y, w, h), [plate, *caption, press]), "video_detect"
 
 
@@ -2186,13 +2197,19 @@ PROFILE_ROWS = 32                         # RETAINED_PROFILE_ROWS in the session
 PROFILE_ROW_H = 19                        # u: a row of the stock list at textscale 0.30
 
 
+KEY_CHIP = 20                             # dp: a bound key's chip height (retained_key_glyphs: 1 em of the strip)
+WAITING_KEY = "#str_07000"                # Press any key...
+VERB_CHANGE, VERB_SELECT, VERB_CLEAR, VERB_BACK = "#str_122207", "#str_122208", "#str_122210", "#str_122209"
+
+
 def bind_row(doc: Document, row: dict, origin) -> dict:
-    """A binding row at its stock place: the setting row's plate, the
-    action's caption in the leading half and its keys in the trailing half,
-    named as the language names them and joined into a list, or the stock
-    word for none (idUserInterfaceRetained::SetKeyBindingNames). Accept asks
-    the session to wait for a key (controlsBind); while it waits the keys
-    read "Press any key..." and the next key pressed binds, as the stock
+    """A binding row: the setting row's plate, the action's caption and its
+    keys as glyphs (retained_key_glyphs): up to two keyboard or mouse keys,
+    then up to two controller buttons a little apart, "+N" for any more, and
+    a dim dash for none. The engine fills the slots from the action's
+    binding (idUserInterfaceRetained::SetKeyBindingNames). Accept asks the
+    session to wait for a key (controlsBind); while it waits the glyphs give
+    way to "Press any key..." and the next key pressed binds, as the stock
     field takes it (idSessionLocal::RetainedControlsKey). The session reads
     the row from the focused control's id, controls_bind_<n>, whose n is
     the action's place in PREY_CONTROLS_BINDINGS."""
@@ -2200,21 +2217,43 @@ def bind_row(doc: Document, row: dict, origin) -> dict:
     doc.key_rows.append(row["bind"])
     ident, state = f"controls_bind_{index}", f"controls.{index}.keys"
     doc.state[state] = {"type": "string", "initial": "", "keyBinding": row["bind"]}
+    doc.state[f"{state}.more"] = {"type": "string", "initial": ""}
     x, y, w, h = row["rect"]
     d = row_d(w, h)
     size = {**absolute(0, 0, w, h), **PASSIVE}
-    value = bound(doc, label(f"{ident}-value", PLACEHOLDER, row["control_rect"], BODY, 0.33, TEXT_VALUE, shadow=True,
-                             ty=row["control_ty"], overflow=keyword("hidden"), **ELLIPSIS), state)
+    kx, _, kw, _ = row["control_rect"]
+    waiting = {"op": "==", "args": [{"state": CONTROLS_CAPTURE}, index]}
+    more = {"id": f"{ident}-more", "type": "text", "properties": {
+        "text": text(PLACEHOLDER), "position": keyword("relative"), "display": keyword("block"), "font-family": font(BODY),
+        "font-size": length(0.6, "em"), "color": colour(TEXT_VALUE), "white-space": keyword("nowrap"), **PASSIVE}}
+    doc.bind(f"{ident}-more", "text", {"state": f"{state}.more"})
+    dash = group(f"{ident}-none", {"position": keyword("relative"), "display": keyword("none"), "width": length(0.7, "em"),
+                                   "height": length(1.5), "background-color": colour(rgb("#B8C9E6", 0.35)), **PASSIVE})
+    doc.bind(f"{ident}-none", "display", {"op": "select", "args": [{"op": "&&", "args": [
+        {"op": "==", "args": [{"state": f"{state}.keyCount"}, 0]}, {"op": "==", "args": [{"state": f"{state}.padCount"}, 0]}]},
+        "block", "none"]})
+    strip = group(f"{ident}-keys", {**absolute(kx, 0, kw, h), "display": keyword("flex"), "flex-direction": keyword("row"),
+                                    "align-items": keyword("center"), "font-size": length(KEY_CHIP), "overflow": keyword("hidden"),
+                                    **PASSIVE}, [*glyphs.bound_keys(doc, f"{ident}-k", state), more, dash])
+    doc.bind(f"{ident}-keys", "display", {"op": "select", "args": [waiting, "none", "flex"]})
+    prompt = label(f"{ident}-waiting", WAITING_KEY, (kx, 0, kw, h), BODY, row.get("label_scale", 0.33), TEXT_HOVER,
+                   align="left", centre=True, display=keyword("none"))
+    for node in prompt:
+        doc.bind(node["id"], "display", {"op": "select", "args": [waiting, "block", "none"]})
     children = [
         vector(f"{ident}-plate", dict(size), [svg("plate", d, fill=linear([0, 0], [w * U, 0], [
             (0, rgb(PLATE_ROW, 0.77)), (1, rgb(PLATE_ROW, 0.06))]), stroke=stroke(solid(rgb(PLATE_ROW)), 1 * U, join="round"))]),
         vector(f"{ident}-rim", {**size, "opacity": number(0)}, [svg("rim", d, stroke=stroke(solid(RAIL), 1.5 * U, join="round"))]),
-        *label(f"{ident}-label", row["label"], row["label_rect"], BODY, 0.33, TEXT_LABEL, shadow=True, ty=row["label_ty"]),
-        *value,
+        *label(f"{ident}-label", row["label"], row["label_rect"], BODY, row.get("label_scale", 0.33), TEXT_LABEL, shadow=True,
+               ty=row["label_ty"], align=row.get("label_align", "center"), centre=row.get("centre", False),
+               overflow=keyword("hidden"), **ELLIPSIS),
+        strip, *prompt,
     ]
+    rim_ids = doc.states(ident, {name: [(f"{ident}-rim", "opacity", number(on))] for name, on in
+                                 (("default", 0), ("hover", 0.5), ("focus", 1), ("pressed", 1), ("disabled", 0))}, enter=1, leave=1)
     return group(ident, {**absolute(origin[0] + x, origin[1] + y, w, h), "opacity": number(1)}, children,
-                 control={"role": "button", "label": row["label"], "action": "controlsBind",
-                          "states": setting_states(doc, ident, f"{ident}-value")})
+                 control={"role": "button", "label": row["label"], "action": "controlsBind", "prompt": VERB_CHANGE,
+                          "states": rim_ids})
 
 
 def session_controls_bindings() -> list[str]:
@@ -2464,14 +2503,174 @@ def line(ident: str, box) -> dict:
     return box_fill(ident, box, SEPARATOR)
 
 
+# Options' compact layout (section 12.5): each page holds two columns of
+# 21 u rows on a 24 u pitch under inline section headings, labels at the
+# leading edge and values in the trailing part, where the stock page held
+# one column of 25 u rows on a 30 u pitch.
+OPT_PITCH, OPT_ROW_H = 24, 21
+OPT_PAD, OPT_GAP, OPT_TOP = 8, 10, 9
+OPT_SCALE, OPT_HEADING_SCALE = 0.28, 0.27
+OPT_SLOTS = 14
+OPT_RULE = rgb("#BDCFE0", 0.40)          # prey.separator, softened: a heading's rule
+OPT_FOOT_SCALE = 0.30                    # the bottom bar's actions, smaller to leave the prompts room
+OPT_PROMPT_SCALE = 0.27
+PROMPT_KEYS = {"accept": "#str_122212", "back": "#str_122213", "clear": "#str_122214"}
+
+
+def compact_row(row: dict, x: float, y: float, w: float) -> dict:
+    """A tree row (retained_options_tree) as the row builders take it: its
+    plate at x,y in the frame, its label at the leading edge, its value or
+    keys in the trailing part, every text centred on the row's height."""
+    split = round(w * {"bind": 0.5, "choice": 0.57}.get(row["kind"], 0.53))
+    out = dict(row)
+    out.update(rect=(x, y, w, OPT_ROW_H), label_rect=(8, 0, split - 12, OPT_ROW_H), label_ty=0, label_align="left",
+               label_scale=OPT_SCALE, value_scale=OPT_SCALE, centre=True, section=row.get("section"))
+    if row["kind"] == "bind":
+        out["control_rect"] = (split, 0, w - split - 10, OPT_ROW_H)
+    elif row["kind"] == "choice":
+        out["control_rect"] = (split, 2, w - split - 12, OPT_ROW_H - 4)
+    elif row["kind"] == "slider":
+        out.update(control_rect=(split, 2, w - split - 44, OPT_ROW_H - 4), number_w=32, number_gap=5, number_scale=0.26)
+    elif row["kind"] == "size":
+        fw = (w - split - 24) / 2
+        out["fields"] = [{"cvar": field["cvar"], "rect": (split + offset, 2, fw, OPT_ROW_H - 4)}
+                         for field, offset in zip(row["fields"], (0, fw + 12))]
+    return out
+
+
+def section_heading(ident: str, key: str, x: float, y: float, w: float) -> dict:
+    """An inline section heading: the display face in prey.text.nav at the
+    column's leading edge over a hairline rule, one slot tall."""
+    return group(ident, {**absolute(x, y, w, OPT_PITCH), **PASSIVE}, [
+        *label(f"{ident}-text", key, (2, 1, w - 4, OPT_ROW_H), DISPLAY, OPT_HEADING_SCALE, TEXT_NAV, shadow=True,
+               align="left", centre=True),
+        box_fill(f"{ident}-rule", (0, OPT_ROW_H, w, 1), OPT_RULE)])
+
+
+def options_setting_names() -> set[str]:
+    """The settings src/ui/UserInterfaceRetained.cpp's FindPlayerSetting lets
+    a page change."""
+    source = (ROOT / "src" / "ui" / "UserInterfaceRetained.cpp").read_text(encoding="utf-8")
+    body = source[source.index("const PlayerSetting* FindPlayerSetting"):]
+    body = body[:body.index("const auto found = settings.find(cvar);")]
+    return set(re.findall(r'\{"(\w+)",\{', body))
+
+
+def options_page(doc: Document, page: dict, tab: int, side: int, x0: float, width: float, *, side_tab: str | None,
+                 apply: bool) -> tuple[list[dict], list[str]]:
+    """One page of the tree: its two columns of headings and rows, an Apply
+    Changes button at the foot of the second column where the page's
+    settings take a video restart, and the authored steps between them.
+    Returns the nodes and each column's first control."""
+    bx, by, bw, bh = OPTIONS_BOOK
+    col_w = (width - 2 * OPT_PAD - OPT_GAP) / 2
+    nodes, columns, tag = [], [], f"{tab}_{side}"
+    for c, column in enumerate(page["columns"]):
+        cx = x0 + OPT_PAD + c * (col_w + OPT_GAP)
+        slot, targets = 0, []       # (slot, [control ids at that slot], shared)
+        for item in column:
+            y = by + OPT_TOP + slot * OPT_PITCH
+            kind = item["kind"]
+            if kind == "heading":
+                nodes.append(section_heading(f"sec{tag}_{c}_{slot}", item["key"], cx, y, col_w))
+                slot += 1
+                continue
+            if kind == "detect":
+                row = {**item, "rect": (cx, y, col_w, 2 * OPT_PITCH - 3), "label_rect": (8, 1, col_w - 16, OPT_ROW_H),
+                       "label_ty": 0, "label_align": "left", "label_scale": OPT_SCALE, "centre": True,
+                       "button_rect": (col_w - 104, 22, 98, 21), "button_scale": OPT_SCALE, "section": None, "cvar": None}
+                node, target = detect_box(doc, row, (0, 0))
+                nodes.append(node)
+                targets.append((slot, [target], False))
+                slot += 2
+                continue
+            if kind == "either":
+                ids = []
+                for section, inner in item["rows"]:
+                    node, target = page_row(doc, compact_row(inner, cx, y, col_w), (0, 0), tag)
+                    nodes.append(shown_when(doc, node, OPTION_SECTIONS[section]))
+                    ids.append(target)
+                targets.append((slot, ids, True))
+                slot += 1
+                continue
+            node, target = page_row(doc, compact_row(item, cx, y, col_w), (0, 0), tag)
+            nodes.append(node)
+            targets.append((slot, [target], False))
+            slot += 1
+        if slot > (OPT_SLOTS - (1 if apply and c == 1 else 0)):
+            raise SystemExit(f"settings.rui: page {page['name']} column {c} holds {slot} slots, more than fit")
+        columns.append(targets)
+    foot_right = "page_reset"
+    if apply:
+        cx = x0 + OPT_PAD + col_w + OPT_GAP
+        row = {"kind": "apply", "rect": (cx + col_w - 118, by + bh - 29, 118, 24), "label": APPLY_KEY}
+        node, target = page_row(doc, row, (0, 0), tag)
+        nodes.append(node)
+        foot_right = target
+        navigate([node], target, up=columns[1][-1][1][0] if columns[1] else target, down="page_reset", left=target, right=target)
+
+    # The steps: down and up each column in reading order, Up from a
+    # column's first control to its own top tab, Left from the first column
+    # to the side tab that shows the page, and across to the control at the
+    # nearest slot of the other column. The outer edges name themselves.
+    # A slot of two rows (either) is reached by the runtime's own nearest
+    # step, which finds whichever of the two shows.
+    def nearest(targets, at):
+        best = min(targets, key=lambda entry: abs(entry[0] - at))
+        return None if best[2] else best[1][0]
+    for c, targets in enumerate(columns):
+        other = columns[1 - c] if len(columns) > 1 else []
+        for index, (at, ids, _) in enumerate(targets):
+            steps = {}
+            if index == 0:
+                steps["up"] = f"tab_top{tab}"
+            elif not targets[index - 1][2]:
+                steps["up"] = targets[index - 1][1][0]
+            if index == len(targets) - 1:
+                steps["down"] = foot_right if c == 1 else "page_back"
+            elif not targets[index + 1][2]:
+                steps["down"] = targets[index + 1][1][0]
+            across = nearest(other, at) if other else None
+            if c == 0:
+                steps["left"] = side_tab or ids[0]
+                if across or not other:
+                    steps["right"] = across or ids[0]
+            else:
+                steps["right"] = ids[0]
+                if across:
+                    steps["left"] = across
+            for ident in ids:
+                navigate(nodes, ident, **steps)
+    return nodes, [targets[0][1][0] for targets in columns if targets]
+
+
+def foot_prompt(doc: Document, ident: str, x: float, glyph: dict, verb_key: str | None = None, *,
+                verb_state: str | None = None) -> dict:
+    """A prompt on the bottom bar: the device's glyph and its verb."""
+    children = [glyph]
+    size = EM * OPT_PROMPT_SCALE * U * FONT_FIT
+    if verb_key or verb_state:
+        verb_node = {"id": f"{ident}-verb", "type": "text", "properties": {
+            "text": text(verb_key or PLACEHOLDER), "position": keyword("relative"), "display": keyword("block"),
+            "font-family": font(DISPLAY), "font-size": length(size), "line-height": ul(19), "color": colour(TEXT_BOTTOM),
+            "white-space": keyword("nowrap"), "margin-left": length(6), "margin-top": length(-2 * CAP_LINE[DISPLAY] * size - 5),
+            **PASSIVE}}
+        if verb_state:
+            doc.bind(f"{ident}-verb", "text", {"state": verb_state})
+        children.append(verb_node)
+    return group(ident, {**absolute(x, 432, 150, 19), "display": keyword("flex"), "flex-direction": keyword("row"),
+                         "align-items": keyword("center"), **PASSIVE}, children)
+
+
 def options_document() -> dict:
-    """Options (section 9): the full page on its 0.50 body, the four top
-    tabs with their pages (Controls, Game Options and Video with their side
-    tabs, Audio on one page) and the Reset Defaults dialog. Each row changes
-    its setting or binding at once, as the stock controls do.
-    An active tab and its page are one surface: the page's outline breaks
-    across the active tab and runs whole along every inactive one
-    (section 6)."""
+    """Options (section 12.5): the full page on its 0.50 body, the four top
+    tabs with their side tabs and pages, built from the tree in
+    tools/ui/retained_options_tree.py, the Reset Defaults dialog and the
+    prompts on the bottom bar. Each row changes its setting or binding at
+    once, as the stock controls do; a video setting that takes a restart
+    waits for Apply Changes. An active tab and its page are one surface:
+    the page's outline breaks across the active tab and runs whole along
+    every inactive one (section 6)."""
     doc = Document("openpr06.settings")
     for section in ("controls", "game", "display", "audio"):      # the session clears these on arrival
         doc.state[f"from_{section}"] = {"type": "boolean", "initial": False}
@@ -2511,32 +2710,45 @@ def options_document() -> dict:
     doc.state[CONTROLS_CAPTURE] = {"type": "number", "initial": -1}
     doc.session("controlsBind")
     doc.events["onSecondary"] = [{"op": "action", "action": doc.session("controlsClear")}]
+    # The prompts: Accept's verb follows the focused control (a binding row's
+    # is Change), else Select (UserInterfaceRetained.cpp PublishPromptGlyphs).
+    glyphs.prompt_states(doc)
+    doc.state["prompt.accept"] = {"type": "string", "initial": VERB_SELECT}
 
     doc.state["tab.top"] = {"type": "number", "initial": 0}     # the stock page opens on Controls
     flip = doc.session("soundTabFlip")
     bx, by, bw, bh = OPTIONS_BOOK
     tx, ty, tw_all, th = OPTIONS_TOP_TABS
-    tw = tw_all / len(OPTIONS_TABS)
-    inner_x = bx + OPTIONS_SIDE_W
+    tw = tw_all / len(options_tree.TABS)
     shade = [(0, rgb(PAGE_SHADE, 0.93)), (0.125, rgb(PAGE_SHADE, 0.81)), (0.25, rgb(PAGE_SHADE, 0.64)),
              (0.5, rgb(PAGE_SHADE, 0.28)), (0.75, rgb(PAGE_SHADE, 0.06)), (1, rgb(PAGE_SHADE, 0))]
-    fade_w, fade_h = (bw - OPTIONS_SIDE_W) / 4, bh / 4
-    # The page: its wash, the shading from its top, and its outline.
+    fade_h = bh / 4
+    # The page: its wash, the shading from its top, and its outline, which
+    # runs whole beside the top tabs and under every inactive one.
     contents = [
         box_fill("book-wash", OPTIONS_BOOK, PAGE_WASH),
-        vector("book-shade-top", {**absolute(inner_x, by, bw - OPTIONS_SIDE_W, fade_h), **PASSIVE}, [
-            svg("shade", f"M0 0H{bw - OPTIONS_SIDE_W}V{fade_h}H0Z", fill=linear([0, 0], [0, fade_h * U], shade))]),
+        vector("book-shade-top", {**absolute(bx, by, bw, fade_h), **PASSIVE}, [
+            svg("shade", f"M0 0H{bw}V{fade_h}H0Z", fill=linear([0, 0], [0, fade_h * U], shade))]),
         line("book-right", (bx + bw - 1, by, 1, bh)), line("book-foot", (bx, by + bh - 1, bw, 1)), line("book-left", (bx, by, 1, bh)),
-        line("book-top-lead", (bx, by, tx - bx, 1)),
+        line("book-top-lead", (bx, by, tx - bx, 1)), line("book-top-trail", (tx + tw_all, by, bx + bw - tx - tw_all, 1)),
     ]
 
-    # The top tabs. The outline runs under every inactive one.
+    # The top tabs, and the keys that page them: Q and E, or the bumpers.
     top_on = f"M0 {th}C3 {th} 4 0 11 0H{tw - 3}L{tw - 1} {th}V{th + .6}H0Z"
     top_rim = f"M0 {th}C3 {th} 4 0 11 0H{tw - 3}L{tw - 1} {th}"
     top_off = f"M0 {th - .5}C3 {th - .5} 4 0 11 0H{tw - 3}L{tw - 1} {th - .5}Z"
     active_paint = linear([0, 0], [0, th * U], [(0, rgb("#7F95AA")), (0.5, rgb("#3E4C5A")), (1, rgb(PAGE_SHADE))])
-    tabs, books, first_focus, side_first = [], [], {}, {}
-    for index, (key, source) in enumerate(OPTIONS_TABS):
+    contents += [
+        group("tabs-previous", {**absolute(tx - 26, ty + 1, 24, th - 2), "display": keyword("flex"), "align-items": keyword("center"),
+                                **PASSIVE}, [glyphs.prompt_glyph(doc, "tabs-previous-glyph", key_name=glyphs.LABEL_KEYS["Q"], shoulder=0, size_dp=18)]),
+        group("tabs-next", {**absolute(tx + tw_all + 3, ty + 1, 26, th - 2), "display": keyword("flex"),
+                            "align-items": keyword("center"), **PASSIVE},
+              [glyphs.prompt_glyph(doc, "tabs-next-glyph", key_name=glyphs.LABEL_KEYS["E"], shoulder=1, size_dp=18)]),
+    ]
+    stock_profiles = next(side for side in stock_options("Options_Controls")["sides"] if side["name"] == PROFILES_SIDE)
+    tabs, books, side_focus, side_counts = [], [], {}, {}
+    names = options_setting_names()
+    for index, (key, sides) in enumerate(options_tree.TABS):
         ident, box = f"tab_top{index}", (tx + index * tw, ty, tw, th + 1)
         faces = (tab_face(f"{ident}-idle", box, top_off, solid(rgb("#252831")), TAB_TEXT, key, 0.28),
                  tab_face(f"{ident}-active", box, top_on, active_paint, TEXT_HOVER, key, 0.28, rim_d=top_rim, rim_tint=RAIL))
@@ -2544,102 +2756,126 @@ def options_document() -> dict:
         chosen = {"op": "==", "args": [{"state": "tab.top"}, index]}
         contents.append(shown_when(doc, under, {"op": "!", "args": [chosen]}))
         tabs.append(tab_button(doc, ident, box, key, faces, f"{ident}Pick", chosen))
-        stock = stock_options(source)
-        sides = stock["sides"]
-        book = []          # this top tab's side tabs, pages and the furniture only it has
-        if sides[0]["key"] is not None:
-            # A column of side tabs: the divider between it and the pages,
-            # and the shading from the inner page's leading edge.
-            side_state = f"tab.side{index}"
+        book = []
+        has_sides = sides[0]["key"] is not None
+        side_state = f"tab.side{index}"
+        side_counts[index] = len(sides) if has_sides else 0
+        if has_sides:
             doc.state[side_state] = {"type": "number", "initial": 0}
+            inner_x = bx + OPTIONS_SIDE_W
+            fade_w = (bw - OPTIONS_SIDE_W) / 4
             book += [
                 vector(f"book{index}-shade-side", {**absolute(inner_x, by, fade_w, bh), **PASSIVE}, [
                     svg("shade", f"M0 0H{fade_w}V{bh}H0Z", fill=linear([0, 0], [fade_w * U, 0], shade))]),
                 line(f"book{index}-divider-head", (inner_x, by, 1, OPTIONS_SIDE_MARGIN)),
+                # The triggers page the side tabs.
+                group(f"book{index}-sections", {**absolute(bx + 8, by + 11, OPTIONS_SIDE_W - 16, 18), "display": keyword("flex"),
+                                                "flex-direction": keyword("row"), "align-items": keyword("center"), **PASSIVE}, [
+                    glyphs.prompt_glyph(doc, f"book{index}-sections-up", shoulder=0, trigger=True, size_dp=18),
+                    group(f"book{index}-sections-gap", {"position": keyword("relative"), "width": ul(OPTIONS_SIDE_W - 16 - 32),
+                                                        "height": length(1)}),
+                    glyphs.prompt_glyph(doc, f"book{index}-sections-down", shoulder=1, trigger=True, size_dp=18)]),
             ]
             sh, sw = (bh - OPTIONS_SIDE_MARGIN) / len(sides), OPTIONS_SIDE_W
             side_on = f"M9 1.5H{sw + .6}V{sh - 1.5}H0V10.5Z"
             side_rim = f"M{sw} 1.5H9L0 10.5V{sh - 1.5}H{sw}"
             side_off = f"M9 1.5H{sw - .5}V{sh - 1.5}H0V10.5Z"
             side_paint = linear([0, 0], [sw * U, 0], [(0, rgb("#5A6E80")), (0.55, rgb("#3B4854")), (1, rgb(PAGE_SHADE))])
+            x0, width = inner_x, bw - OPTIONS_SIDE_W
+        else:
+            x0, width = bx, bw
         side_tabs = []     # after the pages: a page's box would take the hits of a tab under it
-        for number_of, side in enumerate(sides):
-            origin = (bx + side["page"][0], by + side["page"][1])
-            built = [page_row(doc, row, origin, f"{index}_{number_of}") for row in side["rows"]]
-            rows, focusable = [node for node, _ in built], [target for _, target in built]
-            if side["name"] == PROFILES_SIDE:
-                nodes, target = profiles_page(doc, side, origin)
-                rows, focusable = rows + nodes, focusable + [target]
-            side_first.setdefault(index, []).append(focusable[0])
-            # Up from a page's first control reaches its own top tab. The
-            # nearest tab that way was often a neighbour: from Audio's first
-            # row it was Video, from Controls' it was Game Options.
-            navigate(rows, focusable[0], up=f"tab_top{index}")
-            if focusable[0] == "video_detect":
-                # Detect sits at its plate's trailing end, so from the row
-                # below it the nearest control up was the Game Options tab.
-                navigate(rows, focusable[1], up="video_detect")
-                navigate(rows, "video_detect", down=focusable[1])
-            if side["name"] == "Options_Video_Display":
-                # A change of rendering API takes the game restarted: the
-                # stock dialog's line, while the choice differs from the API
-                # the process started with.
-                rows.append(shown_when(doc, group("video-api-notice", {**absolute(origin[0] + 10, origin[1] + 312, 262, 34), **PASSIVE},
-                                                 label("video-api-notice-text", RESTART_NOTICE_KEY, (0, 0, 262, 34), BODY, 0.25,
-                                                       TEXT_LABEL, wrap=True, shadow=True)),
-                                       {"op": "!=", "args": [{"state": "cv.r_renderApi"}, {"state": "applied.r_renderApi"}]}))
-            heads = []
-            for at, heading in enumerate(side["headings"]):
-                hx, hy, hw, hh = heading["rect"]
-                place = (origin[0] + hx, origin[1] + hy, hw, hh)
-                if heading["kind"] == "note":
-                    parts = label(f"note{index}-{number_of}-{at}", heading["key"], place, BODY, heading["scale"], TEXT_LABEL,
-                                  shadow=True, ty=heading["ty"])
-                else:
-                    parts = header_bar(f"head{index}-{number_of}-{at}", place, heading["key"], heading["labels"])
-                heads.append(group(f"head{index}-{number_of}-{at}-box", {**absolute(0, 0, FULL_FRAME[2], FULL_FRAME[3]), **PASSIVE},
-                                   parts))
-            # The Audio tab's two sets of sub-options show by the sound system in use.
-            for node, item in [*zip(rows, side["rows"]), *zip(heads, side["headings"])]:   # zip stops before the notice
-                if item["section"] in OPTION_SECTIONS:
-                    shown_when(doc, node, OPTION_SECTIONS[item["section"]])
-            page_nodes = [*heads, *rows]
-            if side["key"] is None:
-                first_focus[index] = focusable[0]
+        for number_of, page in enumerate(sides):
+            ident_side = f"tab_side{index}_{number_of}"
+            if page.get("profiles"):
+                origin = (bx + stock_profiles["page"][0], by + stock_profiles["page"][1])
+                page_nodes, first = profiles_page(doc, stock_profiles, origin)
+                navigate(page_nodes, first, up=f"tab_top{index}")
+                firsts = [first]
+            else:
+                page_nodes, firsts = options_page(doc, page, index, number_of, x0, width,
+                                                  side_tab=ident_side if has_sides else None, apply=page["apply"])
+                if page["name"] == "display":
+                    # A change of rendering API takes the game restarted: the
+                    # stock dialog's line, while the choice differs from the
+                    # API the process started with.
+                    col_w = (width - 2 * OPT_PAD - OPT_GAP) / 2
+                    page_nodes.append(shown_when(doc, group("video-api-notice", {
+                        **absolute(x0 + OPT_PAD, by + bh - 40, col_w, 34), **PASSIVE},
+                        label("video-api-notice-text", RESTART_NOTICE_KEY, (0, 0, col_w, 34), BODY, 0.25, TEXT_LABEL,
+                              wrap=True, shadow=True)),
+                        {"op": "!=", "args": [{"state": "cv.r_renderApi"}, {"state": "applied.r_renderApi"}]}))
+            side_focus.setdefault(index, []).append(firsts[0])
+            if not has_sides:
                 book += page_nodes
                 continue
-            ident_side, picked = f"tab_side{index}_{number_of}", {"op": "==", "args": [{"state": side_state}, number_of]}
+            picked = {"op": "==", "args": [{"state": side_state}, number_of]}
             side_box = (bx, by + OPTIONS_SIDE_MARGIN + number_of * sh, sw + 1, sh)
-            side_faces = (tab_face(f"{ident_side}-idle", side_box, side_off, solid(rgb("#3E4C61", 0.45)), TAB_TEXT, side["key"],
-                                   0.33, ty=side["ty"]),
-                          tab_face(f"{ident_side}-active", side_box, side_on, side_paint, TEXT_HOVER, side["key"], 0.33,
-                                   rim_d=side_rim, rim_tint=rgb("#A7BFD7"), ty=side["ty"]))
+            side_faces = (tab_face(f"{ident_side}-idle", side_box, side_off, solid(rgb("#3E4C61", 0.45)), TAB_TEXT, page["key"], 0.31),
+                          tab_face(f"{ident_side}-active", side_box, side_on, side_paint, TEXT_HOVER, page["key"], 0.31,
+                                   rim_d=side_rim, rim_tint=rgb("#A7BFD7")))
             doc.events[f"{ident_side}Pick"] = [{"op": "action", "action": flip}, {"op": "setState", "values": {side_state: number_of}}]
-            if side["name"] == PROFILES_SIDE:
+            if page.get("profiles"):
                 # As the stock tab's onTabActivate: list the profiles afresh.
                 doc.events[f"{ident_side}Pick"].append({"op": "action", "action": doc.session("profileScan")})
-            side_tabs.append(tab_button(doc, ident_side, side_box, side["key"], side_faces, f"{ident_side}Pick", picked))
+            side_tabs.append(tab_button(doc, ident_side, side_box, page["key"], side_faces, f"{ident_side}Pick", picked))
+            navigate(side_tabs, ident_side, right=firsts[0])
             # The divider beside this tab shows while another is the active one.
             book.append(shown_when(doc, line(f"book{index}-divider{number_of}", (inner_x, side_box[1], 1, sh)),
                                    {"op": "!", "args": [picked]}))
             book.append(shown_when(doc, group(f"page{index}-{number_of}", {**absolute(0, 0, FULL_FRAME[2], FULL_FRAME[3])},
                                               page_nodes), picked))
-            if number_of == 0:
-                first_focus[index] = focusable[0]
         book += side_tabs
         if index == AUDIO_TAB:
-            # The EAX mark, while EAX is in use.
+            # The EAX mark, while EAX is in use, under the OpenAL rows.
             book.append(shown_when(doc, picture("audio-eax-mark", "guis/assets/menu/eax", {
-                **absolute(bx + sides[0]["page"][0] + 175, by + sides[0]["page"][1] + 220 + 100, 64, 28), **PASSIVE}),
+                **absolute(bx + bw - OPT_PAD - 64, by + bh - 34, 64, 28), **PASSIVE}),
                 {"op": "!=", "args": [{"state": "eax"}, 0]}))
         books.append(shown_when(doc, group(f"book{index}", {**absolute(0, 0, FULL_FRAME[2], FULL_FRAME[3])}, book), chosen))
-        doc.events[f"{ident}Pick"] = [{"op": "action", "action": flip}, {"op": "setState", "values": {"tab.top": index}},
-                                      {"op": "focus", "control": first_focus[index]}]
+
+    def focus_side(index: int) -> list:
+        """Focus the first control of the side tab top tab `index` shows."""
+        if side_counts[index] == 0:
+            return [{"op": "focus", "control": side_focus[index][0]}]
+        program = [{"op": "focus", "control": side_focus[index][-1]}]
+        for number_of in reversed(range(side_counts[index] - 1)):
+            program = [{"op": "if", "condition": {"op": "==", "args": [{"state": f"tab.side{index}"}, number_of]},
+                        "then": [{"op": "focus", "control": side_focus[index][number_of]}], "else": program}]
+        return program
+    count = len(options_tree.TABS)
+    for index in range(count):
+        doc.events[f"tab_top{index}Pick"] = [{"op": "action", "action": flip}, {"op": "setState", "values": {"tab.top": index}},
+                                            *focus_side(index)]
+        for number_of, target in enumerate(side_focus[index] if side_counts[index] else ()):
+            doc.events[f"tab_side{index}_{number_of}Pick"].append({"op": "focus", "control": target})
+
+    def by_tab(make) -> list:
+        """A program that runs make(index) for the top tab that shows."""
+        program = make(count - 1)
+        for index in reversed(range(count - 1)):
+            program = [{"op": "if", "condition": {"op": "==", "args": [{"state": "tab.top"}, index]}, "then": make(index),
+                        "else": program}]
+        return program
+    # Q and E, or the bumpers, page the top tabs; the triggers page the side
+    # tabs of the top tab that shows. Both wrap.
+    doc.events["onTabPrevious"] = by_tab(lambda index: [{"op": "call", "event": f"tab_top{(index - 1) % count}Pick"}])
+    doc.events["onTabNext"] = by_tab(lambda index: [{"op": "call", "event": f"tab_top{(index + 1) % count}Pick"}])
+
+    def page_sides(index: int, step: int) -> list:
+        sides = side_counts[index]
+        if not sides:
+            return []
+        program = [{"op": "call", "event": f"tab_side{index}_{(sides - 1 + step) % sides}Pick"}]
+        for number_of in reversed(range(sides - 1)):
+            program = [{"op": "if", "condition": {"op": "==", "args": [{"state": f"tab.side{index}"}, number_of]},
+                        "then": [{"op": "call", "event": f"tab_side{index}_{(number_of + step) % sides}Pick"}], "else": program}]
+        return program
+    doc.events["onSectionPrevious"] = by_tab(lambda index: page_sides(index, -1))
+    doc.events["onSectionNext"] = by_tab(lambda index: page_sides(index, 1))
+
     # After Apply Changes the video restart rebuilds the view and the focus
     # is gone: the session asks for it back, on the Video page that shows.
-    doc.events["videoApplied"] = [{"op": "if", "condition": {"op": "==", "args": [{"state": f"tab.side{VIDEO_TAB}"}, number_of]},
-                                   "then": [{"op": "focus", "control": target}]}
-                                  for number_of, target in enumerate(side_first[VIDEO_TAB])]
+    doc.events["videoApplied"] = focus_side(VIDEO_TAB)
     # What is in effect has the type of the setting it is compared with.
     for name in VIDEO_RESTART:
         live = doc.state.setdefault(f"cv.{name}", {"type": "number", "initial": 0, "cvar": name})
@@ -2648,15 +2884,48 @@ def options_document() -> dict:
     if doc.key_rows != session_controls_bindings():
         raise SystemExit("settings.rui: PREY_CONTROLS_BINDINGS in src/framework/Session_menu.cpp must list the Controls rows' "
                          "bindings in order: " + ", ".join(f'"{binding}"' for binding in doc.key_rows))
+    # Every setting a row sets directly must be one the engine lets a page change.
+    missing = sorted({action["arguments"]["cvar"] for action in doc.actions.values()
+                      if action.get("operation") == "settings.player.set"} - names)
+    if missing:
+        raise SystemExit("settings.rui: FindPlayerSetting in src/ui/UserInterfaceRetained.cpp does not list " + ", ".join(missing))
+    session = SESSION_SOURCE.read_text(encoding="utf-8")
+    reset = set()
+    for found in re.finditer(r"MAINMENU_RESET_(?:GAME|CONTROLS|VIDEO|AUDIO)_CVARS\[\]\s*=\s*\{(.*?)\};", session, re.S):
+        reset |= {name.lower() for name in re.findall(r'"(\w+)"', re.sub(r"//[^\n]*", "", found.group(1)))}
+    unreset = sorted({row["cvar"] for row in options_tree.rows() if row.get("cvar") and row["cvar"].lower() not in reset
+                      and row["cvar"] not in ("display_mode_choice",)}
+                     | {field["cvar"] for row in options_tree.rows() if row["kind"] == "size" for field in row["fields"]
+                        if field["cvar"].lower() not in reset})
+    if unreset:
+        raise SystemExit("settings.rui: no Reset Defaults list in src/framework/Session_menu.cpp names " + ", ".join(unreset))
     dialogs = [reset_dialog(doc)]
-    # The bottom bar's two actions step to each other and stop at its ends:
-    # Right from Reset to defaults found the Audio tab at the top.
-    reset = link(doc, "page_reset", "#str_20209", (32 + 270, 432, 280, 19), event="resetModalShow", scale=0.36, ty=-6,
+
+    # The bottom bar: Back with its key, Accept's and Clear's prompts, and
+    # Reset to defaults, which the north face button also opens. The two
+    # actions step to each other and stop at the bar's ends.
+    doc.events["onTertiary"] = [{"op": "call", "event": "resetModalShow"}]
+    reset = link(doc, "page_reset", "#str_20209", (452, 432, 132, 19), event="resetModalShow", scale=OPT_FOOT_SCALE, ty=-5,
                  navigation={"left": "page_back", "right": "page_reset"})
+    binding = {"op": "==", "args": [{"state": "prompt.accept"}, VERB_CHANGE]}
+    accept = foot_prompt(doc, "prompt-accept", 248, glyphs.prompt_glyph(doc, "prompt-accept-glyph", key_name=PROMPT_KEYS["accept"],
+                                                                         face="south", size_dp=18), verb_state="prompt.accept")
+    doc.bind("prompt-accept", "display", {"op": "select", "args": [{"op": "!=", "args": [{"state": "prompt.accept"}, ""]},
+                                                                   "flex", "none"]})
+    clear = foot_prompt(doc, "prompt-clear", 340, glyphs.prompt_glyph(doc, "prompt-clear-glyph", key_name=PROMPT_KEYS["clear"],
+                                                                       face="west", size_dp=18), VERB_CLEAR)
+    doc.bind("prompt-clear", "display", {"op": "select", "args": [binding, "flex", "none"]})
+    foot = (
+        foot_prompt(doc, "prompt-back", 40, glyphs.prompt_glyph(doc, "prompt-back-glyph", key_name=PROMPT_KEYS["back"],
+                                                                 face="east", size_dp=18)),
+        accept, clear,
+        foot_prompt(doc, "prompt-reset", 436, glyphs.prompt_glyph(doc, "prompt-reset-glyph", face="north", size_dp=18)),
+        reset,
+    )
     # The top tabs come after the tab pages, whose boxes would take their hits.
     page = full_page(doc, "#str_20208", [*contents, *books, *tabs], "settingsBack",
-                     [{"op": "focus", "control": first_focus[0]}], alpha=0.5, back_scale=0.36, foot=(reset,),
-                     back_navigation={"left": "page_back", "right": "page_reset"})
+                     focus_side(0), alpha=0.5, back_scale=OPT_FOOT_SCALE, foot=foot,
+                     back_navigation={"left": "page_back", "right": "page_reset"}, back_box=(66, 432, 160, 19))
     return page_document(doc, page, dialogs)
 
 

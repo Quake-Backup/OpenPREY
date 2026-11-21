@@ -60,7 +60,7 @@ idCVar ai_showNoAAS(				"ai_showNoAAS",					"0",			CVAR_GAME | CVAR_BOOL,	"1= Sh
 idCVar ai_printSpeech(				"ai_printSpeech",				"0",			CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE,	"1= Draw hunter speech sounds" );
 idCVar ai_skipSpeech(				"ai_skipSpeech",				"0",			CVAR_GAME | CVAR_BOOL,			"1= Do not use the AI speech system" );
 idCVar ai_skipThink(				"ai_skipThink",					"0",			CVAR_GAME | CVAR_BOOL,			"1= Do not execute hhAI::Think() fxn" );
-idCVar g_useDDA(					"g_useDDA",						"1",			CVAR_GAME | CVAR_BOOL,			"Whether to use dda system" );
+idCVar g_useDDA(					"g_useDDA",						"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL,			"Whether to use dda system" );
 idCVar g_debugMatter(				"g_debugmatter",				"0",			CVAR_GAME | CVAR_INTEGER,		"turns on matter based debugging, 2=include wallwalk traces" );
 idCVar g_debugImpulse(				"g_debugimpulse",				"0",			CVAR_GAME | CVAR_BOOL,			"turns on impulse debugging" );
 idCVar sys_forceCache(				"sys_forceCache",				"0",			CVAR_BOOL | CVAR_SYSTEM,		"force resource caching even when developer is on" ); //HUMANHEAD mdc - added for developer cache skipping
@@ -354,7 +354,7 @@ idCVar g_gun_y(						"g_gunY",					"0",			CVAR_GAME | CVAR_FLOAT, "" );
 idCVar g_gun_z(						"g_gunZ",					"0",			CVAR_GAME | CVAR_FLOAT, "" );
 idCVar g_viewNodalX(				"g_viewNodalX",				"0",			CVAR_GAME | CVAR_FLOAT, "" );
 idCVar g_viewNodalZ(				"g_viewNodalZ",				"0",			CVAR_GAME | CVAR_FLOAT, "" );
-idCVar g_fov(						"g_fov",					"90",			CVAR_GAME | CVAR_INTEGER | CVAR_NOCHEAT, "" );
+idCVar g_fov(						"g_fov",					"90",			CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER | CVAR_NOCHEAT, "" );
 idCVar g_skipViewEffects(			"g_skipViewEffects",		"0",			CVAR_GAME | CVAR_BOOL, "skip damage and other view effects" );
 idCVar g_mpWeaponAngleScale(		"g_mpWeaponAngleScale",		"0",			CVAR_GAME | CVAR_FLOAT, "Control the weapon sway in MP" );
 

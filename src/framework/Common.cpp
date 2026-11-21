@@ -8607,6 +8607,11 @@ void idCommonLocal::InitGame( void ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec editor.cfg\n" );
 	}
 	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec default.cfg\n" );
+	// Prey's default.cfg binds only the keyboard and mouse; openPR06 adds a
+	// controller layout. The player's config, run later, keeps their own.
+	if ( fileSystem->ReadFile( "openpr06_bindings.cfg", NULL ) >= 0 ) {
+		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec openpr06_bindings.cfg\n" );
+	}
 	if ( fileSystem->ReadFile( "openpr06_defaults.cfg", NULL ) >= 0 ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec openpr06_defaults.cfg\n" );
 	} else if ( fileSystem->ReadFile( "openq4_defaults.cfg", NULL ) >= 0 ) {

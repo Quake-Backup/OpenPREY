@@ -68,7 +68,7 @@ windowDef desktop {
 	onDeactivate {
 	}
 
-	// openPREY: out of game the 3D backdrop (MenuScene) opens close on the
+	// openPR06: out of game the 3D backdrop (MenuScene) opens close on the
 	// Sphere and pulls back to rest (AnimSceneIntro); without it the stock
 	// opening plays. In game, noIntro keeps the stock opening over the frozen
 	// frame, and the backdrop it reveals is the 3D one, at rest.
@@ -246,7 +246,7 @@ windowDef desktop {
 		}
 	}
 
-	// openPREY: the 3D backdrop's entrance (docs/dev/prey-ui-visual-design.md
+	// openPR06: the 3D backdrop's entrance (docs/dev/prey-ui-visual-design.md
 	// section 12.2). The camera opens close on the Sphere and swings round it
 	// to rest over 1200 ms (MenuScene's orbit); the backdrop fades up from
 	// black in 150 ms, the portal rim swings in from 700 ms as it does when a
@@ -474,7 +474,7 @@ windowDef desktop {
 			// field widens with the screen (naturalmatscale holds its density) and
 			// Earth continues through its own edge slices.
 			//
-			// openPREY: the stars lie at infinity, so they turn with the 3D
+			// openPR06: the stars lie at infinity, so they turn with the 3D
 			// backdrop's camera (gui::menuscene_x and _y, 0 at rest). Copies of
 			// the field beside and above it cover what the turn uncovers; at rest
 			// only the first shows, exactly where the stock draws it.
@@ -510,7 +510,7 @@ windowDef desktop {
 				visible		( "gui::menuscene_moving" == 1 )
 			}
 
-			// openPREY: the Sphere and Earth as lit 3D bodies (section 12.2 of
+			// openPR06: the Sphere and Earth as lit 3D bodies (section 12.2 of
 			// docs/dev/prey-ui-visual-design.md), when the scene can draw.
 #include "guis/mainmenu/mainmenu_scene.guifragment"
 

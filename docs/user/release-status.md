@@ -1,36 +1,36 @@
 # Release status
 
-**openPREY has no release yet.** The current version line is `0.0.1`, and the
+**openPR06 has no release yet.** The current version line is `0.0.1`, and the
 only way to play it is to build it yourself from this repository. Status
 checked on 11 November 2026.
 
-The [Releases page](https://github.com/themuffinator/openPREY/releases) still
-lists nightly builds from April 2026. They predate openPREY's move onto the
+The [Releases page](https://github.com/themuffinator/openPR06/releases) still
+lists nightly builds from April 2026. They predate openPR06's move onto the
 current openQ4 engine and the in-tree PREY game library, so they don't match
 these guides. Please don't report bugs against them.
 
-## Getting openPREY today
+## Getting openPR06 today
 
-1. Keep your legitimate copy of **PREY (2006)** where it is installed. openPREY
+1. Keep your legitimate copy of **PREY (2006)** where it is installed. openPR06
    ships no PREY game data.
-2. Build and stage openPREY with [BUILDING.md](../../BUILDING.md). The staged
+2. Build and stage openPR06 with [BUILDING.md](../../BUILDING.md). The staged
    package lands in `.install/`: the client, the dedicated server, the renderer
-   modules, and `basepr/` with the unified `game_x64` module and openPREY's own
+   modules, and `basepr/` with the unified `game_x64` module and openPR06's own
    packs.
-3. Launch `openPREY-client_x64` from `.install/` (`.exe` on Windows). openPREY
+3. Launch `openPR06-client_x64` from `.install/` (`.exe` on Windows). openPR06
    finds a CD-era or other retail install through the registry, App Paths and
    uninstall entries and the usual install folders. If it doesn't, point it at
    the folder that contains `base`:
 
    ```text
-   openPREY-client_x64 +set r_fullscreen 0 +set fs_basepath "C:\path\to\Prey"
+   openPR06-client_x64 +set r_fullscreen 0 +set fs_basepath "C:\path\to\Prey"
    ```
 
 [Getting Started](getting-started.md) covers the details.
 
 ## Platforms
 
-Active CI (`.github/workflows/openprey-validation.yml`) builds the engine,
+Active CI (`.github/workflows/openpr06-validation.yml`) builds the engine,
 dedicated server, OpenGL and Vulkan renderers and the unified game module on
 Windows x64 and Linux x64 on every push. Nothing is packaged or published from
 CI yet: the inherited openQ4 release, ARM64, macOS and signing workflows are
@@ -41,14 +41,14 @@ module.
 |---|---|---|---|
 | Windows x64 | Built in CI | Deepest testing: representative campaign maps, save/load and a two-client listen server | None published. `tools/build/package_nightly.py` can produce a local archive |
 | Linux x64 | Built in CI | Retail gameplay validation still pending | None published |
-| Steam Deck / SteamOS | `openPREY-steamdeck` launcher staged by Linux builds | Inherited from openQ4, not yet checked with PREY | None published |
-| Linux AppImage | `tools/build/package_linux_appimage.py` is rebranded for openPREY | Not run | Not produced: the publication lane is switched off |
+| Steam Deck / SteamOS | `openPR06-steamdeck` launcher staged by Linux builds | Inherited from openQ4, not yet checked with PREY | None published |
+| Linux AppImage | `tools/build/package_linux_appimage.py` is rebranded for openPR06 | Not run | Not produced: the publication lane is switched off |
 | Linux ARM64, Windows ARM64 | Build files inherited from openQ4; nothing builds them | None | Not supported |
 | macOS | Build files and packaging helpers inherited from openQ4; nothing builds them | None | Not supported. See [macOS Support Data](macos-support-data.md) if you build it anyway |
-| Android | Inherited openQ4 sources only | None | openPREY doesn't target Android |
+| Android | Inherited openQ4 sources only | None | openPR06 doesn't target Android |
 
 The [platform support roadmap](../dev/platform-support.md) lists the evidence a
-platform needs before openPREY claims it.
+platform needs before openPR06 claims it.
 
 ## What works and what doesn't
 

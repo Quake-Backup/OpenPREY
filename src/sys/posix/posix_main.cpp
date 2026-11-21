@@ -121,7 +121,7 @@ static const char *Posix_InstanceLockPath( void ) {
 		runtimeDir = "/tmp";
 	}
 
-	idStr::snPrintf( lockPath, sizeof( lockPath ), "%s/openprey-%u.lock", runtimeDir, static_cast<unsigned int>( geteuid() ) );
+	idStr::snPrintf( lockPath, sizeof( lockPath ), "%s/openpr06-%u.lock", runtimeDir, static_cast<unsigned int>( geteuid() ) );
 	return lockPath;
 }
 
@@ -657,6 +657,27 @@ const char *Posix_Cwd( void ) {
 }
 
 /*
+================
+Posix_MigrateLegacySavePath
+
+openPR06 was named openPREY before 0.0.1. The first run after the rename moves
+the old save folder to the new name, or keeps using it if the move fails.
+================
+*/
+void Posix_MigrateLegacySavePath( const idStr &legacyPath, idStr &savePath ) {
+	struct stat st;
+	if ( stat( savePath.c_str(), &st ) == 0 || errno != ENOENT ) {
+		return;
+	}
+	if ( stat( legacyPath.c_str(), &st ) != 0 || !S_ISDIR( st.st_mode ) ) {
+		return;
+	}
+	if ( rename( legacyPath.c_str(), savePath.c_str() ) != 0 ) {
+		savePath = legacyPath;
+	}
+}
+
+/*
 =================
 Sys_GetMemoryStatus
 =================
@@ -1125,7 +1146,7 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 /*
 ================
 Sys_AlreadyRunning
-return true if there is a copy of openPREY running already
+return true if there is a copy of openPR06 running already
 ================
 */
 bool Sys_AlreadyRunning( void ) {
@@ -1156,7 +1177,7 @@ bool Sys_AlreadyRunning( void ) {
 
 		Posix_ReleaseInstanceLock();
 		if ( lockError == EACCES || lockError == EAGAIN ) {
-			common->Printf( "another openPREY instance is already running\n" );
+			common->Printf( "another openPR06 instance is already running\n" );
 			return true;
 		}
 

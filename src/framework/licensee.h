@@ -15,20 +15,20 @@
 
 // RAVEN BEGIN
 // rjohnson: this is the name of the game we are making
-#define PROJECT_NAME					"openPREY"
+#define PROJECT_NAME					"openPR06"
 #define PROJECT_AUTHOR					"themuffinator"
 #define PROJECT_COMPANY				"DarkMatter Productions"
 #define PROJECT_VERSION				OPENQ4_VERSION_SHORT
 #define PROJECT_VERSION_FULL			OPENQ4_VERSION
 #define PROJECT_VERSION_DATE			OPENQ4_VERSION_DATE
 #define PROJECT_WEBSITE				"www.darkmatter-quake.com"
-#define PROJECT_REPO					"https://github.com/themuffinator/openPREY"
+#define PROJECT_REPO					"https://github.com/themuffinator/openPR06"
 #define PROJECT_RELEASES_URL			PROJECT_REPO "/releases"
 
 #define GAME_NAME						PROJECT_NAME			// appears on errors and secondary windows
 #define GAME_ICON						"assets/icons/prey.ico"
 
-// caption of the main game window: "openPREY - Version: 0.0.1-dev (2026-11-10)"
+// caption of the main game window: "openPR06 - Version: 0.0.1-dev (2026-11-10)"
 #define GAME_WINDOW_TITLE				PROJECT_NAME " - Version: " PROJECT_VERSION " (" PROJECT_VERSION_DATE ")"
 
 #define ENGINE_VERSION					PROJECT_NAME " " PROJECT_VERSION
@@ -50,12 +50,12 @@
 #endif
 
 // paths
-#define	CD_BASEDIR						"openPREY"
+#define	CD_BASEDIR						"openPR06"
 #define	BASE_GAMEDIR					"base"
 #define	BASE_MPGAMEDIR					"base"
-#define OPENPREY_GAMEDIR				"basepr"
+#define OPENPR06_GAMEDIR				"basepr"
 // Compatibility macro retained while inherited engine call sites are renamed.
-#define OPENQ4_GAMEDIR					OPENPREY_GAMEDIR
+#define OPENQ4_GAMEDIR					OPENPR06_GAMEDIR
 #define	DEMO_GAMEDIR					"demo"
 #define	GAME_PLAYERDEFNAME				"player_tommy"
 #define GAME_PLAYERDEFNAME_MP			"player_tommy_mp"
@@ -72,13 +72,16 @@
 #endif
 #define	CD_EXE							PROJECT_NAME "-client_" OPENQ4_BINARY_ARCH ".exe"
 
-// Read-only compatibility names for settings written before the openPREY casing settled.
+// Read-only compatibility names for settings written before the project was
+// renamed from openPREY to openPR06, and before the openPREY casing settled.
 #ifdef _XENON
-#define CONFIG_FILE						"save:/openPREYConfig.cfg"
+#define CONFIG_FILE						"save:/openPR06Config.cfg"
+#define PREVIOUS_CONFIG_FILE			"save:/openPREYConfig.cfg"
 #define INTERIM_CONFIG_FILE				"save:/OpenPREYConfig.cfg"
 #define LEGACY_CONFIG_FILE				"save:/OpenPreyConfig.cfg"
 #else
-#define CONFIG_FILE						"openPREYConfig.cfg"
+#define CONFIG_FILE						"openPR06Config.cfg"
+#define PREVIOUS_CONFIG_FILE			"openPREYConfig.cfg"
 #define INTERIM_CONFIG_FILE				"OpenPREYConfig.cfg"
 #define LEGACY_CONFIG_FILE				"OpenPreyConfig.cfg"
 #endif
@@ -137,7 +140,7 @@
 #define ASYNC_PROTOCOL_MAJOR			2
 // RAVEN END
 
-// Savegame header compatibility. New openPREY saves use the Prey name while the
+// Savegame header compatibility. New openPR06 saves use the Prey name while the
 // inherited Quake 4 and legacy openQ4 names remain readable during migration.
 #define SAVEGAME_GAME_NAME_PREY				"Prey"
 #define SAVEGAME_GAME_NAME_RETAIL				"Quake4"
@@ -150,15 +153,15 @@
 #define EDITOR_WINDOWTEXT				"QuakeEdit"
 
 // win32 info
-#define WIN32_CONSOLE_CLASS				"openPREY WinConsole"
-#define WIN32_SPLASH_CLASS				"openPREY Splash"
-#define	WIN32_WINDOW_CLASS_NAME			"openPREY"
-#define	WIN32_FAKE_WINDOW_CLASS_NAME	"OPENPREY_WGL_FAKE"
+#define WIN32_CONSOLE_CLASS				"openPR06 WinConsole"
+#define WIN32_SPLASH_CLASS				"openPR06 Splash"
+#define	WIN32_WINDOW_CLASS_NAME			"openPR06"
+#define	WIN32_FAKE_WINDOW_CLASS_NAME	"OPENPR06_WGL_FAKE"
 
 #ifdef __linux__
 	#define DEFAULT_BASE_PATH				"/usr/local/games/basepr"
 #elif defined( MACOS_X )
-	#define DEFAULT_BASE_PATH				"/Applications/openPREY"
+	#define DEFAULT_BASE_PATH				"/Applications/openPR06"
 #endif
 
 // CD Key file info

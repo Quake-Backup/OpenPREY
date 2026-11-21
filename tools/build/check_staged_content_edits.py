@@ -34,7 +34,7 @@ STALE_LOOSE_SUBDIRS = (
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Remove stale loose basepr content that is now compiled into openPREY PK4s "
+            "Remove stale loose basepr content that is now compiled into openPR06 PK4s "
             "before Meson stages a fresh install."
         )
     )

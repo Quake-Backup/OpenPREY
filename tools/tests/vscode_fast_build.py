@@ -50,21 +50,21 @@ def validate_tasks() -> None:
     if len(default_tasks) != 1:
         raise AssertionError(f"Expected exactly one default build task, found {len(default_tasks)}")
 
-    fast_build = find_task(tasks, "Build openPREY (Meson Debug)")
+    fast_build = find_task(tasks, "Build openPR06 (Meson Debug)")
     if fast_build is not default_tasks[0]:
-        raise AssertionError("Build openPREY (Meson Debug) must be the default VS Code build task")
+        raise AssertionError("Build openPR06 (Meson Debug) must be the default VS Code build task")
     if fast_build.get("dependsOn"):
         raise AssertionError("Fast default build must not depend on configure or full install tasks")
     if "fastbuild" not in fast_build.get("args", []):
         raise AssertionError("Fast default build must invoke meson-task.ps1 fastbuild")
 
-    full_build = find_task(tasks, "Full Build and Stage openPREY (Meson Debug)")
+    full_build = find_task(tasks, "Full Build and Stage openPR06 (Meson Debug)")
     if full_build.get("dependsOrder") != "sequence":
         raise AssertionError("Full build task must keep ordered configure, compile, install steps")
     for label in (
-        "Configure openPREY (Meson Debug)",
-        "Compile openPREY (Meson Debug)",
-        "Stage openPREY Install Tree (Meson Debug)",
+        "Configure openPR06 (Meson Debug)",
+        "Compile openPR06 (Meson Debug)",
+        "Stage openPR06 Install Tree (Meson Debug)",
     ):
         if label not in full_build.get("dependsOn", []):
             raise AssertionError(f"Full build task is missing dependency {label!r}")
@@ -78,7 +78,7 @@ def validate_wrapper() -> None:
     wrapper = read(".vscode/meson-task.ps1")
     require(wrapper, "[ValidateSet('setup', 'compile', 'install', 'fastbuild')]", "VS Code Meson wrapper actions")
     require(wrapper, "stage_fast_install.py", "VS Code fast build staging script")
-    # openPREY's standard local tree is builddir configured as a debug build;
+    # openPR06's standard local tree is builddir configured as a debug build;
     # compile reconfigures an existing build directory that drifted from it.
     require(wrapper, "$buildDir = Join-Path $workspaceRoot 'builddir'", "VS Code build uses the standard builddir")
     require(wrapper, "'buildtype' = 'debug'", "VS Code build must configure the debug buildtype")

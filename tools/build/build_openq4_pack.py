@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a single openPREY runtime PK4."""
+"""Build a single openPR06 runtime PK4."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ from openq4_pak import (
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build one openPREY runtime PK4.")
+    parser = argparse.ArgumentParser(description="Build one openPR06 runtime PK4.")
     parser.add_argument("--pak-name", required=True, choices=OPENQ4_PACK_NAMES, help="Output pack name.")
     parser.add_argument("--source-dir", required=True, help="Source content directory for this pack.")
     parser.add_argument(

@@ -2508,7 +2508,7 @@ void idInteraction::AddActiveInteraction( void ) {
 				entityDef->parms.suppressShadowInViewID == R_EffectiveViewIDForSubview() ) {
 				shadowSuppressed = true;
 			}
-			// OPENPREY: a levelshot leaves out the player's view models, so
+			// OPENPR06: a levelshot leaves out the player's view models, so
 			// their shadows go with them. A view model is never admitted to a
 			// shadow map, and its volume turned the light's pass into a stencil
 			// hybrid in shots the weapon is not even in.

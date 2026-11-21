@@ -1138,7 +1138,7 @@ void RB_CreateSingleDrawInteractionsFiltered( const drawSurf_t *surf, void (*Dra
 					inter.specularColor.Zero();
 					inter.flatDiffuseParams.Zero();
 					R_ResetInteractionSpecular( &inter );
-					// OPENPREY: the shadow-map visibility pass draws the stage's
+					// OPENPR06: the shadow-map visibility pass draws the stage's
 					// geometry through the receiver program, which needs only the
 					// light's projection; the stage's own program runs afterwards.
 					if ( RB_ShadowMapVisibilityMaskPassActive() ) {

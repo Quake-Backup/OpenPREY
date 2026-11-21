@@ -1,12 +1,12 @@
 [Desktop Entry]
 Type=Application
-Name=openPREY (Steam Deck)
+Name=openPR06 (Steam Deck)
 GenericName=First-person shooter
-Comment=Launch openPREY with the Steam Deck platform profile
-Exec=openPREY-steamdeck
-Icon=openprey
+Comment=Launch openPR06 with the Steam Deck platform profile
+Exec=openPR06-steamdeck
+Icon=openpr06
 Terminal=false
 Categories=Game;ActionGame;Shooter;
 Keywords=prey;idtech;fps;multiplayer;steamdeck;
 StartupNotify=true
-X-openPREY-Version=@OPENPREY_PROJECT_VERSION_FULL@
+X-openPR06-Version=@OPENPR06_PROJECT_VERSION_FULL@

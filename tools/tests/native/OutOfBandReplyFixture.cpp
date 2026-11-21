@@ -111,7 +111,7 @@ static void CheckInfoReply( int players, int nameBytes, int serverNameBytes, int
 	// (ServerScan.cpp, Session_menu.cpp), whatever the required list says.
 	for ( const char *key : { "si_name", "si_map", "si_gameType", "si_maxPlayers", "si_usePass", "si_pure", "fs_game",
 			"net_serverDedicated", "si_fragLimit", "si_timeLimit", "si_captureLimit", "si_spectators", "si_teamDamage" } ) {
-		// openPREY: only the keys this game's server declares; PREY's has no
+		// openPR06: only the keys this game's server declares; PREY's has no
 		// capture limit, for one.
 		bool declared = false;
 		for ( const auto &pair : SERVERINFO_DEFAULTS ) {
@@ -128,7 +128,7 @@ static void CheckInfoReply( int players, int nameBytes, int serverNameBytes, int
 	}
 	Check( limit < 0 || limit >= 8 || players > 24, "names are cut only for a crowded server" );
 	if ( players == 0 && extraKeys == 0 ) {
-		// openPREY: PREY's whole server info can fit with room to spare; then
+		// openPR06: PREY's whole server info can fit with room to spare; then
 		// every key goes, and only a larger one must fill the packet.
 		int wholeDict = 2;
 		for ( const auto &pair : dict ) {

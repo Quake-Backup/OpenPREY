@@ -3,10 +3,10 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-Multiplayer is experimental in openPREY. A listen server with two clients has
+Multiplayer is experimental in openPR06. A listen server with two clients has
 been played; dedicated servers and larger matches haven't been tested yet.
 
-This guide covers a simple way to host an openPREY server.
+This guide covers a simple way to host an openPR06 server.
 
 ## Hosting from the Game
 
@@ -19,38 +19,38 @@ Quake 4 one inherited from openQ4, so players may need to join an Internet
 server by address with `connect`.
 
 Set **Dedicated** to **Yes** to host without playing, as in the original game.
-When you start the server, the game window closes and the openPREY console window
+When you start the server, the game window closes and the openPR06 console window
 takes its place. The server runs there and accepts console commands such as
 `spawnServer game/dmescher`, `kick` and `quit`; close the console window to stop
-the server. To play on it from the same computer, start openPREY again and join
+the server. To play on it from the same computer, start openPR06 again and join
 it from the multiplayer server browser.
 
-To run a server without starting the game first, start openPREY with
+To run a server without starting the game first, start openPR06 with
 `+set net_serverDedicated 1`, as you could the original game. No game window
 opens, and the console window runs the server as above:
 
 ```text
-openPREY-client_x64 +set net_serverDedicated 1 +set si_map game/dmescher +set si_gameType deathmatch +spawnServer
+openPR06-client_x64 +set net_serverDedicated 1 +set si_map game/dmescher +set si_gameType deathmatch +spawnServer
 ```
 
 On a machine without a display, use the dedicated server executable below.
 
 ## What You Need
 
-- A working openPREY build, staged to `.install/` as described in [BUILDING.md](../../BUILDING.md); there is no openPREY release yet
+- A working openPR06 build, staged to `.install/` as described in [BUILDING.md](../../BUILDING.md); there is no openPR06 release yet
 - Access to the original PREY (2006) retail assets
-- The `openPREY-ded_x64` executable from that build
+- The `openPR06-ded_x64` executable from that build
 - A 64-bit Windows or Linux x64 host
 
 ## Dedicated Server Requirements
 
-The dedicated server does not need a GPU or an OpenGL-capable desktop session, but it still needs the same retail `base/` assets and the same openPREY game module (`basepr/game_x64`) as the clients.
+The dedicated server does not need a GPU or an OpenGL-capable desktop session, but it still needs the same retail `base/` assets and the same openPR06 game module (`basepr/game_x64`) as the clients.
 
-For light testing, plan on a modern 64-bit host with at least 2 GB RAM available to the operating system and server, plus room for openPREY and the PREY assets, as described in the [Getting Started system requirements](getting-started.md#system-requirements). For public servers, prefer 4 GB+ RAM, a stable wired connection, and enough upload bandwidth for the player count you advertise.
+For light testing, plan on a modern 64-bit host with at least 2 GB RAM available to the operating system and server, plus room for openPR06 and the PREY assets, as described in the [Getting Started system requirements](getting-started.md#system-requirements). For public servers, prefer 4 GB+ RAM, a stable wired connection, and enough upload bandwidth for the player count you advertise.
 
 ## Quick Start
 
-1. Make sure openPREY can see your PREY assets.
+1. Make sure openPR06 can see your PREY assets.
 2. Launch the dedicated server executable.
 3. Set a server name, map, and game type.
 4. Start the server with `spawnServer`.
@@ -58,7 +58,7 @@ For light testing, plan on a modern 64-bit host with at least 2 GB RAM available
 Example startup flow:
 
 ```text
-openPREY-ded_x64 +set net_ip 0.0.0.0 +set net_port 28004 +set si_name "My openPREY Server" +set si_map game/dmescher +set si_gameType deathmatch +spawnServer
+openPR06-ded_x64 +set net_ip 0.0.0.0 +set net_port 28004 +set si_name "My openPR06 Server" +set si_map game/dmescher +set si_gameType deathmatch +spawnServer
 ```
 
 For remote administration, follow the [server and remote-console security
@@ -71,13 +71,13 @@ For predictable hosting, set the interface and UDP port before starting the serv
 | Variable | What it controls |
 |---|---|
 | `net_ip` | Local interface to bind. The default `localhost` value means all local interfaces for compatibility. Use `0.0.0.0` to state the IPv4 wildcard explicitly, or use a local IPv4 address such as `192.168.1.50` to bind only that adapter. |
-| `net_port` | Server UDP port. `0` asks openPREY to try the default server range, `28004` through `28007`; a value from `1` through `65535` selects that exact port. |
+| `net_port` | Server UDP port. `0` asks openPR06 to try the default server range, `28004` through `28007`; a value from `1` through `65535` selects that exact port. |
 
 `net_ip` is a local bind address, not the public address reported by your router. Do not put a public WAN address here unless that address is actually assigned to an interface on the server host.
 
 An explicit `net_ip` that cannot be resolved or bound now stops network startup instead of silently opening the server on every interface. Correct the address or select `0.0.0.0`, then start the server again.
 
-Network endpoint ports use the full unsigned 16-bit range, `0` through `65535`. Port `0` has a special server configuration meaning: openPREY selects an available default port rather than listening on literal port zero. The internal `PORT_ANY` value asks the operating system for an ephemeral port; clients and developer diagnostics use it, but it is not a normal public-server setting.
+Network endpoint ports use the full unsigned 16-bit range, `0` through `65535`. Port `0` has a special server configuration meaning: openPR06 selects an available default port rather than listening on literal port zero. The internal `PORT_ANY` value asks the operating system for an ephemeral port; clients and developer diagnostics use it, but it is not a normal public-server setting.
 
 If `net_port` is `0`, check the server console or log to learn which port was selected before configuring a firewall or router.
 
@@ -109,7 +109,7 @@ IPv4 remains the baseline transport: when both families are enabled, a failure t
 
 For an IPv6-only server, set `net_enableIPv4 0`. The IPv6 bind then owns the outcome and its failure stops startup the same way.
 
-Older configurations that put an IPv6 literal in `net_ip` keep working: openPREY treats it as the IPv6 interface and opens no IPv4 socket, exactly as before. Prefer `net_ip6` for new configurations.
+Older configurations that put an IPv6 literal in `net_ip` keep working: openPR06 treats it as the IPv6 interface and opens no IPv4 socket, exactly as before. Prefer `net_ip6` for new configurations.
 
 ## Connecting over IPv6
 
@@ -131,7 +131,7 @@ Run `netIPv6SelfTest` on the server console to confirm IPv6 parsing and loopback
 
 For predictable hosting, use direct IPv4 UDP with the firewall and port-forward
 rules below. The legacy `net_socks*` CVars remain visible for configuration
-compatibility, but openPREY does not enable or support SOCKS UDP relay; setting
+compatibility, but openPR06 does not enable or support SOCKS UDP relay; setting
 them does not route multiplayer traffic through a SOCKS proxy.
 
 - Allow inbound UDP on the selected `net_port` in the server host's firewall. Normal gameplay connections do not require an inbound TCP port forward.
@@ -173,7 +173,7 @@ them does not route multiplayer traffic through a SOCKS proxy.
 
 ## Bots
 
-openPREY multiplayer servers can add PREY's artificial players, so a server can
+openPR06 multiplayer servers can add PREY's artificial players, so a server can
 stay populated while it is quiet. Use `addbot [character] [skill]` to add one,
 and `removebot [character]` or `removebots` to release the slots again.
 
@@ -190,7 +190,7 @@ enough. For the full command list, the character file format, and how to add
 your own characters, see [Multiplayer bots](../dev/mp-bots.md).
 
 > [!NOTE]
-> The inherited openQ4 repeater is compiled out (`OPENPREY_ENABLE_REPEATER 0`)
+> The inherited openQ4 repeater is compiled out (`OPENPR06_ENABLE_REPEATER 0`)
 > until its extended game-API calls are adapted to PREY's v7 game API.
 
 ## Multiplayer Tuning
@@ -199,6 +199,6 @@ For connection behavior, IPv6, bandwidth limits and simulated network conditions
 
 ## Notes
 
-- openPREY uses its own engine and game modules.
-- openPREY is not a drop-in runtime for mods built for the original proprietary PREY game DLLs.
+- openPR06 uses its own engine and game modules.
+- openPR06 is not a drop-in runtime for mods built for the original proprietary PREY game DLLs.
 - For advanced configuration, file layout, and path behavior, see [TECHNICAL.md](../../TECHNICAL.md).

@@ -11,7 +11,7 @@ dark themes alike. See docs/dev/ui-visual-design.md, section 2.
 
 This is upstream openQ4's Quake 4 frame. Its olive rails are among the
 divergences docs/dev/prey-ui-visual-design.md rules out, so restyle it to that
-document before framing any openPREY screenshot. openPREY ships no README
+document before framing any openPR06 screenshot. openPR06 ships no README
 screenshots yet; the upstream Quake 4 shots were removed.
 
 The sources are left untouched; each framed copy is written next to its

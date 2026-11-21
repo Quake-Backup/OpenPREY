@@ -1726,8 +1726,8 @@ bool VK_Device_Init( const renderWindowServices_s *windowServices, uint32_t firs
 	VkApplicationInfo appInfo;
 	memset( &appInfo, 0, sizeof( appInfo ) );
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pApplicationName = "openPREY";
-	appInfo.pEngineName = "openPREY";
+	appInfo.pApplicationName = "openPR06";
+	appInfo.pEngineName = "openPR06";
 	appInfo.apiVersion = VK_API_VERSION_1_3;
 
 	VkInstanceCreateInfo ici;

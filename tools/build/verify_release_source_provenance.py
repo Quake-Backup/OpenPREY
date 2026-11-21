@@ -131,7 +131,7 @@ def verify_layer_provenance(
         commit_key="projectGitCommit",
         dirty_key="projectGitDirty",
         expected_commit=expected_project_commit,
-        label="openPREY (layer stage)",
+        label="openPR06 (layer stage)",
     )
     verify_manifest_commit(
         manifest,
@@ -168,9 +168,9 @@ def verify_release_source_provenance(
     # library (src/game, src/Prey, src/preyengine) in place. Keep the historical
     # staged OpenPrey-game verifier for old evidence fixtures.
     if gamelibs_root is None and stage_manifest is None and expected_gamelibs_commit is None:
-        commit = require_full_git_sha(expected_project_commit or "", "expected openPREY commit")
-        project_root = require_repository(project_root, "openPREY repository")
-        verify_repository_commit(project_root, commit, "openPREY")
+        commit = require_full_git_sha(expected_project_commit or "", "expected openPR06 commit")
+        project_root = require_repository(project_root, "openPR06 repository")
+        verify_repository_commit(project_root, commit, "openPR06")
         for relative in (
             "src/game/LICENSE",
             "src/Prey/LICENSE",
@@ -191,15 +191,15 @@ def verify_release_source_provenance(
     if any(arg is not None for arg in layer_args) and not all(arg is not None for arg in layer_args):
         raise RuntimeError("layer provenance needs the layer root, its stage manifest and the expected layer commit")
     expected_project_commit = require_full_git_sha(
-        expected_project_commit, "expected openPREY commit"
+        expected_project_commit, "expected openPR06 commit"
     )
     expected_gamelibs_commit = require_full_git_sha(
         expected_gamelibs_commit, "expected OpenPrey-game commit"
     )
-    project_root = require_repository(project_root, "openPREY repository")
+    project_root = require_repository(project_root, "openPR06 repository")
     gamelibs_root = require_repository(gamelibs_root, "OpenPrey-game repository")
 
-    verify_repository_commit(project_root, expected_project_commit, "openPREY")
+    verify_repository_commit(project_root, expected_project_commit, "openPR06")
     verify_repository_commit(gamelibs_root, expected_gamelibs_commit, "OpenPrey-game")
 
     # The companion staging tool (stage_gamelibs.py) was removed with the
@@ -211,7 +211,7 @@ def verify_release_source_provenance(
         commit_key="projectGitCommit",
         dirty_key="projectGitDirty",
         expected_commit=expected_project_commit,
-        label="openPREY",
+        label="openPR06",
     )
     verify_manifest_commit(
         manifest,
@@ -265,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(
         "release source provenance verified: "
-        f"openPREY={args.expected_project_commit.lower()} "
+        f"openPR06={args.expected_project_commit.lower()} "
         f"game sources={(args.expected_gamelibs_commit or args.expected_project_commit).lower()}"
         + (f" layer={args.expected_layer_commit.lower()}" if args.expected_layer_commit else "")
     )

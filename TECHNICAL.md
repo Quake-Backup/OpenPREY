@@ -1,4 +1,4 @@
-# openPREY Technical Reference
+# openPR06 Technical Reference
 
 This reference is for advanced players, server operators, modders and developers. It covers compatibility status, the install layout, asset checks, useful console settings, file paths, crash reports, mod packaging, the game code and version numbers.
 
@@ -24,16 +24,16 @@ For installation and a feature overview, see the [README](README.md). For buildi
 
 ## Compatibility
 
-openPREY runs the official PREY (2006) game data from your own install with its own engine and its own build of the PREY SDK game code. Compatibility here means compatibility with the official assets, not binary interchangeability with the proprietary retail DLLs. openPREY has no release yet; the April 2026 nightlies on the Releases page predate the move onto the current openQ4 engine.
+openPR06 runs the official PREY (2006) game data from your own install with its own engine and its own build of the PREY SDK game code. Compatibility here means compatibility with the official assets, not binary interchangeability with the proprietary retail DLLs. openPR06 has no release yet; the April 2026 nightlies on the Releases page predate the move onto the current openQ4 engine.
 
 ### Landed
 
-- **Project rebrand** — Meson project metadata, staged binaries, VS Code launch settings and documentation use openPREY naming throughout.
+- **Project rebrand** — Meson project metadata, staged binaries, VS Code launch settings and documentation use openPR06 naming throughout.
 - **PREY install discovery** — `fs_basepath` auto-detection checks the PREY registry keys, App Paths and uninstall entries and the known CD-era install roots before any Steam or GOG library, so disc installs need neither. See [File System Paths](#file-system-paths).
 - **Unified game module loader** — the engine builds and stages one `game_<arch>` module under `basepr/` for both single-player and multiplayer.
 - **In-tree game library** — the PREY SDK-derived game sources live in `src/game/`, `src/Prey/` and `src/preyengine/` and build into that one module.
 - **Official PK4 layout validation** — startup rejects missing or modified required base packs while `fs_validateOfficialPaks 1` is set. See [Asset Validation](#asset-validation).
-- **Windows and Linux x64 CI** — active CI (`openprey-validation.yml`) builds and stages the engine, dedicated server, OpenGL and Vulkan renderers and the unified game module on Windows x64 and Linux x64. The macOS and ARM64 build files are inherited from openQ4, but nothing builds them and they aren't supported.
+- **Windows and Linux x64 CI** — active CI (`openpr06-validation.yml`) builds and stages the engine, dedicated server, OpenGL and Vulkan renderers and the unified game module on Windows x64 and Linux x64. The macOS and ARM64 build files are inherited from openQ4, but nothing builds them and they aren't supported.
 - **Precomputed light-grid irradiance** — portal-area light grids can be baked, loaded, visualized and applied as an indirect-diffuse pass. See [Light Grids](#light-grids).
 
 ### In Progress
@@ -48,7 +48,7 @@ openPREY runs the official PREY (2006) game data from your own install with its 
 - **Full campaign completion** — the project does not yet claim end-to-end single-player completion against stock assets.
 - **Multiplayer parity** — multiplayer compatibility remains under active validation.
 
-The [rebase status ledger](docs/dev/prey-rebase/status-ledger.md) records what has been ported, how each piece was tested and the explicit deferrals; [docs/dev/release-completion.md](docs/dev/release-completion.md) collects work for the first release's changelog. Please report anything that breaks on the [issue tracker](https://github.com/themuffinator/openPREY/issues).
+The [rebase status ledger](docs/dev/prey-rebase/status-ledger.md) records what has been ported, how each piece was tested and the explicit deferrals; [docs/dev/release-completion.md](docs/dev/release-completion.md) collects work for the first release's changelog. Please report anything that breaks on the [issue tracker](https://github.com/themuffinator/openPR06/issues).
 
 ---
 
@@ -60,22 +60,22 @@ Local builds stage this layout into `.install/`, the runtime package root.
 
 ```
 .install/
-├── openPREY-client_x64      # The game (.exe on Windows)
-├── openPREY-ded_x64         # Dedicated server (.exe on Windows)
+├── openPR06-client_x64      # The game (.exe on Windows)
+├── openPR06-ded_x64         # Dedicated server (.exe on Windows)
 ├── renderer-gl_x64          # OpenGL renderer module, the default (.dll / .so)
 ├── renderer-vk_x64          # Vulkan renderer module, opt-in with r_renderApi vulkan (.dll / .so)
 ├── OpenAL32.dll             # (Windows) OpenAL Soft runtime; see BUILDING.md
-├── openPREY-steamdeck       # (Linux) Steam Deck launcher
+├── openPR06-steamdeck       # (Linux) Steam Deck launcher
 ├── share/                   # (Linux) desktop entries and icons
-└── basepr/                  # The single openPREY game directory
+└── basepr/                  # The single openPR06 game directory
     ├── game_x64             # Unified game module (.dll / .so)
-    ├── pak0.pk4             # openPREY core runtime content: GLSL programs, fonts, strings, menus, scripts
-    ├── pak1.pk4             # openPREY interface artwork (clients only)
+    ├── pak0.pk4             # openPR06 core runtime content: GLSL programs, fonts, strings, menus, scripts
+    ├── pak1.pk4             # openPR06 interface artwork (clients only)
     └── mod.json             # Game-directory manifest
 ```
 
 - Single-player and multiplayer load the same unified `game_<arch>` module from `basepr/`. The retail module names `gamex64` / `gamex86` are still accepted as loader aliases during the migration.
-- Your retail game data stays in the PREY install's `base/` directory; openPREY reads it from there.
+- Your retail game data stays in the PREY install's `base/` directory; openPR06 reads it from there.
 - When updating, replace the whole staged tree. The engine, renderer modules and game module must come from the same build.
 
 ### Dependencies
@@ -100,7 +100,7 @@ Dependencies come from Meson subprojects and wraps (`subprojects/`) or vendored 
 
 ## Asset Validation
 
-openPREY checks at startup that your PREY installation has the required official base packs, unmodified.
+openPR06 checks at startup that your PREY installation has the required official base packs, unmodified.
 
 1. It scans the detected `base/` pack set.
 2. It chooses the required layout to validate against:
@@ -110,7 +110,7 @@ openPREY checks at startup that your PREY installation has the required official
 
 `fs_validateOfficialPaks 1` (the default, set at startup) enables these checks. The [official PK4 checksum reference](docs/dev/prey-rebase/official-pk4-checksums.md) lists the expected files.
 
-openPREY also checks its own `basepr/pak0.pk4` and `pak1.pk4` against checksums built into the executable, and refuses to start if one is missing or modified. A dedicated server needs only `pak0.pk4`; `pak1.pk4` is client-only. A pack that passed is remembered in `generated/packs/verified.txt` under `fs_cachepath` and hashed again only after the file changes. `+set fs_cacheVerifiedPaks 0` hashes every pack at every launch. See [Content Pack Distribution](docs/dev/content-pack-distribution.md).
+openPR06 also checks its own `basepr/pak0.pk4` and `pak1.pk4` against checksums built into the executable, and refuses to start if one is missing or modified. A dedicated server needs only `pak0.pk4`; `pak1.pk4` is client-only. A pack that passed is remembered in `generated/packs/verified.txt` under `fs_cachepath` and hashed again only after the file changes. `+set fs_cacheVerifiedPaks 0` hashes every pack at every launch. See [Content Pack Distribution](docs/dev/content-pack-distribution.md).
 
 ---
 
@@ -139,7 +139,7 @@ See [Display Settings](docs/user/display-settings.md).
 
 ### Renderer
 
-- `r_renderApi best|gl|vulkan|gl-module|gles` selects the renderer and takes effect on engine restart, not `vid_restart`. `best` (the default) picks OpenGL on desktop, the only renderer that runs PREY's own ARB interaction stages. Vulkan is opt-in and not at PREY parity yet; if it can't start, openPREY falls back to OpenGL and `r_actualRenderApi` reports `gl`.
+- `r_renderApi best|gl|vulkan|gl-module|gles` selects the renderer and takes effect on engine restart, not `vid_restart`. `best` (the default) picks OpenGL on desktop, the only renderer that runs PREY's own ARB interaction stages. Vulkan is opt-in and not at PREY parity yet; if it can't start, openPR06 falls back to OpenGL and `r_actualRenderApi` reports `gl`.
 - `r_renderDevice auto|<id>` selects the GPU for Vulkan; `rendererDevices` lists the stable device IDs.
 
 See [Rendering Backend and Device](docs/user/display-settings.md#rendering-backend-and-device) and [Performance Presets](docs/user/display-settings.md#performance-presets).
@@ -169,7 +169,7 @@ See [Shadow Mapping](docs/user/shadow-mapping.md) for presets and troubleshootin
 
 ### Light Grids
 
-openPREY supports idTech 4-style precomputed irradiance volumes for indirect diffuse lighting. Runtime data is stored in two parts:
+openPR06 supports idTech 4-style precomputed irradiance volumes for indirect diffuse lighting. Runtime data is stored in two parts:
 
 - `maps/<map>.lightgrid` — probe layout, atlas metadata, and per-area light-grid parameters
 - `env/maps/<map>/area*_lightgrid_amb.tga` — baked irradiance atlas images, typically one per populated portal area
@@ -181,7 +181,7 @@ See the [Light Grid Guide](docs/user/light-grids.md) for workflows and troublesh
 Run baking from a staged `.install/` launch against a valid PREY asset install and always force windowed mode:
 
 ```powershell
-.\openPREY-client_x64.exe +set fs_game basepr +set fs_savepath ..\.home +set r_fullscreen 0 +bakeLightGrids game/roadhouse force
+.\openPR06-client_x64.exe +set fs_game basepr +set fs_savepath ..\.home +set r_fullscreen 0 +bakeLightGrids game/roadhouse force
 ```
 
 Command form:
@@ -261,7 +261,7 @@ Controllers can be connected or disconnected at any time and every button can be
 
 ## File System Paths
 
-openPREY looks for your PREY installation in this order:
+openPR06 looks for your PREY installation in this order:
 
 1. A valid `fs_basepath` set with a cvar or on the command line
 2. The current working directory
@@ -273,7 +273,7 @@ The registry and known-root candidates are written to the log, which helps when 
 
 - `fs_basepath` — PREY installation directory, the folder that contains `base/` (detected automatically).
 - `fs_homepath` — writable user directory.
-- `fs_savepath` — saves, configuration and logs (defaults to `fs_homepath`): `%LOCALAPPDATA%\openPREY` on Windows, `$XDG_DATA_HOME/openprey` or `~/.local/share/openprey` on Linux. Each game directory keeps its own folder here, so openPREY uses `basepr`.
+- `fs_savepath` — saves, configuration and logs (defaults to `fs_homepath`): `%LOCALAPPDATA%\openPR06` on Windows, `$XDG_DATA_HOME/openpr06` or `~/.local/share/openpr06` on Linux. Each game directory keeps its own folder here, so openPR06 uses `basepr`.
 - `fs_cachepath` — regenerable `generated/` caches (defaults to `fs_savepath`). Safe to delete.
 - `fs_game` — active game directory (`basepr`, or a mod).
 - `fs_cdpath` — extra read-only search root, set at startup only; used for local `.install/` overlays, so launch from `.install/` when testing.
@@ -281,7 +281,7 @@ The registry and known-root candidates are written to the log, which helps when 
 If your PREY installation is not found automatically, launch with:
 
 ```
-openPREY-client_x64 +set fs_basepath "C:\path\to\Prey" +set r_fullscreen 0
+openPR06-client_x64 +set fs_basepath "C:\path\to\Prey" +set r_fullscreen 0
 ```
 
 Point it at the folder that contains `base/`, not at `base/` itself.
@@ -290,19 +290,19 @@ Point it at the folder that contains `base/`, not at `base/` itself.
 
 ## Crash Reports
 
-On Windows, a crash writes `openprey_crash_*.log` and `openprey_crash_*.dmp` files to a `crashes/` folder beside the executable. Please attach both files when [reporting a crash](https://github.com/themuffinator/openPREY/issues). On Linux, a fatal signal prints the signal and the last renderer and game-module startup phases to the terminal and appends the same line to `logs/fatal.txt` under `fs_savepath/basepr/`. macOS isn't supported; if you build it anyway, follow the [macOS support-data guide](docs/user/macos-support-data.md).
+On Windows, a crash writes `openpr06_crash_*.log` and `openpr06_crash_*.dmp` files to a `crashes/` folder beside the executable. Please attach both files when [reporting a crash](https://github.com/themuffinator/openPR06/issues). On Linux, a fatal signal prints the signal and the last renderer and game-module startup phases to the terminal and appends the same line to `logs/fatal.txt` under `fs_savepath/basepr/`. macOS isn't supported; if you build it anyway, follow the [macOS support-data guide](docs/user/macos-support-data.md).
 
 <a id="debugging-and-local-validation"></a>
 
 ### Logs and Local Validation
 
-openPREY writes no log file unless you ask for one. The recommended local validation loop:
+openPR06 writes no log file unless you ask for one. The recommended local validation loop:
 
 1. Launch from `.install/` in windowed mode:
    ```powershell
-   .\openPREY-client_x64.exe +set fs_game basepr +set fs_savepath ..\.home +set logFile 2 +set logFileName logs/openprey.log +set r_fullscreen 0
+   .\openPR06-client_x64.exe +set fs_game basepr +set fs_savepath ..\.home +set logFile 2 +set logFileName logs/openpr06.log +set r_fullscreen 0
    ```
-2. Inspect `.home\basepr\logs\openprey.log` after each run (logs go under the game directory in `fs_savepath`).
+2. Inspect `.home\basepr\logs\openpr06.log` after each run (logs go under the game directory in `fs_savepath`).
 3. Fix warnings and errors in engine/game/parser/loader code before resorting to content-side workarounds.
 
 **Useful log cvars:** `s_logSpeech 1` prints each speech start (`SOUND_SPEECH`). `s_logSubtitles 1` prints each change to the PREY sound-shader caption queue (`SOUND_SUBTITLE`). Set `s_muteUnfocused 0` for unattended runs: an unfocused window otherwise plays no sound world, which also clears captions.
@@ -322,9 +322,9 @@ The manifest is a flat JSON object with these required string fields:
 - `releaseDate`
 - `website`
 - `author`
-- `requiredopenPREYVersion` — the oldest openPREY version the mod works with, as `major.minor.patch`. The inherited `requiredopenQ4Version` key is still read when `requiredopenPREYVersion` is absent.
+- `requiredopenPR06Version` — the oldest openPR06 version the mod works with, as `major.minor.patch`. The inherited `requiredopenQ4Version` key is still read when `requiredopenPR06Version` is absent.
 
-Mods without a valid manifest, or that need a newer openPREY than the one running, are skipped with a warning and hidden from the Mods menu.
+Mods without a valid manifest, or that need a newer openPR06 than the one running, are skipped with a warning and hidden from the Mods menu.
 
 Example:
 
@@ -335,15 +335,15 @@ Example:
   "releaseDate": "2026-10-01",
   "website": "https://example.com",
   "author": "Your Name",
-  "requiredopenPREYVersion": "0.0.1"
+  "requiredopenPR06Version": "0.0.1"
 }
 ```
 
-Game modules are optional. openPREY first looks for `game_<arch>` in the mod's directory beside the executable and otherwise uses the one in `basepr/`, so a content-only mod needs just its `mod.json` and content files. Game modules are never loaded from PK4s or from `fs_savepath`.
+Game modules are optional. openPR06 first looks for `game_<arch>` in the mod's directory beside the executable and otherwise uses the one in `basepr/`, so a content-only mod needs just its `mod.json` and content files. Game modules are never loaded from PK4s or from `fs_savepath`.
 
-A mod built on the retail base (`fs_game_base` other than `basepr`) still gets openPREY's runtime content: the filesystem searches `basepr/` between the mod and `base/`, so openPREY's shaders, GUIs and fonts remain available.
+A mod built on the retail base (`fs_game_base` other than `basepr`) still gets openPR06's runtime content: the filesystem searches `basepr/` between the mod and `base/`, so openPR06's shaders, GUIs and fonts remain available.
 
-When a mod ships a declaration file with the same name as one beneath it, openPREY reads the mod's copy first and then the copies below it. The mod's definitions win, and the base file's other definitions are still found. Set `decl_layerModFiles 0` at startup to have a mod's file hide the base file entirely, as in the original game.
+When a mod ships a declaration file with the same name as one beneath it, openPR06 reads the mod's copy first and then the copies below it. The mod's definitions win, and the base file's other definitions are still found. Set `decl_layerModFiles 0` at startup to have a mod's file hide the base file entirely, as in the original game.
 
 ---
 
@@ -351,7 +351,7 @@ When a mod ships a declaration file with the same name as one beneath it, openPR
 
 ## Game Code
 
-openPREY's game code is derived from the PREY Software Development Kit and lives in this repository under [`src/game/`](src/game/), [`src/Prey/`](src/Prey/) and [`src/preyengine/`](src/preyengine/). Meson compiles those trees in place against the engine headers in the rest of `src/`. The former `OpenPrey-game` companion repository is historical; its history was merged in with the import (see [game source provenance](docs/dev/game-source-provenance.md)).
+openPR06's game code is derived from the PREY Software Development Kit and lives in this repository under [`src/game/`](src/game/), [`src/Prey/`](src/Prey/) and [`src/preyengine/`](src/preyengine/). Meson compiles those trees in place against the engine headers in the rest of `src/`. The former `OpenPrey-game` companion repository is historical; its history was merged in with the import (see [game source provenance](docs/dev/game-source-provenance.md)).
 
 The game code remains under the original Human Head Studios SDK EULA (`LICENSES/PREY-SDK-EULA.rtf`), which permits non-commercial modification for use with a legitimate copy of PREY but prohibits commercial exploitation and standalone redistribution of the SDK-derived code. The engine is GPLv3. [LICENSING.md](LICENSING.md) explains the separate terms.
 
@@ -386,7 +386,7 @@ The version starts from the base version in `meson.build` (currently `0.0.1`) an
 - `dev` — default local builds, e.g. `X.Y.Z-dev+gabcdef12`
 - `nightly` / `beta` / `rc` — pre-release labels, with an optional `version_iteration`
 
-The `meson.build` version is a floor. `tools/build/openq4_version.py` raises it to the highest `vX.Y.Z` tag in the local repository, and `-Dversion_base_override` pins it exactly. openPREY's GitHub repository has no such tags yet. A checkout that has fetched tags from the `openq4-upstream` remote picks up openQ4's release tags, though, and reports an openQ4 version such as `0.13.2-dev`. Fetch upstream with `--no-tags`, or delete those local tags, to avoid that.
+The `meson.build` version is a floor. `tools/build/openq4_version.py` raises it to the highest `vX.Y.Z` tag in the local repository, and `-Dversion_base_override` pins it exactly. openPR06's GitHub repository has no such tags yet. A checkout that has fetched tags from the `openq4-upstream` remote picks up openQ4's release tags, though, and reports an openQ4 version such as `0.13.2-dev`. Fetch upstream with `--no-tags`, or delete those local tags, to avoid that.
 
 ---
 

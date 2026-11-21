@@ -25,12 +25,12 @@ ROOT = Path(__file__).resolve().parents[2]
 # Terms whose value can change after the material is parsed. Each clears the flag.
 PREDEFINED_TERMS = {
     "time": "EXP_REG_TIME",
-    **{f"parm{i}": f"EXP_REG_PARM{i}" for i in range(13)},  # openPREY: Prey adds parm12
+    **{f"parm{i}": f"EXP_REG_PARM{i}" for i in range(13)},  # openPR06: Prey adds parm12
     "DecalLife": "EXP_REG_PARM4",
     "DecalSpawn": "EXP_REG_PARM5",
     "VertexRandomizer": "EXP_REG_VERTEX_RANDOM",
     **{f"global{i}": f"EXP_REG_GLOBAL{i}" for i in range(8)},
-    # openPREY: Prey's view registers, set per view by the game, and
+    # openPR06: Prey's view registers, set per view by the game, and
     # fragmentPrograms, which Prey reads from a register each evaluation where
     # openQ4 folds it to a literal while parsing.
     "distance": "EXP_REG_PARM12",
@@ -176,7 +176,7 @@ def validate_initialisation(material: str) -> None:
 
 def validate_terms(material: str, header: str) -> None:
     body = function_body(material, "int idMaterial::ParseTerm( idLexer &src )", "Material.cpp")
-    # openPREY: a term may name aliases in one condition ("parm12" || "distance")
+    # openPR06: a term may name aliases in one condition ("parm12" || "distance")
     blocks = [
         (name, block)
         for condition, block in re.findall(
@@ -253,7 +253,7 @@ def validate_terms(material: str, header: str) -> None:
         remainder = remainder.replace(function_body(material, signature, "Material.cpp"), "")
     remainder = remainder.replace(colored.group(1), "")
 
-    # openPREY: Prey's view stage keywords read the view registers without an
+    # openPR06: Prey's view stage keywords read the view registers without an
     # expression, as "colored" reads the entity colour, and clear the flag too
     view = re.search(
         r'if \( !token\.Icmp\( "scopeView" \) \|\| !token\.Icmp\( "notScopeView" \) \|\|(.*?)\n\t\t\}', stage, re.S)
@@ -309,7 +309,7 @@ def validate_operations(material: str, header: str) -> None:
     for line in cases[0].splitlines():
         if ("view->" in line or "shaderParms[" in line) and not re.match(r"\s*registers\[EXP_REG_\w+\] = ", line):
             raise AssertionError(f"EvaluateRegisters reads the view or the entity outside a predefined register: {line.strip()}")
-    # openPREY: thirteen parms (Prey adds parm12)
+    # openPR06: thirteen parms (Prey adds parm12)
     if evaluate.count("view->") != 9 or len(re.findall(r"= shaderParms\[", evaluate)) != 14:
         raise AssertionError("EvaluateRegisters seeds the time, eight globals, thirteen parms and the vertex randomizer")
 

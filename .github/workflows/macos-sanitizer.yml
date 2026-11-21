@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   macos-sanitizer:
-    if: ${{ false }} # OPENPREY-GATED: split-module/OpenQ4 source contract
+    if: ${{ false }} # OPENPR06-GATED: split-module/OpenQ4 source contract
     name: macOS ${{ matrix.bridge_label }} ASan+UBSan
     runs-on: macos-15
     timeout-minutes: 150

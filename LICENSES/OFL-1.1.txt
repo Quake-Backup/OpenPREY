@@ -1,7 +1,7 @@
-Copyright (c) 2026 DarkMatter Productions (https://github.com/themuffinator/openPREY),
-for Talon, content/basepr/pak0/fonts/english.ttf.
+Copyright (c) 2026 DarkMatter Productions (https://github.com/themuffinator/openPR06),
+for Talon UI Condensed, content/basepr/pak0/fonts/talon-ui-condensed.ttf.
 
-Glyphs in that face for scripts Talon does not draw are derived from the Noto fonts:
+Glyphs in that face for scripts it does not draw are derived from the Noto fonts:
 Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)
 Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic)
 Copyright 2024 The Noto Project Authors (https://github.com/notofonts/hebrew)

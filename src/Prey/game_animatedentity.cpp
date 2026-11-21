@@ -351,7 +351,7 @@ void hhAnimatedEntity::JawFlap(hhAnimator *theAnimator, jointHandle_t stillJoint
 		for (int i = 0; i < jawFlapList.Num(); i++) {
 			jawFlapInfo_t &flapInfo = jawFlapList[i];
 
-			// openPREY: a bone that carries the joint the view rides (the player's head
+			// openPR06: a bone that carries the joint the view rides (the player's head
 			// bone under the roadhouse mirror camera) stays put, or the view nods with
 			// every syllable. Its mods are reset so an earlier flap does not hold.
 			bool carriesView = false;

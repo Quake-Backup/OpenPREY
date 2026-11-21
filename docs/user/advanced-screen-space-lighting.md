@@ -15,7 +15,7 @@ The effects share the native scene-presentation pass, run before temporal AA
 when TAA is enabled, and leave the HUD, menus, and console at native resolution.
 Engine screenshots include the effect result.
 
-openPREY's first rendering target is the legacy GL/ARB2 interaction path that
+openPR06's first rendering target is the legacy GL/ARB2 interaction path that
 matches PREY's original materials. Full PREY parity on the ModernGL and Vulkan
 paths is deferred (`TODO-RENDER-BACKENDS` in the ledger), and these effects
 haven't been tried on PREY's maps, portals or spirit walk.

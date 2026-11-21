@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.restartmenu",
+ "id": "openpr06.restartmenu",
  "canvas": {"height": 720, "minWidth": 960},
  "actions": {
   "deathLoad": {"operation": "session.menu", "arguments": {"command": "deathLoad"}},

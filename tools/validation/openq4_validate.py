@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Validation profiles for openPREY local pushes and pull requests.
+"""Validation profiles for openPR06 local pushes and pull requests.
 
 The filename remains ``openq4_validate.py`` as a temporary compatibility entry
 point for existing automation. New validation behavior and user-facing output
-use openPREY names and package layout.
+use openPR06 names and package layout.
 """
 
 from __future__ import annotations
@@ -89,8 +89,8 @@ STAGED_FORBIDDEN_PK4_MEMBER_SUBSTRINGS = (
 
 STAGED_FORBIDDEN_LOOSE_GAME_PATHS = (
     "default.cfg",
-    "openprey_defaults.cfg",
-    "openprey_profile_steamdeck.cfg",
+    "openpr06_defaults.cfg",
+    "openpr06_profile_steamdeck.cfg",
     "openq4_defaults.cfg",
     "openq4_profile_steamdeck.cfg",
     "botfiles",
@@ -115,8 +115,8 @@ NON_RUNTIME_PATTERNS = (
 )
 
 GAME_DIR_NAME = "basepr"
-CLIENT_BINARY_STEM = "openPREY-client"
-DEDICATED_BINARY_STEM = "openPREY-ded"
+CLIENT_BINARY_STEM = "openPR06-client"
+DEDICATED_BINARY_STEM = "openPR06-ded"
 GAME_MODULE_STEM = "game"
 LEGACY_SPLIT_GAME_MODULE_PATTERNS = (
     "game-sp_*.dll",
@@ -132,7 +132,7 @@ LEGACY_SPLIT_GAME_MODULE_PATTERNS = (
     "game_mp_*.so",
     "game_mp_*.dylib",
 )
-FORBIDDEN_STAGED_RUNTIME_DIR_NAMES = frozenset(("base", "baseoq4", "baseq4", "basepy", "openprey"))
+FORBIDDEN_STAGED_RUNTIME_DIR_NAMES = frozenset(("base", "baseoq4", "baseq4", "basepy", "openpr06"))
 LEGACY_ENGINE_BINARY_PREFIXES = ("openq4-client_", "openq4-ded_")
 LEGACY_RETAIL_GAME_MODULE_NAMES = frozenset(
     f"{stem}{suffix}"
@@ -144,7 +144,7 @@ LEGACY_RETAIL_GAME_MODULE_NAMES = frozenset(
 # authoritative gate for these inherited fixtures. They still validate
 # OpenQ4 release/signing/evidence lanes (including split game modules), so
 # they remain available for manual migration work but are not active
-# openPREY push/PR checks until rebuilt around basepr and game_<arch>.
+# openPR06 push/PR checks until rebuilt around basepr and game_<arch>.
 DEFERRED_RELEASE_LANE_TESTS = frozenset(
     (
         "linux_arm64_cross_compile.py",
@@ -152,7 +152,7 @@ DEFERRED_RELEASE_LANE_TESTS = frozenset(
         "linux_arm64_release_evidence.py",
         # These tests validate the inherited linux-sanitizer/linux-wayland
         # workflow jobs themselves. Both jobs are unconditionally
-        # OPENPREY-GATED because they still encode OpenQ4 lane identities and
+        # OPENPR06-GATED because they still encode OpenQ4 lane identities and
         # split-module release assumptions. Platform-independent sanitizer
         # source invariants remain active in linux_sanitizer_source_contract.py.
         # This test is the static contract for the inherited manual/nightly
@@ -241,7 +241,7 @@ MACOS_OPENAL_PROVIDERS = ("apple_framework", "system")
 MAX_MACOS_SUPPORT_INFO_SCRIPT_BYTES = 256 * 1024
 MACOS_SUPPORT_INFO_REQUIRED_TOKENS = (
     "#!/bin/sh",
-    "OPENPREY_PACKAGE_ROOT",
+    "OPENPR06_PACKAGE_ROOT",
     "HOME_DIR=${HOME:-}",
     "ARCHIVE_TMP",
     "MAX_SUPPORT_TEXT_BYTES",
@@ -257,8 +257,8 @@ MACOS_SUPPORT_INFO_REQUIRED_TOKENS = (
     "contains_control_chars()",
     "Support package root must not contain control characters",
     "Support output directory must not contain control characters",
-    "HOME was not set; home-scoped openprey.log files were skipped.",
-    "HOME was not set; saved openPREYConfig.cfg paths were skipped.",
+    "HOME was not set; home-scoped openpr06.log files were skipped.",
+    "HOME was not set; saved openPR06Config.cfg paths were skipped.",
     "logs/renderer-config.txt",
     "Game module search failed:",
     "Game module load failed:",
@@ -267,7 +267,7 @@ MACOS_SUPPORT_INFO_REQUIRED_TOKENS = (
     "HOME was not set; the macOS DiagnosticReports directory could not be located.",
     ".XXXXXX.tar.gz.tmp",
     "does not dump the environment",
-    "does not launch openPREY",
+    "does not launch openPR06",
     "does not copy retail Prey assets",
     "truncated copy failed; source was not copied",
     "COPYFILE_DISABLE=1 tar -czf",
@@ -281,18 +281,18 @@ MACOS_SUPPORT_INFO_FORBIDDEN_TOKENS = (
     "printenv",
     "env >",
     "set >",
-    "openPREY-client_arm64 >",
-    "openPREY-client_arm64 2>",
-    "openPREY-client_x64 >",
-    "openPREY-client_x64 2>",
-    "openPREY-client_x86 >",
-    "openPREY-client_x86 2>",
-    "openPREY-ded_arm64 >",
-    "openPREY-ded_arm64 2>",
-    "openPREY-ded_x64 >",
-    "openPREY-ded_x64 2>",
-    "openPREY-ded_x86 >",
-    "openPREY-ded_x86 2>",
+    "openPR06-client_arm64 >",
+    "openPR06-client_arm64 2>",
+    "openPR06-client_x64 >",
+    "openPR06-client_x64 2>",
+    "openPR06-client_x86 >",
+    "openPR06-client_x86 2>",
+    "openPR06-ded_arm64 >",
+    "openPR06-ded_arm64 2>",
+    "openPR06-ded_x64 >",
+    "openPR06-ded_x64 2>",
+    "openPR06-ded_x86 >",
+    "openPR06-ded_x86 2>",
     "xattr -l",
     "xattr -p",
     "xattr -w",
@@ -397,12 +397,12 @@ def resolve_meson_wrapper(root: Path) -> list[str]:
     if host_is_windows():
         wrapper = root / "tools" / "build" / "meson_setup.ps1"
         if not wrapper.is_file():
-            raise ValidationError(f"openPREY Meson wrapper not found: {wrapper}")
+            raise ValidationError(f"openPR06 Meson wrapper not found: {wrapper}")
         return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(wrapper)]
 
     wrapper = root / "tools" / "build" / "meson_setup.sh"
     if not wrapper.is_file():
-        raise ValidationError(f"openPREY Meson wrapper not found: {wrapper}")
+        raise ValidationError(f"openPR06 Meson wrapper not found: {wrapper}")
     return ["bash", str(wrapper)]
 
 
@@ -420,7 +420,7 @@ def validate_source_root(root: Path) -> None:
     missing = [path for path in required_files if not path.is_file()]
     if missing:
         formatted = "\n".join(f"  - {path}" for path in missing)
-        raise ValidationError(f"Source root is missing required openPREY files:\n{formatted}")
+        raise ValidationError(f"Source root is missing required openPR06 files:\n{formatted}")
 
     if host_is_windows():
         wrapper = root / "tools" / "build" / "meson_setup.ps1"
@@ -499,7 +499,7 @@ def validation_env(args: argparse.Namespace, root: Path) -> dict[str, str]:
     if args.game_libs_repo:
         game_libs_repo = validate_game_libs_repo_path(Path(args.game_libs_repo))
     else:
-        configured_repo = env.get("OPENPREY_GAMELIBS_REPO", "").strip()
+        configured_repo = env.get("OPENPR06_GAMELIBS_REPO", "").strip()
         if not configured_repo:
             configured_repo = env.get("OPENQ4_GAMELIBS_REPO", "").strip()
         # The Prey game library (src/game, src/Prey, src/preyengine) is compiled
@@ -507,17 +507,17 @@ def validation_env(args: argparse.Namespace, root: Path) -> dict[str, str]:
         # override only exists for validation fixtures.
         game_libs_repo = validate_game_libs_repo_path(Path(configured_repo) if configured_repo else root)
 
-    # OPENPREY_GAMELIBS_REPO is canonical. Mirror it into the migration alias that
+    # OPENPR06_GAMELIBS_REPO is canonical. Mirror it into the migration alias that
     # the inherited source-contract tests read so both agree.
     canonical_game_libs_repo = str(game_libs_repo)
-    env["OPENPREY_GAMELIBS_REPO"] = canonical_game_libs_repo
+    env["OPENPR06_GAMELIBS_REPO"] = canonical_game_libs_repo
     env["OPENQ4_GAMELIBS_REPO"] = canonical_game_libs_repo
 
     # Game modules are compiled with the engine; the old switch is accepted
     # for command-line continuity and has no separate checkout/build step.
 
     if args.skip_icon_sync:
-        env["OPENPREY_SKIP_ICON_SYNC"] = "1"
+        env["OPENPR06_SKIP_ICON_SYNC"] = "1"
 
     return env
 
@@ -681,7 +681,7 @@ def run_python_tests(args: argparse.Namespace, root: Path, env: dict[str, str]) 
         root / "tools" / "tests" / "generated_image_pak_content_stamp.py",
         root / "tools" / "tests" / "parser_include_paths_contract.py",
         root / "tools" / "tests" / "filesystem_mod_manifest.py",
-        root / "tools" / "tests" / "openprey_filesystem_policy.py",
+        root / "tools" / "tests" / "openpr06_filesystem_policy.py",
         root / "tools" / "tests" / "filesystem_write_qpath_safety.py",
         root / "tools" / "tests" / "game_module_completion_safety.py",
         root / "tools" / "tests" / "game_type_module_selection.py",
@@ -772,9 +772,10 @@ def run_python_tests(args: argparse.Namespace, root: Path, env: dict[str, str]) 
         root / "tools" / "tests" / "openurl_security.py",
         root / "tools" / "tests" / "openq4_pure_pack.py",
         root / "tools" / "tests" / "update_manifest_tool.py",
-        root / "tools" / "tests" / "openprey_rebase_contract.py",
-        root / "tools" / "tests" / "openprey_runtime_branding.py",
-        root / "tools" / "tests" / "openprey_tool_branding.py",
+        root / "tools" / "tests" / "openpr06_rebase_contract.py",
+        root / "tools" / "tests" / "openpr06_runtime_branding.py",
+        root / "tools" / "tests" / "openpr06_tool_branding.py",
+        root / "tools" / "tests" / "openpr06_former_name_guard.py",
         root / "tools" / "tests" / "p0_governance_evidence.py",
         root / "tools" / "tests" / "packaging_safety.py",
         root / "tools" / "tests" / "parallel_job_system.py",
@@ -984,7 +985,7 @@ def run_python_tests(args: argparse.Namespace, root: Path, env: dict[str, str]) 
 
 
 def ensure_game_libs_repo(env: dict[str, str]) -> None:
-    game_libs_repo = validate_game_libs_repo_path(Path(env["OPENPREY_GAMELIBS_REPO"]))
+    game_libs_repo = validate_game_libs_repo_path(Path(env["OPENPR06_GAMELIBS_REPO"]))
     for source_tree, label in (
         ("game", "shared game"),
         ("Prey", "Prey gameplay"),
@@ -1345,8 +1346,8 @@ def validate_linux_steamdeck_launcher(path: Path, root: Path, client_candidates:
         raise ValidationError(f"Linux Steam Deck launcher is unreadable: {rel(path, root)}") from exc
 
     required_tokens = (
-        "OPENPREY_STEAMDECK",
-        "OPENPREY_FORCE_X11",
+        "OPENPR06_STEAMDECK",
+        "OPENPR06_FORCE_X11",
         "SDL_VIDEO_DRIVER=x11",
         "SDL_VIDEODRIVER=x11",
         "+set com_platformProfile steamdeck",
@@ -1382,16 +1383,16 @@ def desktop_exec_command(exec_line: str) -> str:
 
 
 def validate_linux_launch_metadata(root: Path, install_root: Path, client_candidates: list[Path]) -> None:
-    steamdeck_launcher = install_root / "openPREY-steamdeck"
+    steamdeck_launcher = install_root / "openPR06-steamdeck"
     if not steamdeck_launcher.is_file():
-        raise ValidationError("Linux staged payload is missing openPREY-steamdeck.")
+        raise ValidationError("Linux staged payload is missing openPR06-steamdeck.")
     require_posix_executable(steamdeck_launcher, root, "Linux Steam Deck launcher")
     validate_linux_steamdeck_launcher(steamdeck_launcher, root, client_candidates)
 
     desktop_dir = install_root / "share" / "applications"
     desktop_entries = {
-        "openprey.desktop": {path.name for path in client_candidates},
-        "openprey-steamdeck.desktop": {steamdeck_launcher.name},
+        "openpr06.desktop": {path.name for path in client_candidates},
+        "openpr06-steamdeck.desktop": {steamdeck_launcher.name},
     }
     for filename, allowed_commands in desktop_entries.items():
         desktop_path = desktop_dir / filename
@@ -1859,7 +1860,7 @@ def validate_staged_payload(root: Path, *, dry_run: bool, build_dir: Path | None
         formatted = "\n".join(f"  - {rel(path, root)}" for path in legacy_runtime_paths)
         raise ValidationError(
             "Staged payload contains an obsolete OpenQ4/retail runtime layout; "
-            "openPREY packages only openPREY-client/openPREY-ded with basepr/game_<arch>:\n"
+            "openPR06 packages only openPR06-client/openPR06-ded with basepr/game_<arch>:\n"
             f"{formatted}"
         )
 
@@ -1879,7 +1880,7 @@ def validate_staged_payload(root: Path, *, dry_run: bool, build_dir: Path | None
     if split_modules:
         formatted = "\n".join(f"  - {rel(path, root)}" for path in split_modules)
         raise ValidationError(
-            "Staged payload contains obsolete split game modules; openPREY packages one unified game_<arch> module:\n"
+            "Staged payload contains obsolete split game modules; openPR06 packages one unified game_<arch> module:\n"
             f"{formatted}"
         )
 
@@ -1964,7 +1965,7 @@ def validate_staged_payload(root: Path, *, dry_run: bool, build_dir: Path | None
     if stale_loose_content:
         formatted = "\n".join(f"  - {rel(path, root)}" for path in stale_loose_content)
         raise ValidationError(
-            "Staged basepr contains loose content that must live inside openPREY PK4s:\n"
+            "Staged basepr contains loose content that must live inside openPR06 PK4s:\n"
             f"{formatted}"
         )
 
@@ -2052,7 +2053,7 @@ def run_macos_static_dry_run_profiles(args: argparse.Namespace, root: Path, env:
 def run_macos_static_validation_track(args: argparse.Namespace, root: Path, env: dict[str, str]) -> None:
     if args.runtime and host_is_macos():
         raise ValidationError(
-            "The macos-static profile must not run openPREY on macOS. "
+            "The macos-static profile must not run openPR06 on macOS. "
             "Run renderer self-test binaries only on available non-macOS hosts, "
             "or use the documented Apple-hardware signoff workflow for macOS runtime evidence."
         )
@@ -2109,7 +2110,7 @@ def apply_profile_defaults(args: argparse.Namespace, root: Path) -> None:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("profile", choices=sorted(PROFILE_DEFAULTS), help="Validation profile to run.")
-    parser.add_argument("--source-root", default="", help="openPREY source root. Defaults to this script's repository.")
+    parser.add_argument("--source-root", default="", help="openPR06 source root. Defaults to this script's repository.")
     parser.add_argument("--build-dir", default=None, help="Meson build directory for this validation run.")
     parser.add_argument("--buildtype", default=None, help="Meson buildtype. Profile default: push=debug, pr=debug.")
     parser.add_argument("--platform-backend", default="", help="Optional Meson platform_backend override.")
@@ -2133,7 +2134,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--skip-build", action="store_true", help="Skip Meson setup/compile/install steps.")
     parser.add_argument("--build-gamelibs", action="store_true", help="Deprecated: game modules now build with the engine.")
     parser.add_argument("--game-libs-repo", default="", help="Override the game-source root for validation fixtures; ordinary builds use this checkout.")
-    parser.add_argument("--skip-icon-sync", action="store_true", help="Set OPENPREY_SKIP_ICON_SYNC=1 for this run.")
+    parser.add_argument("--skip-icon-sync", action="store_true", help="Set OPENPR06_SKIP_ICON_SYNC=1 for this run.")
     parser.add_argument("--jobs", "-j", type=positive_int, default=None, help="Parallel compile job count passed to Meson.")
     parser.add_argument("--extra-setup-arg", action="append", default=[], help="Additional argument appended to Meson setup.")
     parser.add_argument("--extra-compile-arg", action="append", default=[], help="Additional argument appended to Meson compile.")
@@ -2150,7 +2151,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="Disable official Prey retail PK4 validation for assetless renderer startup smoke checks.",
     )
-    parser.add_argument("--fail-on-dirty", action="store_true", help="Fail when the openPREY working tree has uncommitted changes.")
+    parser.add_argument("--fail-on-dirty", action="store_true", help="Fail when the openPR06 working tree has uncommitted changes.")
     parser.add_argument("--dry-run", action="store_true", help="Print the selected commands without executing them.")
     return parser.parse_args(argv)
 
@@ -2169,12 +2170,12 @@ def main(argv: list[str]) -> int:
     wrapper = resolve_meson_wrapper(root)
 
     started = time.monotonic()
-    print(f"openPREY {args.profile} validation", flush=True)
+    print(f"openPR06 {args.profile} validation", flush=True)
     print(f"Source root: {root}", flush=True)
     print(f"Git revision: {describe_git_revision(root, env)}", flush=True)
     print(f"Build dir: {build_dir}", flush=True)
     print(f"Build type: {args.buildtype}", flush=True)
-    print(f"GameLibs repo: {env['OPENPREY_GAMELIBS_REPO']}", flush=True)
+    print(f"GameLibs repo: {env['OPENPR06_GAMELIBS_REPO']}", flush=True)
 
     try:
         check_dirty_worktree(args, root, env)

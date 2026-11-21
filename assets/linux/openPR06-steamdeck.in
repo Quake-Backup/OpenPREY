@@ -1,0 +1,11 @@
+#!/bin/sh
+
+export OPENPR06_STEAMDECK="${OPENPR06_STEAMDECK:-1}"
+
+if [ "${OPENPR06_FORCE_X11:-${OPENQ4_FORCE_X11:-0}}" = "1" ]; then
+	export SDL_VIDEO_DRIVER=x11
+	export SDL_VIDEODRIVER=x11
+fi
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+exec "$SCRIPT_DIR/@OPENPR06_CLIENT_BINARY@" +set com_platformProfile steamdeck +set r_fullscreen 0 "$@"

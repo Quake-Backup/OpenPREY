@@ -30,7 +30,7 @@ namespace {
 
 const char *const RETAINED_PRESET_CHECK_GUI = "guis/menu/presetcheck.rui";
 const char *const STOCK_PRESET_CHECK_GUI = "guis/presetcheck.gui";
-// OPENPREY: Prey's strings. The Quality Preset row's nine names, and where the
+// OPENPR06: Prey's strings. The Quality Preset row's nine names, and where the
 // row lives in both interfaces: Options > Video.
 const char *const PRESET_TIER_NAMES = "#str_122026";
 const char *const PRESET_MENU_NAME = "#str_20208";
@@ -40,7 +40,7 @@ enum class PresetCheckStage { Idle, Showing, Applying };
 
 struct PresetCheckScreen {
 	idUserInterface *gui = NULL;
-	idUserInterface *backdrop = NULL;   // OPENPREY: the stock screen, drawn beneath the retained one
+	idUserInterface *backdrop = NULL;   // OPENPR06: the stock screen, drawn beneath the retained one
 	bool retained = false;
 	bool playIntro = true;      // the main menu plays its intro after a startup check
 	PresetCheckStage stage = PresetCheckStage::Idle;
@@ -239,7 +239,7 @@ bool Session_StartPresetCheck( bool force ) {
 		gui = sessLocal.FindRetainedGui( RETAINED_PRESET_CHECK_GUI, true, false );
 		retained = gui != NULL;
 	}
-	// OPENPREY: the stock screen is also the retained one's backdrop (the static
+	// OPENPR06: the stock screen is also the retained one's backdrop (the static
 	// menu backdrop and the wordmark), which leaves its own dialog undrawn while
 	// gui::retainedHome is set, as guis/restart.gui does under the death screen.
 	idUserInterface *stock = uiManager->FindGui( STOCK_PRESET_CHECK_GUI, true, false, true );

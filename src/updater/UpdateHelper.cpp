@@ -314,7 +314,7 @@ void TellPlayer( const std::string &message ) {
 		return;
 	}
 #if defined( _WIN32 )
-	MessageBoxW( nullptr, Widen( message ).c_str(), L"openPREY", MB_OK | MB_ICONWARNING );
+	MessageBoxW( nullptr, Widen( message ).c_str(), L"openPR06", MB_OK | MB_ICONWARNING );
 #else
 	std::fprintf( stderr, "%s\n", message.c_str() );
 #endif
@@ -331,17 +331,17 @@ int Run( const std::vector<std::string> &arguments ) {
 		}
 	}
 	if ( updateDir.empty() ) {
-		std::fprintf( stderr, "usage: openPREY-updater --apply <install>/.update [--wait-pid <pid>]\n" );
+		std::fprintf( stderr, "usage: openPR06-updater --apply <install>/.update [--wait-pid <pid>]\n" );
 		return 2;
 	}
 	std::error_code ec;
 	updateDir = fs::weakly_canonical( fs::absolute( updateDir, ec ), ec );
 	if ( updateDir.filename() != UPDATE_DIRECTORY || !fs::is_directory( updateDir, ec ) ) {
-		std::fprintf( stderr, "openPREY-updater: %s is not an openPREY update folder\n", ToUtf8( updateDir ).c_str() );
+		std::fprintf( stderr, "openPR06-updater: %s is not an openPR06 update folder\n", ToUtf8( updateDir ).c_str() );
 		return 2;
 	}
 	logFile.Open( updateDir / HELPER_LOG_FILE );
-	logFile.Line( "openPREY-updater started for " + ToUtf8( updateDir ) );
+	logFile.Line( "openPR06-updater started for " + ToUtf8( updateDir ) );
 
 	UpdatePlan plan;
 	UpdateResult result;
@@ -360,7 +360,7 @@ int Run( const std::vector<std::string> &arguments ) {
 	if ( planInstall != install || relaunch.parent_path() != install ) {
 		error = "the plan names a different install folder";
 	} else if ( !WaitForProcess( pid ) ) {
-		error = "openPREY did not close within " + std::to_string( WAIT_FOR_GAME_SECONDS ) + " seconds";
+		error = "openPR06 did not close within " + std::to_string( WAIT_FOR_GAME_SECONDS ) + " seconds";
 	} else {
 		logFile.Line( "game closed; installing " + plan.version );
 		result.succeeded = Apply( plan, updateDir, error );
@@ -373,7 +373,7 @@ int Run( const std::vector<std::string> &arguments ) {
 	// The plan is spent either way; a later start must not apply it again.
 	fs::remove( updateDir / PLAN_FILE, ec );
 
-	if ( error.rfind( "openPREY did not close", 0 ) == 0 ) {
+	if ( error.rfind( "openPR06 did not close", 0 ) == 0 ) {
 		return 1;	// the game is still running; starting another copy would only confuse
 	}
 	std::string launchError;

@@ -2204,7 +2204,7 @@ int idProgram::CalculateChecksum( void ) const {
 
 	delete [] statementList;
 
-	// openPREY: saved threads hold raw stack frames, so the frame layout is part
+	// openPR06: saved threads hold raw stack frames, so the frame layout is part
 	// of what a savegame depends on. Statements alone did not change when vector
 	// stack variables stopped over-reserving on 64-bit; a save made with the old
 	// frames must take the restart-with-persistent-data path, not resume with

@@ -27,7 +27,7 @@ TEST_SEED = hashlib.sha256(b"openQ4 update core test key - not a release key").d
 def manifest_bytes(version: str = "0.15.0", **overrides) -> bytes:
     document = {
         "schema": 1,
-        "product": "openPREY",
+        "product": "openPR06",
         "version": version,
         "tag": "v" + version,
         "packages": {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate packaged HTML documentation for openPREY releases."""
+"""Generate packaged HTML documentation for openPR06 releases."""
 
 from __future__ import annotations
 
@@ -36,11 +36,11 @@ DEVELOPMENT_ROADMAP = Path("docs/dev/roadmap.md")
 
 
 SITE_CSS = r"""
-/* openPREY documentation portal. Styled after docs/dev/prey-ui-visual-design.md: steel glass over
+/* openPR06 documentation portal. Styled after docs/dev/prey-ui-visual-design.md: steel glass over
    space, claw-cornered frames, side tabs for navigation and Prey's own display and body faces, which
    tools/assets/fonts/embed_atlas_fonts.py writes to assets/docs/fonts/ and this site ships in fonts/. */
-@font-face{font-family:"openPREY Menu";src:url("fonts/openprey-menu.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:"openPREY Default";src:url("fonts/openprey-default.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"openPR06 Menu";src:url("fonts/openpr06-menu.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Talon UI Condensed";src:url("fonts/talon-ui-condensed.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
 
 :root {
   color-scheme: dark;
@@ -59,8 +59,8 @@ SITE_CSS = r"""
   --row: #546579;
   --wash: rgba(166, 196, 230, 0.15);
   --separator: rgba(189, 207, 224, 0.35);
-  --f-display: "openPREY Menu", "Eurostile Extended", "Microgramma", "Bahnschrift", sans-serif;
-  --f-body: "openPREY Default", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+  --f-display: "openPR06 Menu", "Eurostile Extended", "Microgramma", "Bahnschrift", sans-serif;
+  --f-body: "Talon UI Condensed", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
   --f-prose: "Bahnschrift", "Saira Condensed", "Roboto Condensed", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "Cascadia Code", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
   --claw-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23576272'/%3E%3Cstop offset='.55' stop-color='%233B4351'/%3E%3Cstop offset='1' stop-color='%232E3541'/%3E%3C/linearGradient%3E%3CradialGradient id='s'%3E%3Cstop offset='0' stop-color='%2314171B'/%3E%3Cstop offset='.72' stop-color='%23171B20'/%3E%3Cstop offset='1' stop-color='%23363E4A'/%3E%3C/radialGradient%3E%3CclipPath id='c'%3E%3Cpath d='M47 0H128V7.5C116 9.5 103 14.5 93 18.5C89 42 84 74 71.5 106C64 115 36 117 17 104.5C6 96 1 79 2 60C3 42 10 28 19 19C28 10 37 3.5 47 0Z'/%3E%3C/clipPath%3E%3C/defs%3E%3Cpath d='M47 0H128V7.5C116 9.5 103 14.5 93 18.5C89 42 84 74 71.5 106C64 115 36 117 17 104.5C6 96 1 79 2 60C3 42 10 28 19 19C28 10 37 3.5 47 0Z' fill='url(%23b)'/%3E%3Cellipse cx='43.5' cy='66.5' rx='16.5' ry='21.5' fill='url(%23s)'/%3E%3Cpath d='M47 0H128V7.5C116 9.5 103 14.5 93 18.5C89 42 84 74 71.5 106C64 115 36 117 17 104.5C6 96 1 79 2 60C3 42 10 28 19 19C28 10 37 3.5 47 0Z' fill='none' stroke='%23B3C6E2' stroke-width='14' clip-path='url(%23c)'/%3E%3C/svg%3E");
@@ -393,13 +393,9 @@ samp {
 /* Picture frame: an outline only, rounded, in prey.frame.picture. */
 .hero-banner {
   width: 100%;
+  height: auto;
   display: block;
   margin-bottom: 18px;
-  padding: 4px;
-  border: 2px solid #A7C4E8;
-  border-radius: 10px;
-  background: #000;
-  box-shadow: 0 0 24px rgba(47, 100, 220, 0.22);
 }
 
 .hero h1,
@@ -749,9 +745,9 @@ class GeneratedDocSite:
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate packaged HTML documentation for an openPREY release."
+        description="Generate packaged HTML documentation for an openPR06 release."
     )
-    parser.add_argument("--source-root", default=".", help="openPREY repository root.")
+    parser.add_argument("--source-root", default=".", help="openPR06 repository root.")
     parser.add_argument("--output-dir", required=True, help="Directory to populate with HTML docs.")
     parser.add_argument("--version", required=True, help="Release version string.")
     parser.add_argument("--platform", required=True, help="Target package platform.")
@@ -1130,7 +1126,7 @@ def build_doc_specs(source_root: Path) -> list[DocSpec]:
         if not summary and relative == Path("README.md"):
             summary = (
                 "Project overview, runtime scope, compatibility goals, and the main "
-                "documentation map for openPREY."
+                "documentation map for openPR06."
             )
         specs.append(
             DocSpec(
@@ -1249,7 +1245,7 @@ def render_doc_page(
     summary_html = (
         f'<p class="lead">{html.escape(spec.summary)}</p>'
         if spec.summary
-        else '<p class="lead">Included in the packaged openPREY offline documentation set.</p>'
+        else '<p class="lead">Included in the packaged openPR06 offline documentation set.</p>'
     )
 
     return "\n".join(
@@ -1260,7 +1256,7 @@ def render_doc_page(
             '  <meta charset="UTF-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1.0">',
             '  <meta name="color-scheme" content="dark">',
-            f"  <title>{html.escape(spec.title)} | openPREY Documentation</title>",
+            f"  <title>{html.escape(spec.title)} | openPR06 Documentation</title>",
             f'  <link rel="stylesheet" href="{html.escape(css_href)}">',
             "</head>",
             "<body>",
@@ -1268,14 +1264,14 @@ def render_doc_page(
             '    <header class="topbar">',
             '      <div class="brand">',
             '        <span class="eyebrow">Packaged HTML documentation</span>',
-            f'        <a class="brand-title" href="{html.escape(docs_home_href)}">openPREY Documentation</a>',
+            f'        <a class="brand-title" href="{html.escape(docs_home_href)}">openPR06 Documentation</a>',
             f'        <div class="brand-subtitle">Release {html.escape(version)} · {html.escape(platform)} · {html.escape(arch)}</div>',
             "      </div>",
             '      <div class="action-row">',
             f'        <a class="button primary" href="{html.escape(docs_home_href)}">Docs Home</a>',
             f'        <a class="button" href="{html.escape(overview_href)}">Project Overview</a>',
             f'        <a class="button" href="{html.escape(package_home_href)}">Package Home</a>',
-            '        <a class="button" href="https://github.com/themuffinator/openPREY">GitHub</a>',
+            '        <a class="button" href="https://github.com/themuffinator/openPR06">GitHub</a>',
             "      </div>",
             "    </header>",
             '    <div class="layout">',
@@ -1301,7 +1297,7 @@ def render_doc_page(
             "      </aside>",
             "    </div>",
             '    <footer class="footer">',
-            f'      <p>Offline release documentation generated from the openPREY repository sources for version <strong>{html.escape(version)}</strong>.</p>',
+            f'      <p>Offline release documentation generated from the openPR06 repository sources for version <strong>{html.escape(version)}</strong>.</p>',
             f'      <p><a href="{html.escape(docs_home_href)}">Documentation home</a> | <a href="{html.escape(package_home_href)}">Package home</a> | <a href="https://www.darkmatter-quake.com">Website</a></p>',
             "    </footer>",
             "  </div>",
@@ -1360,7 +1356,7 @@ def render_index_page(
             '  <meta charset="UTF-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1.0">',
             '  <meta name="color-scheme" content="dark">',
-            "  <title>openPREY Documentation Portal</title>",
+            "  <title>openPR06 Documentation Portal</title>",
             '  <link rel="stylesheet" href="_static/site.css">',
             "</head>",
             "<body>",
@@ -1368,7 +1364,7 @@ def render_index_page(
             '    <header class="topbar">',
             '      <div class="brand">',
             '        <span class="eyebrow">Offline HTML documentation</span>',
-            '        <a class="brand-title" href="index.html">openPREY Documentation Portal</a>',
+            '        <a class="brand-title" href="index.html">openPR06 Documentation Portal</a>',
             f'        <div class="brand-subtitle">Release {html.escape(version)} · {html.escape(platform)} · {html.escape(arch)} · {len(specs)} documents</div>',
             "      </div>",
             '      <div class="action-row">',
@@ -1379,8 +1375,8 @@ def render_index_page(
             "      </div>",
             "    </header>",
             '    <section class="hero">',
-            '      <img class="hero-banner" src="assets/docs/img/banner.png" alt="openPREY banner">',
-            '      <span class="eyebrow">openPREY Release Documentation</span>',
+            '      <img class="hero-banner" src="assets/docs/img/banner.png" alt="openPR06 banner">',
+            '      <span class="eyebrow">openPR06 Release Documentation</span>',
             '      <h1>Full offline HTML docs, shipped with the release package.</h1>',
             '      <p class="lead">This package includes the project overview, build and technical references, user guides, developer notes, and proposal research converted into a browsable HTML site with internal links preserved.</p>',
             '      <div class="hero-actions">',
@@ -1403,7 +1399,7 @@ def render_index_page(
             "    </section>",
             '    <footer class="footer">',
             '      <p>These pages are bundled directly into the release archive so the package remains self-documenting even when viewed offline.</p>',
-            '      <p><a href="../README.html">Package home</a> | <a href="https://github.com/themuffinator/openPREY">Repository</a> | <a href="https://www.darkmatter-quake.com">Website</a></p>',
+            '      <p><a href="../README.html">Package home</a> | <a href="https://github.com/themuffinator/openPR06">Repository</a> | <a href="https://www.darkmatter-quake.com">Website</a></p>',
             "    </footer>",
             "  </div>",
             "</body>",
@@ -1449,6 +1445,8 @@ def generate_release_docs_site(
         Path("LICENSES/PREY-SDK-EULA.rtf"),
         Path("LICENSES/DOOM-3-ADDITIONAL-TERMS.txt"),
         Path("LICENSES/DOOM-3-BFG-ADDITIONAL-TERMS.txt"),
+        # The site's body web face is Talon UI Condensed, under the SIL OFL.
+        Path("LICENSES/OFL-1.1.txt"),
         Path("src/game/LICENSE"),
     ):
         copy_docs_auxiliary_file(source_root, auxiliary, output_root / auxiliary)
@@ -1534,7 +1532,7 @@ def main(argv: list[str]) -> int:
         platform=args.platform,
         arch=args.arch,
     )
-    print(f"Generated openPREY HTML docs: {result.index_path} ({result.page_count} pages)")
+    print(f"Generated openPR06 HTML docs: {result.index_path} ({result.page_count} pages)")
     return 0
 
 

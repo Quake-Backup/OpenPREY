@@ -1,6 +1,6 @@
 # Retail Prey Decl Audit
 
-This audit checks openPREY's decl system against the shipped Prey (2006) decl
+This audit checks openPR06's decl system against the shipped Prey (2006) decl
 files and the retail engine (`PREY.exe`, 1.4 patch, November 2007). The Quake 4
 audit in retail-q4-decl-parity-audit.md
 covers the inherited Raven parsers. This one covers what Prey's own assets and
@@ -23,14 +23,14 @@ and `pak_en_t.pk4` uses a registered type:
 | `af/` | `.af` | `articulatedFigure` |
 
 The retail engine registers `materials`, `skins`, `sound` and `beams`, and the
-game library registers `def`, `fx`, `particles`, `af` and `newpdas`. openPREY
+game library registers `def`, `fx`, `particles`, `af` and `newpdas`. openPR06
 registers the same folders. Retail has no `newpdas/` content. The one file
 under `liquids/` (`feedingtower/crouch.liquid`) and the `guis/*.guifragment`
 includes are not decls.
 
 ## Keyword Coverage
 
-The keyword string tables in `PREY.exe` were compared against the openPREY
+The keyword string tables in `PREY.exe` were compared against the openPR06
 parsers:
 
 - material keywords are covered in full; see [Materials](#materials) for
@@ -49,17 +49,17 @@ parsers:
 
 Retail `idDeclParticle::ParseParms` joins a lone `-` token with the number that
 follows it, and errors with `no number after minus sign` when none follows.
-Doom 3's parser does not do this, and openPREY used to read
+Doom 3's parser does not do this, and openPR06 used to read
 `distribution sphere 0.000 -1.000 -1.000` as five parms. That overflowed the
 array, so the particles `crawler_spooge` and `ash` were defaulted. Six more
 stages that use negative `distribution`, `orientation` or `customPath` parms
-loaded with shifted values. openPREY now follows the retail parser.
+loaded with shifted values. openPR06 now follows the retail parser.
 
 ### `_nogore` sound shaders
 
 Retail `idDeclManager::FindSound` looks up `<name>_nogore` first whenever the
 game's `g_nogore` cvar is set. The retail sound files ship 35 such variants,
-which cover the possessed children on the feeding tower maps. openPREY's
+which cover the possessed children on the feeding tower maps. openPR06's
 `FindSound` now does the same lookup. Entity defs already swap to their
 `_nogore` variants in the game library.
 
@@ -74,13 +74,13 @@ Every material keyword retail `PREY.exe` accepts was mapped to its handler in
 the retail parser (`ParseMaterial`, `ParseStage`, `ParseDeform`,
 `CheckSurfaceParm`) and in the renderer code that reads the result. The
 Prey SDK's `src/renderer/Material.h` confirmed the field names. Shipped
-materials were counted to rank the gaps. The fixes below bring openPREY to
+materials were counted to rank the gaps. The fixes below bring openPR06 to
 retail behaviour.
 
 ### Surface parms
 
 Retail treats an info parm's `clearSolid` as a mask of contents bits to remove,
-not a boolean. openPREY now does the same, and its Prey table matches retail:
+not a boolean. openPR06 now does the same, and its Prey table matches retail:
 
 | Parm | Retail effect |
 | --- | --- |
@@ -104,7 +104,7 @@ had no surface type and blocked neither shots nor splash damage as retail does.
 | `EFFECT_MACRO` | non-solid, no shadows, `noimpact`, translucent, two-sided | 0 |
 | `ALPHA_MACRO` | no shadows, `noimpact`, translucent, two-sided | 0 |
 
-openPREY used to ignore `OVERLAY_MACRO`, `GLASS_MACRO` and `SKYBOX_MACRO`, so
+openPR06 used to ignore `OVERLAY_MACRO`, `GLASS_MACRO` and `SKYBOX_MACRO`, so
 the wound overlays had no polygon offset and glass had no glass surface type.
 It also gave `DECAL_ALPHATEST_MACRO` a polygon offset that retail does not.
 
@@ -112,7 +112,7 @@ It also gave `DECAL_ALPHATEST_MACRO` a polygon offset that retail does not.
 
 Retail's deform list is `sprite`, `tube`, `flare`, `expand`, `move`,
 `eyeBall`, `beam`, `corona`, `jitter`, `particle`, `particle2`, `turbulent`.
-openPREY used to treat `beam` as `tube`, which errors on any mesh that is not
+openPR06 used to treat `beam` as `tube`, which errors on any mesh that is not
 made of quads, and dropped `jitter`. Both now follow retail:
 
 - `deform beam` (61 materials: projectile trails, energy beams): the mesh is
@@ -131,7 +131,7 @@ made of quads, and dropped `jitter`. Both now follow retail:
 
 `highres` (591 stages) marks a source authored at twice its intended size.
 Retail halves such an image once, even under `nopicmip`, unless
-`image_useHighRes` is set, and only its top machine spec set it. openPREY now
+`image_useHighRes` is set, and only its top machine spec set it. openPR06 now
 records the flag on the image and honours `image_useHighRes`, which defaults to
 `1` so textures keep their current full size. As in retail, the flag is not
 part of an image's identity, so the first material to name an image decides.
@@ -164,14 +164,14 @@ two models differ only in the falloff term.
 Retail applies that `× 2` in the fragment program (`ADD R2, R2, R2`) and passes
 the bare specular colour in environment parameter 1. This engine passes the
 colour already doubled (`RB_ARB2_DrawInteraction`, inherited from openQ4, whose
-Quake 4 program does not double), so openPREY's `interaction.vfp` does not
+Quake 4 program does not double), so openPR06's `interaction.vfp` does not
 double the map again. Until 11 November 2026 it did, and the stock OpenGL path
 drew specular at twice the brightness of every other path: the Vulkan
 interaction, the GLSL material interaction and the shadow-map receivers all
 apply the factor once. That is what made a shadow-mapped light look dimmer
 than the same light under stencil shadows.
 
-openPREY renders this on every backend. `R_InteractionSpecularParms`
+openPR06 renders this on every backend. `R_InteractionSpecularParms`
 (`tr_local.h`) packs the specular stage's exponent and brightness with the two
 cvars, and each stock interaction path consumes the same four values:
 
@@ -216,7 +216,7 @@ retail engine hits as well:
 
 - `unknown general material parameter` for `detail` and `bumpforceHighQuality`,
   and `unknown token 'shadowdraw'`. These are not retail keywords. Retail
-  defaults the material just as openPREY does (`MF_DEFAULTED`, checked in the
+  defaults the material just as openPR06 does (`MF_DEFAULTED`, checked in the
   disassembly);
 - `Bad term` for `ember1`, `fireballtable` and `animbump_speed`, and
   `unknown token '1'` for `table tabletest { 1, 0 }`. No such tables exist, and
@@ -232,7 +232,7 @@ Launch from the staged `.install/` against a retail install, in windowed mode,
 with an isolated save path:
 
 ```powershell
-.install\openPREY-client_x64.exe +set r_fullscreen 0 +set developer 1 +set logFile 2 `
+.install\openPR06-client_x64.exe +set r_fullscreen 0 +set developer 1 +set logFile 2 `
   +set logFileName logs/checkdecls.log +set fs_savepath .tmp\decl-audit\save `
   +set fs_basepath "<Prey install>" +set fs_game basepr +checkDecls +wait +quit
 ```

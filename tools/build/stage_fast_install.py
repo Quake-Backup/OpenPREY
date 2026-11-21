@@ -14,11 +14,11 @@ from windows_runtime import cleanup_windows_stage_target, is_windows_host
 
 
 ROOT_RUNTIME_PATTERNS = (
-    "openPREY-client_*.exe",
-    "openPREY-client_*.pdb",
-    "openPREY-ded_*.exe",
-    "openPREY-ded_*.pdb",
-    "openPREY-updater_*.exe",
+    "openPR06-client_*.exe",
+    "openPR06-client_*.pdb",
+    "openPR06-ded_*.exe",
+    "openPR06-ded_*.pdb",
+    "openPR06-updater_*.exe",
     "renderer-gl_*.dll",
     "renderer-gl_*.pdb",
     "renderer-vk_*.dll",
@@ -26,12 +26,12 @@ ROOT_RUNTIME_PATTERNS = (
     "OpenAL32.dll",
 )
 POSIX_ENGINE_RUNTIME_PATTERNS = (
-    "openPREY-client_*",
-    "openPREY-ded_*",
+    "openPR06-client_*",
+    "openPR06-ded_*",
 )
 LINUX_ROOT_RUNTIME_PATTERNS = (
     *POSIX_ENGINE_RUNTIME_PATTERNS,
-    "openPREY-updater_*",
+    "openPR06-updater_*",
     "renderer-gl_*.so",
     "renderer-vk_*.so",
 )
@@ -68,16 +68,16 @@ WINDOWS_FOREIGN_RUNTIME_PATTERNS = (
     "*.dylib",
 )
 POSIX_ENGINE_FOREIGN_RUNTIME_PATTERNS = (
-    "openPREY-client_*.exe",
-    "openPREY-client_*.pdb",
-    "openPREY-client_*.dll",
-    "openPREY-client_*.so",
-    "openPREY-client_*.dylib",
-    "openPREY-ded_*.exe",
-    "openPREY-ded_*.pdb",
-    "openPREY-ded_*.dll",
-    "openPREY-ded_*.so",
-    "openPREY-ded_*.dylib",
+    "openPR06-client_*.exe",
+    "openPR06-client_*.pdb",
+    "openPR06-client_*.dll",
+    "openPR06-client_*.so",
+    "openPR06-client_*.dylib",
+    "openPR06-ded_*.exe",
+    "openPR06-ded_*.pdb",
+    "openPR06-ded_*.dll",
+    "openPR06-ded_*.so",
+    "openPR06-ded_*.dylib",
 )
 
 
@@ -127,7 +127,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--source-root",
         default=str(Path(__file__).resolve().parents[2]),
-        help="openPREY source root used to validate the fast staging target.",
+        help="openPR06 source root used to validate the fast staging target.",
     )
     parser.add_argument(
         "--temporary-runtime",

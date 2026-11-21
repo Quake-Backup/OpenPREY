@@ -43,8 +43,10 @@ idCVar idDemoFile::com_preloadDemos( "com_preloadDemos", "0", CVAR_SYSTEM | CVAR
 idCVar idDemoFile::demo_recordThread( "demo_recordThread", "1", CVAR_SYSTEM | CVAR_BOOL | CVAR_NOCHEAT, "Pack a recording's blocks on a worker thread, so recording costs the game no frame time" );
 
 static const char DEMO_MAGIC[] = GAME_NAME " RDEMO";
+static const char PREVIOUS_DEMO_MAGIC[] = "openPREY RDEMO";
 static const char INTERIM_DEMO_MAGIC[] = "OpenPREY RDEMO";
 static const char LEGACY_DEMO_MAGIC[] = "OpenPrey RDEMO";
+static_assert( sizeof( DEMO_MAGIC ) == sizeof( PREVIOUS_DEMO_MAGIC ), "render-demo magic length changed" );
 static_assert( sizeof( DEMO_MAGIC ) == sizeof( INTERIM_DEMO_MAGIC ), "render-demo magic length changed" );
 static_assert( sizeof( DEMO_MAGIC ) == sizeof( LEGACY_DEMO_MAGIC ), "render-demo magic length changed" );
 #define MAX_DEMO_HASH_STRINGS 65536
@@ -557,6 +559,7 @@ bool idDemoFile::OpenForReading( const char *fileName, bool allowPreload, bool q
 		return false;
 	}
 	if ( memcmp( magicBuffer, DEMO_MAGIC, DEMO_MAGIC_LENGTH ) == 0 ||
+		 memcmp( magicBuffer, PREVIOUS_DEMO_MAGIC, DEMO_MAGIC_LENGTH ) == 0 ||
 		 memcmp( magicBuffer, INTERIM_DEMO_MAGIC, DEMO_MAGIC_LENGTH ) == 0 ||
 		 memcmp( magicBuffer, LEGACY_DEMO_MAGIC, DEMO_MAGIC_LENGTH ) == 0 ) {
 		if ( f->ReadInt( compression ) != sizeof( compression ) ) {
@@ -571,8 +574,8 @@ bool idDemoFile::OpenForReading( const char *fileName, bool allowPreload, bool q
 		f->Rewind();
 	}
 
-	// openPREY reads no retail Quake 4 render demos, so no wrapper spelling is
-	// ambiguous and a block scheme is always openPREY's own.
+	// openPR06 reads no retail Quake 4 render demos, so no wrapper spelling is
+	// ambiguous and a block scheme is always openPR06's own.
 	if ( compression == DEMO_SCHEME_BLOCKS ) {
 		if ( bytes.direct == NULL ) {
 			// read through the idFile, which stands just past the wrapper: the

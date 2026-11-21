@@ -5,11 +5,11 @@
 
 ## Voice chat
 
-Voice chat is off in openPREY. The engine still carries openQ4's microphone
+Voice chat is off in openPR06. The engine still carries openQ4's microphone
 capture and playback (`s_voiceChatCapture`, `s_voiceChatTest` and
 `listVoiceChat` exist), but PREY's v7 game API has no voice recipients, so the
 client and server drop voice packets instead of passing them to the game
-module. The gate is marked `OPENPREY-GATED(D9)` in `src/framework/async/`.
+module. The gate is marked `OPENPR06-GATED(D9)` in `src/framework/async/`.
 Voice menus from openQ4's interfaces have nothing to send through.
 
 PREY's own canned voice commands (`clientVoiceChat`, which plays a `snd_voc_*`
@@ -26,7 +26,7 @@ Bots added with `addbot` chat through the same path as players; `bot_chat 0`
 keeps them quiet. See [Multiplayer bots](../dev/mp-bots.md#chat) for their
 chat events and replies.
 
-openPREY's engine replaces the chat history and the entry field of PREY's stock
+openPR06's engine replaces the chat history and the entry field of PREY's stock
 multiplayer GUIs (`guis/mphud.gui` and `guis/mpmsgmode.gui`) with its own chat
 panel. Chat keeps the latest 64 received messages and wraps long lines.
 
@@ -78,5 +78,5 @@ panel. `chatHistory status` reports counts and position without printing message
 ## Quick chat
 
 openQ4's quick-chat wheel (`_quickChat`) belongs to its retained interface.
-Its HUD document, `guis/hud/quick_chat.rui`, isn't part of openPREY's `basepr`
-content, so the wheel doesn't appear in openPREY.
+Its HUD document, `guis/hud/quick_chat.rui`, isn't part of openPR06's `basepr`
+content, so the wheel doesn't appear in openPR06.

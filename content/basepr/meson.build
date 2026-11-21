@@ -54,7 +54,7 @@ if build_games
 endif
 
 basepr_manifest_conf = configuration_data()
-basepr_manifest_conf.set('OPENPREY_VERSION_BASE', openq4_version_base)
+basepr_manifest_conf.set('OPENPR06_VERSION_BASE', openq4_version_base)
 basepr_manifest = configure_file(
   input: 'mod.json.in',
   output: 'mod.json',
@@ -67,7 +67,7 @@ install_data(
 )
 
 custom_target(
-  'openprey_stage_mod_manifest_direct_run',
+  'openpr06_stage_mod_manifest_direct_run',
   input: basepr_manifest,
   output: 'stage-mod-manifest.stamp',
   command: [

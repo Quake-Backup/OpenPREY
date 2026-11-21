@@ -101,7 +101,7 @@ idCVar ui_retainedMultiplayer( "ui_retainedMultiplayer", "0", CVAR_GUI | CVAR_BO
 // to (see idSessionLocal::FindRetainedGui). While it is 0 no session route
 // creates a retained view and the stock GUIs present every screen. Archived,
 // so an explicit player preference persists across launches.
-// openPREY: the retained screens are authored for Quake 4 (content/baseoq4 in openQ4);
+// openPR06: the retained screens are authored for Quake 4 (content/baseoq4 in openQ4);
 // Prey presents its retail GUIs, so the stock interface is the default.
 idCVar ui_retained( "ui_retained", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "use the retained interface by default; 0 selects the stock interface" );
 idCVar ui_hudScale( "ui_hudScale", "1", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "retained status bar scale, independent of menus", .5f, 2.0f );
@@ -109,7 +109,7 @@ idCVar ui_browserView( "ui_browserView", "0", CVAR_GUI | CVAR_INTEGER | CVAR_ARC
 idCVar ui_hudSafeInset( "ui_hudSafeInset", "0", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "retained status bar safe inset in percent of viewport", 0.0f, 10.0f );
 idCVar ui_retainedCaptureLoadFade( "ui_retainedCaptureLoadFade", "0", CVAR_GUI | CVAR_BOOL | CVAR_NOCHEAT, "diagnostic: use the engine screenshot command to capture the middle and end of the retained loading fade" );
 
-// openPREY: Create Server's Server Type and Dedicated. StartMenuServer reads
+// openPR06: Create Server's Server Type and Dedicated. StartMenuServer reads
 // these, as Quake 4's menu binds them; Prey's stock page kept them in GUI
 // keys the session never read, so it binds these CVars now, and so does the
 // retained MultiPrey page (createLan, createDedicated).
@@ -305,7 +305,7 @@ static const char *const RETAINED_ARENA_PAUSE_GUI = "guis/menu/arena_pause.rui";
 // The buy card (section 14.18) covers the game's buy menu, and buys through
 // the game ("retained buy <index>", the item's place in the game's catalog).
 static const char *const RETAINED_MP_BUY_GUI = "guis/menu/mp_buy.rui";
-// openPREY: the chat line's card, which covers the game's guis/mpmsgmode.gui,
+// openPR06: the chat line's card, which covers the game's guis/mpmsgmode.gui,
 // and the connecting screen, the client's guis/netmenu.gui retained.
 static const char *const RETAINED_MP_CHAT_GUI = "guis/menu/mp_chat.rui";
 static const char *const RETAINED_CONNECTING_GUI = "guis/menu/connecting.rui";
@@ -397,7 +397,7 @@ static const char *const RETAINED_CONTROLS_BINDINGS[] = {
 	"emote cheer", "emote taunt", "emote grab_a", "_voicechat"
 };
 static const int RETAINED_CONTROLS_ROWS = sizeof( RETAINED_CONTROLS_BINDINGS ) / sizeof( RETAINED_CONTROLS_BINDINGS[0] );
-// openPREY: the Options page's Controls tab binds Prey's actions, in the order
+// openPR06: the Options page's Controls tab binds Prey's actions, in the order
 // of its rows (the stock page's side tabs in turn). bind_row in
 // tools/ui/build_retained_screens.py names each row by its place here and
 // refuses to write the page while this list differs.
@@ -1457,7 +1457,7 @@ static void BuildMainMenuRefreshChoices( idStr &choiceNames, idStr &choiceValues
 =================
 BuildMainMenuFrameLimitChoices
 
-OPENPREY: the Frame Rate Limit row of Prey's Display page. A preset writes its
+OPENPR06: the Frame Rate Limit row of Prey's Display page. A preset writes its
 tier's cap to com_maxfps and detection writes the display's own rate, so the
 current value joins the list rather than reading as the first entry.
 =================
@@ -1530,7 +1530,7 @@ static void SetMainMenuQualityGuiVars( idUserInterface *gui ) {
 	const glconfig_t &rendererConfig = renderSystem->GetGLConfig();
 	gui->SetStateInt( "r_interactionsBypassed", rendererConfig.disableARB2Interactions ? 1 : 0 );
 	gui->SetStateInt( "r_postAAAvailable", ( rendererConfig.GLSLProgramAvailable && rendererConfig.GLSL130Available ) ? 1 : 0 );
-	// OPENPREY: Prey's Shader Detail row is greyed while shader programs are off
+	// OPENPR06: Prey's Shader Detail row is greyed while shader programs are off
 	// (the stock script reads this state) and on Vulkan, which draws the
 	// fallback stages only (R_EffectiveShaderLevel in Material.cpp).
 	gui->SetStateInt( "r_skipNewAmbient", cvarSystem->GetCVarBool( "r_skipNewAmbient" ) ? 1 : 0 );
@@ -2414,7 +2414,7 @@ void idSessionLocal::StartMenu( bool playIntro ) {
 		SetGUI( NULL, NULL );
 		return;
 	}
-	// openPREY: playIntro is the main menu's own opening out of game (the 3D
+	// openPR06: playIntro is the main menu's own opening out of game (the 3D
 	// backdrop's entrance, docs/dev/prey-ui-visual-design.md section 12.2),
 	// not a logo video, so com_skipLogoVideos leaves it alone. The opening
 	// brings the screen up from black itself; the session's blackout covers
@@ -3303,7 +3303,7 @@ idSessionLocal::PublishRetainedControls
 
 Each row's keys, as the language names them and joins a list, or the stock
 page's word for none; the row waiting for a key says so instead. The page is
-openQ4's CONTROLS page or, in openPREY, the Options page, whose Controls tab
+openQ4's CONTROLS page or, in openPR06, the Options page, whose Controls tab
 holds Prey's binding rows.
 ===============
 */
@@ -3398,7 +3398,7 @@ the stock binding field does: Escape, Start or Back cancel, Backspace or
 Delete clear the row, any other key joins its keys (at most two of each device
 family, idKeyInput::BindForMenu). The key's release and characters are its own. Out of
 a wait, Delete or Backspace on a binding row clears it; on the device tabs'
-rows they reach the page. openPREY's Options page takes keys the same way
+rows they reach the page. openPR06's Options page takes keys the same way
 on its Controls tab, with Prey's menu sound.
 ===============
 */
@@ -3558,7 +3558,7 @@ static void Session_MenuBuildSaveGameSearchDirs( idStrList &gameDirs, const char
 	gameDirs.Clear();
 	Session_MenuAddUniqueSaveGameSearchDir( gameDirs, preferredGameDir );
 	Session_MenuAddUniqueSaveGameSearchDir( gameDirs, cvarSystem->GetCVarString( "fs_game" ) );
-	Session_MenuAddUniqueSaveGameSearchDir( gameDirs, OPENPREY_GAMEDIR );
+	Session_MenuAddUniqueSaveGameSearchDir( gameDirs, OPENPR06_GAMEDIR );
 	Session_MenuAddUniqueSaveGameSearchDir( gameDirs, BASE_GAMEDIR );
 }
 
@@ -3827,7 +3827,7 @@ static bool Session_MenuReadSaveGameHeader( const idStr &slotName, idDict *playe
 	}
 
 	idStr savePath = va( "savegames/%s.save", slotName.c_str() );
-	// openPREY lists saves from several game directories; read each from its own.
+	// openPR06 lists saves from several game directories; read each from its own.
 	idStr game = ( gameDir != NULL && gameDir[0] != '\0' ) ? idStr( gameDir ) : idStr( cvarSystem->GetCVarString( "fs_game" ) );
 	idFile *file = fileSystem->OpenFileRead( savePath.c_str(), true, game.Length() ? game.c_str() : NULL );
 	if ( file == NULL ) {
@@ -4099,7 +4099,7 @@ void idSessionLocal::SetSaveGameGuiVars( void ) {
 	}
 	guiActive->DeleteStateVar( va("loadgame_item_%i", fileList.Num()) );
 	guiActive->SetStateInt( "loadgame_listdef_count", fileList.Num() );
-	// OPENPREY: Resume Game follows the list, so deleting the last save hides it.
+	// OPENPR06: Resume Game follows the list, so deleting the last save hides it.
 	if ( guiActive == guiMainMenu ) {
 		guiMainMenu->SetStateBool( "hasrecentsave", !mapSpawned && fileList.Num() > 0 );
 	}
@@ -4240,7 +4240,7 @@ void idSessionLocal::SetMainMenuGuiVars( bool refreshCatalogs ) {
 		guiMainMenu->SetKeyBindingNames();
 		PopulateMainMenuAudioDeviceChoices( guiMainMenu );
 		PopulateMainMenuDisplayChoices( guiMainMenu );
-		// OPENPREY: the Profiles tab asks for scanforprofiles when it is
+		// OPENPR06: the Profiles tab asks for scanforprofiles when it is
 		// switched to, but a menu reopened on that tab does not switch to it,
 		// so list the profiles here too (Appendix C of
 		// docs/dev/prey-ui-visual-design.md).
@@ -4251,7 +4251,7 @@ void idSessionLocal::SetMainMenuGuiVars( bool refreshCatalogs ) {
 	const char *inGameState = mapSpawned ? ( IsMultiplayer() ? "2" : "1" ) : "0";
 	guiMainMenu->SetStateString( "inGame", inGameState );
 	guiMainMenu->SetStateString( "ingame", inGameState );
-	// OPENPREY: retail shows Resume Game on the out-of-game menu while a
+	// OPENPR06: retail shows Resume Game on the out-of-game menu while a
 	// loadable save exists; resumegame loads the newest.
 	bool hasRecentSave = false;
 	if ( !mapSpawned ) {
@@ -4744,7 +4744,7 @@ static bool Session_ConnectToTypedAddress( const char *text, idStr &error ) {
 ==============
 Session_ResetMainMenuCVars
 
-OPENPREY: the Reset Defaults dialog's Game Options, Video and Audio boxes
+OPENPR06: the Reset Defaults dialog's Game Options, Video and Audio boxes
 (resetgame, resetvideo, resetaudio). Retail PREY.exe reset every cvar carrying
 CVAR_GAME, CVAR_RENDERER or CVAR_SOUND; here each box resets the cvars its
 Options page shows, so the player name, server settings, developer cvars and
@@ -4873,7 +4873,7 @@ static void Session_ResetMainMenuAudio( idUserInterface *gui ) {
 ==============
 Session_ControlProfile*
 
-OPENPREY: Controls > Profiles, as retail PREY.exe kept it. A profile is
+OPENPR06: Controls > Profiles, as retail PREY.exe kept it. A profile is
 "<name>.binds" in the game directory of the save path and holds the key
 bindings as `unbindall` followed by `bind` lines (idKeyInput::WriteBindings,
 retail's writebindings). Loading runs only those binding commands, so a
@@ -5546,7 +5546,7 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 			continue;
 		}
 
-		// OPENPREY: Prey's Reset Defaults dialog sends this for its Controls
+		// OPENPR06: Prey's Reset Defaults dialog sends this for its Controls
 		// box. Prey's default.cfg is its key layout: unbindall, then the binds.
 		if ( !idStr::Icmp( cmd, "resetbindings" ) ) {
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW, "exec default.cfg" );
@@ -5554,7 +5554,7 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 			continue;
 		}
 
-		// OPENPREY: the dialog's Game Options, Video and Audio boxes. Each
+		// OPENPR06: the dialog's Game Options, Video and Audio boxes. Each
 		// resets the cvars its Options page shows (Session_ResetMainMenuCVars).
 		if ( !idStr::Icmp( cmd, "resetgame" ) ) {
 			Session_ResetMainMenuGameOptions( guiMainMenu );
@@ -5569,7 +5569,7 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 			continue;
 		}
 
-		// OPENPREY: Controls > Profiles (Session_ControlProfile*). The page
+		// OPENPR06: Controls > Profiles (Session_ControlProfile*). The page
 		// sends scanforprofiles itself after a save or delete.
 		if ( !idStr::Icmp( cmd, "scanforprofiles" ) ) {
 			Session_ScanControlProfiles( guiActive ? guiActive : guiMainMenu );
@@ -5595,7 +5595,7 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 			continue;
 		}
 
-		// OPENPREY: Resume Game, shown out of game while a save exists
+		// OPENPR06: Resume Game, shown out of game while a save exists
 		// (gui::hasrecentsave), loads the newest save, as retail did.
 		if ( !idStr::Icmp( cmd, "resumegame" ) ) {
 			idStrList saves;
@@ -5628,7 +5628,7 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 					channel = atoi( snd );
 					snd = args.Argv( icmd++ );
 				}
-				// openPREY: the retained screens' session code names Quake
+				// openPR06: the retained screens' session code names Quake
 				// 4's selection cue; Prey's press sound answers it.
 				if ( !snd.Icmp( "main_menu_selection" ) ) {
 					snd = "guisounds_menu_clickin";
@@ -5935,7 +5935,7 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 			continue;
 		}
 
-		// OPENPREY: Cancel on the Updates waiting box.
+		// OPENPR06: Cancel on the Updates waiting box.
 		if ( !idStr::Icmp( cmd, "cancelUpdateCheck" ) ) {
 			idAsyncNetwork::client.CancelVersionCheck();
 			continue;
@@ -6966,7 +6966,7 @@ const char* idSessionLocal::MessageBox( msgBoxType_t type, const char *message, 
 
 	guiMsg->SetStateString( "visible_entry", "0" );
 	guiMsg->SetStateString( "visible_cdkey", "0" );
-	guiMsg->SetStateString( "visible_progress", "0" );	// openPREY: the download box's bar
+	guiMsg->SetStateString( "visible_progress", "0" );	// openPR06: the download box's bar
 	switch ( type ) {
 		case MSG_INFO:
 			guiMsg->SetStateString( "mid", "" );
@@ -7126,7 +7126,7 @@ void idSessionLocal::RunTimedMessageBoxPacingTest( int durationMsec, bool networ
 =================
 idSessionLocal::ConnectingScreen
 
-openPREY: the screen the client shows while it challenges and connects
+openPR06: the screen the client shows while it challenges and connects
 (idAsyncClient::ConnectToServer and the pure wait). Where the retained
 screens present it is guis/menu/connecting.rui, which takes the stock
 screen's "status" under the same name and answers Cancel with the stock
@@ -7176,7 +7176,7 @@ void idSessionLocal::DownloadProgressBox( backgroundDownload_t *bgl, const char 
 	if ( !BoxDialogSanityCheck() ) {
 		return;
 	}
-	// openPREY: the retained box draws the progress bar (visible_progress);
+	// openPR06: the retained box draws the progress bar (visible_progress);
 	// Prey's stock box shows the message alone.
 	SelectMessageBox( true );
 
@@ -7541,7 +7541,7 @@ static const int RETAINED_SETTINGSPAGE_LEAVE_MSEC = 500;
 // are the stock choice's, in its order (mp_create_val4's values).
 static const char *const RETAINED_CREATE_SERVER_GUI = "guis/menu/createserver.rui";
 static const int RETAINED_CREATE_MAP_ROWS = 64;
-// openPREY: Prey's two (MCS_GameTypeEdit's values in mainmenu_multiplayer.guifragment).
+// openPR06: Prey's two (MCS_GameTypeEdit's values in mainmenu_multiplayer.guifragment).
 static const char *const RETAINED_CREATE_GAMETYPES[] = {
 	"Deathmatch", "Team DM"
 };
@@ -7567,7 +7567,7 @@ static const retainedCreateSetting_t RETAINED_CREATE_SETTINGS[] = {
 	{ "createCaptureLimit",	"capturelimit",	"si_captureLimit",			1, 999,	false },
 	{ "createControlTime",	"controltime",	"si_controlTime",			1, 999,	false },
 	{ "createTimeLimit",	"timelimit",	"si_timeLimit",				0, 60,	false },
-	{ "createMaxPlayers",	"maxplayers",	"si_maxPlayers",			1, 32,	false },	// openPREY: Prey's MAX_CLIENTS
+	{ "createMaxPlayers",	"maxplayers",	"si_maxPlayers",			1, 32,	false },	// openPR06: Prey's MAX_CLIENTS
 	{ "createMinPlayers",	"minplayers",	"si_minPlayers",			1, 16,	false },
 	{ "createVoting",		"voting",		"si_allowVoting",			0, 1,	true },
 	{ "createTeamDamage",	"teamdamage",	"si_teamDamage",			0, 1,	true },
@@ -7684,7 +7684,7 @@ static const int RETAINED_MOD_ROWS = 32;
 static const char *const RETAINED_DEMO_FILTERS[] = { "all", "mvd", "render", "legacy", "incomplete" };
 static const int RETAINED_DEMO_FILTER_COUNT = sizeof( RETAINED_DEMO_FILTERS ) / sizeof( RETAINED_DEMO_FILTERS[0] );
 static const int RETAINED_LOAD_ROWS = 64;
-// openPREY: Prey's loading picture, where Quake 4 had gfx/guis/loadscreens/generic.
+// openPR06: Prey's loading picture, where Quake 4 had gfx/guis/loadscreens/generic.
 static const char *const RETAINED_LOAD_GENERIC_SHOT = "guis/assets/loading/loading";
 // Multiplayer levelshots precache on idle front-end frames: none until the
 // title has presented for this long, then as many a frame as fit this long
@@ -7694,10 +7694,10 @@ static const int RETAINED_LEVELSHOT_FRAME_MSEC = 4;
 // The stock choreography shows a page 550 ms after its activation and a
 // home-state pop-up at once (specification section 8); the retained screen
 // covers the legacy departure for that long before the page takes over.
-// openPREY: a Prey page presents at once and grows from the bottom bar itself
+// openPR06: a Prey page presents at once and grows from the bottom bar itself
 // (section 8 of the Prey visual specification), so the hand-off takes no time.
 static const int RETAINED_PAGE_HANDOFF_MSEC = 0;
-// openPREY: Back on a page shrinks it into the bottom bar first, 500 ms down
+// openPR06: Back on a page shrinks it into the bottom bar first, 500 ms down
 // and 200 ms across, and then the home takes the screen
 // (idSessionLocal::LeaveRetainedPage).
 static const int RETAINED_PAGE_LEAVE_MSEC = 700;
@@ -7731,7 +7731,7 @@ typedef struct retainedHandoff_s {
 	retainedHandoffKind_t	kind;
 } retainedHandoff_t;
 
-// openPREY: the retained home is the navigation over Prey's stock portal
+// openPR06: the retained home is the navigation over Prey's stock portal
 // backdrop (docs/dev/prey-ui-visual-design.md, section 12.5). A page it has
 // no retained document for is the stock page: guis/mainmenu.gui opens it on
 // one of these named events and grows it from the bottom bar as it always
@@ -7752,7 +7752,7 @@ static const retainedHandoff_t RETAINED_HANDOFFS[] = {
 	{ "updates",		"retainedPage_updates",		RETAINED_HANDOFF_IN_PLACE },
 };
 
-// openPREY: whether the stock menu, not a document of the home's own, answers
+// openPR06: whether the stock menu, not a document of the home's own, answers
 // this request.
 static bool Session_RetainedHomeHandsOff( const char *request ) {
 	for ( int i = 0; i < static_cast<int>( sizeof( RETAINED_HANDOFFS ) / sizeof( RETAINED_HANDOFFS[0] ) ); ++i ) {
@@ -7763,7 +7763,7 @@ static bool Session_RetainedHomeHandsOff( const char *request ) {
 	return false;
 }
 
-// openPREY: Prey's stock menu hides its navigation (Main_Menu) the moment a
+// openPR06: Prey's stock menu hides its navigation (Main_Menu) the moment a
 // page starts to grow or the opening portal starts, and shows it again when
 // the page is back in the bottom bar or the portal is open. The retained home
 // covers the menu exactly while that navigation would show.
@@ -7792,7 +7792,7 @@ static const char *Session_RetainedHomeMissingPage( idUserInterface *menu ) {
 			return RETAINED_HANDOFFS[i].window;
 		}
 	}
-	// openPREY: the home covers the menu by its navigation's visibility.
+	// openPR06: the home covers the menu by its navigation's visibility.
 	if ( !UI_LegacyWindowExists( menu, "Main_Menu" ) ) {
 		return "Main_Menu";
 	}
@@ -8470,7 +8470,7 @@ void idSessionLocal::UpdateRetainedHome() {
 	}
 	const bool context = Session_RetainedScreensEnabled() && guiMainMenu != NULL && guiActive == guiMainMenu &&
 		guiTest == NULL && !RetainedUI_IsOpen() && ( !mapSpawned || !IsMultiplayer() );
-	// openPREY: the home is the paused game's navigation or the title's, over
+	// openPR06: the home is the paused game's navigation or the title's, over
 	// the stock menu's own backdrop (DrawRetainedHome). Each loads on first
 	// use. While one can present, the stock menu leaves its navigation and
 	// bottom bar undrawn (gui::retainedHome), through its own pages too, so
@@ -8636,7 +8636,7 @@ void idSessionLocal::RetainedHomeFrameEvent() {
 void idSessionLocal::DrawRetainedHome( int presentationTime ) {
 	// The legacy menu keeps its timelines, music and hand-off choreography
 	// running unseen; only the retained screen reaches the output.
-	// openPREY: the stock menu draws beneath the home. Its portal, star field,
+	// openPR06: the stock menu draws beneath the home. Its portal, star field,
 	// Sphere, Earth and wordmark are Prey's backdrop (section 12.5 of
 	// docs/dev/prey-ui-visual-design.md), in a game the frozen frame the
 	// portal tears open as well, and its timelines and music run as they do
@@ -8885,7 +8885,7 @@ void idSessionLocal::ShowSaveRestoreFailure( const char *saveName ) {
 
 void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const char *request ) {
 #ifndef ID_DEDICATED
-	// openPREY: Prey's menu sounds (section 8 of the Prey visual
+	// openPR06: Prey's menu sounds (section 8 of the Prey visual
 	// specification), which a document's event names beside what it does.
 	if ( request != NULL && gui != NULL && !idStr::Icmpn( request, "sound", 5 ) ) {
 		static const char *const sounds[][2] = {
@@ -8911,7 +8911,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
 		Session_PresetCheckRequest( gui, request );
 		return;
 	}
-	// openPREY: the retained connecting screen's Cancel answers as the stock
+	// openPR06: the retained connecting screen's Cancel answers as the stock
 	// button's abort, through the client's own handler (ConnectingScreen).
 	if ( request != NULL && gui != NULL && gui == guiRetainedConnecting ) {
 		if ( gui == guiActive && !idStr::Icmp( request, "netAbort" ) && guiHandle != NULL ) {
@@ -9000,7 +9000,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
 	if ( gui != NULL && request != NULL && gui == guiRetainedCredits ) {
 		// The Credits page's one verb, Back, while it presents.
 		if ( gui == guiActive && !idStr::Icmp( request, "creditsBack" ) ) {
-			LeaveRetainedPage( gui );	// openPREY: the page shrinks into the bar first
+			LeaveRetainedPage( gui );	// openPR06: the page shrinks into the bar first
 		}
 		return;
 	}
@@ -9050,7 +9050,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
         // The restart screen's plates run the stock screen's own commands.
         if ( !idStr::Icmp( request, "deathRestart" ) ) HandleRestartMenuCommands( "restart" );
         else if ( !idStr::Icmp( request, "deathLoad" ) ) {
-            // openPREY: Prey's death screen loads the newest save, as the
+            // openPR06: Prey's death screen loads the newest save, as the
             // stock button's loadlastsave does, and restarts the level when
             // there is none or it cannot be loaded.
             idStrList fileList;
@@ -9060,7 +9060,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
                 MoveToNewMap( mapSpawnData.serverInfo.GetString( "si_map" ) );
             }
         }
-        // openPREY: Main Menu opens the menu as the stock button does; the
+        // openPR06: Main Menu opens the menu as the stock button does; the
         // level is already unloaded.
         else if ( !idStr::Icmp( request, "deathMenu" ) ) HandleRestartMenuCommands( "mainmenu" );
         else if ( !idStr::Icmp( request, "quit" ) ) common->Quit();
@@ -9128,7 +9128,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
 		}
 		return;
 	}
-	// openPREY: New Game's skill frame. Normal, Cherokee (the harder mode a
+	// openPR06: New Game's skill frame. Normal, Cherokee (the harder mode a
 	// finished game unlocks) and Casino (the Roadhouse's games, once it is
 	// finished) start the game as the stock buttons do: the choice goes on the
 	// stock menu's state, where startGame reads it.
@@ -9147,7 +9147,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
 	// no MODS. A row selects its mod, and LOAD MOD restarts the engine into it
 	// as the stock LOAD MOD does.
 	if ( !idStr::Icmp( request, "mods" ) && guiRetainedHome == guiRetainedTitle && !Session_RetainedHomeHandsOff( "mods" ) ) {
-		// openPREY: the title's link has played Prey's click already.
+		// openPR06: the title's link has played Prey's click already.
 		PublishRetainedMods( guiRetainedHome );
 		guiRetainedHome->HandleNamedEvent( "modsModalShow" );
 		return;
@@ -9176,7 +9176,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
 		if ( idStr::Icmp( request, handoff.request ) ) {
 			continue;
 		}
-		// openPREY: the stock menu opens its own page on the event; the home
+		// openPR06: the stock menu opens its own page on the event; the home
 		// stops covering it once its navigation hides (UpdateRetainedHome).
 		// The page's sounds and commands come through the stock menu's frame.
 		idStr command;
@@ -9209,7 +9209,7 @@ void idSessionLocal::HandleRetainedSessionRequest( idUserInterface *gui, const c
 ===============
 Session_PublishPreyOptionsAudio
 
-openPREY: what the retained Options page's Audio tab shows that no CVar state
+openPR06: what the retained Options page's Audio tab shows that no CVar state
 gives it (guis/menu/settings.rui). The two volume sliders run 0 to 100 over
 the stock sliders' 0 to 1, which the stock control maps onto decibels
 (idSliderWindow, volumeslider); the device list is the one the stock page
@@ -9258,7 +9258,7 @@ static void Session_PublishPreyOptionsAudio( idUserInterface *page ) {
 ===============
 Session_PublishPreyOptionsVideo
 
-openPREY: what the retained Options page's Video tab shows that no CVar state
+openPR06: what the retained Options page's Video tab shows that no CVar state
 gives it. The resolution, monitor, refresh-rate and frame-limit lists are the
 stock page's (SetMainMenuVideoGuiVars builds them as text for its choices),
 each as rows of labels with the entry in use chosen. `applied` publishes what
@@ -9369,7 +9369,7 @@ bool idSessionLocal::BeginRetainedPage( const char *request ) {
 	}
 	if ( ( !saving && !restarting && !credits && !multiplayer && !settings && idStr::Icmp( request, "loadGame" ) ) ||
 			guiRetainedHome == NULL ||
-			// openPREY: Prey's in-game menu offers Credits too.
+			// openPR06: Prey's in-game menu offers Credits too.
 			guiActive != guiMainMenu || ( multiplayer && mapSpawned ) ||
 			( ( saving || restarting ) && ( !mapSpawned || IsMultiplayer() ) ) ) {
 		return false;
@@ -9436,7 +9436,7 @@ bool idSessionLocal::BeginRetainedPage( const char *request ) {
 		for ( int i = 0; i < RETAINED_SETTINGS_SECTION_COUNT; i++ ) {
 			page->SetStateBool( va( "from_%s", RETAINED_SETTINGS_SECTIONS[ i ].section ), false );
 		}
-		// openPREY: the Audio tab's sound-system state and its lists.
+		// openPR06: the Audio tab's sound-system state and its lists.
 		Session_RefreshMainMenuAudioState( page );
 		Session_PublishPreyOptionsAudio( page );
 		// And the Video tab's lists, with what is in effect now.
@@ -9456,7 +9456,7 @@ bool idSessionLocal::BeginRetainedPage( const char *request ) {
 	retainedPageAt = retainedHandoffUntil;
 	guiRetainedHome->HandleNamedEvent( va( "carry_%s", request ) );
 	guiRetainedHome->HandleNamedEvent( "depart" );
-	// openPREY: the stock menu dresses its backdrop for a full-screen page, as
+	// openPR06: the stock menu dresses its backdrop for a full-screen page, as
 	// its own pages do: the wordmark hides and the portal's view swings in.
 	guiMainMenu->HandleNamedEvent( "retainedCover_page" );
 	retainedPageLeaving = NULL;
@@ -9483,7 +9483,7 @@ bool idSessionLocal::RetainedChildPageActive() const {
 // abandons it.
 void idSessionLocal::UpdateRetainedPage() {
 #ifndef ID_DEDICATED
-	// openPREY: a page that was asked to leave returns once it has shrunk
+	// openPR06: a page that was asked to leave returns once it has shrunk
 	// into the bottom bar; anything else taking the screen first abandons it.
 	if ( retainedPageLeaving != NULL ) {
 		if ( guiActive != retainedPageLeaving ) {
@@ -9525,7 +9525,7 @@ void idSessionLocal::ReturnRetainedPage() {
 	if ( !RetainedPageActive() || guiMainMenu == NULL ) {
 		return;
 	}
-	// openPREY: the stock menu's navigation is the home's cue to cover it
+	// openPR06: the stock menu's navigation is the home's cue to cover it
 	// (Session_RetainedStockMenuAtHome); its backdrop has been coming back
 	// since the page started to leave (LeaveRetainedPage).
 	retainedPageLeaving = NULL;
@@ -9542,7 +9542,7 @@ void idSessionLocal::ReturnRetainedPage() {
 ===============
 idSessionLocal::LeaveRetainedPage
 
-openPREY: Back on a retained page. The page shrinks into the bottom bar on its
+openPR06: Back on a retained page. The page shrinks into the bottom bar on its
 "pageLeave" event while the stock menu brings the wordmark and the portal's
 view back, as a stock page's own leaving does, and the home takes the screen
 when the page is in the bar (UpdateRetainedPage). With reduced motion the home
@@ -9617,7 +9617,7 @@ title.
 */
 void idSessionLocal::DrawRetainedPageHome( int presentationTime ) {
 #ifndef ID_DEDICATED
-	// openPREY: a Prey page stands over the stock menu's backdrop, in a game
+	// openPR06: a Prey page stands over the stock menu's backdrop, in a game
 	// too, as the home does (DrawRetainedHome). The home that handed off has
 	// hidden its navigation and draws nothing.
 	if ( guiMainMenu != NULL ) {
@@ -9790,7 +9790,7 @@ void idSessionLocal::PublishRetainedLoadRows( idUserInterface *gui ) {
 		gui->SetStateString( va( "%s.row%d.context", list, row ), context.c_str() );
 		gui->SetStateString( va( "%s.row%d.name", list, row ), name.c_str() );
 		gui->SetStateString( va( "%s.row%d.location", list, row ), location.c_str() );
-		// openPREY: the stock list's Date and Time columns.
+		// openPR06: the stock list's Date and Time columns.
 		idStr date, time;
 		if ( index < retainedLoadSlots.Num() ) {
 			Session_RetainedSaveStamp( retainedLoadTimes[ index ], date, time );
@@ -10053,7 +10053,7 @@ void idSessionLocal::HandleRetainedSaveRequest( idUserInterface *gui, const char
 			gui->HandleNamedEvent( "overwriteModalShow" );
 			return;
 		}
-		// openPREY: a saved game closes the menu, as the stock page's does
+		// openPR06: a saved game closes the menu, as the stock page's does
 		// (saveGameOk).
 		if ( RetainedSaveGame( gui, name.c_str() ) ) {
 			ExitMenu();
@@ -10131,7 +10131,7 @@ void idSessionLocal::OpenRestartMenu() {
 	if ( Session_RetainedScreensEnabled() && guiRetainedRestartMenu == NULL ) {
 		guiRetainedRestartMenu = FindRetainedGui( RETAINED_RESTARTMENU_GUI, true, false );
 	}
-	// openPREY: the retained death screen is the frame and its buttons over
+	// openPR06: the retained death screen is the frame and its buttons over
 	// the stock screen's backdrop, wordmark and fade from black, which
 	// guis/restart.gui keeps drawing beneath it (idSessionLocal::Draw) while it
 	// leaves its own frame and buttons undrawn (gui::retainedHome).
@@ -10202,7 +10202,7 @@ idUserInterface *idSessionLocal::RetainedMultiplayerPage() {
 		return NULL;
 	}
 	// Quietly, as a home screen over a main menu without its pages.
-	// openPREY: Prey's MultiPrey page holds all three of its tabs and opens
+	// openPR06: Prey's MultiPrey page holds all three of its tabs and opens
 	// no stock page, so it needs no routes into the stock menu.
 	if ( false && !Session_RetainedMultiplayerRoutes( guiMainMenu ) ) {
 		if ( retainedStock.FindIndex( RETAINED_MPPAGE_GUI ) < 0 ) {
@@ -10274,7 +10274,7 @@ void idSessionLocal::HandleRetainedMultiplayerPageRequest( idUserInterface *gui,
 	if ( retainedMpPageDest != 0 || retainedSubpageFrom != NULL || guiMainMenu == NULL ) {
 		return;
 	}
-	// openPREY: Prey's MultiPrey page holds the stock page's three tabs.
+	// openPR06: Prey's MultiPrey page holds the stock page's three tabs.
 	if ( HandleRetainedMultiPreyRequest( gui, request ) ) {
 		return;
 	}
@@ -10386,7 +10386,7 @@ idUserInterface *idSessionLocal::RetainedSettingsPage() {
 		return NULL;
 	}
 	// Quietly, as a home screen over a main menu without its routes.
-	// openPREY: the Options page opens the stock page, on a tab it has not
+	// openPR06: the Options page opens the stock page, on a tab it has not
 	// rebuilt, through the stock menu's retainedPage_settings events.
 	if ( !UI_LegacyNamedEventExists( guiMainMenu, "retainedPage_settings" ) ||
 			!UI_LegacyNamedEventExists( guiMainMenu, "retainedPage_settingsReset" ) ) {
@@ -10455,7 +10455,7 @@ void idSessionLocal::HandleRetainedSettingsPageRequest( idUserInterface *gui, co
 	if ( retainedSettingsDest != 0 || retainedSubpageFrom != NULL || guiMainMenu == NULL ) {
 		return;
 	}
-	// openPREY: Prey's Options is one page of tabs (section 12.5 of the Prey
+	// openPR06: Prey's Options is one page of tabs (section 12.5 of the Prey
 	// visual specification), every tab of the stock page and its Reset
 	// Defaults dialog rebuilt. Back shrinks it into the bar.
 	{
@@ -11483,7 +11483,7 @@ void idSessionLocal::PublishRetainedJoinGame( idUserInterface *gui ) {
 		UI_RetainedPrecacheImage( retainedJoinShot.c_str() );
 	}
 	gui->SetStateString( "join.shot", chosen >= 0 ? retainedJoinShot.c_str() : RETAINED_LOAD_GENERIC_SHOT );
-	// openPREY: the chosen server as Prey's Selected Server tab shows it: its
+	// openPR06: the chosen server as Prey's Selected Server tab shows it: its
 	// name, map, game type, players and address, whether it asks for a
 	// password, and the first eight players' names.
 	{
@@ -11550,7 +11550,7 @@ the focus changes.
 */
 void idSessionLocal::UpdateRetainedJoinGame() {
 #ifndef ID_DEDICATED
-	// openPREY: Prey's MultiPrey page holds the server browser too.
+	// openPR06: Prey's MultiPrey page holds the server browser too.
 	idUserInterface *join = guiRetainedJoin != NULL && guiActive == guiRetainedJoin ? guiRetainedJoin :
 		guiRetainedMpPage != NULL && guiActive == guiRetainedMpPage ? guiRetainedMpPage : NULL;
 	if ( join == NULL ) {
@@ -11979,7 +11979,7 @@ void idSessionLocal::HandleRetainedJoinGameRequest( idUserInterface *gui, const 
 ===============
 idSessionLocal::PublishRetainedMultiPrey
 
-openPREY: what Prey's MultiPrey page shows as it opens, gathered as the stock
+openPR06: what Prey's MultiPrey page shows as it opens, gathered as the stock
 page's arrival gathers it: the player's name and the player models with their
 portraits (modelscan), Create Server's settings and the chosen game type's
 maps, and the server browser as InitServerBrowser leaves it, with a new list
@@ -12009,7 +12009,7 @@ void idSessionLocal::PublishRetainedMultiPrey( idUserInterface *page ) {
 ===============
 idSessionLocal::HandleRetainedMultiPreyRequest
 
-openPREY: the MultiPrey page's verbs. Player Settings names the player (its
+openPR06: the MultiPrey page's verbs. Player Settings names the player (its
 text, at most the stock field's 40 bytes) and chooses a model by its place in
 the player definition (mp.pick), as the stock portraits do; Create Server's
 verbs and Find Servers' are the Create Server and Join Game pages' own
@@ -12391,7 +12391,7 @@ idUserInterface *idSessionLocal::SelectRetainedLoadingGui( idUserInterface *lega
 		return legacy;
 	}
 	// Only the stock loading screens are replaced; a map's own GUI stays, and
-	// so does a mod's own copy of a stock one. openPREY: Prey loads every level
+	// so does a mod's own copy of a stock one. openPR06: Prey loads every level
 	// under one screen, guis/map/loading.gui.
 	static const char *stockScreens[] = {
 		"guis/map/loading.gui",
@@ -12514,7 +12514,7 @@ unique instance each open and is left alone.
 static const int RETAINED_WARM_DELAY_MSEC = 500;
 void idSessionLocal::WarmRetainedPages() {
 #ifndef ID_DEDICATED
-	// openPREY: Prey's pause also leads to SAVE GAME and CREDITS, and its
+	// openPR06: Prey's pause also leads to SAVE GAME and CREDITS, and its
 	// title to CREDITS. They load with the level or the title, but presented
 	// unprepared: SAVE GAME's first open compiled its artwork in that frame.
 	static const char *const leads[][7] = {
@@ -12904,7 +12904,7 @@ static bool Session_IsBuyMenu( idUserInterface *gui ) {
 	return gui != NULL && gui->State().GetBool( "gameDraw" ) && !idStr::Icmp( gui->Name(), "guis/buymenu.gui" );
 }
 
-// openPREY: the game's chat line (clientMessageMode), which the chat card
+// openPR06: the game's chat line (clientMessageMode), which the chat card
 // covers.
 static bool Session_IsChatLine( idUserInterface *gui ) {
 	return gui != NULL && gui->State().GetBool( "gameDraw" ) && !idStr::Icmp( gui->Name(), "guis/mpmsgmode.gui" );
@@ -13117,7 +13117,7 @@ void idSessionLocal::UpdateRetainedMultiplayer() {
 		// The Arena's pause menu takes its own card, and so does the buy menu.
 		const bool arena = Session_IsArenaPause( guiActive );
 		const bool buy = Session_IsBuyMenu( guiActive );
-		// openPREY: and so does the chat line.
+		// openPR06: and so does the chat line.
 		const bool chat = Session_IsChatLine( guiActive );
 		bool welcome = false;
 		if ( !summary && !arena && !buy && !chat ) {
@@ -13160,7 +13160,7 @@ void idSessionLocal::UpdateRetainedMultiplayer() {
 		card->SetStateBool( "mp.cover_allowed", false );
 		PreyGame_HandleMainMenuCommands( "retainedMultiplayerCover", card );
 		if ( chat ) {
-			// openPREY: the session answers for Prey's game module here too:
+			// openPR06: the session answers for Prey's game module here too:
 			// the card types the line on the channel the game opened the stock
 			// prompt on, and sends it as the stock field does. Prey's game draws
 			// the prompt itself (idMultiplayerGame::Draw), so the card hides it.
@@ -13171,7 +13171,7 @@ void idSessionLocal::UpdateRetainedMultiplayer() {
 			guiActive->SetPresentationValue( "MessageMode::visible", "0", false );
 			guiActive->SetPresentationValue( "Desktop::hideCursor", "1", false );
 		} else if ( !summary && !arena && !buy ) {
-			// openPREY: the session answers for Prey's game module, which keeps
+			// openPR06: the session answers for Prey's game module, which keeps
 			// its stock menu: the card shows that menu's state and sends its
 			// commands (Session_MirrorPreyGameMenu).
 			card->SetStateInt( "mp.protocol", RETAINED_MP_PROTOCOL );
@@ -13239,7 +13239,7 @@ void idSessionLocal::UpdateRetainedMultiplayer() {
 	PreyGame_HandleMainMenuCommands( "retainedMultiplayerState", guiRetainedMultiplayer );
 	if ( !retainedMultiplayerSummary && !retainedMultiplayerBuy && Session_IsGameMenu( guiActive ) &&
 			Session_MirrorPreyGameMenu( guiActive, guiRetainedMultiplayer ) ) {
-		// openPREY: what the game changed on its stock menu.
+		// openPR06: what the game changed on its stock menu.
 		guiRetainedMultiplayer->SetStateInt( "mp.revision", guiRetainedMultiplayer->State().GetInt( "mp.revision" ) + 1 );
 	}
 	const int revision = guiRetainedMultiplayer->State().GetInt( "mp.revision" );
@@ -13269,7 +13269,7 @@ void idSessionLocal::RetireRetainedMultiplayer( bool release ) {
 	const int now = common->GetPresentationTime();
 	guiRetainedMultiplayer = NULL;
 	if ( retainedMultiplayerTarget != NULL && Session_IsGameMenu( retainedMultiplayerTarget ) ) {
-		// openPREY: the stock menu the card hid (see UpdateRetainedMultiplayer).
+		// openPR06: the stock menu the card hid (see UpdateRetainedMultiplayer).
 		retainedMultiplayerTarget->SetPresentationValue( "BoxParent::visible", "1", false );
 		retainedMultiplayerTarget->SetPresentationValue( "Desktop::hideCursor", "0", false );
 	} else if ( retainedMultiplayerTarget != NULL && Session_IsChatLine( retainedMultiplayerTarget ) ) {
@@ -13307,7 +13307,7 @@ void idSessionLocal::RetainedMultiplayerFrameEvent() {
 	}
 }
 
-// openPREY: Prey's in-game multiplayer menu (guis/mpmain.gui) under its card,
+// openPR06: Prey's in-game multiplayer menu (guis/mpmain.gui) under its card,
 // guis/menu/mp_escape.rui. Prey's game module publishes nothing for a card:
 // the session copies what the game sets on its stock menu onto the card each
 // frame (UpdateMainGui, StartMenu, ModelScan, MAPScan and the chat history),
@@ -13481,7 +13481,7 @@ void idSessionLocal::HandleRetainedMultiplayerRequest( idUserInterface *gui, con
 		return;
 	}
 	if ( Session_IsChatLine( guiActive ) ) {
-		// openPREY: the chat card. Its line goes out as the stock field's
+		// openPR06: the chat card. Its line goes out as the stock field's
 		// chatmessage, on the channel the card's tabs chose, and Back closes
 		// the prompt; the game closes it after a line, as the stock does.
 		idUserInterface *prompt = guiActive;
@@ -13511,7 +13511,7 @@ void idSessionLocal::HandleRetainedMultiplayerRequest( idUserInterface *gui, con
 		return;
 	}
 	if ( Session_IsGameMenu( guiActive ) && !retainedMultiplayerSummary && !retainedMultiplayerBuy ) {
-		// openPREY: Prey's card. Each verb is the stock menu's own command,
+		// openPR06: Prey's card. Each verb is the stock menu's own command,
 		// with what that command reads set on the stock menu first, as its
 		// windows set it (guis/mpmain.gui).
 		idUserInterface *menu = guiActive;

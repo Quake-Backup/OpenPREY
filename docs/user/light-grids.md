@@ -3,13 +3,13 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-This guide covers openPREY's user-facing light-grid system: what it does, how to enable or disable it, how to bake data for one map or many maps, where the baked files go, and how to troubleshoot common problems.
+This guide covers openPR06's user-facing light-grid system: what it does, how to enable or disable it, how to bake data for one map or many maps, where the baked files go, and how to troubleshoot common problems.
 
-openPREY keeps the existing feature naming in the engine and README, so you will see both of these terms:
+openPR06 keeps the existing feature naming in the engine and README, so you will see both of these terms:
 - `light grid`
 - `irradiance volume`
 
-In practice they refer to the same openPREY feature: precomputed indirect diffuse lighting sampled from a 3D probe layout.
+In practice they refer to the same openPR06 feature: precomputed indirect diffuse lighting sampled from a 3D probe layout.
 
 ## Quick Start
 
@@ -20,7 +20,7 @@ seta r_useLightGrid 1
 seta r_showLightGrid 0
 ```
 
-openPREY's stock PREY menus have no light-grid option, so set it from the console. The retained interface inherited from openQ4 lists the same toggle under Settings → System → Irradiance Volumes when both `ui_retained 1` and `ui_retainedSystem 1` are set; it is not checked with PREY.
+openPR06's stock PREY menus have no light-grid option, so set it from the console. The retained interface inherited from openQ4 lists the same toggle under Settings → System → Irradiance Volumes when both `ui_retained 1` and `ui_retainedSystem 1` are set; it is not checked with PREY.
 
 Bake the currently loaded map from the in-game console:
 
@@ -31,7 +31,7 @@ bakeLightGrids
 Bake a list of maps from the command line, then quit when finished:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids game/roadhouse game/dmshuttle1 -quit
+openPR06-client_x64.exe +bakeLightGrids game/roadhouse game/dmshuttle1 -quit
 ```
 
 > [!WARNING]
@@ -50,7 +50,7 @@ Notes:
 
 ## What the System Does
 
-openPREY's current light-grid path:
+openPR06's current light-grid path:
 - adds indirect diffuse lighting from precomputed probes
 - prefers one `.lightgridpack` file per map when present
 - falls back to one `.lightgrid` metadata file plus baked per-area atlas images
@@ -69,10 +69,10 @@ Current scope and limits:
   weighted by their metalness and ambient occlusion, on OpenGL and Vulkan
 - LDR bake output
 - writes `.tga` atlas images, not BFG `.exr`
-- intended for openPREY's native bake/load path, not drop-in BFG asset parity
+- intended for openPR06's native bake/load path, not drop-in BFG asset parity
 - translucent effects, decals, and other non-lighting surfaces remain outside the runtime light-grid pass
 
-If no baked assets are found, openPREY leaves the runtime grid empty. Starting a light-grid bake generates the requested probe layout on demand; this avoids paying the collision and visibility setup cost on every stock-map load when there is no atlas to render.
+If no baked assets are found, openPR06 leaves the runtime grid empty. Starting a light-grid bake generates the requested probe layout on demand; this avoids paying the collision and visibility setup cost on every stock-map load when there is no atlas to render.
 
 ## Runtime Controls
 
@@ -125,9 +125,9 @@ bakeLightGrids
 ```
 
 After the bake completes:
-- openPREY writes the `.lightgridpack` runtime pack.
-- openPREY writes the `.lightgrid` metadata file.
-- openPREY writes loose fallback/debug atlases per area.
+- openPR06 writes the `.lightgridpack` runtime pack.
+- openPR06 writes the `.lightgrid` metadata file.
+- openPR06 writes loose fallback/debug atlases per area.
 - The newly written data is reloaded automatically.
 
 ## Batch Baking from the Command Line
@@ -137,23 +137,23 @@ This is the preferred workflow when you want progress information without manual
 Bake all maps:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids all -quit
+openPR06-client_x64.exe +bakeLightGrids all -quit
 ```
 
 Bake all multiplayer maps only:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids all-mp -quit
+openPR06-client_x64.exe +bakeLightGrids all-mp -quit
 ```
 
 Bake a selected list of maps:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids game/roadhouse game/feedingtowera game/dmshuttle1 -quit
+openPR06-client_x64.exe +bakeLightGrids game/roadhouse game/feedingtowera game/dmshuttle1 -quit
 ```
 
 Behavior:
-- openPREY discovers or accepts target map names.
+- openPR06 discovers or accepts target map names.
 - It loads each map automatically.
 - It uses the same unified `game_<arch>` module for SP and MP map discovery.
 - Without `force`, it skips maps whose `.lightgridpack` output already exists and whose stored bake-settings/layout hash matches the current bake. If no valid pack exists, it can still skip when the older `.lightgrid` metadata and required loose atlas files are complete.
@@ -161,8 +161,8 @@ Behavior:
 - It exits at the end if `-quit` is supplied.
 
 Important:
-- Use `openPREY-client_x64.exe`, not `openPREY-ded_x64.exe`.
-- Multiplayer-map baking requires a render-capable client path, so openPREY forces `net_serverDedicated 0` during that workflow when necessary.
+- Use `openPR06-client_x64.exe`, not `openPR06-ded_x64.exe`.
+- Multiplayer-map baking requires a render-capable client path, so openPR06 forces `net_serverDedicated 0` during that workflow when necessary.
 
 ## Bake Command Syntax
 
@@ -173,10 +173,10 @@ bakeLightGrids [all | all-mp | <map> ...] [force] [-quit] [limit<num>] [bounce<n
 ```
 
 If no map names are given:
-- openPREY bakes the currently loaded map.
+- openPR06 bakes the currently loaded map.
 
 If map names, `all`, or `all-mp` are given:
-- openPREY runs in batch mode and loads maps automatically.
+- openPR06 runs in batch mode and loads maps automatically.
 - Multiplayer targets are cheat-protected. Enable cheats first with `sv_cheats 1` or `net_allowCheats 1`.
 
 ### Bake Options
@@ -189,7 +189,7 @@ If map names, `all`, or `all-mp` are given:
 | `force` | `bakeLightGrids force` | Remove existing outputs for the target map(s) and rebuild them even if all required files already exist. |
 | `-quit` | `+bakeLightGrids all -quit` | Quit after the batch completes. |
 | `limit<num>` | `limit2048` | Maximum probe count per area before the grid spacing grows. |
-| `bounce<num>` | `bounce2` | Number of bake passes. Bounce 2+ reuses the previous openPREY bake through the runtime light-grid path. |
+| `bounce<num>` | `bounce2` | Number of bake passes. Bounce 2+ reuses the previous openPR06 bake through the runtime light-grid path. |
 | `size<num>` | `size256` | Cubemap capture resolution used during baking. |
 | `blends<num>` | `blends4` | Number of capture blends/jittered accumulations per face. |
 | `samples<num>` | `samples256` | Irradiance integration samples per output texel. |
@@ -201,21 +201,21 @@ If map names, `all`, or `all-mp` are given:
 Fast test bake:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids game/roadhouse size64 samples32 limit1024 -quit
+openPR06-client_x64.exe +bakeLightGrids game/roadhouse size64 samples32 limit1024 -quit
 ```
 
-Maps the bake command treats as multiplayer (an `mp/` prefix) need cheats enabled first, for example `openPREY-client_x64.exe +set sv_cheats 1 +bakeLightGrids <map> -quit`. PREY's `game/dm*` maps currently don't count.
+Maps the bake command treats as multiplayer (an `mp/` prefix) need cheats enabled first, for example `openPR06-client_x64.exe +set sv_cheats 1 +bakeLightGrids <map> -quit`. PREY's `game/dm*` maps currently don't count.
 
 Balanced quality:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids game/roadhouse size128 samples128 blends1 bounce1 grid 64 64 128 -quit
+openPR06-client_x64.exe +bakeLightGrids game/roadhouse size128 samples128 blends1 bounce1 grid 64 64 128 -quit
 ```
 
 Higher-quality bake:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids game/roadhouse size256 samples256 blends2 bounce2 grid 48 48 96 -quit
+openPR06-client_x64.exe +bakeLightGrids game/roadhouse size256 samples256 blends2 bounce2 grid 48 48 96 -quit
 ```
 
 Practical tuning advice:
@@ -250,7 +250,7 @@ env/maps/game/roadhouse/area1_lightgrid_pos.tga
 
 What each file is for:
 - `maps/.../*.lightgridpack`
-  Preferred runtime artifact. It stores the probe metadata plus an indexed set of per-area irradiance, visibility, and probe-position image chunks in the engine's binary image payload format, letting openPREY load the current/neighbor areas from one map-local file.
+  Preferred runtime artifact. It stores the probe metadata plus an indexed set of per-area irradiance, visibility, and probe-position image chunks in the engine's binary image payload format, letting openPR06 load the current/neighbor areas from one map-local file.
 - `maps/.../*.lightgrid`
   Loose fallback/debug metadata. It stores probe layout metadata, area assignment, bounds, spacing, probe origins, and deterministic bake stats used to detect stale outputs.
 - `env/maps/.../area*_lightgrid_amb.tga`
@@ -260,7 +260,7 @@ What each file is for:
 - `env/maps/.../area*_lightgrid_pos.tga`
   Loose fallback/debug compact per-probe relocation offsets so runtime visibility checks use the actual baked probe positions instead of ideal grid centers.
 
-openPREY loads these files automatically when the corresponding map is loaded. A valid `.lightgridpack` wins on every renderer: one that cannot sample DXT textures (OpenGL ES without S3TC, as on most Mali and PowerVR GPUs) decodes the pack's DXT irradiance atlases on the CPU, so it never needs the loose TGAs. `r_lightGridSoftwareDecode 1` forces that path on any renderer for testing.
+openPR06 loads these files automatically when the corresponding map is loaded. A valid `.lightgridpack` wins on every renderer: one that cannot sample DXT textures (OpenGL ES without S3TC, as on most Mali and PowerVR GPUs) decodes the pack's DXT irradiance atlases on the CPU, so it never needs the loose TGAs. `r_lightGridSoftwareDecode 1` forces that path on any renderer for testing.
 
 ### Checking packs
 
@@ -293,7 +293,7 @@ Then:
 ### 2. Batch Bake a Whole Asset Set Overnight
 
 ```text
-openPREY-client_x64.exe +set logFileName logs/openprey_lightgrids.log +bakeLightGrids all -quit
+openPR06-client_x64.exe +set logFileName logs/openpr06_lightgrids.log +bakeLightGrids all -quit
 ```
 
 This gives you:
@@ -306,7 +306,7 @@ This gives you:
 Name them explicitly, since `all-mp` doesn't find PREY's multiplayer maps yet:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids force game/dmshuttle1 game/dmshuttle2 game/dmroadhouse -quit
+openPR06-client_x64.exe +bakeLightGrids force game/dmshuttle1 game/dmshuttle2 game/dmroadhouse -quit
 ```
 
 ### 4. Force a Clean Re-Bake of the Current Map
@@ -344,13 +344,13 @@ Fix:
 - Or use explicit map targets:
 
 ```text
-openPREY-client_x64.exe +bakeLightGrids game/roadhouse -quit
+openPR06-client_x64.exe +bakeLightGrids game/roadhouse -quit
 ```
 
 ### `bakeLightGrids: no valid map targets were found.`
 
 Cause:
-- The supplied map names were wrong or not found by openPREY.
+- The supplied map names were wrong or not found by openPR06.
 
 Fix:
 - Use map paths without the `.map` extension.
@@ -437,7 +437,7 @@ r_showLightGrid 0
 
 ## Limitations and Expectations
 
-openPREY's current light-grid system is intentionally scoped. End users should expect:
+openPR06's current light-grid system is intentionally scoped. End users should expect:
 - indirect diffuse only
 - no specular/reflection-probe lighting from this system
 - no HDR/EXR bake output
@@ -446,11 +446,11 @@ openPREY's current light-grid system is intentionally scoped. End users should e
 - loose per-area atlas files retained as fallback/debug outputs
 - console/log progress rather than a fully interactive bake UI
 
-That is by design for the current openPREY implementation.
+That is by design for the current openPR06 implementation.
 
 ## Log and Console Output
 
-During batch bakes, openPREY reports:
+During batch bakes, openPR06 reports:
 - map load progress
 - module switches between SP and MP
 - bounce count
@@ -464,7 +464,7 @@ During batch bakes, openPREY reports:
 If you want a separate bake log:
 
 ```text
-openPREY-client_x64.exe +set logFileName logs/openprey_lightgrids.log +bakeLightGrids all -quit
+openPR06-client_x64.exe +set logFileName logs/openpr06_lightgrids.log +bakeLightGrids all -quit
 ```
 
 On a standard local setup, logs are written under `fs_savepath/basepr/logs/`.

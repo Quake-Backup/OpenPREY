@@ -11,7 +11,7 @@ so it renders in ordinary gameplay next to stock surfaces, and every light
 keeps its own shadows. A material the renderer cannot prove keeps its authored
 classic stages.
 
-openPREY's first rendering target is the legacy GL/ARB2 interaction path that
+openPR06's first rendering target is the legacy GL/ARB2 interaction path that
 matches PREY's original materials. Full PREY parity on the ModernGL and Vulkan
 paths is deferred (`TODO-RENDER-BACKENDS` in the
 [rebase status ledger](../dev/prey-rebase/status-ledger.md#explicit-deferral-register)),
@@ -272,5 +272,5 @@ The PBR laboratory and Vulkan regression scripts under `tools/tests/`
 (`renderer_pbr_laboratory.py` and the `renderer_vulkan_pbr_*.py` family) are
 inherited from openQ4. They still build their test runtime around openQ4's
 `baseoq4` game directory and a retail Quake 4 install, so they don't run
-against openPREY yet. Use the engine's `screenshot` command and `gfxInfo` to
+against openPR06 yet. Use the engine's `screenshot` command and `gfxInfo` to
 check PBR content by hand until they're ported.

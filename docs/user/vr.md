@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-openPREY's engine carries openQ4's OpenXR support for PC VR headsets. It draws
+openPR06's engine carries openQ4's OpenXR support for PC VR headsets. It draws
 the game in stereo at your headset's resolution, tracks your head, turns a
 motion controller's aim into player input, and shows the HUD, menus, loading
 screens and video cinematics on floating screens in front of you.
@@ -19,7 +19,7 @@ it.
 
 openQ4 built part of its VR support into its Quake 4 game code. PREY's game
 module, built from the PREY SDK, has no VR-specific code, so these parts are
-missing in openPREY:
+missing in openPR06:
 
 - the gun drawn in your hand and shots leaving it (the `vr_weaponOffset*` and
   `vr_weaponPitch` settings have nothing to move);
@@ -45,8 +45,8 @@ The engine-side parts described below still apply.
   so turning VR on for the first time restarts the renderer once.
 - On Linux, either renderer works on an X11 desktop. On a Wayland desktop,
   use Vulkan, or OpenGL with a runtime that can bind it there (Monado can;
-  SteamVR cannot, so with SteamVR start openPREY with the environment variable
-  `OPENPREY_FORCE_X11=1` to run it through XWayland).
+  SteamVR cannot, so with SteamVR start openPR06 with the environment variable
+  `OPENPR06_FORCE_X11=1` to run it through XWayland).
 
 ## Turning VR on
 
@@ -62,7 +62,7 @@ checked with PREY; the console settings below cover everything it sets.
 When VR is on, the desktop window shows what your left eye sees. To turn VR
 off again, enter `vr_enable 0`.
 
-If the headset isn't connected yet, openPREY waits for it and starts VR as soon
+If the headset isn't connected yet, openPR06 waits for it and starts VR as soon
 as it appears.
 
 In single player, taking the headset off or opening your runtime's own menu
@@ -200,7 +200,7 @@ resolution stays off in VR. MSAA (`r_multiSamples`) and SMAA work as well. See
 ## Multiplayer
 
 Your aim reaches the server the same way a mouse's does, so a VR player can
-join an openPREY server without anything extra on the server. Shots leave from
+join an openPR06 server without anything extra on the server. Shots leave from
 your view, as they do on the desktop.
 
 ## Troubleshooting
@@ -217,8 +217,8 @@ events.
 - **"does not support Vulkan"** or **"does not support OpenGL"**: switch
   `r_renderApi` to the other renderer and restart.
 - **"cannot bind it ... native Wayland"**: your runtime can't use OpenGL on a
-  Wayland desktop. Use `r_renderApi vulkan`, or start openPREY with
-  `OPENPREY_FORCE_X11=1`.
+  Wayland desktop. Use `r_renderApi vulkan`, or start openPR06 with
+  `OPENPR06_FORCE_X11=1`.
 - **"the runtime did not create the Vulkan renderer's device"**: the runtime
   refused to make the Vulkan device for your headset, so VR stays off;
   `vr_restart` tries again.

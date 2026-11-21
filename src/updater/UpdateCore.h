@@ -45,9 +45,9 @@ version.
 namespace openq4 {
 namespace update {
 
-// openPREY: the product a manifest must name, and the game folder its packs
+// openPR06: the product a manifest must name, and the game folder its packs
 // stage into beside the executables.
-static constexpr const char *PRODUCT = "openPREY";
+static constexpr const char *PRODUCT = "openPR06";
 static constexpr const char *GAME_DIR = "basepr";
 static constexpr const char *MANIFEST_ASSET = "openq4-update.json";
 static constexpr const char *SIGNATURE_ASSET = "openq4-update.json.sig";

@@ -30,7 +30,7 @@ The result must:
 
 ### Preserve the Prey v7 boundary
 
-The engine-side `OPENPREY_ENABLE_BOTS` path depends on callbacks and bot
+The engine-side `OPENPR06_ENABLE_BOTS` path depends on callbacks and bot
 metadata that are not part of Prey's game API v7. Enabling it would neither
 identify the selected character to the game nor satisfy the rebase requirement
 to preserve the ABI.
@@ -222,7 +222,7 @@ invented derogatory language.
    - Package them in `pak0.pk4`; do not stage loose botfiles in `.install`.
    - Port and activate `tools/tests/mp_bot_characters.py` for the Prey schema,
      v7 lifecycle, exact roster, all content cardinalities, and chat safety.
-   - Keep `mp_bot_navigation.py` explicitly deferred until openPREY has an
+   - Keep `mp_bot_navigation.py` explicitly deferred until openPR06 has an
      honest Prey-aware navigation contract.
 
 ## Acceptance gates
@@ -261,7 +261,7 @@ Completed on 2026-08-02:
   `.style`, 19 `.bot`, and 19 `.chat` files. No loose staged botfiles or import
   libraries remain in `.install`.
 - The direct-build dedicated smoke at
-  `.tmp/mp-bot-final-builddir-20260802-123036/basepr/logs/openprey.log` loaded
+  `.tmp/mp-bot-final-builddir-20260802-123036/basepr/logs/openpr06.log` loaded
   six styles and 19 characters, exercised four distinct named bots and skill
   levels, emitted authored chat, reloaded live content, removed bots, and shut
   down without a bot parser or identity error.

@@ -1,16 +1,18 @@
-"""Rebuild openPREY's TrueType faces.
+"""Rebuild openPR06's TrueType faces.
 
 Usage:
-    python build_openprey_fonts.py --source .tmp/prey-fontsrc
+    python build_openpr06_fonts.py --source .tmp/prey-fontsrc
         --donors .tmp/fontdonors --output content/basepr/pak0/fonts
-        [--faces english,menu,alien,bigchars]
+        [--faces talon-ui-condensed,menu,alien,bigchars]
 
 ``menu``, ``alien`` and ``bigchars`` are traced from Prey's retail bitmap fonts,
-extracted into the source directory by ``extract_source_fonts.py``. ``english``
-is Talon, drawn in ``talon/``; it needs no retail source, so ``--source`` may
-be left out when only it is built. The output file names deliberately match
-the paths used by the renderer after it resolves ``fonts``, ``fonts/menu`` and
-``fonts/alien`` through ``fonts/english``.
+extracted into the source directory by ``extract_source_fonts.py``; their file
+names match the paths the renderer resolves ``fonts/menu`` and ``fonts/alien``
+to. ``talon-ui-condensed`` is Talon UI Condensed, openPR06's own interface and
+HUD face, drawn in ``talon/``. It replaces Prey's narrow body face (the bare
+``fonts`` face, which resolves to ``fonts/english``), and the renderer loads it
+for that face by name (``R_TTF_BODY_FACE_FILE``). It needs no retail source, so
+``--source`` may be left out when only it is built.
 """
 from __future__ import annotations
 
@@ -183,11 +185,11 @@ class TalonFaceBuilder(FaceBuilder):
         font = TTFont(str(destination))
         font.recalcTimestamp = False
         names = font["name"]
-        names.setName("(c) 2026 DarkMatter Productions. Talon is part of openPREY.", 0, 3, 1, 0x409)
+        names.setName("(c) 2026 DarkMatter Productions. Talon UI Condensed is part of openPR06.", 0, 3, 1, 0x409)
         names.setName(
-            "Talon is original openPREY work, drawn on Impact's proportions with the squared bowls of the "
+            "Talon UI Condensed is original openPR06 work, drawn on Impact's proportions with the squared bowls of the "
             "PREY wordmark; no outline is traced from retail art. Licensed under the SIL Open Font License 1.1. "
-            "Glyphs for scripts Talon does not draw are derived from the Noto fonts, (c) Google, also licensed "
+            "Glyphs for scripts it does not draw are derived from the Noto fonts, (c) Google, also licensed "
             "under the SIL Open Font License 1.1.",
             13, 3, 1, 0x409,
         )
@@ -198,38 +200,38 @@ class TalonFaceBuilder(FaceBuilder):
 PREY_BITMAP_ATTRIBUTION = "the Prey (2006) bitmap fonts by Human Head Studios and 3D Realms"
 
 FACES: dict[str, FaceSpec] = {
-    "english": FaceSpec(
+    "talon-ui-condensed": FaceSpec(
         source="fonts/english",
-        family="openPREY Talon",
-        description="openPREY's default UI and HUD face, drawn for openPREY.",
+        family="Talon UI Condensed",
+        description="Talon UI Condensed: openPR06's condensed interface face for setting rows, buttons, lists, dialogs, help and HUD text. It replaces Prey's narrow body face.",
         prey_format=True,
-        project_name="openPREY",
+        project_name="openPR06",
         bitmap_attribution=PREY_BITMAP_ATTRIBUTION,
     ),
     "menu": FaceSpec(
         source="fonts/english/menu",
-        family="openPREY Menu",
+        family="openPR06 Menu",
         description="Prey's menu face.",
         prey_format=True,
-        project_name="openPREY",
+        project_name="openPR06",
         bitmap_attribution=PREY_BITMAP_ATTRIBUTION,
     ),
     "alien": FaceSpec(
         source="fonts/english/alien",
-        family="openPREY Alien",
+        family="openPR06 Alien",
         all_caps=True,
         extended=False,
         description="Prey's alien glyph face; Latin characters map to its retail symbols.",
         prey_format=True,
-        project_name="openPREY",
+        project_name="openPR06",
         bitmap_attribution=PREY_BITMAP_ATTRIBUTION,
     ),
     "bigchars": FaceSpec(
         source="textures/gfx/bigchars",
-        family="openPREY BigChars",
+        family="openPR06 BigChars",
         grid_atlas="textures/gfx/bigchars.tga",
         description="Prey's fixed-cell console and loading-screen face.",
-        project_name="openPREY",
+        project_name="openPR06",
         bitmap_attribution=PREY_BITMAP_ATTRIBUTION,
     ),
 }
@@ -246,8 +248,8 @@ def composable_codepoints(second_pass: bool = False) -> list[int]:
     return wanted
 
 
-# Faces drawn for openPREY rather than traced from a retail atlas.
-DRAWN_FACES = {"english"}
+# Faces drawn for openPR06 rather than traced from a retail atlas.
+DRAWN_FACES = {"talon-ui-condensed"}
 
 
 def build_drawn_face(key: str, spec: FaceSpec, donors: Path, output: Path) -> dict:
@@ -315,7 +317,7 @@ def build_face(key: str, spec: FaceSpec, source: Path, donors: Path, output: Pat
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, help="retail font extraction; not needed for english")
+    parser.add_argument("--source", type=Path, help="retail font extraction; not needed for talon-ui-condensed")
     parser.add_argument("--donors", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--faces", default="")

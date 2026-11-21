@@ -1,6 +1,6 @@
 # Multiplayer bot characters
 
-openPREY multiplayer ships a data-driven cast built on Prey's own artificial
+openPR06 multiplayer ships a data-driven cast built on Prey's own artificial
 player. Each bot is a normal multiplayer player entity with a retail model,
 skill-scaled execution, a recognizable way of fighting, and a separate voice.
 This guide describes the runtime contract, content format, operator controls,
@@ -45,7 +45,7 @@ snapshot carries the same dictionary as a fallback. Team DM assigns a new bot
 to the less-populated team once and preserves that team across a content reload.
 
 This is an important compatibility choice. The old engine-side
-`OPENPREY_ENABLE_BOTS` path is compiled out because it expects callbacks and
+`OPENPR06_ENABLE_BOTS` path is compiled out because it expects callbacks and
 metadata absent from Prey's v7 game contract. The character system adds no
 virtual to the engine/game boundary and keeps `GAME_API_VERSION` at 7.
 

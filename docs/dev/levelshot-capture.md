@@ -1,9 +1,9 @@
 # Levelshot capture
 
-openPREY ships recaptures of retail Prey's loading screens with the tiles a
+openPR06 ships recaptures of retail Prey's loading screens with the tiles a
 wide or tall window needs around them. Each set is a faithful copy of the
 retail picture: the retail camera is recovered from the art, and the set is
-rendered there by openPREY with shadow maps for every light. This page covers
+rendered there by openPR06 with shadow maps for every light. This page covers
 what ships, how the engine uses it, how the sets were made, and how to make
 them again.
 
@@ -45,12 +45,12 @@ pak2 holds all 33 of retail's in-game loading screens and the roadhouse tiles:
   4. the generic `guis/assets/loading/loading.tga`.
 
   The menus' pictures under `loading/thumbs/` are never the loading art.
-  openPREY drops step 1: a save's preview screenshot is never the loading
+  openPR06 drops step 1: a save's preview screenshot is never the loading
   backdrop, so a save loads under its map's loading art like any other load.
   `Session_FindMapLoadingImage` (`Session.cpp`) follows steps 2 to 4 for the
   stock screen, the retained screen (`guis/loading/loading.rui`,
   `prey-ui-visual-design.md` section 12.5) and the retained pause shot.
-  openPREY adds a mapDef's `loadimage` ahead of them (no retail mapDef has
+  openPR06 adds a mapDef's `loadimage` ahead of them (no retail mapDef has
   one), and copies an addon map's `_left`, `_right`,
   `_top` and `_bottom` tiles beside its picture.
 - **Wide and tall windows.** The session composes the centre and its tiles
@@ -59,7 +59,7 @@ pak2 holds all 33 of retail's in-game loading screens and the roadhouse tiles:
   composition. A picture without both of the tiles its window needs (a save's
   screenshot, `feedingtowera`, most addon art) is drawn at 4:3; its edge
   columns were stretched across the rest before.
-- **The stock screen's default.** openPREY's `guis/map/loading.gui` set the
+- **The stock screen's default.** openPR06's `guis/map/loading.gui` set the
   generic picture in `onTime 0` whenever `gui::loading_bkgnd` equalled `""`.
   GUI expressions compare as numbers, so every image name equalled `""` and
   the stock screen always showed the generic picture. The session sets the
@@ -121,7 +121,7 @@ The capture pins live in `tools/assets/levelshots/capture.py`:
 - **Beams face the view again** (`spindlea`'s forcefield beams). Retail's
   `.beam` model builds a view-independent ribbon, three rows of nodes on the
   beam's local X with the side rows on Y, and the beam materials'
-  `deform beam` turns it to the viewer. openPREY's model built the ribbon
+  `deform beam` turns it to the viewer. openPR06's model built the ribbon
   facing the view already, so the deform turned it edge-on and every beam
   with that deform vanished. `hhRenderModelBeam` now builds retail's
   template, from `PREY.exe` 1.4 (`Model_hhBeam.cpp`).
@@ -134,7 +134,7 @@ The capture pins live in `tools/assets/levelshots/capture.py`:
   multiplayer maps' hexagonal wall-walk panels (`textures/special/wallwalk`,
   whose additive stage is a `glowStage`) as thick white outlines that read as
   a hexagon twice the size; with the overlay off the pattern already matched.
-  openPREY draws the glow-only view at full size, so the depth later passes
+  openPR06 draws the glow-only view at full size, so the depth later passes
   read stays intact, and box-reduces it to the 256x256 image by repeated
   halving. The overlay is skipped when nothing in the view has a glow stage.
   Measured at `dmshuttle2`'s camera, the panels' mean colour is within 2 of
@@ -150,7 +150,7 @@ The capture pins live in `tools/assets/levelshots/capture.py`:
   above the window. Retail creates a light's interaction with a surface only
   if the surface has lighting stages, fog and blend lights included
   (`idInteraction::CreateInteraction` in `PREY.exe` 1.4, Doom 3's rule).
-  openPREY used Quake 4's rule for fog and blend lights, `ReceivesFog()`,
+  openPR06 used Quake 4's rule for fog and blend lights, `ReceivesFog()`,
   which also takes ambient-only surfaces, so the fog painted the
   skyboxportal surface black over the sky (`Interaction.cpp`). The window
   frame, which is lit, still fogs black, as in retail.
@@ -312,7 +312,7 @@ after the set.
 ## Making them again
 
 ```
-set OPENPREY_RETAIL_BASE=C:\path\to\Prey\base
+set OPENPR06_RETAIL_BASE=C:\path\to\Prey\base
 python tools/assets/levelshots/levelshots.py solve a <map> ...
 python tools/assets/levelshots/levelshots.py capture a [<set> ...]
 python tools/assets/levelshots/levelshots.py stage [<set> ...]

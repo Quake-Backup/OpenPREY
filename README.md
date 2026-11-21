@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="assets/docs/img/banner.png" alt="openPREY">
+<img src="assets/docs/img/banner.png" alt="openPR06">
 
 **The modern way to play PREY.**<br>
 An open-source engine and game-code replacement that runs the original 2006 game on today's Windows and Linux PCs.
@@ -12,42 +12,42 @@ An open-source engine and game-code replacement that runs the original 2006 game
 [![Licensing](https://img.shields.io/badge/licence-GPL%20engine%20%7C%20SDK%20game%20code-blue.svg)](LICENSING.md)
 [![Proudly vibecoded](assets/docs/img/badge-proudly-vibecoded.svg)](AGENTS.md)
 
-[![Build openPREY from source](https://img.shields.io/badge/Build-openPREY%20from%20source-2d8f4e?style=for-the-badge&logo=github)](BUILDING.md)
+[![Build openPR06 from source](https://img.shields.io/badge/Build-openPR06%20from%20source-2d8f4e?style=for-the-badge&logo=github)](BUILDING.md)
 [![Join the DarkMatter Discord](https://img.shields.io/badge/Join%20the-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/T32mFejwR4)
 
 [Quick start](#quick-start) · [Features](#features) · [Platforms](#platforms-and-requirements) · [Guides](#player-guides) · [Help](#getting-help) · [Build from source](BUILDING.md)
 
 </div>
 
-## What is openPREY?
+## What is openPR06?
 
-openPREY replaces PREY's engine and game binaries with its own: a GPL engine built on [openQ4](https://github.com/themuffinator/openQ4) and a source-available game module built from the PREY SDK. Your original campaign and multiplayer maps load from the retail game files, now with modern window and display handling, a choice of OpenGL or Vulkan rendering and one game module for single-player and multiplayer.
+openPR06 replaces PREY's engine and game binaries with its own: a GPL engine built on [openQ4](https://github.com/themuffinator/openQ4) and a source-available game module built from the PREY SDK. Your original campaign and multiplayer maps load from the retail game files, now with modern window and display handling, a choice of OpenGL or Vulkan rendering and one game module for single-player and multiplayer.
 
 > [!NOTE]
-> openPREY does **not** include any PREY game data. You need your own copy of PREY (2006), from the original discs or another legitimate source.
+> openPR06 does **not** include any PREY game data. You need your own copy of PREY (2006), from the original discs or another legitimate source.
 
 > [!IMPORTANT]
-> openPREY is in **early development** and has no release yet. Representative campaign maps, save/load and a two-client multiplayer session have been played on it, but full campaign completion and multiplayer parity aren't claimed. See [release status](docs/user/release-status.md).
+> openPR06 is in **early development** and has no release yet. Representative campaign maps, save/load and a two-client multiplayer session have been played on it, but full campaign completion and multiplayer parity aren't claimed. See [release status](docs/user/release-status.md).
 
 ## Quick start
 
-Until the first release, you build openPREY yourself:
+Until the first release, you build openPR06 yourself:
 
-1. Install **PREY (2006)**. Leave it where it is; openPREY keeps to its own folder.
-2. Build and stage openPREY with [BUILDING.md](BUILDING.md). The staged package lands in `.install/`.
-3. Launch `openPREY-client_x64` (`.exe` on Windows) from `.install/`.
-4. openPREY finds your PREY install on its own. If it doesn't, launch with `+set r_fullscreen 0 +set fs_basepath "C:\path\to\Prey"`, pointing at the folder that contains `base`, not at `base` itself. See [If auto-detection fails](docs/user/getting-started.md#if-auto-detection-fails).
+1. Install **PREY (2006)**. Leave it where it is; openPR06 keeps to its own folder.
+2. Build and stage openPR06 with [BUILDING.md](BUILDING.md). The staged package lands in `.install/`.
+3. Launch `openPR06-client_x64` (`.exe` on Windows) from `.install/`.
+4. openPR06 finds your PREY install on its own. If it doesn't, launch with `+set r_fullscreen 0 +set fs_basepath "C:\path\to\Prey"`, pointing at the folder that contains `base`, not at `base` itself. See [If auto-detection fails](docs/user/getting-started.md#if-auto-detection-fails).
 
 > [!TIP]
-> Don't copy retail `.pk4` files into `basepr/`. That folder is for openPREY's own files.
+> Don't copy retail `.pk4` files into `basepr/`. That folder is for openPR06's own files.
 
-The [Releases page](https://github.com/themuffinator/openPREY/releases) still lists nightly builds from April 2026. They predate openPREY's move onto the current openQ4 engine and don't match this README.
+The [Releases page](https://github.com/themuffinator/openPR06/releases) still lists nightly builds from April 2026. They predate openPR06's move onto the current openQ4 engine and don't match this README.
 
 ## Features
 
 What the current code does:
 
-- 💿 **Finds CD-era installs.** openPREY checks the folder it starts in, the Windows registry (install keys, App Paths and uninstall entries) and the usual install folders such as `Human Head Studios\Prey` and `2K Games\Prey`. It doesn't depend on Steam or GOG. On Linux it looks in `~/Games/Prey`.
+- 💿 **Finds CD-era installs.** openPR06 checks the folder it starts in, the Windows registry (install keys, App Paths and uninstall entries) and the usual install folders such as `Human Head Studios\Prey` and `2K Games\Prey`. It doesn't depend on Steam or GOG. On Linux it looks in `~/Games/Prey`.
 - ✅ **Checks your game files.** Startup confirms the official base packs are present. The consolidated retail layout is checksum-verified; CD-era numbered packs are checked for presence until their checksums are recorded.
 - 🎮 **One module for every mode.** A single `game_x64` module, built from the PREY SDK, runs single-player and multiplayer.
 - 🖥️ **Modern window handling** through SDL3: windowed, borderless, desktop fullscreen and exclusive fullscreen, monitor selection with `r_screen`, and aspect ratio and FOV that follow the render size. Linux runs native Wayland or X11.
@@ -65,10 +65,10 @@ Active CI builds Windows x64 and Linux x64 on every push. No packages are publis
 | Platform | State | Notes |
 |---|---|---|
 | **Windows x64** | Built in CI; most runtime testing happens here | Windows 10/11 recommended |
-| **Linux x64** | Built in CI | A modern 64-bit desktop, comparable to Ubuntu 24.04 or newer. SDL3 picks Wayland or X11; set `OPENPREY_FORCE_X11=1` to force XWayland |
-| **Steam Deck / SteamOS** | Launcher in Linux builds | Run `openPREY-steamdeck`; inherited from openQ4, not yet checked with PREY. See the [Steam Deck guide](docs/user/steam-deck.md) |
-| **Linux AppImage** | Not produced yet | `tools/build/package_linux_appimage.py` is rebranded for openPREY (`x86_64` and `aarch64` names), but nothing runs it until the release lane is rebuilt |
-| **Linux ARM64** | Not supported yet | openQ4's ARM64 lanes are switched off until they're rebuilt for openPREY |
+| **Linux x64** | Built in CI | A modern 64-bit desktop, comparable to Ubuntu 24.04 or newer. SDL3 picks Wayland or X11; set `OPENPR06_FORCE_X11=1` to force XWayland |
+| **Steam Deck / SteamOS** | Launcher in Linux builds | Run `openPR06-steamdeck`; inherited from openQ4, not yet checked with PREY. See the [Steam Deck guide](docs/user/steam-deck.md) |
+| **Linux AppImage** | Not produced yet | `tools/build/package_linux_appimage.py` is rebranded for openPR06 (`x86_64` and `aarch64` names), but nothing runs it until the release lane is rebuilt |
+| **Linux ARM64** | Not supported yet | openQ4's ARM64 lanes are switched off until they're rebuilt for openPR06 |
 | **macOS** | Not supported yet | The build files cover macOS hosts, but CI doesn't build or test it and there's no package |
 | **Windows ARM64** | Not supported yet | Switched off, as for Linux ARM64 |
 
@@ -99,42 +99,42 @@ Start with [release status](docs/user/release-status.md): what works today and w
 
 ## Compatibility
 
-- openPREY runs the **official retail PREY (2006) assets** with its **own engine and game module**.
+- openPR06 runs the **official retail PREY (2006) assets** with its **own engine and game module**.
 - Mods built for the original proprietary PREY game DLLs won't load.
-- For multiplayer, use matching openPREY builds on every client and server.
-- openPREY is in **early development**: compatibility work is ongoing.
+- For multiplayer, use matching openPR06 builds on every client and server.
+- openPR06 is in **early development**: compatibility work is ongoing.
 
 ## Getting help
 
-- **Something broken?** Open an [issue](https://github.com/themuffinator/openPREY/issues) with your setup details and a log: launch with `+set logFile 2`, reproduce the problem and attach the `qconsole.log` it writes to your save folder.
+- **Something broken?** Open an [issue](https://github.com/themuffinator/openPR06/issues) with your setup details and a log: launch with `+set logFile 2`, reproduce the problem and attach the `qconsole.log` it writes to your save folder.
 - **Crashed on Windows?** Attach the log and minidump from the `crashes/` folder beside the executable.
 - **Building on a Mac?** macOS isn't supported yet, but the [macOS support-data guide](docs/user/macos-support-data.md) shows what a useful report contains.
 - **Want to chat?** Find us on the [DarkMatter Discord](https://discord.gg/T32mFejwR4).
 
 ## For developers
 
-- [BUILDING.md](BUILDING.md): build openPREY on Windows, Linux and macOS hosts
+- [BUILDING.md](BUILDING.md): build openPR06 on Windows, Linux and macOS hosts
 - [TECHNICAL.md](TECHNICAL.md): compatibility status, file layout, configuration and dependencies
 - [AGENTS.md](AGENTS.md): project rules, including the licence boundary between engine and game code
 - [Source layout](docs/dev/source-layout.md): where new code and vendored libraries go
-- [The rebase plan](docs/dev/prey-rebase/plan.md): how openPREY moved onto openQ4 and adapts upstream engine changes
-- [Platform support](docs/dev/platform-support.md): what each platform needs before openPREY claims it
+- [The rebase plan](docs/dev/prey-rebase/plan.md): how openPR06 moved onto openQ4 and adapts upstream engine changes
+- [Platform support](docs/dev/platform-support.md): what each platform needs before openPR06 claims it
 - [CONTRIBUTING.md](.github/CONTRIBUTING.md): project conventions for pull requests
 
 ## Credits
 
-**themuffinator** leads openPREY's development, with stewardship from **DarkMatter Productions**. openPREY stands on **Human Head Studios**' PREY and its SDK, and on the **[openQ4](https://github.com/themuffinator/openQ4)** engine, which brings the work of everyone credited there with it.
+**themuffinator** leads openPR06's development, with stewardship from **DarkMatter Productions**. openPR06 stands on **Human Head Studios**' PREY and its SDK, and on the **[openQ4](https://github.com/themuffinator/openQ4)** engine, which brings the work of everyone credited there with it.
 
 <details>
 <summary><b>Full credits and third-party software</b></summary>
 
-- **themuffinator**: openPREY development and maintenance; author of openQ4
+- **themuffinator**: openPR06 development and maintenance; author of openQ4
 - **DarkMatter Productions**: project stewardship and [website](https://www.darkmatter-quake.com)
-- **Human Head Studios**: PREY (2006) and the PREY SDK that openPREY's game module is built from
-- **[openQ4](https://github.com/themuffinator/openQ4)**: the engine openPREY is built on; its engine history is merged into this repository
-- **[Emile Belanger (emileb)](https://github.com/emileb)**: original author of the Android port, SigmaTouch integration, OpenGL ES 3.0 renderer, GLES shader variants, ETC2/EAC compression and associated mobile work, carried into openPREY with the openQ4 engine; see [CONTRIBUTORS.md](CONTRIBUTORS.md) and the [integration record](docs/dev/android-gles-integration.md)
+- **Human Head Studios**: PREY (2006) and the PREY SDK that openPR06's game module is built from
+- **[openQ4](https://github.com/themuffinator/openQ4)**: the engine openPR06 is built on; its engine history is merged into this repository
+- **[Emile Belanger (emileb)](https://github.com/emileb)**: original author of the Android port, SigmaTouch integration, OpenGL ES 3.0 renderer, GLES shader variants, ETC2/EAC compression and associated mobile work, carried into openPR06 with the openQ4 engine; see [CONTRIBUTORS.md](CONTRIBUTORS.md) and the [integration record](docs/dev/android-gles-integration.md)
 - **Justin Marshall**: Quake4Doom and early BSE reverse-engineering reference work
-- **Daniel Gibson and the [dhewm3](https://github.com/dhewm/dhewm3) contributors**: cinematic JPEG handling inherited through Quake4Doom and openQ4, and the `dds/` texture-replacement naming convention openPREY follows
+- **Daniel Gibson and the [dhewm3](https://github.com/dhewm/dhewm3) contributors**: cinematic JPEG handling inherited through Quake4Doom and openQ4, and the `dds/` texture-replacement naming convention openPR06 follows
 - **Robert Beckebans**: renderer modernization reference work, including RBDOOM-3-BFG inspiration
 - **id Software's official Doom 3 and Doom 3 BFG source releases**: retained idTech 4 source lineage; see the [source-provenance inventory](docs/dev/source-provenance.md)
 - **id Software** and **Raven Software**: idTech 4 and the Quake 4 codebase behind openQ4
@@ -155,14 +155,14 @@ Start with [release status](docs/user/release-status.md): what works today and w
 
 ## Licence
 
-The openPREY engine is licensed under the [GNU General Public License v3.0](LICENSE). Files that keep Doom 3 or Doom 3 BFG Edition headers also keep their upstream notices and [Additional](LICENSES/DOOM-3-ADDITIONAL-TERMS.txt) [Terms](LICENSES/DOOM-3-BFG-ADDITIONAL-TERMS.txt); the [source-provenance inventory](docs/dev/source-provenance.md) records their scope and lineage.
+The openPR06 engine is licensed under the [GNU General Public License v3.0](LICENSE). Files that keep Doom 3 or Doom 3 BFG Edition headers also keep their upstream notices and [Additional](LICENSES/DOOM-3-ADDITIONAL-TERMS.txt) [Terms](LICENSES/DOOM-3-BFG-ADDITIONAL-TERMS.txt); the [source-provenance inventory](docs/dev/source-provenance.md) records their scope and lineage.
 
 The game code in [`src/game`](src/game/), [`src/Prey`](src/Prey/) and [`src/preyengine`](src/preyengine/) is derived from the PREY SDK and remains under [Human Head Studios' SDK EULA](LICENSES/PREY-SDK-EULA.rtf). [LICENSING.md](LICENSING.md) explains each component's terms, including the open question about distributing them linked together. PREY's game assets remain the property of their rights holders and are not included.
 
-openPREY is an independent project and is not affiliated with, endorsed by or sponsored by Human Head Studios, 2K, Bethesda, ZeniMax Media, id Software or Raven Software. PREY is a trademark of ZeniMax Media Inc.
+openPR06 is an independent project and is not affiliated with, endorsed by or sponsored by Human Head Studios, 2K, Bethesda, ZeniMax Media, id Software or Raven Software. PREY is a trademark of ZeniMax Media Inc.
 
 ---
 
 <p align="center">
-  <a href="https://www.darkmatter-quake.com">Website</a> · <a href="https://github.com/themuffinator/openPREY/releases">Releases</a> · <a href="https://github.com/themuffinator/openPREY/issues">Issues</a> · <a href="https://discord.gg/T32mFejwR4">Discord</a> · <a href="#top">Back to top</a>
+  <a href="https://www.darkmatter-quake.com">Website</a> · <a href="https://github.com/themuffinator/openPR06/releases">Releases</a> · <a href="https://github.com/themuffinator/openPR06/issues">Issues</a> · <a href="https://discord.gg/T32mFejwR4">Discord</a> · <a href="#top">Back to top</a>
 </p>

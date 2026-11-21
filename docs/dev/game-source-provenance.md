@@ -14,18 +14,18 @@ code from the engine's GPL-covered code and dependencies.
   resolve against this repository's engine headers.
 - The companion repository's copies of SDK engine headers (`src/idLib/`,
   `src/framework/`, `src/renderer/` and similar), its Visual Studio 2005
-  projects and its top-level user-documentation folder were never compiled by openPREY and are not
+  projects and its top-level user-documentation folder were never compiled by openPR06 and are not
   imported. They remain available in the imported history.
 - The complete companion history is a merge parent of the import commit and
-  remains reachable from openPREY's history, so `git log --follow` traces each
+  remains reachable from openPR06's history, so `git log --follow` traces each
   game file back to the original SDK import.
 - The original `EULA.Development Kit.rtf` is retained byte-for-byte at
   [`LICENSES/PREY-SDK-EULA.rtf`](../../LICENSES/PREY-SDK-EULA.rtf).
 
-Subsequent modifications are identified by openPREY's commit history. Source
+Subsequent modifications are identified by openPR06's commit history. Source
 relocation does not grant an alternative licence or remove original notices.
 The SDK-derived game implementation is credited to Human Head Studios,
-id Software and the openPREY contributors.
+id Software and the openPR06 contributors.
 
 ## Content boundary
 

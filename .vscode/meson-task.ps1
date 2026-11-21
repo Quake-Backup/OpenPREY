@@ -15,10 +15,10 @@ $fastStageScript = Join-Path $workspaceRoot 'tools\build\stage_fast_install.py'
 $checkStagedContentScript = Join-Path $workspaceRoot 'tools\build\check_staged_content_edits.py'
 
 if (-not (Test-Path $mesonWrapper)) {
-    throw "openPREY Meson wrapper not found at '$mesonWrapper'."
+    throw "openPR06 Meson wrapper not found at '$mesonWrapper'."
 }
 
-function Invoke-openPREYMeson([string[]]$MesonArgs) {
+function Invoke-openPR06Meson([string[]]$MesonArgs) {
     & powershell -NoProfile -ExecutionPolicy Bypass -File $mesonWrapper @MesonArgs
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
@@ -38,7 +38,7 @@ function Test-MesonBuildDirectory([string]$Path) {
     return (Test-Path $coreData) -and (Test-Path $ninjaFile)
 }
 
-# openPREY's standard local tree (builddir) is a debug build, so the launch
+# openPR06's standard local tree (builddir) is a debug build, so the launch
 # configurations debug Prey compatibility work with full symbols and assertions.
 $expectedBuildOptions = [ordered]@{
     'buildtype' = 'debug'
@@ -56,28 +56,28 @@ function Get-StaleBuildOptions([string]$Path) {
     return @($expectedBuildOptions.Keys | Where-Object { $configured[$_] -ne $expectedBuildOptions[$_] })
 }
 
-function Invoke-openPREYSetup {
+function Invoke-openPR06Setup {
     $optionArgs = @('--backend', 'ninja', '--wrap-mode=forcefallback')
     foreach ($name in $expectedBuildOptions.Keys) {
         $optionArgs += "-D$name=$($expectedBuildOptions[$name])"
     }
     if (Test-MesonBuildDirectory $buildDir) {
-        Invoke-openPREYMeson (@('setup', $buildDir, $workspaceRoot, '--reconfigure') + $optionArgs)
+        Invoke-openPR06Meson (@('setup', $buildDir, $workspaceRoot, '--reconfigure') + $optionArgs)
     } else {
-        Invoke-openPREYMeson (@('setup', '--wipe', $buildDir, $workspaceRoot) + $optionArgs)
+        Invoke-openPR06Meson (@('setup', '--wipe', $buildDir, $workspaceRoot) + $optionArgs)
     }
 }
 
 # An existing build directory keeps whatever it was configured with, and the
 # compile tasks never reconfigure on their own, so bring it up to the expected
 # options before compiling.
-function Invoke-openPREYCompile {
+function Invoke-openPR06Compile {
     $stale = @(Get-StaleBuildOptions $buildDir)
     if ($stale.Count -gt 0) {
         Write-Host "builddir options out of date ($($stale -join ', ')); reconfiguring."
-        Invoke-openPREYSetup
+        Invoke-openPR06Setup
     }
-    Invoke-openPREYMeson @(
+    Invoke-openPR06Meson @(
         'compile',
         '-C',
         $buildDir
@@ -86,20 +86,20 @@ function Invoke-openPREYCompile {
 
 switch ($Action) {
     'setup' {
-        Invoke-openPREYSetup
+        Invoke-openPR06Setup
     }
     'compile' {
-        Invoke-openPREYCompile
+        Invoke-openPR06Compile
     }
     'fastbuild' {
         if (-not (Test-Path $fastStageScript)) {
-            throw "openPREY fast staging script not found at '$fastStageScript'."
+            throw "openPR06 fast staging script not found at '$fastStageScript'."
         }
         if (-not (Test-Path $checkStagedContentScript)) {
-            throw "openPREY staged content edit check script not found at '$checkStagedContentScript'."
+            throw "openPR06 staged content edit check script not found at '$checkStagedContentScript'."
         }
 
-        Invoke-openPREYCompile
+        Invoke-openPR06Compile
         Invoke-PythonTool @(
             $checkStagedContentScript,
             '--source-root',
@@ -116,7 +116,7 @@ switch ($Action) {
         )
     }
     'install' {
-        Invoke-openPREYMeson @(
+        Invoke-openPR06Meson @(
             'install',
             '-C',
             $buildDir,

@@ -1,4 +1,4 @@
-"""Talon: openPREY's body face, drawn parametrically.
+"""Talon UI Condensed: openPR06's interface and HUD face, drawn parametrically.
 
 Talon takes Impact's condensed frame and very tall x-height and gives it the
 squared bowls of the PREY wordmark, at a lighter stem than the traced retail

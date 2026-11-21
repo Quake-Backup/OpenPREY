@@ -85,7 +85,7 @@ static idDecl *openQ4_AllocEffectDecl( void ) {
 		common->FatalError( "DECL_EFFECT allocator returned NULL." );
 	}
 
-	if ( !openPREY_IsIntegratedBSEDeclEffect( decl ) ) {
+	if ( !openPR06_IsIntegratedBSEDeclEffect( decl ) ) {
 		delete decl;
 		common->FatalError( "DECL_EFFECT allocator returned a non-BSE decl instance." );
 	}

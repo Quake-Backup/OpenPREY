@@ -3,18 +3,18 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-This guide covers openPREY's display and window settings: the renderer, performance presets, fullscreen and windowed modes, anti-aliasing, scaling and multi-monitor behavior.
+This guide covers openPR06's display and window settings: the renderer, performance presets, fullscreen and windowed modes, anti-aliasing, scaling and multi-monitor behavior.
 
 ## Where the Settings Live
 
-openPREY starts with PREY's own menus (`ui_retained 0`), which openPREY extends. **Options -> Video** has these tabs:
+openPR06 starts with PREY's own menus (`ui_retained 0`), which openPR06 extends. **Options -> Video** has these tabs:
 
 - The first tab sets the resolution, fullscreen, render scale, vertical sync, brightness and gamma, and has **Auto Detect** and the **Quality Preset** row, which offers all nine presets.
 - The two advanced tabs set shader detail, shadows, specular and bump maps, vertical sync, anti-aliasing (`r_multiSamples`), glow overlays, particle detail, fast skinning and anisotropy.
-- openPREY's **Post FX** tab adds MSAA samples, post anti-aliasing, SSAO, bloom, the CRT filter, HDR tone mapping and exposure.
-- openPREY's **Advanced FX** tab tunes them: MSAA alpha coverage, SSAO radius and intensity, bloom radius, HDR white point, saturation and contrast, and CRT strength and chromatic aberration.
+- openPR06's **Post FX** tab adds MSAA samples, post anti-aliasing, SSAO, bloom, the CRT filter, HDR tone mapping and exposure.
+- openPR06's **Advanced FX** tab tunes them: MSAA alpha coverage, SSAO radius and intensity, bloom radius, HDR white point, saturation and contrast, and CRT strength and chromatic aberration.
 
-Everything else on this page is a console setting. The retained interface (`ui_retained 1`) rebuilds these same **Options -> Video** pages; openQ4's `Settings -> System` page isn't used in openPREY.
+Everything else on this page is a console setting. The retained interface (`ui_retained 1`) rebuilds these same **Options -> Video** pages; openQ4's `Settings -> System` page isn't used in openPR06.
 
 ## Quick Start
 
@@ -75,9 +75,9 @@ OpenGL is the default. `r_renderApi` defaults to `best`, which picks OpenGL on d
 | `gl` | `opengl` | OpenGL, with operating-system/driver GPU routing. |
 | `vulkan` | `vk` | The Vulkan renderer module. Opt-in, and not at PREY parity yet. |
 | `gl-module` | - | Always loads the OpenGL renderer as a module instead of using a statically linked copy. A diagnostic option that renders identically to `gl`. |
-| `gles` | `es` | The OpenGL ES renderer module, inherited from openQ4's Android work. openPREY's desktop builds don't use it. |
+| `gles` | `es` | The OpenGL ES renderer module, inherited from openQ4's Android work. openPR06's desktop builds don't use it. |
 
-Anything else is rejected with a warning, and openPREY uses the platform default.
+Anything else is rejected with a warning, and openPR06 uses the platform default.
 
 ### Choosing a GPU
 
@@ -85,13 +85,13 @@ Anything else is rejected with a warning, and openPREY uses the platform default
 
 ### Trying Vulkan
 
-- Set `r_renderApi vulkan` and restart openPREY fully (not just `vid_restart`). The setting is archived to your config.
-- Before switching, openPREY loads the Vulkan renderer module and tries to create a device with it. If the module is missing, there's no Vulkan driver, no GPU meets the renderer's Vulkan 1.3 feature floor, or the device can't be created, openPREY logs a warning and renders with OpenGL. `gfxInfo` gives the reason on its `Renderer API fallback reason` line, and `r_actualRenderApi` reports `gl`. Your `vulkan` selection is kept, so the next launch tries Vulkan again.
+- Set `r_renderApi vulkan` and restart openPR06 fully (not just `vid_restart`). The setting is archived to your config.
+- Before switching, openPR06 loads the Vulkan renderer module and tries to create a device with it. If the module is missing, there's no Vulkan driver, no GPU meets the renderer's Vulkan 1.3 feature floor, or the device can't be created, openPR06 logs a warning and renders with OpenGL. `gfxInfo` gives the reason on its `Renderer API fallback reason` line, and `r_actualRenderApi` reports `gl`. Your `vulkan` selection is kept, so the next launch tries Vulkan again.
 - Startup failures while creating the window, Vulkan surface, swapchain or mandatory renderer resources also recover to OpenGL in the same launch, and the failure reason stays in the log.
-- If the GPU or driver resets during play (Vulkan reports a lost device), openPREY restarts the renderer and carries on with the same game, up to `r_vkPresentationRecoveries` times a session (default `3`). If presentation keeps failing after that, openPREY stops with an error and saves `r_renderApi gl` for the next launch. A window whose surface is lost, for example after a display change, gets a new surface without a restart.
-- A device failure during a later full `vid_restart` also stops openPREY and saves `r_renderApi gl`. If you launched with `+set r_renderApi vulkan`, remove that option to return to OpenGL.
+- If the GPU or driver resets during play (Vulkan reports a lost device), openPR06 restarts the renderer and carries on with the same game, up to `r_vkPresentationRecoveries` times a session (default `3`). If presentation keeps failing after that, openPR06 stops with an error and saves `r_renderApi gl` for the next launch. A window whose surface is lost, for example after a display change, gets a new surface without a restart.
+- A device failure during a later full `vid_restart` also stops openPR06 and saves `r_renderApi gl`. If you launched with `+set r_renderApi vulkan`, remove that option to return to OpenGL.
 - To go back, run `r_renderApi gl` and restart.
-- Vulkan reports are welcome. Check the list below first, then include `openprey.log`, `gfxInfo`, and your GPU and driver version.
+- Vulkan reports are welcome. Check the list below first, then include `openpr06.log`, `gfxInfo`, and your GPU and driver version.
 
 ### What Vulkan does not do yet
 
@@ -102,7 +102,7 @@ Anything else is rejected with a warning, and openPREY uses the platform default
 
 ## Performance Presets
 
-The `com_performancePreset` cvar stores the selected preset. Run `applyPerformancePreset [name]` from the console to apply one. Without a name it reapplies the stored `com_performancePreset`; if that value is invalid, openPREY falls back to `balanced`. Unknown names are rejected without changing the current preset.
+The `com_performancePreset` cvar stores the selected preset. Run `applyPerformancePreset [name]` from the console to apply one. Without a name it reapplies the stored `com_performancePreset`; if that value is invalid, openPR06 falls back to `balanced`. Unknown names are rejected without changing the current preset.
 
 The first **Options -> Video** tab uses the same recipes. **Quality Preset** applies the chosen preset at once (`applyPerformancePreset <name>`), and **Detect** runs `autoDetectPerformancePreset`. Both keep your display mode and VSync preference, and the other tabs' rows show the new values straight away. The legacy `video low|medium|high|ultra|recommended` menu commands apply `low`, `performance`, `balanced`, `ultra` and the detected preset, and `execMachineSpec` maps the legacy `com_machineSpec` classes onto these presets.
 
@@ -120,7 +120,7 @@ Every way of applying a preset (the menu, the console commands, `execMachineSpec
 | `ultra` | 100% scale, 4x MSAA, SMAA Ultra, 240 FPS cap, 4096 projected / 512 point shadows | 16x anisotropy, full-size textures and DDS replacements enabled, high-end benchmark tag, automatic speaker layout, room reverb | The best image that holds 75 FPS on the reference laptop. Manual choice. |
 | `maximum` | 100% scale, 16x MSAA request, SMAA Ultra, 240 FPS cap, 4096 projected / 2048 point shadows | As Ultra | Everything on. No frame-rate target. Manual choice. |
 
-`enhanced`, `quality`, `ultra` and `maximum` enable [shadow maps](shadow-mapping.md), bloom, SSAO and tone mapping. Enhanced shadow-maps every light with 5-tap fixed filtering: 1024 projected maps in a 4096 atlas and 512 point cubes, with 12 SSAO samples. (The shared preset table leaves point lights on stencil shadows at this tier; openPREY maps them, because PREY lights its levels almost entirely with point lights and the tier would otherwise map nothing.) Quality shadow-maps every light: 2048 projected maps with 9-tap PCSS, 512 point cubes, a 4096 atlas and 20 SSAO samples. Ultra raises projected maps to 4096 with 13-tap PCSS in an 8192 atlas and uses 32 SSAO samples; its point cubes stay at 512 because larger cubes cost more than every other upgrade together. None of these three uses cascades or motion blur. Maximum requests every supported maximum: 2048 point cubes, 13-tap projected and point filtering, four stabilized cascades, a 16384 shadow atlas, 32 SSAO samples and 16-sample motion blur with object vectors. All modern-effects tiers keep unlimited shadow updates and five bloom levels; reducing the level count changes the glow's appearance, not just sampling quality. Low, Performance and Balanced leave these post effects and the HDR scene target off, but openPREY shadow-maps their lights too, at the table's map size and filtering: shadow maps are the default shadow technique on every preset that draws shadows, with the original stencil shadows as the per-light fallback. Minimum and Low Power draw no shadows at all, so that the two presets below the minimum requirements remove rendering work rather than only resolution. On Intel Iris Xe graphics that took 12 to 16 percent off each frame in the hub and combat scenes upstream openQ4 measured, about as much as lowering the scene from 75% to 50%. Changing down from Maximum restores the lower tier's sample counts and shadow sizes, including settings for effects currently disabled.
+`enhanced`, `quality`, `ultra` and `maximum` enable [shadow maps](shadow-mapping.md), bloom, SSAO and tone mapping. Enhanced shadow-maps every light with 5-tap fixed filtering: 1024 projected maps in a 4096 atlas and 512 point cubes, with 12 SSAO samples. (The shared preset table leaves point lights on stencil shadows at this tier; openPR06 maps them, because PREY lights its levels almost entirely with point lights and the tier would otherwise map nothing.) Quality shadow-maps every light: 2048 projected maps with 9-tap PCSS, 512 point cubes, a 4096 atlas and 20 SSAO samples. Ultra raises projected maps to 4096 with 13-tap PCSS in an 8192 atlas and uses 32 SSAO samples; its point cubes stay at 512 because larger cubes cost more than every other upgrade together. None of these three uses cascades or motion blur. Maximum requests every supported maximum: 2048 point cubes, 13-tap projected and point filtering, four stabilized cascades, a 16384 shadow atlas, 32 SSAO samples and 16-sample motion blur with object vectors. All modern-effects tiers keep unlimited shadow updates and five bloom levels; reducing the level count changes the glow's appearance, not just sampling quality. Low, Performance and Balanced leave these post effects and the HDR scene target off, but openPR06 shadow-maps their lights too, at the table's map size and filtering: shadow maps are the default shadow technique on every preset that draws shadows, with the original stencil shadows as the per-light fallback. Minimum and Low Power draw no shadows at all, so that the two presets below the minimum requirements remove rendering work rather than only resolution. On Intel Iris Xe graphics that took 12 to 16 percent off each frame in the hub and combat scenes upstream openQ4 measured, about as much as lowering the scene from 75% to 50%. Changing down from Maximum restores the lower tier's sample counts and shadow sizes, including settings for effects currently disabled.
 
 ### Frame-rate targets
 
@@ -136,7 +136,7 @@ In both interfaces a preset lights **Apply Changes** on **Options -> Video**; pr
 
 ### System check
 
-When an update changes the presets or how openPREY picks one, the next start shows a **System Check** screen before the main menu. It lists the graphics card, memory, processor and display openPREY found, and shows the recommended preset next to your current one on a ladder of all nine. You have three choices:
+When an update changes the presets or how openPR06 picks one, the next start shows a **System Check** screen before the main menu. It lists the graphics card, memory, processor and display openPR06 found, and shows the recommended preset next to your current one on a ladder of all nine. You have three choices:
 
 - **Apply Recommended** switches to the recommended preset, briefly restarts the renderer and sound, then opens the menu. It reads **Continue** when your settings already match.
 - **Keep Current** leaves your settings alone. You won't be asked again until the presets change.
@@ -148,7 +148,7 @@ A new install never sees the screen, because the first launch already picks a pr
 
 `autoDetectPerformancePreset` takes no arguments. It recommends and applies a starting point from the **active renderer and GPU**, system RAM, CPU concurrency, platform power hints and the current drawable resolution. It doesn't run a benchmark or promise a frame rate, and it never picks Maximum.
 
-- Software rendering, insufficient classic material/texture capabilities and systems with at most 2 GiB RAM select Minimum. A PC at the minimum requirements, with at most 4 GiB RAM or a discrete GPU with at most 1 GiB of verified dedicated memory, selects Low. `OPENPREY_LOWPOWER=1` selects Low Power unless the Minimum constraint applies. Discrete GPUs with at most 512 MiB of verified dedicated memory select Minimum.
+- Software rendering, insufficient classic material/texture capabilities and systems with at most 2 GiB RAM select Minimum. A PC at the minimum requirements, with at most 4 GiB RAM or a discrete GPU with at most 1 GiB of verified dedicated memory, selects Low. `OPENPR06_LOWPOWER=1` selects Low Power unless the Minimum constraint applies. Discrete GPUs with at most 512 MiB of verified dedicated memory select Minimum.
 - The Steam Deck profile selects Performance. Shared-memory GPUs can select Balanced at up to the 1080p class with enough RAM and classic-rendering capability.
 - Discrete GPUs are placed by their **verified active-device dedicated memory**, with 16 GiB RAM and modern effects; each resolution class above 1440p costs one preset:
 
@@ -167,7 +167,7 @@ A new install never sees the screen, because the first launch already picks a pr
 
 Auto-Detect can also lower the **scene render scale** below the preset's table value on large displays; for example, shared-memory graphics at 4K use Performance at 50% (a 1080p scene). The window and UI keep their native resolution, and a named preset restores its table values. VR headset scale is a separate [VR setting](vr.md).
 
-On a fresh installation, openPREY starts with a small bootstrap profile, observes the initialized GPU and applies the automatic recommendation before entering gameplay. The console's `Quality profile:` line reports the bootstrap preset on first launch, then the detected profile once detection has applied it. A preset supplied at launch takes precedence, and existing saved settings are kept.
+On a fresh installation, openPR06 starts with a small bootstrap profile, observes the initialized GPU and applies the automatic recommendation before entering gameplay. The console's `Quality profile:` line reports the bootstrap preset on first launch, then the detected profile once detection has applied it. A preset supplied at launch takes precedence, and existing saved settings are kept.
 
 `performancePresetSelfTest` checks the preset commands, cvar mappings, auto-detect and backup/restore, then restores every cvar it touched. It's meant for package and platform validation.
 
@@ -190,11 +190,11 @@ On a fresh installation, openPREY starts with a small bootstrap profile, observe
 
 ## Texture Quality (Picmip and Downsizing)
 
-openPREY has two independent ways to spend less memory and bandwidth on textures.
+openPR06 has two independent ways to spend less memory and bandwidth on textures.
 
 **`image_downSize*`** is the idTech 4 ceiling PREY already had: no texture of that kind may exceed a given size. Performance presets drive these.
 
-**`image_picmip`** is a relative reduction in the style of Quake 3's r_picmip: it drops whole mip levels, so every step halves a texture however large it started. openPREY applies it **only to the diffuse layer of materials**, the colour texture of a `diffusemap` stage. Normal maps, specular maps, lighting, skies, decals, fonts and every 2D/HUD surface keep their authored resolution, so surfaces stay correctly lit and the interface stays sharp.
+**`image_picmip`** is a relative reduction in the style of Quake 3's r_picmip: it drops whole mip levels, so every step halves a texture however large it started. openPR06 applies it **only to the diffuse layer of materials**, the colour texture of a `diffusemap` stage. Normal maps, specular maps, lighting, skies, decals, fonts and every 2D/HUD surface keep their authored resolution, so surfaces stay correctly lit and the interface stays sharp.
 
 | Setting | Default | What it does |
 |---|---:|---|
@@ -209,9 +209,9 @@ openPREY has two independent ways to spend less memory and bandwidth on textures
 
 The ceiling is applied first and `image_picmip` reduces from there. A material that declares `nopicmip` opts out of both.
 
-These settings change the pixels a texture is built from, so openPREY reloads images automatically when you change one; no `vid_restart` is needed. The generated texture cache is keyed by the active reduction, so switching back and forth doesn't leave stale sizes behind.
+These settings change the pixels a texture is built from, so openPR06 reloads images automatically when you change one; no `vid_restart` is needed. The generated texture cache is keyed by the active reduction, so switching back and forth doesn't leave stale sizes behind.
 
-DDS replacement packs have one limitation. Compressed data can only be reduced by discarding mip levels the file already contains, so a `.dds` exported without a full mip chain stays larger than the same texture would on the normal path. Set `image_showPrecompressedTextures 1` to have openPREY name any replacement that couldn't reach the requested size.
+DDS replacement packs have one limitation. Compressed data can only be reduced by discarding mip levels the file already contains, so a `.dds` exported without a full mip chain stays larger than the same texture would on the normal path. Set `image_showPrecompressedTextures 1` to have openPR06 name any replacement that couldn't reach the requested size.
 
 ```
 image_picmip 2
@@ -286,7 +286,7 @@ Notes:
 - `r_multiSamples` is hardware-limited and may be clamped by the driver or GPU.
 - Unsupported `r_multiSamples` values are normalized before video startup: `1` becomes off, and odd or intermediate values step up to `2`, `4`, `8` or `16`.
 - Video startup retries lower MSAA requests if the window or GL context rejects the requested sample count (`16 -> 8 -> 4 -> 2 -> off`) and logs the requested, selected and driver-reported attributes.
-- The game scene target is validated separately from the window framebuffer. If a driver rejects the offscreen target at the selected sample count, openPREY retries lower counts down to `0`; if even the single-sample target is unavailable, it keeps running through the direct-render fallback and logs the framebuffer status.
+- The game scene target is validated separately from the window framebuffer. If a driver rejects the offscreen target at the selected sample count, openPR06 retries lower counts down to `0`; if even the single-sample target is unavailable, it keeps running through the direct-render fallback and logs the framebuffer status.
 - `gfxInfo` reports the active AA summary: requested/effective MSAA, `GL_MAX_SAMPLES`, alpha-to-coverage, post AA mode, screen fraction and supersampling. Once a map is drawing, the effective MSAA count is the one the 3D scene rendered with, so after an `r_multiSamples` change it shows the old count until `vid_restart` or the next map load.
 - On Vulkan, MSAA applies to the 3D scene, not the window, and stops at 8x.
 - Follow an `r_multiSamples` change with `vid_restart`. `r_postAA`, `r_msaaAlphaToCoverage` and `r_msaaResolveDepth` can change at runtime.
@@ -317,7 +317,7 @@ With modes `1` and `2`, a scene below `100%` is upscaled by temporal anti-aliasi
 - The default is **desktop-native fullscreen** (`r_fullscreenDesktop 1`): fullscreen matches your current desktop resolution and doesn't change the display mode.
 - For **exclusive fullscreen**, set `r_fullscreenDesktop 0`. `r_mode`/`r_customWidth`/`r_customHeight` then control the requested fullscreen resolution. The resolution list on the first **Options -> Video** tab writes `r_mode` from PREY's fixed list.
 - `listModes` shows the expanded legacy `r_mode` preset catalog, covering common desktop, laptop, ultrawide, HiDPI, 4K, 5K, 6K and 8K resolutions. `listDisplayModes` shows what your monitor actually supports in exclusive mode.
-- `r_displayRefresh 0` (Auto) keeps your desktop's refresh rate, or the nearest rate the resolution offers, and openPREY picks the same rate for the same resolution at startup, after `vid_restart` and after Alt+Enter. Leave it on Auto unless you need a specific exclusive-mode refresh rate.
+- `r_displayRefresh 0` (Auto) keeps your desktop's refresh rate, or the nearest rate the resolution offers, and openPR06 picks the same rate for the same resolution at startup, after `vid_restart` and after Alt+Enter. Leave it on Auto unless you need a specific exclusive-mode refresh rate.
 - On Windows, fullscreen windows minimize on focus loss so Alt+Tab and the Snipping Tool overlay can take the foreground cleanly.
 - On Windows, `PrintScreen` goes to the system snipping UI by default (`win_printScreenToSystemTool 1`). Bind the in-engine `screenshot` command to another key, or set that cvar to `0` to make `PrintScreen` available for in-engine binds again.
 
@@ -325,13 +325,13 @@ With `r_fullscreenDesktop 1`, `r_mode` and `r_custom*` are ignored for fullscree
 
 ## Windowed Sizing and Placement
 
-- The first time openPREY starts on Windows, it switches the window to borderless presentation (`r_borderless 1`) to avoid OpenGL bordered-window frame-pacing stalls. Set `r_borderless 0` and run `vid_restart` if you want a resizable bordered window.
+- The first time openPR06 starts on Windows, it switches the window to borderless presentation (`r_borderless 1`) to avoid OpenGL bordered-window frame-pacing stalls. Set `r_borderless 0` and run `vid_restart` if you want a resizable bordered window.
 - In bordered windowed mode (`r_fullscreen 0`, `r_borderless 0`), resizing updates `r_windowWidth`/`r_windowHeight` from the client area. Maximizing or minimizing doesn't overwrite the remembered normal size.
 - Moving the window updates `win_xpos`/`win_ypos` from the outer frame, while `r_windowWidth`/`r_windowHeight` describe the drawable client area. Borderless and fullscreen placement don't overwrite the remembered normal position.
 - Switching from fullscreen to windowed restores the last remembered windowed size and position.
-- If you unplug or rearrange monitors and the saved position ends up off-screen, openPREY clamps or recentres the window onto a valid display.
+- If you unplug or rearrange monitors and the saved position ends up off-screen, openPR06 clamps or recentres the window onto a valid display.
 - With an explicit `r_screen` index (`0..N`), the whole window frame is constrained to that display's usable area, and the client area shrinks if needed so the title bar and borders fit. With `r_screen -1`, your placement is respected unless it becomes invalid.
-- Native Wayland compositors own absolute placement. openPREY requests the selected display and client size there and accepts the compositor's placement.
+- Native Wayland compositors own absolute placement. openPR06 requests the selected display and client size there and accepts the compositor's placement.
 - Hold `Shift` while resizing to snap the window to common aspect ratios (4:3, 16:9, 16:10, 21:9 and so on).
 
 ## Aspect Ratio and FOV
@@ -359,13 +359,13 @@ This controls 2D UI layout: menus, HUD, console and loading screens.
 
 ## Television Viewing (Couch Profile)
 
-openPREY keeps openQ4's Couch platform profile for television play. It's selected when the `SteamTenfoot` environment variable that Steam's Big Picture mode sets is present (a Steam Deck keeps its own profile), when you set `OPENPREY_COUCH=1`, or when you start the game with `+set com_platformProfile couch`. `OPENPREY_COUCH=0` stops Big Picture from selecting it.
+openPR06 keeps openQ4's Couch platform profile for television play. It's selected when the `SteamTenfoot` environment variable that Steam's Big Picture mode sets is present (a Steam Deck keeps its own profile), when you set `OPENPR06_COUCH=1`, or when you start the game with `+set com_platformProfile couch`. `OPENPR06_COUCH=0` stops Big Picture from selecting it.
 
-A profile applies its settings from `openprey_profile_<name>.cfg`. openPREY ships only `openprey_profile_steamdeck.cfg` so far, so the Couch profile has no settings of its own yet. The size controls openQ4's version raised (`ui_retainedScale`, `ui_retainedTextScale` and `ui_hudScale`) belong to the retained interface and its HUD.
+A profile applies its settings from `openpr06_profile_<name>.cfg`. openPR06 ships only `openpr06_profile_steamdeck.cfg` so far, so the Couch profile has no settings of its own yet. The size controls openQ4's version raised (`ui_retainedScale`, `ui_retainedTextScale` and `ui_hudScale`) belong to the retained interface and its HUD.
 
 ## Text Rendering
 
-openPREY draws text from TrueType versions of the game's fonts, shipped in `pak0` (`r_useTrueTypeFonts 1`, the default). Menu and HUD text is rasterised at your display's resolution instead of magnifying the original fixed-size atlases, so text stays sharp at 1440p and 4K. `r_useTrueTypeFonts 0` returns to PREY's bitmap fonts. The TrueType path's version of PREY's spline text effect is still being compared with retail (TODO-D10 in the [rebase status ledger](../dev/prey-rebase/status-ledger.md#explicit-deferral-register)). A configuration saved before this default changed is moved to `1` once on its next start.
+openPR06 draws text from TrueType versions of the game's fonts, shipped in `pak0` (`r_useTrueTypeFonts 1`, the default). Menu and HUD text is rasterised at your display's resolution instead of magnifying the original fixed-size atlases, so text stays sharp at 1440p and 4K. `r_useTrueTypeFonts 0` returns to PREY's bitmap fonts. The TrueType path's version of PREY's spline text effect is still being compared with retail (TODO-D10 in the [rebase status ledger](../dev/prey-rebase/status-ledger.md#explicit-deferral-register)). A configuration saved before this default changed is moved to `1` once on its next start.
 
 | Setting | Default | What it does |
 |---|---:|---|
@@ -487,7 +487,7 @@ Mode 2 is experimental: its geometry copies add CPU and memory cost, and no perf
 - If a display change doesn't apply, run `vid_restart`.
 - If monitor targeting looks wrong, run `listDisplays`, set `r_screen` to the right index and restart video.
 - If the UI looks too centred or boxed on a wide display, set `ui_aspectCorrection 0`.
-- If the window opens off-screen after a monitor change, set `r_screen` to the target monitor and restart video; openPREY also tries to recover on its own.
+- If the window opens off-screen after a monitor change, set `r_screen` to the target monitor and restart video; openPR06 also tries to recover on its own.
 - If AA settings seem unchanged, check `r_multiSamples`, `r_postAA` and `r_msaaAlphaToCoverage`, then run `vid_restart`.
-- If the 3D view turns black with `r_postAA` on, set `r_postAA 0`, run `vid_restart`, and attach `openprey.log` plus the output of `gfxInfo` to your report.
+- If the 3D view turns black with `r_postAA` on, set `r_postAA 0`, run `vid_restart`, and attach `openpr06.log` plus the output of `gfxInfo` to your report.
 - If surfaces look unlit or wrong on Vulkan, switch back with `r_renderApi gl` and restart; PREY's ARB interaction stages only run on OpenGL.

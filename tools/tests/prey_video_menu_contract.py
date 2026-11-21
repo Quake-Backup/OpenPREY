@@ -144,14 +144,14 @@ def main() -> int:
         if key not in GUI_STATE:
             fail(f"Video pages read GUI state '{key}', which this check does not know is published")
 
-    # openPREY's own strings exist in every shipped table, with as many
+    # openPR06's own strings exist in every shipped table, with as many
     # choices as the row has values.
     tables = {}
-    for path in sorted(STRINGS_DIR.glob("*_openprey.lang")):
+    for path in sorted(STRINGS_DIR.glob("*_openpr06.lang")):
         table_text = path.read_text(encoding="utf-8")
         tables[path.name] = dict(re.findall(r'^\t"(#str_\d+)"\t"([^"]*)"', table_text, re.M))
     if not tables:
-        fail("no *_openprey.lang tables found")
+        fail("no *_openpr06.lang tables found")
     used = sorted(set(re.findall(r"#str_122\d+", section)) | {"#str_122035"})
     for name, table in tables.items():
         for string_id in used:

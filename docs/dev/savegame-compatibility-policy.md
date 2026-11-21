@@ -2,11 +2,11 @@
 
 > **Development status:** This document describes the current source tree and its evidence, not the contents of the latest available 0.13.2 package. The 0.14.0 release was withdrawn. See [release status](https://github.com/themuffinator/openQ4/blob/main/docs/user/release-status.md).
 
-> **openPREY:** this is upstream openQ4's policy for its own save history, kept
+> **openPR06:** this is upstream openQ4's policy for its own save history, kept
 > for the engine preflight it describes. Prey saves follow
 > [Savegame Reliability](savegame-reliability.md#save-pipeline): payload version
 > 5 with the writing build's exact `raw1` stamp, restored only by the same build
-> of openPREY on the same platform.
+> of openPR06 on the same platform.
 
 This policy defines which openQ4 single-player saves the current runtime may
 load. Reliability mechanisms and implementation detail are documented in
@@ -185,7 +185,7 @@ A source tree without git history, such as GitHub's "Download ZIP" or an
 exported tree, has no commit count and builds as build 0; Meson warns when it
 configures one. Build 0 is older than every save layout, so the floor refused
 every save such a build wrote, including the save it had just staged, and the
-build could neither save nor autosave (openPREY issue #36). A payload stamped
+build could neither save nor autosave (openPR06 issue #36). A payload stamped
 build 0 whose source snapshot and file count are this executable's own was
 written by this executable, so the preflight now reads it as the current layout
 (`OPENQ4_SAVEGAME_CURRENT_LAYOUT`). A build-0 payload from any other source is

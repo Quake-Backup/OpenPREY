@@ -4,11 +4,11 @@
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
 > [!IMPORTANT]
-> **Not active in openPREY yet.** The engine's map loader (`src/idlib/MapFile.cpp`)
+> **Not active in openPR06 yet.** The engine's map loader (`src/idlib/MapFile.cpp`)
 > can read `.ent` and `.entx` companion files, but the game module has to apply
 > them once collision data has loaded. openQ4's Quake 4 game module does that;
 > PREY's game module doesn't call `idMapFile::ApplyEntityStringFiles` yet, so
-> openPREY currently ignores these files. The rest of this page documents the
+> openPR06 currently ignores these files. The rest of this page documents the
 > format the loader accepts.
 
 Entity-string files replace or extend the entities spawned by a retail map

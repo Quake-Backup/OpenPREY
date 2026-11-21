@@ -1,7 +1,7 @@
 # Retail map-script parity
 
 Audit of 10 November 2026. It covers whether retail Prey (2006) scripts run in
-openPREY as they do in the retail 32-bit `gamex86.dll`. That means the 60 files
+openPR06 as they do in the retail 32-bit `gamex86.dll`. That means the 60 files
 under `script/` in `pak_data.pk4`, compiled as one program through
 `script/prey_main.script`, plus the `call`/`callRef` keys in map entities.
 
@@ -15,8 +15,8 @@ under `script/` in `pak_data.pk4`, compiled as one program through
 | VM semantics | `tools/tests/script_vm_conformance.py` (65 checks) | All pass on Win64 |
 | Runtime | `prey_map_load_condump_audit.py --settle-ms 25000` over all 37 maps | No script compile/runtime errors, unsupported-event warnings or stack overflows |
 
-The only event-surface differences are openPREY additions that scripts cannot
-call: `<openprey_script_silence_done>` on `idEntity`, the `<eventDispatchSmoke>`
+The only event-surface differences are openPR06 additions that scripts cannot
+call: `<openpr06_script_silence_done>` on `idEntity`, the `<eventDispatchSmoke>`
 test class, and `'d'` return types on the internal `<script_setcallback>` and
 `<script_setsilencecallback>` events.
 
@@ -81,10 +81,10 @@ retail. Changing them would change what retail scripts observe.
   arguments in `call` keys; all 537 call keys name zero-argument functions, and
   `callRef` passes only an entity name.
 
-## Known openPREY divergences outside the script VM
+## Known openPR06 divergences outside the script VM
 
 The behavior-change audit since the SDK import (`git diff 2a8b64822`) found
-earlier openPREY fixes that change what retail scripts observe. They are
+earlier openPR06 fixes that change what retail scripts observe. They are
 recorded here, not reverted, because each was made on purpose:
 
 | Area | Change | Retail scripts affected |
@@ -106,7 +106,7 @@ recorded here, not reverted, because each was made on purpose:
 python tools/tests/script_vm_conformance.py
 ```
 
-The runner stages `content/basepr/dev/script/openprey_vm_conformance.script` as
+The runner stages `content/basepr/dev/script/openpr06_vm_conformance.script` as
 the loose `maps/game/roadhouse.script` inside an isolated `fs_savepath` under
 `.tmp/script-vm-conformance/`. `WorldSpawn` compiles that fixture on top of the
 full retail program. The engine runs windowed. `--fs-game` selects a mod

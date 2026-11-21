@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-openPREY can use DDS texture-pack replacements without changing the original PREY (2006) materials. This includes the stock game's `progimg/` image-program results, dhewm3-style `dds/` packs, and same-folder replacements used by some PREY (2006) packs.
+openPR06 can use DDS texture-pack replacements without changing the original PREY (2006) materials. This includes the stock game's `progimg/` image-program results, dhewm3-style `dds/` packs, and same-folder replacements used by some PREY (2006) packs.
 
 ## Where files belong
 
@@ -36,7 +36,7 @@ bumpmap addnormals( textures/stone/wall01_local, heightmap( textures/stone/wall0
 
 You can replace either end of that:
 
-- **Replace an input.** Shipping `dds/textures/stone/wall01_local.dds` replaces the source texture and openPREY recomputes the program result on load. This is the simplest option and is what a PREY (2006)-shaped pack normally does.
+- **Replace an input.** Shipping `dds/textures/stone/wall01_local.dds` replaces the source texture and openPR06 recomputes the program result on load. This is the simplest option and is what a PREY (2006)-shaped pack normally does.
 - **Replace the finished result.** Name the file after the whole program using dhewm3's mangling:
 
   ```text
@@ -46,18 +46,18 @@ You can replace either end of that:
 
   Texture-pack tools should preserve that mapping for composed programs such as `heightmap`, `addnormals`, `add`, and `scale`.
 
-If you are unsure what a given material image is called, turn on `image_showPrecompressedTextures` (below) — openPREY prints every path it looked for.
+If you are unsure what a given material image is called, turn on `image_showPrecompressedTextures` (below) — openPR06 prints every path it looked for.
 
 ### Search order
 
-For each image, openPREY probes in this order and takes the first usable file:
+For each image, openPR06 probes in this order and takes the first usable file:
 
 1. `dds/<image program name>.dds` — the dhewm3 naming scheme
 2. `dds/<asset path>.dds` — for plain image references
 3. `<asset path>.dds` — beside the original `.tga`/`.jpg`, the PREY (2006) style
 4. `progimg/...` — the stock precomputed results shipped in the retail PK4s
 
-The retail `progimg/` tree is probed **last**, so a user replacement always wins. openPREY recognizes those retail paths automatically, including nested image programs and plain `gfx/env/` cube sides; you do not need to extract, rename, or regenerate the retail files.
+The retail `progimg/` tree is probed **last**, so a user replacement always wins. openPR06 recognizes those retail paths automatically, including nested image programs and plain `gfx/env/` cube sides; you do not need to extract, rename, or regenerate the retail files.
 
 ## Enable replacements
 
@@ -81,9 +81,9 @@ Texture arrays, cube maps, volume textures, invalid dimensions, and truncated de
 
 ### Normal maps
 
-Write BC7 normal maps the ordinary way: X, Y, Z in RGB, alpha unused. That is what `texconv`, NVTT, Compressonator and `bc7enc` all produce by default, and it is what openPREY expects.
+Write BC7 normal maps the ordinary way: X, Y, Z in RGB, alpha unused. That is what `texconv`, NVTT, Compressonator and `bc7enc` all produce by default, and it is what openPR06 expects.
 
-> **Changed:** earlier openPREY builds incorrectly forced BC7 bump maps into the DXT5nm/RXGB channel layout, which required encoding with `bc7enc -r2a`. A pack authored that way will now render with flat lighting and must be re-encoded without `-r2a`. Only DXT5 and true `RXGB` files use the alpha-swizzled layout; that convention exists because DXT5 gives alpha its own higher-precision interpolator, and BC7 has no such limitation.
+> **Changed:** earlier openPR06 builds incorrectly forced BC7 bump maps into the DXT5nm/RXGB channel layout, which required encoding with `bc7enc -r2a`. A pack authored that way will now render with flat lighting and must be re-encoded without `-r2a`. Only DXT5 and true `RXGB` files use the alpha-swizzled layout; that convention exists because DXT5 gives alpha its own higher-precision interpolator, and BC7 has no such limitation.
 
 ## Other formats
 

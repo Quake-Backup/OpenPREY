@@ -1911,7 +1911,7 @@ static void Cmd_TestDamage_f( const idCmdArgs &args ) {
 ==================
 Cmd_TestViewOverlay_f
 
-openPREY: drives the player's view overlay the way map scripts do with
+openPR06: drives the player's view overlay the way map scripts do with
 setOverlayMaterial and setOverlayColor, so every retail screen effect can be
 checked from the console or a cfg (the console strips the quotes a script
 string literal needs).

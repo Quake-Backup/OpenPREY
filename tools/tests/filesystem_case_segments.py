@@ -148,12 +148,12 @@ def validate_linux_build_path_casing() -> None:
     reject(root_meson, 'root / ".." / "OpenQ4-game"', "default GameLibs repository path")
     reject(root_meson, "../OpenQ4-game", "GameLibs repository diagnostics")
 
-    require(root_meson, "assets/linux/openPREY-steamdeck.in", "Steam Deck launcher template input")
-    require(root_meson, "assets/linux/openprey-steamdeck.desktop.in", "Steam Deck desktop template input")
+    require(root_meson, "assets/linux/openPR06-steamdeck.in", "Steam Deck launcher template input")
+    require(root_meson, "assets/linux/openpr06-steamdeck.desktop.in", "Steam Deck desktop template input")
     reject(root_meson, "assets/linux/openQ4-steamdeck.in", "Steam Deck launcher template input")
     reject(root_meson, "assets/linux/openq4-steamdeck.desktop.in", "Steam Deck desktop template input")
-    require_exact_child("assets/linux", "openPREY-steamdeck.in", "Steam Deck launcher template")
-    require_exact_child("assets/linux", "openprey-steamdeck.desktop.in", "Steam Deck desktop template")
+    require_exact_child("assets/linux", "openPR06-steamdeck.in", "Steam Deck launcher template")
+    require_exact_child("assets/linux", "openpr06-steamdeck.desktop.in", "Steam Deck desktop template")
 
 
 def validate_release_note() -> None:

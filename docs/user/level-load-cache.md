@@ -3,10 +3,10 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-openPREY learns which source files a map actually uses and can prepare those
+openPR06 learns which source files a map actually uses and can prepare those
 bytes during a later matching load. Worker jobs read or inflate the selected
 source, validate supported container framing and whole-buffer integrity, then
-hand immutable bytes back to the normal owner. openPREY also keeps validated local
+hand immutable bytes back to the normal owner. openPR06 also keeps validated local
 binary caches for parsed models, classic map worlds, and collision data, and the
 unified PREY game module keeps compact binary caches for MD5 animations.
 
@@ -29,7 +29,7 @@ performance remains validation-pending.
 ## Safety and compatibility
 
 The retail or mod file selected by the normal virtual filesystem always remains
-authoritative. openPREY resolves that file through the usual search and pure-PK4
+authoritative. openPR06 resolves that file through the usual search and pure-PK4
 rules before it may substitute already prepared, immutable bytes. Parsing,
 validation, and renderer/audio upload stay with the normal resource owner.
 The worker framing step recognizes RIFF/WAVE, Ogg, PNG, and JPEG sources; DDS
@@ -38,7 +38,7 @@ and other formats remain opaque until their ordinary owner parses them.
 Generated model, world, collision, and animation readers build private state
 first and publish it only after the whole payload is valid. A stale, truncated,
 corrupt, oversized, wrong-version, or otherwise mismatched cache is ignored;
-the affected private file is removed where appropriate and openPREY loads the
+the affected private file is removed where appropriate and openPR06 loads the
 original source instead. Packed MD5RProc map worlds remain on their source path
 rather than being flattened into an incompatible world cache.
 
@@ -73,12 +73,12 @@ containing PK4 checksum where applicable. It stores fixed-width values and
 floating-point arrays in a portable byte order; every build uses the same
 format. A stale, truncated, corrupt, or mismatched cache is ignored and rebuilt
 from the installed source animation. Loaded cache data becomes the normal runtime
-animation data; openPREY does not retain a second permanent copy in memory.
+animation data; openPR06 does not retain a second permanent copy in memory.
 Animation memory reporting also includes base-frame storage.
 
 Learned preload identity for a loose file uses its normalized path, size, and
 timestamp. A tool that deliberately preserves both size and timestamp while
-rewriting a loose file can evade that preparation check; close openPREY and remove
+rewriting a loose file can evade that preparation check; close openPR06 and remove
 the generated data, or disable `com_levelLoadCache`, when testing such edits.
 PK4 members remain tied to the containing archive checksum.
 
@@ -135,8 +135,8 @@ g_writeGeneratedAnimCache 1
 
 ## Clean rebuild and rollback
 
-To force a clean rebuild, close openPREY and delete one or more of the
-`generated/` subdirectories listed above under the active `fs_savepath`. openPREY
+To force a clean rebuild, close openPR06 and delete one or more of the
+`generated/` subdirectories listed above under the active `fs_savepath`. openPR06
 will recreate needed private data from the installed sources.
 
 For a complete engine source-path comparison, leave `com_levelLoadModernization 0`
@@ -145,7 +145,7 @@ and disable both animation-cache controls.
 Never delete the original `.proc`, `.cm`, model, image, sound, or
 `models/**/*.md5anim` files from the PREY (2006) installation. If a map still fails
 with all generated caches disabled, the problem is not caused by this cache
-layer; include the active `fs_savepath` and `logs/openprey.log` when reporting it.
+layer; include the active `fs_savepath` and `logs/openpr06.log` when reporting it.
 
 Developers and testers can find the exact key, ownership, validation, and
 pending evidence contract in

@@ -1,4 +1,4 @@
-# openPREY Engine Rebase Plan: onto OpenQ4 `d41186e4`
+# openPR06 Engine Rebase Plan: onto OpenQ4 `d41186e4`
 
 Status: the rebase implementation is complete (2026-08-01). It was developed on
 `prey-on-oq4`; the local `new-prey` branch is cut over to the closing head while the
@@ -27,13 +27,13 @@ item→work-package index. Actual dispositions and verification state live in
 
 ## 1. Baseline facts (initial analysis snapshot)
 
-- **Fork point is exact.** openPREY's `e634332b` ("Initial commit", 2026-02-19) is
+- **Fork point is exact.** openPR06's `e634332b` ("Initial commit", 2026-02-19) is
   byte-identical in source to openQ4 `abb9a688` (2026-02-18); only 42 Quake 4 asset files
   were stripped. Both refs exist in this repo (`openq4-upstream` remote). Every diff and
   3-way merge in this plan is anchored on that pair.
 - **Upstream since fork:** 575 commits, ~282k lines changed in `src/`. Renderer overhauled
   three times and split into loadable modules (`renderer-gl`/`renderer-vk`, versioned C ABI
-  in `RenderModuleAPI.h`, v7 at the selected upstream base; rebased openPREY is now v9);
+  in `RenderModuleAPI.h`, v7 at the selected upstream base; rebased openPR06 is now v9);
   `src/game` deleted in favor of companion-repo
   staging (`openQ4-game` + `tools/build/stage_gamelibs.py`, split `game-sp`/`game-mp`
   modules); BSE integrated in-tree (`src/bse`); new `src/imagetools` and `src/render_geo`
@@ -42,13 +42,13 @@ item→work-package index. Actual dispositions and verification state live in
   `content/baseoq4/pak0|pak1` with build-time pak assembly and `mod.json` manifests; CI
   rebuilt around `manual-release`/`push-verification`/`commit-validation` (nightly workflow
   deleted).
-- **Pre-rebase openPREY input snapshot:** 58 commits plus ~96 uncommitted files. Its
+- **Pre-rebase openPR06 input snapshot:** 58 commits plus ~96 uncommitted files. Its
   engine-side delta was ~15k lines across renderer/framework/sound/ui/idlib/cm/sys, plus
   additive Prey game trees (`src/Prey` 329 files, `src/game` 138 files,
   `src/preyengine`). Those game sources are now canonical in `OpenPrey-game` and are
   staged at configure time; they are not an in-repository `src/game` mirror.
 - **Cross-pollination is decisive.** Both repos share a maintainer, and a large share of
-  openPREY's engine work (post-FX stack, light-grid GI, bakeLightGrids, canvas expansion,
+  openPR06's engine work (post-FX stack, light-grid GI, bakeLightGrids, canvas expansion,
   cursor bounds, macOS/Linux bring-up, 64-bit portability, DXGI vram, focus-window
   plumbing, DDS loading, English lang fallback…) already exists upstream in more evolved
   form. Reapplying those would create duplicate, worse implementations.
@@ -78,7 +78,7 @@ and the spline/credits text effect vs the new TTF font pipeline (ui-02).
 
 ### 3.1 Direction: fresh branch from upstream, curated replay — not a mechanical rebase
 
-Replaying the 58 openPREY commits onto upstream (`git rebase --onto`) is technically
+Replaying the 58 openPR06 commits onto upstream (`git rebase --onto`) is technically
 possible (the identical fork trees give git a real merge base) but would be
 counterproductive: two of the commits are ~1M-line "misc" mega-commits, four unrelated
 efforts sit uncommitted in the working tree, and ~31 of 137 changes must be consciously
@@ -96,7 +96,7 @@ dropped rather than merged. Instead:
 Upstream's own `TODO.md` ends with: *"Project may benefit from catering towards multiple
 idTech4 titles, to include: Doom 3, Doom 3: BFG, Prey, ETQW."* Since the same person
 maintains both repos, the single highest-leverage move is to land **title-agnostic
-engine hooks in openQ4 first**, so openPREY's permanent delta contains only genuinely
+engine hooks in openQ4 first**, so openPR06's permanent delta contains only genuinely
 Prey-specific code. Strong candidates (all currently dispositioned reapply-*):
 
 - Doom 3 `.proc` header acceptance (`mapProcFile003`) in renderer + cm (RD-18, corelibs-20)
@@ -121,11 +121,11 @@ upstream-first because they are pure Doom-3-era restorations with no Prey coupli
 | D2 | Renderer module ABI | **Executed at API v9:** the module split remains. API v8 carried the Prey entity/time-group bridge; API v9 added the per-glyph material field in `glyphInfo_t`. Prey rendering targets the legacy GL/ARB2 path first; ModernGL/Vulkan feature parity remains explicitly deferred. |
 | D3 | BSE | **Executed as an active in-tree runtime subsystem:** Meson always builds and links `src/bse`; Common attaches and initializes it, and the renderer module imports the shared instance. Prey's `gameImport_t` v7 correctly has no `bse` member, so the game module does not receive it through that ABI. Nested `SEG_EFFECT` spawning remains explicitly gated pending a v7-compatible callback path and stock-FX capture. |
 | D4 | `usercmd_t` | **Executed:** upstream's 16-bit `buttons` and impulse-127 plumbing are retained with Prey's bit assignments re-based on top (`BUTTON_ATTACK_ALT` etc., coexisting with `BUTTON_WEAPONWHEEL`). The paired engine/game layout and network `_attackalt` path were validated with a two-client MP run. |
-| D5 | `soundShaderParms_t` | **Executed:** the shared engine/game definition carries Prey's `subIndex` and profanity fields. Sound classes use Prey's five-class numbering (`SOUNDCLASS_MUSIC=4`, `SOUND_MAX_CLASSES=5`), with the upstream musical alias mapped to that value. This is a deliberate divergence from upstream's retail-Q4 ABI freeze because openPREY builds its paired Prey game module. |
+| D5 | `soundShaderParms_t` | **Executed:** the shared engine/game definition carries Prey's `subIndex` and profanity fields. Sound classes use Prey's five-class numbering (`SOUNDCLASS_MUSIC=4`, `SOUND_MAX_CLASSES=5`), with the upstream musical alias mapped to that value. This is a deliberate divergence from upstream's retail-Q4 ABI freeze because openPR06 builds its paired Prey game module. |
 | D6 | Content pipeline | **Executed:** repo-authored runtime content uses `content/basepr/pak0|pak1`, build-time PK4s, and `mod.json`. Large generated fixtures (retail `.cm` mirrors and `roadhouse_quick`) live in the dev-only loose directory rather than pak0. |
-| D7 | Game-dir name | **Executed:** `basepr` is the sole openPREY runtime namespace. Repo-authored runtime content is assembled from `content/basepr/`, and the unified game module installs beneath `.install/basepr/`. |
-| D8 | CI/release | **Executed for active validation and portable packaging:** `openprey-validation.yml` carries the current cross-platform validation architecture. The Windows x64 archive was produced, inspected, and launched successfully in isolation. Inherited release/signing/manual-publish lanes that still encode OpenQ4 or split-module assumptions are deliberately false-gated and remain a release-lane deferral. |
-| D9 | MVD / bots / repeater | **Executed as fixed compile-time gates:** `OPENPREY_ENABLE_MVD`, `OPENPREY_ENABLE_BOTS`, and `OPENPREY_ENABLE_REPEATER` are `0`; guarded sites carry `OPENPREY-GATED(D9)` markers and entry points are inert. Re-enablement remains design work against Prey's v7 API, not a hidden runtime option. |
+| D7 | Game-dir name | **Executed:** `basepr` is the sole openPR06 runtime namespace. Repo-authored runtime content is assembled from `content/basepr/`, and the unified game module installs beneath `.install/basepr/`. |
+| D8 | CI/release | **Executed for active validation and portable packaging:** `openpr06-validation.yml` carries the current cross-platform validation architecture. The Windows x64 archive was produced, inspected, and launched successfully in isolation. Inherited release/signing/manual-publish lanes that still encode OpenQ4 or split-module assumptions are deliberately false-gated and remain a release-lane deferral. |
+| D9 | MVD / bots / repeater | **Executed as fixed compile-time gates:** `OPENPR06_ENABLE_MVD`, `OPENPR06_ENABLE_BOTS`, and `OPENPR06_ENABLE_REPEATER` are `0`; guarded sites carry `OPENPR06-GATED(D9)` markers and entry points are inert. Re-enablement remains design work against Prey's v7 API, not a hidden runtime option. |
 | D10 | TTF fonts | **Executed, TTF-first:** `r_useTrueTypeFonts` defaults to `1`, with the retail bitmaps as the fallback and as `r_useTrueTypeFonts 0`. The retail spline text effect draws with either font path, because it only repositions and fades glyph quads. Quake 4 face names requested by inherited engine code fold onto Prey's faces (`R_CanonicalFontName`). |
 
 ## 4. Phases
@@ -137,22 +137,22 @@ untracked sources). Land or shelve them so the rebase starts from a clean, tagge
 
 1. **Commit the trigger swept-hull fix** (`src/game/Entity.cpp`, `src/Prey/game_trigger.*`)
    — game-side, survives the rebase untouched.
-2. **Commit the openPREY casing rebrand** (licensee.h, workflows, docs) as its own commit.
+2. **Commit the openPR06 casing rebrand** (licensee.h, workflows, docs) as its own commit.
 3. **Commit the light-grid GI and HDR/bloom rewrites as-is for the record**, knowing both
    are dispositioned obsolete-upstream (upstream's `RenderWorld_lightgrid.cpp` is 3453
    lines vs the local untracked 1666; upstream's HDR/bloom/auto-exposure stack is newer).
    They are dropped during the rebase, not lost — the old branch preserves them. Add the
-   untracked files (`RenderWorld_lightgrid.cpp`, shader files, `openprey_version.rc`) first.
+   untracked files (`RenderWorld_lightgrid.cpp`, shader files, `openpr06_version.rc`) first.
 4. **Resolve D7 (basepy/basepr)** and fix the `meson.build` line-74 vs line-465 mismatch.
 5. **Purge tracked `.install/` artifacts** (assets-07: committed binaries, the stale
-   `.install/openprey/` pre-rename copy, duplicated asset trees; keep unique repro cfgs by
+   `.install/openpr06/` pre-rename copy, duplicated asset trees; keep unique repro cfgs by
    moving them to a fixtures dir). Upstream's model generates `.install/` at build time.
 6. Tag: `pre-oq4-rebase`.
 
-### Phase 1 — scaffold (target: upstream tree builds under openPREY identity)
+### Phase 1 — scaffold (target: upstream tree builds under openPR06 identity)
 
 - Branch `prey-on-oq4` from `openq4-upstream/main`.
-- Systematic rebrand pass (FW-01, sys-build rebrand): scripted openQ4→openPREY sweep
+- Systematic rebrand pass (FW-01, sys-build rebrand): scripted openQ4→openPR06 sweep
   against the *current* upstream surface — licensee.h identity block, generated-version
   pipeline (`openq4_version.py` model feeding the version rc; replaces the hardcoded rc),
   save paths with legacy-dir fallbacks, env vars with `OPENQ4_*` fallbacks, desktop
@@ -160,7 +160,7 @@ untracked sources). Land or shelve them so the rebase starts from a clean, tagge
 - Re-add the Prey feature-toggle macro block (FW-02) and INTERIM/LEGACY config constants.
 - Relocate `basepy/` content into the upstream content-pipeline layout (D6); wire Prey
   icons into upstream's install loops.
-- Gate: engine + renderer-gl build and launch to the console with openPREY branding
+- Gate: engine + renderer-gl build and launch to the console with openPR06 branding
   (no game module, no Prey assets yet).
 
 ### Phase 2 — additive compat layer (target: engine-only build with Prey surfaces)
@@ -183,7 +183,7 @@ registers via `RegisterDeclFolderWrapper` (FW-14/15); `IcmpNoColor` must use ups
 The critical path; co-design engine and game-header sides together.
 
 1. **Staging + build** (D1): extend `stage_gamelibs.py` to stage the Prey trees; single
-   `game_<arch>` `shared_module` + `openprey_game_idlib`; `Game.def`; install to game dir.
+   `game_<arch>` `shared_module` + `openpr06_game_idlib`; `Game.def`; install to game dir.
 2. **Loader** (FW-11): unified-module candidate list (`game_x64`/`gamex86`/legacy aliases)
    rebuilt inside upstream's phase-instrumented `LoadGameDLL`, keeping diagnostics and the
    macOS universal2 fallback; v7 `gameImport_t` population (13 systems, no `bse` field).
@@ -231,9 +231,9 @@ Order of battle:
    expressions (RD-20 — follows upstream's register/cache model).
 4. **Drops** (obsolete-upstream): post-FX stack RD-10, light-grid RD-11, DDS loader RD-13,
    portability bundle RD-22 (re-verify only the `Model_lwo` casts). Re-express desired
-   openPREY defaults (e.g. tonemap) as cvar defaults, not code.
+   openPR06 defaults (e.g. tonemap) as cvar defaults, not code.
 5. **Assets**: take upstream's `pak0/glprogs` + `postprocess` materials wholesale
-   (assets-02), dropping the `openprey_`-prefixed snapshots and re-pointing the renderer
+   (assets-02), dropping the `openpr06_`-prefixed snapshots and re-pointing the renderer
    at upstream shader/material names; re-validate the Prey `interaction.vfp` against
    upstream's env-parameter contract and colormode sniffing (assets-03).
 - Gate: retail Prey map renders correctly on `renderer-gl` (beams, portals, spirit walk,
@@ -287,7 +287,7 @@ Order of battle:
   structure; port Prey-specific docs (pk4 checksums, porting baseline, this plan);
   refresh `TECHNICAL.md`/`BUILDING.md` from upstream's versions with Prey deltas.
 - Menu strings: retain private `#str_122xxx` IDs and rename `*999.lang` packs to
-  `<lang>_openprey.lang` in the pak layout (assets-04).
+  `<lang>_openpr06.lang` in the pak layout (assets-04).
 
 ### Phase 8 — validation and cut-over
 
@@ -337,7 +337,7 @@ Recorded validation evidence:
 Explicitly deferred or broader than rebase closure:
 
 - Exhaustive per-map, localization, full subtitle/censor/audio matrix, renderer-backend,
-  direct retail/openPREY mirror/portal image comparison, and platform parity.
+  direct retail/openPR06 mirror/portal image comparison, and platform parity.
   Representative runtime evidence above must not be read as a full manual matrix.
 - macOS/ARM64/signing/manual-publish release-lane reconstruction, remote default-branch
   retargeting, and upstream PR submission.
@@ -379,7 +379,7 @@ verified upstream evidence, effort, risk) is in this directory:
 - [`catalog-assets.md`](catalog-assets.md) — 10 items (assets-*)
 - [`report-interface.md`](report-interface.md) — game↔engine requirements map (18 rows)
 - [`report-architecture.md`](report-architecture.md) — upstream evolution survey
-- [`report-narrative.md`](report-narrative.md) — openPREY port history + hazards
+- [`report-narrative.md`](report-narrative.md) — openPR06 port history + hazards
 - [`report-audit.md`](report-audit.md) — coverage audit (complete; one minor gap:
   `tools/assets/extract_menu_background_tiles.ps1`, carried with assets-05)
 

@@ -431,7 +431,7 @@ public:
 	bool				BeginRetainedPage( const char *request );
 	void				UpdateRetainedPage();
 	void				ReturnRetainedPage();
-	void				LeaveRetainedPage( idUserInterface *page );	// openPREY: Back on a page shrinks it first
+	void				LeaveRetainedPage( idUserInterface *page );	// openPR06: Back on a page shrinks it first
 	void				ReturnRetainedSinglePlayerHome();
 	void				DrawRetainedPageHome( int presentationTime );
 	void				PublishRetainedLoadPage( idUserInterface *gui, int select, const char *error );
@@ -471,7 +471,7 @@ public:
 	idUserInterface *	RetainedMultiplayerPage();
 	bool				OpenRetainedMultiplayerPage( const char *section = NULL );
 	void				HandleRetainedMultiplayerPageRequest( idUserInterface *gui, const char *request );
-	// openPREY: Prey's MultiPrey page (guis/menu/multiplayer.rui): Player
+	// openPR06: Prey's MultiPrey page (guis/menu/multiplayer.rui): Player
 	// Settings, Create Server and Find Servers on one page.
 	void				PublishRetainedMultiPrey( idUserInterface *page );
 	bool				HandleRetainedMultiPreyRequest( idUserInterface *gui, const char *request );
@@ -586,7 +586,7 @@ public:
 	virtual const char *MessageBox( msgBoxType_t type, const char *message, const char *title = NULL, bool wait = false, const char *fire_yes = NULL, const char *fire_no = NULL, bool network = false  );
 	virtual void		StopBox( void );
 	virtual void		DownloadProgressBox( backgroundDownload_t *bgl, const char *title, int progress_start = 0, int progress_end = 100 );
-	// openPREY: the screen a client shows while it connects: the retained
+	// openPR06: the screen a client shows while it connects: the retained
 	// guis/menu/connecting.rui where the retained screens present, else `stock`
 	// (guis/netmenu.gui).
 	idUserInterface *	ConnectingScreen( idUserInterface *stock );
@@ -863,7 +863,7 @@ public:
 	idUserInterface *	guiRetainedBuy;
 	// The single-player Arena's pause card.
 	idUserInterface *	guiRetainedArenaPause;
-	// openPREY: the chat line's card (guis/menu/mp_chat.rui), which covers the
+	// openPR06: the chat line's card (guis/menu/mp_chat.rui), which covers the
 	// game's guis/mpmsgmode.gui as the Escape card covers its menu.
 	idUserInterface *	guiRetainedChat;
 	idUserInterface *	guiRetainedMultiplayer;

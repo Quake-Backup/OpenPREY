@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.connecting",
+ "id": "openpr06.connecting",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {"status": {"type": "string", "initial": ""}},
  "actions": {

@@ -251,22 +251,22 @@ def validate_nontrivial_tga(path: Path | None) -> dict[str, Any]:
 def write_autoexec_configs(home: Path, save_slot: str, settle_frames: int) -> None:
     first_payload = "\n".join(
         (
-            "echo OPENPREY_WAYLAND_SP_SAVE_REQUEST",
+            "echo OPENPR06_WAYLAND_SP_SAVE_REQUEST",
             f"saveGame {save_slot}",
-            "echo OPENPREY_WAYLAND_SP_SAVE_RETURNED",
+            "echo OPENPR06_WAYLAND_SP_SAVE_RETURNED",
             f"set g_autoExecAfterMapLoad {RESTORED_CFG_REL}",
             "set g_autoExecAfterMapLoadDelayMs 1000",
-            "echo OPENPREY_WAYLAND_SP_LOAD_REQUEST",
+            "echo OPENPR06_WAYLAND_SP_LOAD_REQUEST",
             f"loadGame {save_slot}",
             "",
         )
     )
     restored_payload = "\n".join(
         (
-            "echo OPENPREY_WAYLAND_SP_RESTORE_ACTIVE",
+            "echo OPENPR06_WAYLAND_SP_RESTORE_ACTIVE",
             f"wait {max(1, settle_frames)}",
             "gfxInfo",
-            f'echo OPENPREY_WAYLAND_SP_POST_RESTORE_CAPTURE "{MAP_NAME}"',
+            f'echo OPENPR06_WAYLAND_SP_POST_RESTORE_CAPTURE "{MAP_NAME}"',
             f'screenshot "{SCREENSHOT_REL}"',
             "wait 5",
             "quit",
@@ -428,7 +428,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--client-executable",
         type=Path,
         default=None,
-        help="Override the packaged openPREY client executable.",
+        help="Override the packaged openPR06 client executable.",
     )
     parser.add_argument(
         "--basepath",
@@ -494,11 +494,11 @@ def main(argv: list[str]) -> int:
     install_root = args.install_root.resolve()
     basepath = args.basepath.resolve()
     game_libs_repo = args.game_libs_repo.resolve() if args.game_libs_repo else None
-    client = (args.client_executable or install_root / f"openPREY-client_{arch}").resolve()
+    client = (args.client_executable or install_root / f"openPR06-client_{arch}").resolve()
     game_module = (install_root / "basepr" / f"game_{arch}.so").resolve()
     mod_manifest = install_root / "basepr" / "mod.json"
-    openprey_pak0 = install_root / "basepr" / "pak0.pk4"
-    openprey_pak1 = install_root / "basepr" / "pak1.pk4"
+    openpr06_pak0 = install_root / "basepr" / "pak0.pk4"
+    openpr06_pak1 = install_root / "basepr" / "pak1.pk4"
     retail_candidates = (
         (basepath / "base" / "pak000.pk4").resolve(),
         (basepath / "base" / "pak_data.pk4").resolve(),
@@ -507,9 +507,9 @@ def main(argv: list[str]) -> int:
     for description, path in (
         ("packaged client", client),
         ("packaged unified game module", game_module),
-        ("packaged openPREY mod manifest", mod_manifest),
-        ("packaged openPREY pak0.pk4", openprey_pak0),
-        ("packaged openPREY pak1.pk4", openprey_pak1),
+        ("packaged openPR06 mod manifest", mod_manifest),
+        ("packaged openPR06 pak0.pk4", openpr06_pak0),
+        ("packaged openPR06 pak1.pk4", openpr06_pak1),
         ("retail Prey base PK4", retail_pak),
     ):
         if not path.is_file():
@@ -544,8 +544,8 @@ def main(argv: list[str]) -> int:
     args.output_root.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix=f"{arch}-", dir=args.output_root.resolve()))
     home = run_dir / "home"
-    (home / ".config" / "openprey").mkdir(parents=True)
-    (home / ".local" / "share" / "openprey").mkdir(parents=True)
+    (home / ".config" / "openpr06").mkdir(parents=True)
+    (home / ".local" / "share" / "openpr06").mkdir(parents=True)
     write_autoexec_configs(home, args.save_slot, args.settle_frames)
 
     stdout_path = run_dir / "stdout.txt"
@@ -596,7 +596,7 @@ def main(argv: list[str]) -> int:
         }
     )
     environment.pop("DISPLAY", None)
-    environment.pop("OPENPREY_FORCE_X11", None)
+    environment.pop("OPENPR06_FORCE_X11", None)
     environment.pop("OPENQ4_FORCE_X11", None)
 
     started = time.monotonic()
@@ -679,7 +679,7 @@ def main(argv: list[str]) -> int:
         "save load began": re.search(r"loading a v\d+ savegame", log_text) is not None,
         "save restore initialized": "---------- Game Map Init SaveGame -----------" in log_text,
         "second gameplay config executed": f"AutoExecAfterMapLoad: executed {RESTORED_CFG_REL}" in log_text,
-        "post-restore active marker": "OPENPREY_WAYLAND_SP_RESTORE_ACTIVE" in log_text,
+        "post-restore active marker": "OPENPR06_WAYLAND_SP_RESTORE_ACTIVE" in log_text,
         "post-restore screenshot write": f"Wrote {SCREENSHOT_REL}" in log_text,
         "clean game shutdown": "--------------- Game Shutdown ---------------" in log_text,
     }
@@ -705,15 +705,15 @@ def main(argv: list[str]) -> int:
             ("initial player spawn", re.compile(r"SpawnPlayer:\s*\d+")),
             ("initial active draw", re.compile(re.escape("AutoExecAfterMapLoad: first active draw observed"))),
             ("save/load config executed", re.compile(re.escape(f"AutoExecAfterMapLoad: executed {FIRST_CFG_REL}"))),
-            ("save requested", re.compile(re.escape("OPENPREY_WAYLAND_SP_SAVE_REQUEST"))),
+            ("save requested", re.compile(re.escape("OPENPR06_WAYLAND_SP_SAVE_REQUEST"))),
             ("save completed", re.compile(re.escape(f"Saved '{args.save_slot}'"))),
-            ("load requested", re.compile(re.escape("OPENPREY_WAYLAND_SP_LOAD_REQUEST"))),
+            ("load requested", re.compile(re.escape("OPENPR06_WAYLAND_SP_LOAD_REQUEST"))),
             ("savegame stream opened", re.compile(r"loading a v\d+ savegame")),
             ("old map shut down", re.compile(re.escape("------------ Game Map Shutdown --------------"))),
             ("restored map load", re.compile(re.escape(f"Map: {MAP_NAME}"))),
             ("savegame map initialized", re.compile(re.escape("---------- Game Map Init SaveGame -----------"))),
             ("restored config executed", re.compile(re.escape(f"AutoExecAfterMapLoad: executed {RESTORED_CFG_REL}"))),
-            ("restored gameplay active", re.compile(re.escape("OPENPREY_WAYLAND_SP_RESTORE_ACTIVE"))),
+            ("restored gameplay active", re.compile(re.escape("OPENPR06_WAYLAND_SP_RESTORE_ACTIVE"))),
             ("post-restore capture", re.compile(re.escape(f"Wrote {SCREENSHOT_REL}"))),
             ("clean game shutdown", re.compile(re.escape("--------------- Game Shutdown ---------------"))),
         ),
@@ -791,7 +791,7 @@ def main(argv: list[str]) -> int:
         "glErrorMarkers": gl_error_markers,
         "audioErrorMarkers": audio_error_markers,
         "elapsedSeconds": round(elapsed, 3),
-        "openPREYCommit": git_commit(ROOT),
+        "openPR06Commit": git_commit(ROOT),
         "OpenPreyGameCommit": git_commit(game_libs_repo),
         "sha256": {
             "client": sha256_file(client),
@@ -813,7 +813,7 @@ def main(argv: list[str]) -> int:
             "SDL_VIDEO_DRIVER": "wayland",
             "SDL_VIDEODRIVER": "wayland",
             "DISPLAYRemoved": "DISPLAY" not in environment,
-            "OPENPREY_FORCE_X11Removed": "OPENPREY_FORCE_X11" not in environment,
+            "OPENPR06_FORCE_X11Removed": "OPENPR06_FORCE_X11" not in environment,
             "OPENQ4_FORCE_X11Removed": "OPENQ4_FORCE_X11" not in environment,
         },
     }

@@ -938,7 +938,7 @@ def validate_savegame_compat_stamp_model() -> None:
     temp_root.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="savegame-compat-stamp-", dir=temp_root) as raw_temp:
         work = Path(raw_temp)
-        project_root = work / "openPREY"
+        project_root = work / "openPR06"
         game_root = work / "stage"
         project_file = project_root / "src" / "framework" / "Session.cpp"
         game_file = game_root / "src" / "game" / "Game_local.cpp"

@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-This guide covers openPREY's user-facing shadow-map settings, including projected-light shadow maps, experimental point-light shadow maps, cascaded shadow maps (CSM), alpha-tested transparency shadows, and the current experimental translucent-shadow path.
+This guide covers openPR06's user-facing shadow-map settings, including projected-light shadow maps, experimental point-light shadow maps, cascaded shadow maps (CSM), alpha-tested transparency shadows, and the current experimental translucent-shadow path.
 
 ## Quick Start
 
@@ -28,7 +28,7 @@ vid_restart
 
 Notes:
 - `r_shadows` must stay enabled for any shadow path to render.
-- If a light cannot use a complete shadow map, openPREY uses its stencil representation when available. Vulkan logs a missing-resource warning and preserves direct illumination if neither representation can be submitted.
+- If a light cannot use a complete shadow map, openPR06 uses its stencil representation when available. Vulkan logs a missing-resource warning and preserves direct illumination if neither representation can be submitted.
 - If only part of a receiver ownership can be represented in a shadow map, the classic renderer combines that exact map with the missing casters' stencil supplements. If those supplements are incomplete, the complete ownership falls back to stencil instead of publishing a partial shadow.
 - Point lights shadow-map by default (`r_shadowMapPointLights 1`); they are the dominant light class in PREY (2006) content, so every performance preset keeps this at `1`, Enhanced included. Set `r_shadowMapPointLights 0` to fall back to stencil shadows for point lights only.
 - Surfaces drawn with one of PREY's own per-light shader programs (skin, cloth, hair, parallax and masked interactions, chosen by **Shader Detail** above Low on OpenGL) keep that program under a shadow-mapped light and take their shadows from the light's map too (`r_shadowMapProgramReceivers 1`, the default). Those programs cannot read a shadow map, so the renderer first writes the map's filtered visibility for them into the framebuffer's alpha and then scales each program's light by it, which gives them the same soft edges as every other surface. The light's stencil volumes still shadow a program surface the visibility pass cannot cover: a stage that does not add its light, GPU-skinned geometry, or a light whose map is incomplete and needs stencil supplements anyway. `r_shadowMapReport 3` names each of those surfaces and why (`SM stencil-receiver`). The player's own view weapon is never admitted to a shadow map, so its shadow alone still uses a volume; the `levelshot` command leaves the weapon and its shadow out.
@@ -42,7 +42,7 @@ Notes:
 
 ## What the System Does
 
-openPREY currently supports:
+openPR06 currently supports:
 - Projected-light shadow maps for regular projected lights.
 - Point-light cubemap shadow maps for omni/point lights (the dominant PREY (2006) light class), on by default.
 - Fitted perspective shadow maps for off-centre point sources whose entire light volume lies in front of the source. Distant outdoor lights can use the projected cascade machinery without changing their authored illumination.
@@ -184,7 +184,7 @@ vid_restart
 
 ## Residency and Update Budgeting
 
-openPREY keeps opaque static depth resident and reuses it across backend views. Moving and cutout casters are composed over that depth each frame on both renderers: a projected light draws them over its restored atlas tile, and a point light over a copy of its cached cube, so a walking character or an alpha-tested grate costs one cube copy plus its own draws instead of six faces of static scenery. A stored spotlight map with nothing moving in its light costs no work at all: OpenGL keeps it in the atlas it is sampled from, and Vulkan samples the stored map directly instead of copying it into the view's atlas first. Translucent caster passes continue to update normally, and view-fitted CSM/global cache reuse requires an explicit opt-in.
+openPR06 keeps opaque static depth resident and reuses it across backend views. Moving and cutout casters are composed over that depth each frame on both renderers: a projected light draws them over its restored atlas tile, and a point light over a copy of its cached cube, so a walking character or an alpha-tested grate costs one cube copy plus its own draws instead of six faces of static scenery. A stored spotlight map with nothing moving in its light costs no work at all: OpenGL keeps it in the atlas it is sampled from, and Vulkan samples the stored map directly instead of copying it into the view's atlas first. Translucent caster passes continue to update normally, and view-fitted CSM/global cache reuse requires an explicit opt-in.
 
 Point lights are the dominant shadow-casting light class, and a dense view can show dozens at once, so the point cube cache is sized for a whole view within a memory bound. A light with no slot is still shadowed: it renders into a scratch cube every view.
 
@@ -265,7 +265,7 @@ Behavior:
 Current limits:
 - OpenGL and the experimental Vulkan renderer both draw these shadows, with matching results in the inherited openQ4 test scene. Vulkan keeps every shadowed light's translucent shadows in one shared buffer, so when many such lights share a view it lowers their resolution to make them fit, and it skips translucent stages whose texture is a video or a generated image.
 - Supported stages currently include old-style alpha and premultiplied-alpha stages with explicit ST texture coordinates, plus common additive `blend add` / `GL_ONE, GL_ONE` stages.
-- When a translucent shell/tint stage is layered on top of a separate explicit-ST coverage stage, openPREY now reuses that coverage stage, including its alpha-test threshold when present, so layered pickup-orb and similar materials can cast shaped transmitted shadows instead of only uniform blobs.
+- When a translucent shell/tint stage is layered on top of a separate explicit-ST coverage stage, openPR06 now reuses that coverage stage, including its alpha-test threshold when present, so layered pickup-orb and similar materials can cast shaped transmitted shadows instead of only uniform blobs.
 - Supported translucent casters now derive colored transmission from the material inputs available to that stage: texture alpha, sampled texture RGB, stage color, and applicable vertex color.
 - View-dependent reflection cubemaps are treated as tinted transmissive shells instead of using the reflected sample directly, so pickup orbs can tint transmitted light without camera-dependent shadow color shifts.
 - The current high-quality path stores separate translucent shadow moments for red, green, and blue, so each channel resolves blocker depth independently instead of sharing one grayscale depth distribution.
@@ -273,7 +273,7 @@ Current limits:
 - Inherited effect/FX particles, unusual custom stage setups, and many effect-style materials are intentionally not forced into the translucent shadow pass.
 - Colored transmission is still approximate rather than a full deep-shadow solution, but it is materially closer to real tinted transmission than the earlier scalar/grayscale model.
 - This path adds extra GPU work because eligible lights render an additional translucent caster pass.
-- The feature now expects enough hardware for 3 translucent MRT attachments and 3 extra texture samplers in the receiver path; if that is unavailable, openPREY disables this experimental translucent-shadow feature.
+- The feature now expects enough hardware for 3 translucent MRT attachments and 3 extra texture samplers in the receiver path; if that is unavailable, openPR06 disables this experimental translucent-shadow feature.
 
 Controls:
 
@@ -418,7 +418,7 @@ Useful workflow:
 | Windows x64 (GL3.3+) | Implemented, PREY validation pending | Primary development platform; openQ4's bit-exact regression net runs here against Quake 4 maps. |
 | Linux x64 (GL3.3+) | Implemented, PREY validation pending | Same GL feature path as Windows. |
 | Steam Deck | Implemented, PREY validation pending | Recommended: `r_shadowMapSize 1024`, `r_shadowMapPointSize 512`, `r_shadowMapMaxUpdatesPerView 2`, `r_shadowMapCSM 1` with `r_shadowMapCascadeCount 3`. The importance-ordered update budget keeps per-frame shadow cost bounded. |
-| macOS | Not supported | openPREY doesn't build or test macOS yet. The inherited code keeps the retail stencil path on Apple's legacy GL 2.1 tier and the Vulkan shadow path through MoltenVK, neither checked with PREY. |
+| macOS | Not supported | openPR06 doesn't build or test macOS yet. The inherited code keeps the retail stencil path on Apple's legacy GL 2.1 tier and the Vulkan shadow path through MoltenVK, neither checked with PREY. |
 
 The shadow-map pipeline rejects incomplete maps and uses complete stencil coverage when available. If Vulkan temporarily has neither usable representation, it preserves direct illumination and logs the missing resource while requesting stencil ownership for later frames. This recovery case and unsupported material/platform paths still prevent treating shadow mapping as a universal replacement.
 

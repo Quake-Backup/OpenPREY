@@ -7,8 +7,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $workspaceToken = '${workspaceFolder}'
-$clientProgram = "$workspaceToken\.install\openPREY-client_x64.exe"
-$dedicatedProgram = "$workspaceToken\.install\openPREY-ded_x64.exe"
+$clientProgram = "$workspaceToken\.install\openPR06-client_x64.exe"
+$dedicatedProgram = "$workspaceToken\.install\openPR06-ded_x64.exe"
 $workingDirectory = "$workspaceToken\.install"
 $savePath = "$workspaceToken\.home"
 $devPath = "$workspaceToken\.install"
@@ -54,29 +54,29 @@ $manifest = Get-Content -LiteralPath $MapManifest -Raw | ConvertFrom-Json
 $configurations = [System.Collections.Generic.List[object]]::new()
 
 $glArguments = [System.Collections.Generic.List[object]]::new()
-foreach ($argument in (New-BaseArguments 'logs/openprey-gl.log')) {
+foreach ($argument in (New-BaseArguments 'logs/openpr06-gl.log')) {
     $glArguments.Add($argument)
 }
 foreach ($argument in @('+set', 'r_renderApi', 'gl')) {
     $glArguments.Add($argument)
 }
-$configurations.Add((New-LaunchConfiguration -Name 'Launch openPREY (OpenGL)' -Program $clientProgram -Arguments $glArguments.ToArray()))
+$configurations.Add((New-LaunchConfiguration -Name 'Launch openPR06 (OpenGL)' -Program $clientProgram -Arguments $glArguments.ToArray()))
 
 $vulkanArguments = [System.Collections.Generic.List[object]]::new()
-foreach ($argument in (New-BaseArguments 'logs/openprey-vulkan.log')) {
+foreach ($argument in (New-BaseArguments 'logs/openpr06-vulkan.log')) {
     $vulkanArguments.Add($argument)
 }
 foreach ($argument in @('+set', 'r_renderApi', 'vulkan')) {
     $vulkanArguments.Add($argument)
 }
-$configurations.Add((New-LaunchConfiguration -Name 'Launch openPREY (Vulkan)' -Program $clientProgram -Arguments $vulkanArguments.ToArray()))
+$configurations.Add((New-LaunchConfiguration -Name 'Launch openPR06 (Vulkan)' -Program $clientProgram -Arguments $vulkanArguments.ToArray()))
 
 foreach ($entry in $manifest.maps) {
     if ($entry.kind -notin @('sp', 'mp')) {
         throw "Unsupported map kind '$($entry.kind)' for '$($entry.name)'."
     }
 
-    $logName = if ($entry.kind -eq 'sp') { 'logs/openprey-sp.log' } else { 'logs/openprey-mp.log' }
+    $logName = if ($entry.kind -eq 'sp') { 'logs/openpr06-sp.log' } else { 'logs/openpr06-mp.log' }
     $arguments = [System.Collections.Generic.List[object]]::new()
     foreach ($argument in (New-BaseArguments $logName)) {
         $arguments.Add($argument)
@@ -96,7 +96,7 @@ foreach ($entry in $manifest.maps) {
 }
 
 $dedicatedArguments = [System.Collections.Generic.List[object]]::new()
-foreach ($argument in (New-BaseArguments 'logs/openprey-ded.log')) {
+foreach ($argument in (New-BaseArguments 'logs/openpr06-ded.log')) {
     $dedicatedArguments.Add($argument)
 }
 foreach ($argument in @(

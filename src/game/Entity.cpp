@@ -22,15 +22,15 @@
 #include "../Prey/game_zone.h"
 //HUMANHEAD END
 
-static ID_INLINE bool openPREY_IsFiniteFloat( const float value ) {
+static ID_INLINE bool openPR06_IsFiniteFloat( const float value ) {
 	return ( value == value ) && ( idMath::Fabs( value ) < idMath::INFINITY );
 }
 
-static bool openPREY_IsReasonablePVSBounds( const idBounds &bounds ) {
+static bool openPR06_IsReasonablePVSBounds( const idBounds &bounds ) {
 	for ( int axis = 0; axis < 3; axis++ ) {
 		const float mins = bounds[0][axis];
 		const float maxs = bounds[1][axis];
-		if ( !openPREY_IsFiniteFloat( mins ) || !openPREY_IsFiniteFloat( maxs ) ) {
+		if ( !openPR06_IsFiniteFloat( mins ) || !openPR06_IsFiniteFloat( maxs ) ) {
 			return false;
 		}
 		if ( mins > maxs ) {
@@ -103,7 +103,7 @@ const idEventDef EV_StartSoundShader( "startSoundShader", "sd", 'f' );
 const idEventDef EV_StartSound( "startSound", "sdd", 'f' );
 const idEventDef EV_StopSound( "stopSound", "dd" );
 const idEventDef EV_FadeSound( "fadeSound", "dff" );
-static const idEventDef EV_openPREYScriptSilenceDone( "<openprey_script_silence_done>", NULL );
+static const idEventDef EV_openPR06ScriptSilenceDone( "<openpr06_script_silence_done>", NULL );
 const idEventDef EV_SetGuiParm( "setGuiParm", "ss" );
 const idEventDef EV_SetGuiFloat( "setGuiFloat", "sf" );
 const idEventDef EV_GetNextKey( "getNextKey", "ss", 's' );
@@ -186,7 +186,7 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_StartSound,			idEntity::Event_StartSound )
 	EVENT( EV_StopSound,			idEntity::Event_StopSound )
 	EVENT( EV_FadeSound,			idEntity::Event_FadeSound )
-	EVENT( EV_openPREYScriptSilenceDone,	idEntity::Event_ScriptSilenceDone )
+	EVENT( EV_openPR06ScriptSilenceDone,	idEntity::Event_ScriptSilenceDone )
 	EVENT( EV_GetWorldOrigin,		idEntity::Event_GetWorldOrigin )
 	EVENT( EV_SetWorldOrigin,		idEntity::Event_SetWorldOrigin )
 	EVENT( EV_GetOrigin,			idEntity::Event_GetOrigin )
@@ -743,7 +743,7 @@ idEntity::~idEntity( void ) {
 		idThread::ObjectMoveDone( scriptSilenceWaitingThread, this );
 		scriptSilenceWaitingThread = 0;
 	}
-	CancelEvents( &EV_openPREYScriptSilenceDone );
+	CancelEvents( &EV_openPR06ScriptSilenceDone );
 
 	if ( thinkFlags ) {
 		BecomeInactive( thinkFlags );
@@ -1556,9 +1556,9 @@ void idEntity::UpdatePVSAreas( void ) {
 	int i;
 
 	modelAbsBounds.FromTransformedBounds( renderEntity.bounds, renderEntity.origin, renderEntity.axis );
-	if ( !openPREY_IsReasonablePVSBounds( modelAbsBounds ) ) {
+	if ( !openPR06_IsReasonablePVSBounds( modelAbsBounds ) ) {
 		modelAbsBounds = idBounds( renderEntity.origin ).Expand( 256.0f );
-		if ( !openPREY_IsReasonablePVSBounds( modelAbsBounds ) ) {
+		if ( !openPR06_IsReasonablePVSBounds( modelAbsBounds ) ) {
 			numPVSAreas = 0;
 			for ( i = 0; i < MAX_PVS_AREAS; i++ ) {
 				PVSAreas[i] = 0;
@@ -2043,8 +2043,8 @@ void idEntity::TrackScriptVoiceSilence( const s_channelType channel, int length 
 	if ( scriptSilenceWaitingThread ) {
 		int time = length + scriptSilenceSilentTimeOffset;
 		time = idMath::ClampInt( 1, time, time );
-		CancelEvents( &EV_openPREYScriptSilenceDone );
-		PostEventMS( &EV_openPREYScriptSilenceDone, time );
+		CancelEvents( &EV_openPR06ScriptSilenceDone );
+		PostEventMS( &EV_openPR06ScriptSilenceDone, time );
 	}
 }
 
@@ -2064,8 +2064,8 @@ bool idEntity::SetSilenceCallbackForCurrentThread( float plusOrMinusSeconds ) {
 	if ( scriptSilenceNextSilentTime > gameLocal.time ) {
 		int time = ( scriptSilenceNextSilentTime - gameLocal.time ) + scriptSilenceSilentTimeOffset;
 		time = idMath::ClampInt( 1, time, time );
-		CancelEvents( &EV_openPREYScriptSilenceDone );
-		PostEventMS( &EV_openPREYScriptSilenceDone, time );
+		CancelEvents( &EV_openPR06ScriptSilenceDone );
+		PostEventMS( &EV_openPR06ScriptSilenceDone, time );
 	}
 
 	return true;

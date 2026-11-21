@@ -25,11 +25,11 @@ template< class Type >
 struct idEventFunc {
 	const idEventDef	*event;
 	eventCallback_t		function;
-	const char			*signature;		// openPREY: register class of each C++ parameter, see idEventCallbackSignature
+	const char			*signature;		// openPR06: register class of each C++ parameter, see idEventCallbackSignature
 };
 
 /*
-openPREY: event callbacks are stored type-erased and invoked through the
+openPR06: event callbacks are stored type-erased and invoked through the
 generated Callbacks.cpp table, which picks the call signature from the event's
 format string. On 32-bit x86 every argument travelled on the stack, so a
 callback whose C++ parameters disagreed with its format string still received
@@ -250,8 +250,8 @@ public:
 
 	// Static functions
 	static void					Init( void );
-	static int					ValidateEventCallbackSignatures( void );	// openPREY
-	static void					ListEventCallbacks_f( const idCmdArgs &args );	// openPREY
+	static int					ValidateEventCallbackSignatures( void );	// openPR06
+	static void					ListEventCallbacks_f( const idCmdArgs &args );	// openPR06
 	static void					Shutdown( void );
 	static idTypeInfo *			GetClass( const char *name );
 	static void					DisplayInfo_f( const idCmdArgs &args );

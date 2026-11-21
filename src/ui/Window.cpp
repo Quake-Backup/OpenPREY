@@ -859,7 +859,7 @@ const idRegEntry idWindow::RegisterVars[] = {
 	{ "lightRadius2", idRegister::VEC4 },
 	{ "lightRadius3", idRegister::VEC4 },
 	{ "lightRadius4", idRegister::VEC4 },
-	// openPREY: the renderDef's scene camera and bodies (RenderWindow.cpp).
+	// openPR06: the renderDef's scene camera and bodies (RenderWindow.cpp).
 	{ "fovY", idRegister::FLOAT },
 	{ "sceneKey", idRegister::STRING },
 	{ "modelRotate1", idRegister::VEC4 },
@@ -4589,7 +4589,7 @@ void idWindow::UpdateTabContainerState( bool runActivateScript ) {
 		}
 	}
 	if ( activeTab != NULL && runActivateScript ) {
-		// openPREY: onTabActivate raises its commands (set "cmd", or a named
+		// openPR06: onTabActivate raises its commands (set "cmd", or a named
 		// event the tab answers) in the tab's own cmd, which the tab's next
 		// Time() cleared unread: no tab-flip sound, modelscan, MAPScan or
 		// scanforprofiles. Queue them as a timeline event's are, for the GUI's

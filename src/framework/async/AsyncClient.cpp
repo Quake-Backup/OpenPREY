@@ -1051,7 +1051,7 @@ void idAsyncClient::AnswerRconVerify( bool success ) {
 	memset( &rconVerifyAddress, 0, sizeof( rconVerifyAddress ) );
 	rconVerifyTime = 0;
 #if !defined( HUMANHEAD )
-	// OPENPREY-GATED(D9): Prey's v7 idGame has no rcon admin page callback.
+	// OPENPR06-GATED(D9): Prey's v7 idGame has no rcon admin page callback.
 	if ( game != NULL ) {
 		game->ProcessRconReturn( success );
 	}
@@ -1478,7 +1478,7 @@ void idAsyncClient::ProcessUnreliableServerMessage( const idBitMsg &msg ) {
 					frame.SetSize( length );
 					frame.BeginReading();
 #if !defined( HUMANHEAD )
-					// OPENPREY-GATED(D9): Prey's v7 idGame has no voice recipients.
+					// OPENPR06-GATED(D9): Prey's v7 idGame has no voice recipients.
 					game->ClientReceiveVoice( frame );
 #endif
 					offset += length;
@@ -2328,7 +2328,7 @@ void idAsyncClient::ProcessPrintMessage( const netadr_t from, const idBitMsg &ms
 	idStr::Copynz( string, common->GetLanguageDict()->GetString( raw ), sizeof( string ) );
 	common->Printf( "%s\n", string );
 #if !defined( HUMANHEAD )
-	// OPENPREY-GATED(D9): Prey's v7 idGame has no rcon admin page callback.
+	// OPENPR06-GATED(D9): Prey's v7 idGame has no rcon admin page callback.
 	if ( opcode == SERVER_PRINT_RCON && game != NULL ) {
 		game->ReceiveRemoteConsoleOutput( string );
 	}
@@ -3200,7 +3200,7 @@ idAsyncClient::SendVersionCheck
 ==================
 */
 void idAsyncClient::SendVersionCheck( bool fromMenu ) {
-	// The master-server query never knew about openPREY or openQ4 releases and
+	// The master-server query never knew about openPR06 or openQ4 releases and
 	// reported "up to date" whenever id's server stayed silent (#227). The
 	// updater checks the signed manifest of the latest GitHub release.
 	Updater_Check( fromMenu );
@@ -3210,7 +3210,7 @@ void idAsyncClient::SendVersionCheck( bool fromMenu ) {
 ==================
 idAsyncClient::CancelVersionCheck
 
-OPENPREY: the Cancel of the old master-server check's waiting box. The
+OPENPR06: the Cancel of the old master-server check's waiting box. The
 release updater (Updater.cpp) shows no waiting box, so there is nothing to
 cancel; the hook stays for menus that still name it.
 ==================

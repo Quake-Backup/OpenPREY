@@ -193,18 +193,18 @@ rvBSEManagerLocal bseLocal;
 rvDeclEffectEditLocal declEffectEditLocal;
 }
 
-idDecl* openPREY_AllocIntegratedBSEDeclEffect( void ) {
+idDecl* openPR06_AllocIntegratedBSEDeclEffect( void ) {
 	return new rvDeclEffect();
 }
 
-bool openPREY_IsIntegratedBSEDeclEffect( const idDecl *decl ) {
+bool openPR06_IsIntegratedBSEDeclEffect( const idDecl *decl ) {
 	return dynamic_cast<const rvDeclEffect *>( decl ) != NULL;
 }
 
-rvBSEManager* openPREY_GetIntegratedBSEManager( void ) {
+rvBSEManager* openPR06_GetIntegratedBSEManager( void ) {
 	return &bseLocal;
 }
 
-rvDeclEffectEdit* openPREY_GetIntegratedBSEDeclEffectEdit( void ) {
+rvDeclEffectEdit* openPR06_GetIntegratedBSEDeclEffectEdit( void ) {
 	return &declEffectEditLocal;
 }

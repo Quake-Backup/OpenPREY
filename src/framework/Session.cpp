@@ -474,7 +474,7 @@ static void Session_BuildSaveGameSearchDirs( idStrList &gameDirs, const char *pr
 	gameDirs.Clear();
 	Session_AddUniqueSaveGameSearchDir( gameDirs, preferredGameDir );
 	Session_AddUniqueSaveGameSearchDir( gameDirs, cvarSystem->GetCVarString( "fs_game" ) );
-	Session_AddUniqueSaveGameSearchDir( gameDirs, OPENPREY_GAMEDIR );
+	Session_AddUniqueSaveGameSearchDir( gameDirs, OPENPR06_GAMEDIR );
 	Session_AddUniqueSaveGameSearchDir( gameDirs, BASE_GAMEDIR );
 }
 
@@ -1128,7 +1128,7 @@ static bool Session_ValidateSaveGamePayload( idFile *file, const idStr &savePath
 	if ( valid ) {
 		const openQ4SaveGameRelease_t *release = OpenQ4_FindSaveGameRelease( payloadBuild, payloadSourceStamp.c_str(), payloadSourceFileCount );
 		int layoutBuild = OpenQ4_SaveGameLayoutBuild( payloadVersion, payloadBuild, payloadSourceStamp.c_str(), payloadSourceFileCount );
-		// openPREY: a source tree without git history (GitHub's "Download ZIP")
+		// openPR06: a source tree without git history (GitHub's "Download ZIP")
 		// builds as build 0, older than every save layout, and refused every save
 		// it wrote (issue #36). A payload with this executable's own build and
 		// exact source stamp was written by this executable: read it as the
@@ -1158,15 +1158,15 @@ static bool Session_ValidateSaveGamePayload( idFile *file, const idStr &savePath
 			}
 			valid = false;
 		} else if ( layoutBuild < minimumBuild && payloadBuild <= 0 ) {
-			common->Warning( "Savegame '%s' was written by another openPREY built without git history (build 0), whose save layout is unknown",
+			common->Warning( "Savegame '%s' was written by another openPR06 built without git history (build 0), whose save layout is unknown",
 				savePath.c_str() );
 			valid = false;
 		} else if ( layoutBuild < minimumBuild ) {
-			common->Warning( "Savegame '%s' was written by an older openPREY (build %d, below build %d, the oldest this build can restore)",
+			common->Warning( "Savegame '%s' was written by an older openPR06 (build %d, below build %d, the oldest this build can restore)",
 				savePath.c_str(), layoutBuild, minimumBuild );
 			valid = false;
 		} else if ( release != NULL ) {
-			common->DPrintf( "Savegame '%s' was written by openPREY %s; reading it as build %d\n",
+			common->DPrintf( "Savegame '%s' was written by openPR06 %s; reading it as build %d\n",
 				savePath.c_str(), release->version, release->build );
 		} else if ( payloadBuild != BUILD_NUMBER ||
 				OPENQ4_SAVEGAME_COMPAT_SOURCE_FILE_COUNT < 0 ||
@@ -1957,7 +1957,7 @@ static bool Session_FileExistsInSearchPaths( const char *path ) {
 }
 
 /*
-OPENPREY: a map's loading picture, found as retail Prey finds it
+OPENPR06: a map's loading picture, found as retail Prey finds it
 (idFileSystemLocal::FindMapScreenshot in PREY.exe 1.4, asked for the loading
 art rather than the menu thumb): guis/assets/loading/<map>.tga; else that
 picture in an addon pak, copied to guis/assets/loading/addon/<map>.tga with any
@@ -1965,7 +1965,7 @@ _left, _right, _top and _bottom tiles beside it; else the generic
 guis/assets/loading/loading.tga. The menus' pictures under loading/thumbs/
 (FindMapScreenshot) are never the loading art. A mapDef's loadimage comes first
 (the callers read it). Retail shows a loading save's own screenshot,
-savegames/<save>.tga, instead (idSessionLocal::LoadLoadingGui); openPREY never
+savegames/<save>.tga, instead (idSessionLocal::LoadLoadingGui); openPR06 never
 does: a save loads under its map's loading art like any other load.
 */
 static void Session_FindMapLoadingImage( const char *mapPath, char *buf, int len ) {
@@ -2736,7 +2736,7 @@ static bool Session_PrepareExpandedLoadingBackground( const idStr &backgroundPat
 		hasTop = Session_ResolveSiblingImageFilePath( resolvedCenterPath, "_top", resolvedTopPath );
 		hasBottom = Session_ResolveSiblingImageFilePath( resolvedCenterPath, "_bottom", resolvedBottomPath );
 	}
-	// openPREY: only a picture with both tiles its window needs widens. Stretching
+	// openPR06: only a picture with both tiles its window needs widens. Stretching
 	// the art's edge columns across the rest smeared it; a picture without tiles
 	// (a save's screenshot, an addon map's art) is drawn at 4:3 instead.
 	if ( ( expandHorizontally && !( hasLeft && hasRight ) ) || ( expandVertically && !( hasTop && hasBottom ) ) ) {
@@ -3082,7 +3082,7 @@ void idSessionLocal::PrimeMainMenuGuiResources( void ) {
 }
 
 static void Session_DrawFallbackLoadingScreen() {
-	// openPREY: the screen between startup and the menu, and whenever nothing
+	// openPR06: the screen between startup and the menu, and whenever nothing
 	// else draws, is the initializing screen carried on: the retained document
 	// as the last startup step left it (RetainedUI_DrawInitialization). It
 	// replaces the stock loading painting; black is left only for a document
@@ -3135,7 +3135,7 @@ static void Session_DrawLevelshotBounds() {
 	renderSystem->SetUseUIViewportFor2D( previousUIViewportMode );
 }
 
-// A difficulty's localized name, as the retained screens show it. openPREY:
+// A difficulty's localized name, as the retained screens show it. openPR06:
 // Prey has no ranks, only Normal and Cherokee (g_wicked, the harder mode a
 // finished game unlocks), named as the New Game frame names them; `skill` is
 // that flag, so any nonzero value is Cherokee. Quake 4's rank names are not
@@ -3558,7 +3558,7 @@ static void Session_PrintLightGridBakeUsage() {
 	common->Printf( "usage: bakeLightGrids [all | all-mp | <map> ...] [force] [-quit] [limit<num>] [bounce<num>] [size<num>] [blends<num>] [samples<num>] [separateAreas] [grid ( x y z )]\n" );
 	common->Printf( "If no map names are given, the currently loaded map is baked.\n" );
 	common->Printf( "Without 'force', maps whose .lightgridpack output or required .lightgrid metadata plus area atlas files already exist are skipped.\n" );
-	common->Printf( "When map names, 'all', or 'all-mp' are given, openPREY loads each map automatically, prints live progress to the console/log, and writes .lightgridpack plus loose .lightgrid/TGA fallback outputs to fs_savepath.\n" );
+	common->Printf( "When map names, 'all', or 'all-mp' are given, openPR06 loads each map automatically, prints live progress to the console/log, and writes .lightgridpack plus loose .lightgrid/TGA fallback outputs to fs_savepath.\n" );
 	common->Printf( "'separateAreas' rebuilds one portal-area probe layout at a time and streams .lightgrid metadata during the bake to reduce peak CPU memory usage.\n" );
 	common->Printf( "Multiplayer targets are cheat-protected; enable cheats first with 'sv_cheats 1' or 'net_allowCheats 1'.\n" );
 	common->Printf( "This bake is diffuse-only and LDR. It does not output the BFG EXR/PBR light-grid data path.\n" );
@@ -4242,7 +4242,7 @@ static void Session_openQ4AssertMapState_f( const idCmdArgs &args ) {
 	idStr expectedEntityFilter;
 	Session_NormalizeMapPathAndEntityFilter( args.Argv( 1 ), Session_GetEntityFilterArg( args ), expectedMap, expectedEntityFilter );
 	if ( expectedMap.Length() == 0 ) {
-		common->Error( "openPREY map state assertion needs a non-empty expected map" );
+		common->Error( "openPR06 map state assertion needs a non-empty expected map" );
 		return;
 	}
 
@@ -4251,7 +4251,7 @@ static void Session_openQ4AssertMapState_f( const idCmdArgs &args ) {
 	Session_NormalizeMapDeclPath( sessLocal.mapSpawnData.serverInfo.GetString( "si_map", "" ), actualMap );
 	Session_NormalizeEntityFilterToken( sessLocal.mapSpawnData.serverInfo.GetString( "si_entityFilter", "" ), actualEntityFilter );
 
-	common->Printf( "openPREY map state: map=%s entityFilter=%s expectedMap=%s expectedEntityFilter=%s\n",
+	common->Printf( "openPR06 map state: map=%s entityFilter=%s expectedMap=%s expectedEntityFilter=%s\n",
 		actualMap.c_str(),
 		actualEntityFilter.c_str(),
 		expectedMap.c_str(),
@@ -4260,7 +4260,7 @@ static void Session_openQ4AssertMapState_f( const idCmdArgs &args ) {
 	const bool mapMatches = fileSystem->FilenameCompare( actualMap.c_str(), expectedMap.c_str() ) == 0;
 	const bool filterMatches = idStr::Icmp( actualEntityFilter.c_str(), expectedEntityFilter.c_str() ) == 0;
 	if ( !mapMatches || !filterMatches ) {
-		common->Error( "openPREY map state mismatch: expected map=%s entityFilter=%s, got map=%s entityFilter=%s",
+		common->Error( "openPR06 map state mismatch: expected map=%s entityFilter=%s, got map=%s entityFilter=%s",
 			expectedMap.c_str(),
 			expectedEntityFilter.c_str(),
 			actualMap.c_str(),
@@ -5053,7 +5053,7 @@ void idSessionLocal::CompleteWipe() {
 ================
 Session_LoadingIntroPart
 
-OPENPREY: one part of the loading screen's intro at `elapsed` ms, 0 to 1 on
+OPENPR06: one part of the loading screen's intro at `elapsed` ms, 0 to 1 on
 its cubic Bezier easing. The table is tools/ui/loading_notch.py's INTRO,
 which the retained screen plays as a timeline; keep the two in step.
 ================
@@ -5096,7 +5096,7 @@ static float Session_CubicBezierEase( const loadingIntroPart_t &part, float x ) 
 ================
 idSessionLocal::PublishLoadingIntro
 
-OPENPREY: the stock loading screen cannot time its own motion, so the session
+OPENPR06: the stock loading screen cannot time its own motion, so the session
 gives guis/map/loading.gui each part of the intro (section 12.1) before every
 redraw: each part's eased progress from the first frame. Reduced motion shows
 the screen whole at once.
@@ -5435,7 +5435,7 @@ static void Session_OpenQ4GuiFocus_f( const idCmdArgs &args ) {
 ================
 Session_OpenQ4GuiCursor_f
 
-openPREY: openq4_guiCursor <x> <y> places the active classic GUI's pointer at
+openPR06: openq4_guiCursor <x> <y> places the active classic GUI's pointer at
 x,y of its 640x480 canvas, as the mouse would, touching no device, so a
 capture can show the pointer.
 ================
@@ -9959,7 +9959,7 @@ bool idSessionLocal::LoadGame( const char *saveName, const char *preferredGameDi
 		return false;
 	}
 
-	// Search the active mod first, then openPREY's basepr and the retail base directory.
+	// Search the active mod first, then openPR06's basepr and the retail base directory.
 	idFile *loadGameFile = Session_OpenSaveGameReadHandle( in.c_str(), preferredGameDir );
 
 	if ( loadGameFile == NULL ) {
@@ -10851,14 +10851,14 @@ void idSessionLocal::Draw() {
 			DrawRetainedPageHome( presentationTime );
 		}
 		if ( idUserInterface *presetBackdrop = Session_PresetCheckBackdrop( guiActive ) ) {
-			// openPREY: the retained system check stands over the stock one's
+			// openPR06: the retained system check stands over the stock one's
 			// backdrop (Session_StartPresetCheck).
 			presetBackdrop->SetPresentationValue( "Desktop::hideCursor", "1", false );
 			presetBackdrop->Redraw( presentationTime );
 			presetBackdrop->SetPresentationValue( "Desktop::hideCursor", "0", false );
 		}
 		if ( guiRetainedRestartMenu != NULL && guiActive == guiRetainedRestartMenu && guiRestartMenu != NULL ) {
-			// openPREY: the retained death screen stands over the stock one's
+			// openPR06: the retained death screen stands over the stock one's
 			// backdrop, wordmark and fade (idSessionLocal::OpenRestartMenu).
 			guiRestartMenu->SetPresentationValue( "Desktop::hideCursor", "1", false );
 			guiRestartMenu->Redraw( presentationTime );
@@ -11569,7 +11569,7 @@ void idSessionLocal::Init() {
 	cmdSystem->AddCommand( "openq4_assertMenuActivation", Session_openQ4AssertMenuActivation_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "opens the in-game menu and asserts a bounded activation time for validation harnesses" );
 	cmdSystem->AddCommand( "openq4_resumeBakeLightGrids", Session_openQ4ResumeBakeLightGrids_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "internal helper to continue light-grid baking after game-module switches" );
 	cmdSystem->AddCommand( "iamtheduke", Session_IAmTheDuke_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "toggles the SP-only iamtheduke cheat text overlay" );
-	cmdSystem->AddCommand( "bakeLightGrids", Session_BakeLightGrids_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "bakes openPREY-compatible lightgrid metadata and irradiance atlases for the current map or a batch of maps" );
+	cmdSystem->AddCommand( "bakeLightGrids", Session_BakeLightGrids_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "bakes openPR06-compatible lightgrid metadata and irradiance atlases for the current map or a batch of maps" );
     cmdSystem->AddCommand( "campaignSelect", Session_CampaignSelect_f, CMD_FL_SYSTEM, "selects a built-in single-player campaign" );
     cmdSystem->AddCommand( "campaignRemount", Session_CampaignRemount_f, CMD_FL_SYSTEM, "switches to a built-in single-player campaign in place (queued by campaignSelect)" );
     cmdSystem->AddCommand( "campaignList", Session_CampaignList_f, CMD_FL_SYSTEM, "reports built-in campaign content readiness without mounting it" );

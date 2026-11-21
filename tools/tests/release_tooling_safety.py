@@ -227,7 +227,7 @@ def validate_changelog_input_and_markdown_safety() -> None:
         raise AssertionError(f"release header lost escaped text:\n{rendered}")
 
     release_notes_body = CHANGELOG.sanitize_release_notes_override(
-        "# openPREY 0.9.0 Release Notes\n\n## Highlights\n\n- Item\n",
+        "# openPR06 0.9.0 Release Notes\n\n## Highlights\n\n- Item\n",
         "0.9.0",
         "v0.9.0",
     )
@@ -498,7 +498,7 @@ def validate_release_version_floor_and_docs_classification() -> None:
     category, weight, is_major = RELEASE_VERSION.classify_path("assets/icons/prey.ico")
     if (category, weight, is_major) != ("packaging", 2, False):
         raise AssertionError(f"packaged icon path was not classified as packaging: {(category, weight, is_major)!r}")
-    category, weight, is_major = RELEASE_VERSION.classify_path("assets/linux/openPREY-steamdeck.in")
+    category, weight, is_major = RELEASE_VERSION.classify_path("assets/linux/openPR06-steamdeck.in")
     if (category, weight, is_major) != ("platform", 2, False):
         raise AssertionError(f"Linux launcher asset path was not classified as platform: {(category, weight, is_major)!r}")
 
@@ -781,11 +781,11 @@ def validate_icon_sync_symlink_guards() -> None:
 def validate_windows_installer_payload_requirements() -> None:
     package_dir = WORK / "installer-package"
     required = [
-        "openPREY-client_x64.exe",
-        "openPREY-client_x64.pdb",
-        "openPREY-ded_x64.exe",
-        "openPREY-ded_x64.pdb",
-        "openPREY-updater_x64.exe",
+        "openPR06-client_x64.exe",
+        "openPR06-client_x64.pdb",
+        "openPR06-ded_x64.exe",
+        "openPR06-ded_x64.pdb",
+        "openPR06-updater_x64.exe",
         "README.html",
         "LICENSE",
         "LICENSING.md",
@@ -817,11 +817,11 @@ def validate_windows_installer_payload_requirements() -> None:
 def validate_windows_installer_symlink_guards() -> None:
     package_dir = WORK / "installer-symlink-package"
     required = [
-        "openPREY-client_x64.exe",
-        "openPREY-client_x64.pdb",
-        "openPREY-ded_x64.exe",
-        "openPREY-ded_x64.pdb",
-        "openPREY-updater_x64.exe",
+        "openPR06-client_x64.exe",
+        "openPR06-client_x64.pdb",
+        "openPR06-ded_x64.exe",
+        "openPR06-ded_x64.pdb",
+        "openPR06-updater_x64.exe",
         "OpenAL32.dll",
         "README.html",
         "LICENSE",
@@ -839,8 +839,8 @@ def validate_windows_installer_symlink_guards() -> None:
 
     real_client = package_dir / "real-client.exe"
     write_file(real_client, "client\n")
-    (package_dir / "openPREY-client_x64.exe").unlink()
-    if make_symlink(real_client, package_dir / "openPREY-client_x64.exe"):
+    (package_dir / "openPR06-client_x64.exe").unlink()
+    if make_symlink(real_client, package_dir / "openPR06-client_x64.exe"):
         expect_file_not_found(
             lambda: INSTALLER.validate_package_dir(package_dir, "x64"),
             "must not be symlinks",
@@ -848,8 +848,8 @@ def validate_windows_installer_symlink_guards() -> None:
         )
 
     output_dir = WORK / "installer-output"
-    script_path = output_dir / "openprey-0.1.010-windows-x64-setup.iss"
-    installer_path = output_dir / "openprey-0.1.010-windows-x64-setup.exe"
+    script_path = output_dir / "openpr06-0.1.010-windows-x64-setup.iss"
+    installer_path = output_dir / "openpr06-0.1.010-windows-x64-setup.exe"
     outside = WORK / "installer-output-outside.iss"
     write_file(outside, "outside\n")
     script_path.parent.mkdir(parents=True, exist_ok=True)
@@ -911,14 +911,14 @@ def validate_windows_installer_input_escaping() -> None:
 
     rendered = INSTALLER.render_installer_script(
         '#define PackageSource "@@PACKAGE_SOURCE@@"\n@@OUTPUT_BASENAME@@\n',
-        package_dir=Path('C:/release/openprey "quoted"'),
+        package_dir=Path('C:/release/openpr06 "quoted"'),
         output_dir=Path("C:/out"),
         version="0.1.010",
         version_tag="0.1.010",
         arch="x64",
         setup_icon_file=Path("C:/icons/prey.ico"),
     )
-    expected_source = INSTALLER.inno_string_contents(Path('C:/release/openprey "quoted"'))
+    expected_source = INSTALLER.inno_string_contents(Path('C:/release/openpr06 "quoted"'))
     if f'#define PackageSource "{expected_source}"' not in rendered:
         raise AssertionError(f"installer PackageSource was not escaped for Inno Setup:\n{rendered}")
 
@@ -1063,9 +1063,9 @@ def validate_manual_release_optimized_builds() -> None:
 
     gamelibs = (ROOT / "tools" / "build" / "build_gamelibs.ps1").read_text(encoding="utf-8")
     for token in (
-        "OPENPREY_GAMELIBS_REPO",
+        "OPENPR06_GAMELIBS_REPO",
         '"src\\game", "src\\Prey", "src\\preyengine"',
-        "OpenPrey-game is consumed directly by the openPREY Meson build.",
+        "OpenPrey-game is consumed directly by the openPR06 Meson build.",
         "meson_setup.ps1 compile -C builddir",
     ):
         if token not in gamelibs:
@@ -1527,13 +1527,13 @@ def validate_manual_release_companion_checkout() -> None:
 
 def validate_release_source_provenance_verifier() -> None:
     root = WORK / "source-provenance"
-    project = make_git_repo(root / "openPREY")
+    project = make_git_repo(root / "openPR06")
     gamelibs = make_git_repo(root / "OpenPrey-game")
     commit_file(project, ".gitignore", ".tmp/\n", "project source")
     commit_file(gamelibs, "game-source.txt", "game\n", "game source")
     project_sha = git(project, "rev-parse", "HEAD")
     gamelibs_sha = git(gamelibs, "rev-parse", "HEAD")
-    manifest_path = project / "builddir" / ".tmp" / "openprey_gamelibs_stage" / "openprey_gamelibs_stage_manifest.json"
+    manifest_path = project / "builddir" / ".tmp" / "openpr06_gamelibs_stage" / "openpr06_gamelibs_stage_manifest.json"
     manifest = {
         "format": 1,
         "projectGitCommit": project_sha,

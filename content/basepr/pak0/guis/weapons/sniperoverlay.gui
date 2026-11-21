@@ -40,7 +40,7 @@ windowDef desktop {
 		transition "scope::matcolor"			"0 0 0 0"		"1.0 1.0 1.0 1.0" "500" ;
 	}
 	
-	// openPREY: the lens covers the whole screen at every aspect
+	// openPR06: the lens covers the whole screen at every aspect
 	// (prey-ui-visual-design.md 10.8). The stock drew one window of
 	// models/weapons/rifle/scopeview over the 4:3 canvas, so a wide or tall
 	// screen saw the view untinted beside or above it. The lens's banded tint

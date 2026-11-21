@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compute the next openPREY manual release version."""
+"""Compute the next openPR06 manual release version."""
 
 from __future__ import annotations
 
@@ -65,12 +65,12 @@ def parse_bump_mode(value: str) -> str:
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compute the next manual openPREY release version."
+        description="Compute the next manual openPR06 release version."
     )
     parser.add_argument(
         "--source-root",
         default=".",
-        help="openPREY repository root (default: current directory).",
+        help="openPR06 repository root (default: current directory).",
     )
     parser.add_argument(
         "--current-version",
@@ -366,7 +366,7 @@ def main(argv: list[str]) -> int:
                 "version": override_version.text,
                 "version_tag": override_version.text,
                 "release_tag": f"v{override_version.text}",
-                "release_name": f"openPREY {override_version.text}",
+                "release_name": f"openPR06 {override_version.text}",
                 "release_scale": "override",
                 "release_reason": "Version override was supplied manually.",
                 "bump_mode": args.bump_mode,
@@ -388,7 +388,7 @@ def main(argv: list[str]) -> int:
                 "version": current_version.text,
                 "version_tag": current_version.text,
                 "release_tag": f"v{current_version.text}",
-                "release_name": f"openPREY {current_version.text}",
+                "release_name": f"openPR06 {current_version.text}",
                 "release_scale": "floor",
                 "release_reason": (
                     f"No published v* release tag was found, so the configured version "
@@ -414,7 +414,7 @@ def main(argv: list[str]) -> int:
                 "version": current_version.text,
                 "version_tag": current_version.text,
                 "release_tag": f"v{current_version.text}",
-                "release_name": f"openPREY {current_version.text}",
+                "release_name": f"openPR06 {current_version.text}",
                 "release_scale": "floor",
                 "release_reason": (
                     f"The configured repo version {current_version.text} is ahead of "
@@ -445,7 +445,7 @@ def main(argv: list[str]) -> int:
                 "version": latest_version.text,
                 "version_tag": latest_version.text,
                 "release_tag": latest_tag,
-                "release_name": f"openPREY {latest_version.text}",
+                "release_name": f"openPR06 {latest_version.text}",
                 "release_scale": "current",
                 "release_reason": (
                     f"No commits were found since {latest_tag}, so the existing release version is reused."
@@ -508,7 +508,7 @@ def main(argv: list[str]) -> int:
             "version": next_version,
             "version_tag": next_version,
             "release_tag": f"v{next_version}",
-            "release_name": f"openPREY {next_version}",
+            "release_name": f"openPR06 {next_version}",
             "release_scale": release_scale,
             "release_reason": release_reason,
             "bump_mode": args.bump_mode,

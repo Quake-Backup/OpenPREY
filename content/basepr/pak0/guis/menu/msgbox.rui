@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.msgbox",
+ "id": "openpr06.msgbox",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {
   "title": {"type": "string", "initial": ""},

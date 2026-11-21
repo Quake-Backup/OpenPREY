@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.initialization",
+ "id": "openpr06.initialization",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {
   "message": {"type": "string", "initial": "#str_04343"},

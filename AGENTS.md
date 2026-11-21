@@ -1,13 +1,13 @@
-# openPREY Agent Guide
+# openPR06 Agent Guide
 
-This file describes project goals, rules, and workflow expectations for anyone working on openPREY.
+This file describes project goals, rules, and workflow expectations for anyone working on openPR06.
 
 **Project Metadata**
-- Name: openPREY
+- Name: openPR06
 - Author: themuffinator
 - Company: DarkMatter Productions
 - Version: 0.0.1
-- Repository: `https://github.com/themuffinator/openPREY`
+- Repository: `https://github.com/themuffinator/openPR06`
 - Game library: in-tree `src/game/`, `src/Prey/`, `src/preyengine/` (Prey SDK EULA; see `LICENSING.md`)
 
 **Goals**
@@ -22,13 +22,13 @@ This file describes project goals, rules, and workflow expectations for anyone w
 - The Prey game library is canonical in this repository: `src/game/`, `src/Prey/` and `src/preyengine/`. The former `OpenPrey-game` companion repository is historical; its history is a merge parent of the import commit (see `docs/dev/game-source-provenance.md`).
 - Keep the licence boundary explicit: engine code is GPLv3 (`LICENSE`); the game trees are SDK-derived and stay under the Prey SDK EULA (`LICENSES/PREY-SDK-EULA.rtf`). Never move engine code into the game trees or game code into engine directories, and never relicense either side. Preserve original notices.
 - Follow `docs/dev/source-layout.md` for directory placement and file naming: vendored code under `src/external/` or `subprojects/`, licence notices under `LICENSES/`.
-- Sync engine work from upstream OpenQ4 by merging `openq4-upstream/main`; keep the Prey game trees, `content/basepr/` and openPREY naming on the openPREY side, and never import Quake 4 game code (`src/mpgame`, Q4 `src/game`) or `content/baseoq4/`.
-- Prey's game API is v7 (`src/game/Game.h`). Where new upstream engine code calls Quake 4–only `idGame` methods, adapt it to v7 or gate it with the `OPENPREY-GATED(Dn)` markers documented in `docs/dev/prey-rebase/plan.md`.
-- Keep `openPREY` free of references to the old OpenQ4 closed-source BSE companion-repo workflow.
+- Sync engine work from upstream OpenQ4 by merging `openq4-upstream/main`; keep the Prey game trees, `content/basepr/` and openPR06 naming on the openPR06 side, and never import Quake 4 game code (`src/mpgame`, Q4 `src/game`) or `content/baseoq4/`.
+- Prey's game API is v7 (`src/game/Game.h`). Where new upstream engine code calls Quake 4–only `idGame` methods, adapt it to v7 or gate it with the `OPENPR06-GATED(Dn)` markers documented in `docs/dev/prey-rebase/plan.md`.
+- Keep `openPR06` free of references to the old OpenQ4 closed-source BSE companion-repo workflow.
 - Do not assume Steam/GOG distribution paths for Prey (2006). Auto-detection must support CD-era installs.
 - Prefer robust install discovery from registry/app-path/uninstall entries and known legacy install roots.
-- Never launch openPREY in fullscreen from agent workflows; always force windowed mode with `+set r_fullscreen 0` (and equivalent config/cvar handling).
-- Keep Meson as the canonical openPREY build entry point.
+- Never launch openPR06 in fullscreen from agent workflows; always force windowed mode with `+set r_fullscreen 0` (and equivalent config/cvar handling).
+- Keep Meson as the canonical openPR06 build entry point.
 - Use `builddir/` as standard local build output.
 - Use `.install/` as staged runtime package root.
 - Keep compiler/linker intermediates in `builddir/`, not `.install/`.
@@ -36,7 +36,7 @@ This file describes project goals, rules, and workflow expectations for anyone w
 - For any GUI, HUD, menu, icon or branding work, follow `docs/dev/prey-ui-visual-design.md` and its Interface Atlas. `docs/dev/ui-visual-design.md` is the upstream Quake 4 specification and does not apply to Prey screens.
 
 **Build/Tooling Conventions**
-- On Windows, use `tools/build/meson_setup.ps1 ...` (or `tools/build/openprey_devcmd.cmd`) so MSVC environment setup is consistent.
+- On Windows, use `tools/build/meson_setup.ps1 ...` (or `tools/build/openpr06_devcmd.cmd`) so MSVC environment setup is consistent.
 - Use `meson install -C builddir --no-rebuild --skip-subprojects` when staging `.install/`.
 - Legacy `OPENQ4_*` variants are accepted only as temporary migration compatibility inputs.
 
@@ -52,7 +52,7 @@ This file describes project goals, rules, and workflow expectations for anyone w
 - Avoid shipping build-only artifacts (for example import libs) in `.install/`.
 
 **Stable Test Executable Paths**
-- Reuse `.install/openPREY-client_x64.exe` and `.install/openPREY-ded_x64.exe` across runtime tests so Windows Firewall permissions stay useful; re-stage in place rather than creating new executable names per task.
+- Reuse `.install/openPR06-client_x64.exe` and `.install/openPR06-ded_x64.exe` across runtime tests so Windows Firewall permissions stay useful; re-stage in place rather than creating new executable names per task.
 - Isolate each test's writable configuration, saves, logs and captures under `.tmp/<task>/` with filesystem options; test-data isolation must not require copying the executable.
 
 **Development Procedure (Current Direction)**
@@ -64,7 +64,7 @@ This file describes project goals, rules, and workflow expectations for anyone w
 **Debug Loop**
 1. Launch with the mode-appropriate debug configuration in windowed mode only (force `+set r_fullscreen 0`).
 2. Let the engine initialize and enter the target gameplay state.
-3. Close and inspect `fs_savepath\<gameDir>\logs\openprey.log`.
+3. Close and inspect `fs_savepath\<gameDir>\logs\openpr06.log`.
 4. Resolve errors/warnings.
 5. Repeat until clean.
 

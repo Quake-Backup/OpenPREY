@@ -44,7 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #ifndef LINUX_DEFAULT_PATH
-#define LINUX_DEFAULT_PATH "/usr/local/games/openprey"
+#define LINUX_DEFAULT_PATH "/usr/local/games/openpr06"
 #endif
 
 static idStr	basepath;
@@ -200,7 +200,7 @@ static bool Sys_ExecProcessArgs( char *const argv[], bool dofork ) {
 			return true;
 		}
 		execvp( argv[0], argv );
-		Sys_WriteProcessChildText( "openPREY child exec failed: " );
+		Sys_WriteProcessChildText( "openPR06 child exec failed: " );
 		Sys_WriteProcessChildText( argv[0] );
 		Sys_WriteProcessChildText( "\n" );
 		_exit( 127 );
@@ -445,37 +445,37 @@ static void Sys_ReportWaylandRuntime( void ) {
 	const char *x11Display = getenv( "DISPLAY" );
 	const char *sdlVideoDriver = getenv( "SDL_VIDEO_DRIVER" );
 	const char *legacySdlVideoDriver = getenv( "SDL_VIDEODRIVER" );
-	const char *openPREYForceX11 = getenv( "OPENPREY_FORCE_X11" );
-	const char *openPREYDisableLibdecor = getenv( "OPENPREY_WAYLAND_DISABLE_LIBDECOR" );
-	const char *openPREYPreferLibdecor = getenv( "OPENPREY_WAYLAND_PREFER_LIBDECOR" );
-	const char *openPREYSyncWindowOps = getenv( "OPENPREY_WAYLAND_SYNC_WINDOW_OPS" );
+	const char *openPR06ForceX11 = getenv( "OPENPR06_FORCE_X11" );
+	const char *openPR06DisableLibdecor = getenv( "OPENPR06_WAYLAND_DISABLE_LIBDECOR" );
+	const char *openPR06PreferLibdecor = getenv( "OPENPR06_WAYLAND_PREFER_LIBDECOR" );
+	const char *openPR06SyncWindowOps = getenv( "OPENPR06_WAYLAND_SYNC_WINDOW_OPS" );
 	// Temporary migration aliases for environments configured before the rebase.
-	if ( openPREYForceX11 == NULL || openPREYForceX11[0] == '\0' ) {
-		openPREYForceX11 = getenv( "OPENQ4_FORCE_X11" );
+	if ( openPR06ForceX11 == NULL || openPR06ForceX11[0] == '\0' ) {
+		openPR06ForceX11 = getenv( "OPENQ4_FORCE_X11" );
 	}
-	if ( openPREYDisableLibdecor == NULL || openPREYDisableLibdecor[0] == '\0' ) {
-		openPREYDisableLibdecor = getenv( "OPENQ4_WAYLAND_DISABLE_LIBDECOR" );
+	if ( openPR06DisableLibdecor == NULL || openPR06DisableLibdecor[0] == '\0' ) {
+		openPR06DisableLibdecor = getenv( "OPENQ4_WAYLAND_DISABLE_LIBDECOR" );
 	}
-	if ( openPREYPreferLibdecor == NULL || openPREYPreferLibdecor[0] == '\0' ) {
-		openPREYPreferLibdecor = getenv( "OPENQ4_WAYLAND_PREFER_LIBDECOR" );
+	if ( openPR06PreferLibdecor == NULL || openPR06PreferLibdecor[0] == '\0' ) {
+		openPR06PreferLibdecor = getenv( "OPENQ4_WAYLAND_PREFER_LIBDECOR" );
 	}
-	if ( openPREYSyncWindowOps == NULL || openPREYSyncWindowOps[0] == '\0' ) {
-		openPREYSyncWindowOps = getenv( "OPENQ4_WAYLAND_SYNC_WINDOW_OPS" );
+	if ( openPR06SyncWindowOps == NULL || openPR06SyncWindowOps[0] == '\0' ) {
+		openPR06SyncWindowOps = getenv( "OPENQ4_WAYLAND_SYNC_WINDOW_OPS" );
 	}
 	const char *effectiveSdlVideoDriver = ( sdlVideoDriver != NULL && sdlVideoDriver[0] != '\0' )
 		? sdlVideoDriver
 		: legacySdlVideoDriver;
-	const char *effectiveOpenPREYForceX11 = ( openPREYForceX11 != NULL && openPREYForceX11[0] != '\0' )
-		? openPREYForceX11
+	const char *effectiveOpenPR06ForceX11 = ( openPR06ForceX11 != NULL && openPR06ForceX11[0] != '\0' )
+		? openPR06ForceX11
 		: "<unset>";
-	const char *effectiveOpenPREYDisableLibdecor = ( openPREYDisableLibdecor != NULL && openPREYDisableLibdecor[0] != '\0' )
-		? openPREYDisableLibdecor
+	const char *effectiveOpenPR06DisableLibdecor = ( openPR06DisableLibdecor != NULL && openPR06DisableLibdecor[0] != '\0' )
+		? openPR06DisableLibdecor
 		: "<unset>";
-	const char *effectiveOpenPREYPreferLibdecor = ( openPREYPreferLibdecor != NULL && openPREYPreferLibdecor[0] != '\0' )
-		? openPREYPreferLibdecor
+	const char *effectiveOpenPR06PreferLibdecor = ( openPR06PreferLibdecor != NULL && openPR06PreferLibdecor[0] != '\0' )
+		? openPR06PreferLibdecor
 		: "<unset>";
-	const char *effectiveOpenPREYSyncWindowOps = ( openPREYSyncWindowOps != NULL && openPREYSyncWindowOps[0] != '\0' )
-		? openPREYSyncWindowOps
+	const char *effectiveOpenPR06SyncWindowOps = ( openPR06SyncWindowOps != NULL && openPR06SyncWindowOps[0] != '\0' )
+		? openPR06SyncWindowOps
 		: "<unset>";
 
 	if ( waylandDisplay == NULL || waylandDisplay[0] == '\0' ) {
@@ -486,17 +486,17 @@ static void Sys_ReportWaylandRuntime( void ) {
 #if defined( USE_SDL3 )
 		Sys_Printf(
 			"Wayland session detected (%s) without X11 DISPLAY. "
-			"openPREY will use SDL3's native Wayland path when selected; "
-			"use OPENPREY_FORCE_X11=1 from an XWayland-enabled session for fallback, "
-			"OPENPREY_WAYLAND_DISABLE_LIBDECOR=1 to bypass libdecor issues, "
-			"OPENPREY_WAYLAND_PREFER_LIBDECOR=1 for decoration issues, or "
-			"OPENPREY_WAYLAND_SYNC_WINDOW_OPS=1 for window-operation diagnostics.\n",
+			"openPR06 will use SDL3's native Wayland path when selected; "
+			"use OPENPR06_FORCE_X11=1 from an XWayland-enabled session for fallback, "
+			"OPENPR06_WAYLAND_DISABLE_LIBDECOR=1 to bypass libdecor issues, "
+			"OPENPR06_WAYLAND_PREFER_LIBDECOR=1 for decoration issues, or "
+			"OPENPR06_WAYLAND_SYNC_WINDOW_OPS=1 for window-operation diagnostics.\n",
 			waylandDisplay
 		);
 #else
 		Sys_Printf(
 			"Wayland session detected (%s) without X11 DISPLAY. "
-			"openPREY currently requires X11/GLX on Linux; launch from an XWayland-enabled session.\n",
+			"openPR06 currently requires X11/GLX on Linux; launch from an XWayland-enabled session.\n",
 			waylandDisplay
 		);
 #endif
@@ -506,18 +506,18 @@ static void Sys_ReportWaylandRuntime( void ) {
 #if defined( USE_SDL3 )
 	Sys_Printf(
 		"Wayland session detected (%s) with X11 DISPLAY=%s available. SDL3 video override: %s; "
-		"OPENPREY_FORCE_X11=%s OPENPREY_WAYLAND_DISABLE_LIBDECOR=%s OPENPREY_WAYLAND_PREFER_LIBDECOR=%s OPENPREY_WAYLAND_SYNC_WINDOW_OPS=%s.\n",
+		"OPENPR06_FORCE_X11=%s OPENPR06_WAYLAND_DISABLE_LIBDECOR=%s OPENPR06_WAYLAND_PREFER_LIBDECOR=%s OPENPR06_WAYLAND_SYNC_WINDOW_OPS=%s.\n",
 		waylandDisplay,
 		x11Display,
 		( effectiveSdlVideoDriver != NULL && effectiveSdlVideoDriver[0] != '\0' ) ? effectiveSdlVideoDriver : "<unset>",
-		effectiveOpenPREYForceX11,
-		effectiveOpenPREYDisableLibdecor,
-		effectiveOpenPREYPreferLibdecor,
-		effectiveOpenPREYSyncWindowOps
+		effectiveOpenPR06ForceX11,
+		effectiveOpenPR06DisableLibdecor,
+		effectiveOpenPR06PreferLibdecor,
+		effectiveOpenPR06SyncWindowOps
 	);
 #else
 	Sys_Printf(
-		"Wayland session detected (%s). openPREY is using X11 via XWayland (DISPLAY=%s).\n",
+		"Wayland session detected (%s). openPR06 is using X11 via XWayland (DISPLAY=%s).\n",
 		waylandDisplay,
 		x11Display
 	);
@@ -561,28 +561,33 @@ void Sys_AsyncThread( void ) {
  Sys_DefaultSavePath
  ==============
  */
+static void Sys_SetProductSavePath( const char *dataRoot ) {
+	savepath = dataRoot;
+	savepath.StripTrailing( '/' );
+	idStr legacyPath = savepath;
+#if defined( ID_DEMO_BUILD )
+	savepath += "/openpr06-demo";
+	legacyPath += "/openprey-demo";
+#else
+	savepath += "/openpr06";
+	legacyPath += "/openprey";
+#endif
+	Posix_MigrateLegacySavePath( legacyPath, savepath );
+}
+
 const char *Sys_DefaultSavePath(void) {
 	const char *xdgDataHome = getenv( "XDG_DATA_HOME" );
 	if ( xdgDataHome && xdgDataHome[0] == '/' ) {
-		savepath = xdgDataHome;
-		savepath.StripTrailing( '/' );
-#if defined( ID_DEMO_BUILD )
-		savepath += "/openprey-demo";
-#else
-		savepath += "/openprey";
-#endif
+		Sys_SetProductSavePath( xdgDataHome );
 		return savepath.c_str();
 	}
 
 	const char *home = getenv( "HOME" );
 	if ( home && home[0] ) {
-		savepath = home;
-		savepath.StripTrailing( '/' );
-#if defined( ID_DEMO_BUILD )
-		savepath += "/.local/share/openprey-demo";
-#else
-		savepath += "/.local/share/openprey";
-#endif
+		idStr dataRoot = home;
+		dataRoot.StripTrailing( '/' );
+		dataRoot += "/.local/share";
+		Sys_SetProductSavePath( dataRoot.c_str() );
 	} else {
 		savepath = Posix_Cwd();
 	}

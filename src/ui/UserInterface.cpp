@@ -1504,7 +1504,7 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 			cursorY + static_cast<float>( event->evValue2 ) );
 	}
 
-	// openPREY: while gui::skipOnInput names a named event, the first key,
+	// openPR06: while gui::skipOnInput names a named event, the first key,
 	// button or click runs it instead of reaching the windows. The main menu's
 	// 3D entrance skips to rest this way (guis/mainmenu.gui, skipIntro).
 	if ( desktop && event->evType == SE_KEY && event->evValue2 == 1 ) {
@@ -1527,7 +1527,7 @@ const char *idUserInterfaceLocal::HandleEvent( const sysEvent_t *event, int _tim
 ==============
 Named event commands
 
-openPREY: a `set "cmd"` in a script that answers a named event raises the
+openPR06: a `set "cmd"` in a script that answers a named event raises the
 command on the answering window, often the Desktop, and nothing read it
 there: idWindow::HandleEvent clears its own window's command first, and
 idWindow::Time clears the others. Retail Prey's idWindow::RunNamedEvent moved
@@ -1758,7 +1758,7 @@ void idUserInterfaceLocal::DrawCursor() {
 	if ( idKeyInput::LastPointerWasTouch() ) {
 		return;
 	}
-	// openPREY: retail Prey's pointer box (PREY.exe 1.4), half Doom 3's for the
+	// openPR06: retail Prey's pointer box (PREY.exe 1.4), half Doom 3's for the
 	// same 32-texel art: 16 units of the 640x480 canvas on a menu, 32 on a
 	// world GUI.
 	if ( !desktop || desktop->GetFlags() & WIN_MENUGUI ) {
@@ -1996,11 +1996,11 @@ void idUserInterfaceLocal::WriteToDemoFile( class idDemoFile *f ) {
 	f->WriteFloat( cursorY );
 }
 
-// openPREY: a stream marker and version lead the GUI state, so a stream from
+// openPR06: a stream marker and version lead the GUI state, so a stream from
 // another build fails closed instead of misreading the window tree. Version 2
 // follows upstream's checked encoding (one-byte bools, bounded strings).
-static const int OPENPREY_GUI_SAVE_MAGIC = 'P' | ( 'G' << 8 ) | ( 'U' << 16 ) | ( 'I' << 24 );
-static const int OPENPREY_GUI_SAVE_VERSION = 2;
+static const int OPENPR06_GUI_SAVE_MAGIC = 'P' | ( 'G' << 8 ) | ( 'U' << 16 ) | ( 'I' << 24 );
+static const int OPENPR06_GUI_SAVE_VERSION = 2;
 
 static const int UI_MAX_SAVEGAME_STATE_ENTRIES = 16384;
 static const int UI_MAX_SAVEGAME_STRING_LENGTH = 64 * 1024;
@@ -2068,8 +2068,8 @@ bool idUserInterfaceLocal::WriteToSaveGame( idFile *savefile ) const {
 		return false;
 	}
 
-	if ( !UI_WriteSaveGameInt( savefile, OPENPREY_GUI_SAVE_MAGIC, "GUI save magic" ) ||
-		 !UI_WriteSaveGameInt( savefile, OPENPREY_GUI_SAVE_VERSION, "GUI save version" ) ) {
+	if ( !UI_WriteSaveGameInt( savefile, OPENPR06_GUI_SAVE_MAGIC, "GUI save magic" ) ||
+		 !UI_WriteSaveGameInt( savefile, OPENPR06_GUI_SAVE_VERSION, "GUI save version" ) ) {
 		return false;
 	}
 
@@ -2215,7 +2215,7 @@ bool idUserInterfaceLocal::ReadFromSaveGame( idFile *savefile ) {
 		!UI_ReadSaveGameInt( savefile, version, "GUI save version" ) ) {
 		return false;
 	}
-	if ( magic != OPENPREY_GUI_SAVE_MAGIC || version != OPENPREY_GUI_SAVE_VERSION ) {
+	if ( magic != OPENPR06_GUI_SAVE_MAGIC || version != OPENPR06_GUI_SAVE_VERSION ) {
 		common->Warning( "idUserInterfaceLocal::ReadFromSaveGame: unsupported GUI stream marker 0x%08x version %d",
 			magic, version );
 		return false;

@@ -1,4 +1,4 @@
-// openPREY version information resource.
+// openPR06 version information resource.
 #include <winres.h>
 
 #include "../../AutoVersion.h"

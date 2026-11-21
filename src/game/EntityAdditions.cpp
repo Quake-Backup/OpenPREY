@@ -1573,14 +1573,14 @@ void idEntity::Event_SetEntityKey( const char *key, const idEntity* value ) {
 // HUMANHEAD CJR
 //=============================================================================
 
-static idEntity *openPREY_PlayerCanSeeAttachmentBody( idEntity *entity ) {
+static idEntity *openPR06_PlayerCanSeeAttachmentBody( idEntity *entity ) {
 	if ( entity && entity->IsType( idAFAttachment::Type ) ) {
 		return static_cast<idAFAttachment *>( entity )->GetBody();
 	}
 	return NULL;
 }
 
-static idEntity *openPREY_PlayerCanSeeTraceEntity( idEntity *entity ) {
+static idEntity *openPR06_PlayerCanSeeTraceEntity( idEntity *entity ) {
 	idEntity *master;
 	idEntity *body;
 
@@ -1588,7 +1588,7 @@ static idEntity *openPREY_PlayerCanSeeTraceEntity( idEntity *entity ) {
 		return NULL;
 	}
 
-	body = openPREY_PlayerCanSeeAttachmentBody( entity );
+	body = openPR06_PlayerCanSeeAttachmentBody( entity );
 	if ( body ) {
 		return body;
 	}
@@ -1601,7 +1601,7 @@ static idEntity *openPREY_PlayerCanSeeTraceEntity( idEntity *entity ) {
 	return entity;
 }
 
-static bool openPREY_PlayerCanSeeTraceHitMatches( idEntity *traceEntity, idEntity *expectedEntity ) {
+static bool openPR06_PlayerCanSeeTraceHitMatches( idEntity *traceEntity, idEntity *expectedEntity ) {
 	if ( !traceEntity || !expectedEntity ) {
 		return false;
 	}
@@ -1610,13 +1610,13 @@ static bool openPREY_PlayerCanSeeTraceHitMatches( idEntity *traceEntity, idEntit
 		return true;
 	}
 
-	idEntity *traceOwner = openPREY_PlayerCanSeeTraceEntity( traceEntity );
-	idEntity *expectedOwner = openPREY_PlayerCanSeeTraceEntity( expectedEntity );
+	idEntity *traceOwner = openPR06_PlayerCanSeeTraceEntity( traceEntity );
+	idEntity *expectedOwner = openPR06_PlayerCanSeeTraceEntity( expectedEntity );
 
 	return traceOwner && expectedOwner && traceOwner == expectedOwner;
 }
 
-static bool openPREY_PlayerCanSeePoint( hhPlayer *player, idEntity *pvsEntity, const idVec3 &targetOrigin, idEntity *selfCheck ) {
+static bool openPR06_PlayerCanSeePoint( hhPlayer *player, idEntity *pvsEntity, const idVec3 &targetOrigin, idEntity *selfCheck ) {
 	trace_t traceInfo;
 	idEntity *traceEntity;
 
@@ -1638,30 +1638,30 @@ static bool openPREY_PlayerCanSeePoint( hhPlayer *player, idEntity *pvsEntity, c
 	gameLocal.clip.TracePoint( traceInfo, player->GetEyePosition(), targetOrigin, MASK_SHOT_RENDERMODEL, player );
 	traceEntity = gameLocal.GetTraceEntity( traceInfo );
 	return ( traceInfo.fraction >= 1.0f ||
-		openPREY_PlayerCanSeeTraceHitMatches( traceEntity, selfCheck ) ||
-		openPREY_PlayerCanSeeTraceHitMatches( traceEntity, pvsEntity ) );
+		openPR06_PlayerCanSeeTraceHitMatches( traceEntity, selfCheck ) ||
+		openPR06_PlayerCanSeeTraceHitMatches( traceEntity, pvsEntity ) );
 }
 
-static bool openPREY_PlayerCanSeeActorBody( hhPlayer *player, idEntity *body ) {
+static bool openPR06_PlayerCanSeeActorBody( hhPlayer *player, idEntity *body ) {
 	if ( !body ) {
 		return false;
 	}
 
-	idEntity *traceEntity = openPREY_PlayerCanSeeTraceEntity( body );
+	idEntity *traceEntity = openPR06_PlayerCanSeeTraceEntity( body );
 	if ( body->IsType( idActor::Type ) ) {
 		idActor *actor = static_cast<idActor *>( body );
-		if ( openPREY_PlayerCanSeePoint( player, body, actor->GetEyePosition(), traceEntity ) ) {
+		if ( openPR06_PlayerCanSeePoint( player, body, actor->GetEyePosition(), traceEntity ) ) {
 			return true;
 		}
 	}
 
 	if ( body->GetPhysics() ) {
-		if ( openPREY_PlayerCanSeePoint( player, body, body->GetPhysics()->GetAbsBounds().GetCenter(), traceEntity ) ) {
+		if ( openPR06_PlayerCanSeePoint( player, body, body->GetPhysics()->GetAbsBounds().GetCenter(), traceEntity ) ) {
 			return true;
 		}
 	}
 
-	return openPREY_PlayerCanSeePoint( player, body, body->GetOrigin(), traceEntity );
+	return openPR06_PlayerCanSeePoint( player, body, body->GetOrigin(), traceEntity );
 }
 
 void idEntity::Event_PlayerCanSee() {
@@ -1679,12 +1679,12 @@ void idEntity::Event_PlayerCanSee() {
 		// Get the player
 		player = static_cast<hhPlayer *>( ent );
 
-		if ( openPREY_PlayerCanSeePoint( player, this, this->GetOrigin(), openPREY_PlayerCanSeeTraceEntity( this ) ) ) {
+		if ( openPR06_PlayerCanSeePoint( player, this, this->GetOrigin(), openPR06_PlayerCanSeeTraceEntity( this ) ) ) {
 			idThread::ReturnInt( true );
 			return;
 		}
 
-		if ( this->IsType( idActor::Type ) && openPREY_PlayerCanSeeActorBody( player, this ) ) {
+		if ( this->IsType( idActor::Type ) && openPR06_PlayerCanSeeActorBody( player, this ) ) {
 			idThread::ReturnInt( true );
 			return;
 		}
@@ -1696,8 +1696,8 @@ void idEntity::Event_PlayerCanSee() {
 		// owning body as visible for attached-head script checks, matching the way
 		// head combat models are owned by their actor body elsewhere in the game.
 		if ( this->IsType( idAFAttachment::Type ) ) {
-			idEntity *body = openPREY_PlayerCanSeeAttachmentBody( this );
-			if ( openPREY_PlayerCanSeeActorBody( player, body ) ) {
+			idEntity *body = openPR06_PlayerCanSeeAttachmentBody( this );
+			if ( openPR06_PlayerCanSeeActorBody( player, body ) ) {
 				idThread::ReturnInt( true );
 				return;
 			}

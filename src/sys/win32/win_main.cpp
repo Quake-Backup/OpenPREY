@@ -426,7 +426,7 @@ static bool Sys_TryTranslateopenQ4ProtocolCommandLine( const char *rawCmdLine, i
 		return false;
 	}
 
-	if ( idStr::Icmpn( args.Argv( 0 ), "openprey://", 11 ) != 0 ) {
+	if ( idStr::Icmpn( args.Argv( 0 ), "openpr06://", 11 ) != 0 ) {
 		return false;
 	}
 
@@ -569,6 +569,38 @@ static bool Sys_IsAbsoluteWindowsPath( const idStr &path ) {
 	return drivePath || uncPath;
 }
 
+/*
+==============
+Sys_MigrateLegacyWindowsSavePath
+
+openPR06 was named openPREY before 0.0.1. The first run after the rename moves
+the old save folder to the new name. If the move fails (another copy of the old
+build holds files open, say), this run keeps using the old folder.
+==============
+*/
+static void Sys_MigrateLegacyWindowsSavePath( const idStr &productRoot, idStr &savePath ) {
+	idStr legacyPath = productRoot;
+	legacyPath.AppendPath( "openPREY" );
+	legacyPath.SlashesToBackSlashes();
+
+	wchar_t wideSavePath[1024];
+	wchar_t wideLegacyPath[1024];
+	if ( MultiByteToWideChar( CP_UTF8, MB_ERR_INVALID_CHARS, savePath.c_str(), -1, wideSavePath, 1024 ) == 0 ||
+			MultiByteToWideChar( CP_UTF8, MB_ERR_INVALID_CHARS, legacyPath.c_str(), -1, wideLegacyPath, 1024 ) == 0 ) {
+		return;
+	}
+	if ( GetFileAttributesW( wideSavePath ) != INVALID_FILE_ATTRIBUTES ) {
+		return;
+	}
+	const DWORD legacyAttributes = GetFileAttributesW( wideLegacyPath );
+	if ( legacyAttributes == INVALID_FILE_ATTRIBUTES || ( legacyAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 ) {
+		return;
+	}
+	if ( !MoveFileExW( wideLegacyPath, wideSavePath, 0 ) ) {
+		savePath = legacyPath;
+	}
+}
+
 static bool Sys_BuildWindowsProductSavePath( const char *root, idStr &savePath ) {
 	if ( root == NULL || root[0] == '\0' ) {
 		savePath.Clear();
@@ -582,8 +614,10 @@ static bool Sys_BuildWindowsProductSavePath( const char *root, idStr &savePath )
 		return false;
 	}
 	savePath.StripTrailing( '\\' );
-	savePath.AppendPath( "openPREY" );
+	const idStr productRoot = savePath;
+	savePath.AppendPath( "openPR06" );
 	savePath.SlashesToBackSlashes();
+	Sys_MigrateLegacyWindowsSavePath( productRoot, savePath );
 	return true;
 }
 
@@ -1859,13 +1893,13 @@ static HANDLE win_instanceMutex = NULL;
 ================
 Sys_AlreadyRunning
 
-returns true if there is a copy of openPREY running already
+returns true if there is a copy of openPR06 running already
 ================
 */
 bool Sys_AlreadyRunning(void) {
 #ifndef DEBUG
 	if (!win32.win_allowMultipleInstances.GetBool()) {
-		win_instanceMutex = ::CreateMutex(NULL, FALSE, "openPREY");
+		win_instanceMutex = ::CreateMutex(NULL, FALSE, "openPR06");
 		if (::GetLastError() == ERROR_ALREADY_EXISTS || ::GetLastError() == ERROR_ACCESS_DENIED) {
 			return true;
 		}
@@ -1975,7 +2009,7 @@ void Sys_Init(void) {
 	win32.sys_arch.SetString( Sys_FormatWindowsVersion( win32.osversion ) );
 	if ( !Sys_IsWindowsVersionOrGreater( win32.osversion, OPENQ4_VALIDATED_WINDOWS_MAJOR_VERSION, OPENQ4_VALIDATED_WINDOWS_MINOR_VERSION ) ) {
 		common->Printf(
-			"WARNING: %s is outside openPREY's actively validated Windows support matrix.\n",
+			"WARNING: %s is outside openPR06's actively validated Windows support matrix.\n",
 			win32.sys_arch.GetString() );
 	}
 

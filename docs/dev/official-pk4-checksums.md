@@ -1,10 +1,10 @@
 # Official Prey (2006) PK4 Checksums
 
-This document tracks the official PK4 checksum baseline used by openPREY startup validation.
+This document tracks the official PK4 checksum baseline used by openPR06 startup validation.
 
 ## Status
 
-openPREY now tracks two known official Prey base pack layouts:
+openPR06 now tracks two known official Prey base pack layouts:
 
 1. Classic retail CD/DVD naming (`pak000` ... `pak004`).
 2. Consolidated naming seen in legacy digital distributions (`pak_data`, `pak_sound`, `pak_en_v`, `pak_en_t`).
@@ -14,8 +14,8 @@ remain presence-only (see "Additional Official PK4s" below).
 
 ## Capture Method
 
-1. Launch openPREY against a clean Prey installation.
-2. Enable startup logging (`logFile 2`) and inspect `logs/openprey.log` under `fs_savepath`.
+1. Launch openPR06 against a clean Prey installation.
+2. Enable startup logging (`logFile 2`) and inspect `logs/openpr06.log` under `fs_savepath`.
 3. Record `Loaded pk4 ... with checksum ...` lines.
 4. Populate required and optional PK4 tables below.
 
@@ -38,9 +38,9 @@ Sources, which agree on every value:
 - Retail PC 3-CD set, five languages (ISO labels `PREY_DISC1` to `PREY_DISC3`,
   mastered 2006-06-13), read from the discs' `Setup/Data/Base` and again after
   installing and patching to 1.4: the 1.4 patch does not touch these packs
-  (openPREY issue #37, with the capture harness and SHA-256 values).
+  (openPR06 issue #37, with the capture harness and SHA-256 values).
 - A Steam install (`steamapps/common/Prey 2006/base`), from its startup log
-  (openPREY issue #36).
+  (openPR06 issue #36).
 
 ## Required Baseline: Consolidated Naming
 
@@ -74,7 +74,7 @@ it, is `0xe0be2928` (2 entries, 1685372 bytes, MD5
 ## Notes
 
 - Checksum format is the engine PK4 checksum generated in `src/framework/FileSystem.cpp`.
-- The consolidated checksums were captured from an installed retail-media layout via openPREY runtime logging (`Loaded pk4 ... checksum ...`).
+- The consolidated checksums were captured from an installed retail-media layout via openPR06 runtime logging (`Loaded pk4 ... checksum ...`).
 - The optional packs stay presence-only (`0` in `officialPk4s[]`): patches
   replace some of them (`game00.pk4` above), and installs at patch levels
   before 1.4 have not been catalogued. A pinned value would refuse those.

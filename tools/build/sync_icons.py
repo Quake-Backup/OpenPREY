@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync openPREY platform icon artifacts from assets/icons."""
+"""Sync openPR06 platform icon artifacts from assets/icons."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ PNG_SIZES = (16, 20, 24, 32, 40, 48, 64, 128, 256, 512, 1024)
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Sync openPREY icon outputs for all platforms.")
+    parser = argparse.ArgumentParser(description="Sync openPR06 icon outputs for all platforms.")
     parser.add_argument(
         "--source-root",
         default=".",

@@ -112,7 +112,7 @@ def validate_install_discovery(source: str) -> None:
         require(uninstall, f'"{value}"', f"uninstall {value} lookup")
     require(uninstall, 'displayName.Find( "prey", false )', "Prey uninstall-name filter")
 
-    require(steam, '"OPENPREY_STEAM_ROOT"', "primary Steam override")
+    require(steam, '"OPENPR06_STEAM_ROOT"', "primary Steam override")
     require(steam, 'path.AppendPath( "Prey" )', "Steam Prey folder")
     reject(steam, 'path.AppendPath( "Quake 4" )', "Steam Quake 4 folder")
     require(gog, '"C:/GOG Games/Prey"', "GOG Prey folder")
@@ -161,7 +161,7 @@ def validate_user_diagnostics(source: str) -> None:
     ):
         reject(source, stale, "active FileSystem diagnostics")
     require(source, "Required official Prey media pk4 files", "Prey retail validation diagnostic")
-    require(source, "openPREY runtime content packs", "openPREY runtime-pack diagnostic")
+    require(source, "openPR06 runtime content packs", "openPR06 runtime-pack diagnostic")
 
 
 def main() -> None:
@@ -171,7 +171,7 @@ def main() -> None:
     validate_platform_residuals()
     validate_prey_filesystem_api(source)
     validate_user_diagnostics(source)
-    print("openprey_filesystem_policy: ok")
+    print("openpr06_filesystem_policy: ok")
 
 
 if __name__ == "__main__":

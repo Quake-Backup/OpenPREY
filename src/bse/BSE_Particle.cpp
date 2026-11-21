@@ -705,7 +705,7 @@ void rvParticle::EvaluatePosition(const rvBSE* effect, rvParticleTemplate* pt, i
 
 bool rvParticle::RunPhysics(rvBSE* effect, rvSegmentTemplate* st, float time) {
 #if defined(HUMANHEAD)
-	// OPENPREY-GATED(D3): collision/effect callbacks are absent from Prey's v7 ABI.
+	// OPENPR06-GATED(D3): collision/effect callbacks are absent from Prey's v7 ABI.
 	return false;
 #else
 	if (!effect || !st || !bse_physics.GetBool() || session->readDemo) {

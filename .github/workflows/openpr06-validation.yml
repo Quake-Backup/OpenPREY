@@ -1,4 +1,4 @@
-name: openPREY Validation
+name: openPR06 Validation
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: openprey-validation-${{ github.workflow }}-${{ github.ref }}
+  group: openpr06-validation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     name: Scaffold and Content Contracts
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout openPREY
+      - name: Checkout openPR06
         uses: actions/checkout@v6
 
       - name: Set up Python
@@ -36,14 +36,14 @@ jobs:
             tools/build/openq4_pak.py \
             tools/build/game_source_inventory.py             tools/build/content_packs.py \
             tools/build/write_pak_manifest.py \
-            tools/tests/openprey_rebase_contract.py \
+            tools/tests/openpr06_rebase_contract.py \
             tools/tests/prey_video_menu_contract.py \
             tools/tests/linux_sanitizer_source_contract.py
           bash -n tools/build/meson_setup.sh
           python tools/build/sync_icons.py --check
           python tools/build/game_source_inventory.py . > /dev/null
           python tools/build/content_packs.py meson-list
-          python tools/tests/openprey_rebase_contract.py
+          python tools/tests/openpr06_rebase_contract.py
           python tools/tests/prey_video_menu_contract.py
           python tools/tests/linux_sanitizer_source_contract.py
 
@@ -77,20 +77,20 @@ jobs:
           - platform: Windows x64
             os: windows-2025
             module: game_x64.dll
-            client: openPREY-client_x64.exe
-            dedicated: openPREY-ded_x64.exe
+            client: openPR06-client_x64.exe
+            dedicated: openPR06-ded_x64.exe
             renderer_gl: renderer-gl_x64.dll
             renderer_vk: renderer-vk_x64.dll
           - platform: Linux x64
             os: ubuntu-24.04
             module: game_x64.so
-            client: openPREY-client_x64
-            dedicated: openPREY-ded_x64
+            client: openPR06-client_x64
+            dedicated: openPR06-ded_x64
             renderer_gl: renderer-gl_x64.so
             renderer_vk: renderer-vk_x64.so
 
     steps:
-      - name: Checkout openPREY
+      - name: Checkout openPR06
         uses: actions/checkout@v6
 
       - name: Set up Python
@@ -163,9 +163,9 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $outputRoot = Join-Path $env:GITHUB_WORKSPACE ".tmp/openal-soft-x64"
-          $env:OPENPREY_VS_TARGET_ARCH = "x64"
+          $env:OPENPR06_VS_TARGET_ARCH = "x64"
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/build/prepare_windows_openal.ps1 -Architecture "x64" -OutputRoot $outputRoot
-          "OPENPREY_OPENAL_ROOT=$outputRoot" >> $env:GITHUB_ENV
+          "OPENPR06_OPENAL_ROOT=$outputRoot" >> $env:GITHUB_ENV
 
       - name: Configure, build, and stage (Windows)
         if: runner.os == 'Windows'
@@ -197,16 +197,16 @@ jobs:
           test -f ".install/basepr/pak0.pk4"
           test -f ".install/basepr/pak1.pk4"
           test -f ".install/basepr/mod.json"
-          test -f ".install/openPREY.ico"
-          test -f ".install/openPREY.icns"
+          test -f ".install/openPR06.ico"
+          test -f ".install/openPR06.icns"
           if [ "${{ runner.os }}" = "Linux" ]; then
-            test -f ".install/share/applications/openprey.desktop"
-            test -f ".install/share/applications/openprey-steamdeck.desktop"
-            test -f ".install/share/icons/hicolor/256x256/apps/openprey.png"
+            test -f ".install/share/applications/openpr06.desktop"
+            test -f ".install/share/applications/openpr06-steamdeck.desktop"
+            test -f ".install/share/icons/hicolor/256x256/apps/openpr06.png"
           fi
           if find .install/basepr -maxdepth 1 -type f \( \
               -name 'game-sp_*' -o -name 'game-mp_*' -o \
               -name 'game_sp_*' -o -name 'game_mp_*' \) | grep -q .; then
-            echo "Split GameLib artifacts must not be staged; openPREY ships one game_<arch> module."
+            echo "Split GameLib artifacts must not be staged; openPR06 ships one game_<arch> module."
             exit 1
           fi

@@ -30,11 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 #define __ASYNCSERVER_H__
 #include "VoiceTransport.h"
 
-// OPENPREY-GATED(D9): upstream bot slots depend on game API callbacks that are
+// OPENPR06-GATED(D9): upstream bot slots depend on game API callbacks that are
 // not part of Prey's v7 contract. Keep the implementation available for a
 // future, explicitly versioned reintroduction, but compile it out by default.
-#ifndef OPENPREY_ENABLE_BOTS
-#define OPENPREY_ENABLE_BOTS 0
+#ifndef OPENPR06_ENABLE_BOTS
+#define OPENPR06_ENABLE_BOTS 0
 #endif
 
 /*
@@ -263,8 +263,8 @@ public:
 
 	void				PrintLocalServerInfo( void );
 
-#if OPENPREY_ENABLE_BOTS
-// OPENPREY-GATED(D9): engine-only bot entry points; not exported to game API v7.
+#if OPENPR06_ENABLE_BOTS
+// OPENPR06-GATED(D9): engine-only bot entry points; not exported to game API v7.
 	int					AllocOpenClientSlotForAI(const char* botName, int maxPlayersOnServer);
 	int 				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);
 #endif

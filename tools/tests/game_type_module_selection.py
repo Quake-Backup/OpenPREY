@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guards openPREY's unified game-module selection contract.
+"""Guards openPR06's unified game-module selection contract.
 
 Prey uses one game module for both single-player and multiplayer.  The gameplay
 mode selected by ``si_gameType`` must therefore never choose a different binary.
@@ -516,17 +516,17 @@ def validate_font_restart_documentation() -> None:
 def validate_unified_module_selection() -> None:
     common = read(ROOT / "src" / "framework" / "Common.cpp")
     selector = cxx_function_body(
-        common, "static const char *openPREY_SelectGameModuleBaseName( void )"
+        common, "static const char *openPR06_SelectGameModuleBaseName( void )"
     )
     require(selector, 'return "game";', "unified game-module selector")
     reject(selector, "si_gameType", "unified game-module selector")
 
     candidates = cxx_function_body(
-        common, "static void openPREY_BuildGameModuleCandidateList( idStrList &candidates )"
+        common, "static void openPR06_BuildGameModuleCandidateList( idStrList &candidates )"
     )
     require(
         candidates,
-        'va( "game_%s", OPENPREY_MODULE_ARCH_TAG )',
+        'va( "game_%s", OPENPR06_MODULE_ARCH_TAG )',
         "unified game-module candidate list",
     )
     require(candidates, '"game_universal2"', "unified macOS module compatibility")
@@ -537,12 +537,12 @@ def validate_unified_module_selection() -> None:
     loader = cxx_function_body(common, "void idCommonLocal::LoadGameDLL( void )")
     require(
         loader,
-        "openPREY_SelectGameModuleBaseName()",
+        "openPR06_SelectGameModuleBaseName()",
         "unified game-module loader",
     )
     require(
         loader,
-        "openPREY_BuildGameModuleCandidateList( gameModuleCandidates )",
+        "openPR06_BuildGameModuleCandidateList( gameModuleCandidates )",
         "unified game-module loader",
     )
     require(
@@ -663,7 +663,7 @@ def validate_async_module_state() -> None:
     init_end = common.index("void idCommonLocal::ShutdownGame( bool reloading ) {", init_start)
     init_body = common[init_start:init_end]
     for token in (
-        "const idStr pendingGameModule = openPREY_SelectGameModuleBaseName();",
+        "const idStr pendingGameModule = openPR06_SelectGameModuleBaseName();",
         "openQ4_NormalizeGameTypeForModule( pendingGameModule.c_str() );",
     ):
         require(init_body, token, "game type normalization before declaration initialization")

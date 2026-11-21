@@ -89,7 +89,7 @@ static idStr ServerBrowserText( const char *text, int limit = 96 ) {
 // Reject malformed folder identifiers rather than inventing a sanitized token.
 static idStr ServerBrowserMod( const char *mod ) {
 	if ( !mod || !mod[0] ) {
-		return OPENPREY_GAMEDIR;
+		return OPENPR06_GAMEDIR;
 	}
 	if ( strlen( mod ) > 64 || !strcmp( mod, "." ) || !strcmp( mod, ".." ) ) {
 		return "";
@@ -134,7 +134,7 @@ static idStr ServerBrowserEndpoint( const netadr_t &adr ) {
 // control time; every other public type GTF_FRAGLIMIT): the label and the
 // serverinfo key the browser's details name it by. Prey's game reports only
 // "deathmatch" and "Team DM" (si_gameTypeArgs); the Quake 4 types keep their
-// rows, labelled by openPREY's own strings, because Quake 4's #str_41xxx IDs
+// rows, labelled by openPR06's own strings, because Quake 4's #str_41xxx IDs
 // are subtitle lines in Prey's string table.
 static void ServerBrowserMatchLimit( const char *type, const char *&label, const char *&key ) {
 	static const char *capture[] = { "CTF", "One Flag CTF", "Arena CTF", "Arena One Flag CTF" };
@@ -857,7 +857,7 @@ void idServerScan::AddFavoriteServers() {
 void idServerScan::UpdateFilterByMod( int direction ) {
 	idStrList mods;
 	mods.Append( "" );
-	mods.Append( OPENPREY_GAMEDIR );
+	mods.Append( OPENPR06_GAMEDIR );
 	for ( int i = 0; i < Num(); ++i ) {
 		const idStr mod = ServerBrowserMod( (*this)[i].serverInfo.GetString( "fs_game" ) );
 		if ( mod.Length() ) {
@@ -922,7 +922,7 @@ listed servers heard from or given up on ("Scanning %d/%d: %s"; on the LAN,
 "Scanning - Found: %s" across its reply window), and once the scan completes,
 how many it covered ("Scanned %d Prey servers") on a full bar. A refresh
 says nothing until a server answers, as Quake 4's did. Retail Prey's language
-files have none of these strings; openPREY's *_openprey.lang files supply
+files have none of these strings; openPR06's *_openpr06.lang files supply
 them under Quake 4's IDs.
 ================
 */

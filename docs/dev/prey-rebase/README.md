@@ -1,8 +1,8 @@
-# openPREY rebase evidence bundle
+# openPR06 rebase evidence bundle
 
 UPSTREAM_BASE: d41186e4 (2026-07-31)
 
-This directory is the durable audit trail for the 2026 openPREY-on-OpenQ4 rebase.
+This directory is the durable audit trail for the 2026 openPR06-on-OpenQ4 rebase.
 
 - [plan.md](plan.md) records the strategy and decisions.
 - [implementation.md](implementation.md) records the ordered work packages.

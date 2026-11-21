@@ -5,17 +5,17 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>openPREY</string>
+	<string>openPR06</string>
 	<key>CFBundleExecutable</key>
-	<string>openPREY</string>
+	<string>openPR06</string>
 	<key>CFBundleIconFile</key>
 	<string>prey.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.darkmatter.openprey</string>
+	<string>com.darkmatter.openpr06</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>openPREY</string>
+	<string>openPR06</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

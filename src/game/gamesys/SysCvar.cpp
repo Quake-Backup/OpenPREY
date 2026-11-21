@@ -344,7 +344,7 @@ idCVar pm_thirdPersonDeathMP(		"pm_thirdPersonDeathMP",	"1",			CVAR_GAME | CVAR_
 idCVar g_showAimHealth(				"g_showAimHealth",			"0",			CVAR_GAME | CVAR_BOOL, "health display of target (gameplay testing)" );
 //HUMANHEAD END
 idCVar g_showPlayerShadow(			"g_showPlayerShadow",		"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "show your own player model's shadow in your own view, in single-player and multiplayer" );
-// openPREY: retail shipped g_showPlayerShadow 0 and every saved config archives it
+// openPR06: retail shipped g_showPlayerShadow 0 and every saved config archives it
 idCVar g_showPlayerShadowMigrated(	"g_showPlayerShadowMigrated",	"0",		CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL | CVAR_NOCHEAT, "one-time migration flag that turns on g_showPlayerShadow in configs saved with the retail default" );
 idCVar g_showHud(					"g_showHud",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "" );
 idCVar g_showProjectilePct(			"g_showProjectilePct",		"0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "enables display of player hit percentage" );

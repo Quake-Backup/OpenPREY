@@ -35,10 +35,10 @@ resolve_meson_cmd() {
     local candidate=""
     local python_cmd=""
 
-    local configured_meson="${OPENPREY_MESON:-${OPENQ4_MESON:-}}"
+    local configured_meson="${OPENPR06_MESON:-${OPENQ4_MESON:-}}"
     if [[ -n "${configured_meson}" ]]; then
         if [[ ! -x "${configured_meson}" ]]; then
-            echo "OPENPREY_MESON points to a missing or non-executable Meson: '${configured_meson}'." >&2
+            echo "OPENPR06_MESON points to a missing or non-executable Meson: '${configured_meson}'." >&2
             exit 1
         fi
 
@@ -296,7 +296,7 @@ if [[ -z "${command_name}" ]]; then
     exit 1
 fi
 
-if [[ ( "${command_name}" == "setup" || "${command_name}" == "compile" || "${command_name}" == "install" ) && "${OPENPREY_SKIP_ICON_SYNC:-${OPENQ4_SKIP_ICON_SYNC:-0}}" != "1" ]]; then
+if [[ ( "${command_name}" == "setup" || "${command_name}" == "compile" || "${command_name}" == "install" ) && "${OPENPR06_SKIP_ICON_SYNC:-${OPENQ4_SKIP_ICON_SYNC:-0}}" != "1" ]]; then
     if [[ ! -f "${sync_icons_script}" ]]; then
         echo "Icon sync script not found: '${sync_icons_script}'." >&2
         exit 1

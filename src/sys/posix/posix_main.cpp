@@ -657,6 +657,27 @@ const char *Posix_Cwd( void ) {
 }
 
 /*
+================
+Posix_MigrateLegacySavePath
+
+openPR06 was named openPREY before 0.0.1. The first run after the rename moves
+the old save folder to the new name, or keeps using it if the move fails.
+================
+*/
+void Posix_MigrateLegacySavePath( const idStr &legacyPath, idStr &savePath ) {
+	struct stat st;
+	if ( stat( savePath.c_str(), &st ) == 0 || errno != ENOENT ) {
+		return;
+	}
+	if ( stat( legacyPath.c_str(), &st ) != 0 || !S_ISDIR( st.st_mode ) ) {
+		return;
+	}
+	if ( rename( legacyPath.c_str(), savePath.c_str() ) != 0 ) {
+		savePath = legacyPath;
+	}
+}
+
+/*
 =================
 Sys_GetMemoryStatus
 =================

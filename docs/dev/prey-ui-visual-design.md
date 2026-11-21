@@ -2392,7 +2392,7 @@ openPR06's own marks live in `assets/`:
 | --- | --- | --- |
 | Application icon | `assets/icons/prey.*` | The hawk Talon in red and orange flame with a cyan electric edge; executables, desktop entries, installers |
 | Splash | `assets/splash/prey_rt_bitmap_4001.bmp` | Windows startup splash: the stone hawk with the dark extended wordmark |
-| README banner | `assets/docs/img/banner.png` | "open" in a white geometric sans beside "PREY" in dark navy extended capitals, over the Sphere and the glowing spirit hawk |
+| README banner | `assets/docs/img/banner.png` | "open" in a white geometric sans beside "PR06" in dark navy extended capitals, over the Sphere and the glowing spirit hawk |
 | Release package home | `assets/release/README.html` | The `README.html` at the root of every package: the portal rim, Sphere and Earth's limb behind the hawk and wordmark, the arc of hooks as its section menu, the home bottom bar for its documentation links, and claw-cornered frames with setting-row plates and 3-slice buttons for its content |
 | Project overview and documentation portal | `assets/docs/README.html`; `SITE_CSS` in `tools/build/generate_release_docs.py` | The same vocabulary for the repository overview page and every packaged documentation page; side columns are tab containers whose links are side tabs |
 | Web faces | `assets/docs/fonts/openpr06-menu.woff`, `talon-ui-condensed.woff` | The display tracing and Talon UI Condensed, subset for the pages above by `tools/assets/fonts/embed_atlas_fonts.py`; the release home embeds them so it works offline from an unpacked archive |

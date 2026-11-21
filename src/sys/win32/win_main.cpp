@@ -569,6 +569,38 @@ static bool Sys_IsAbsoluteWindowsPath( const idStr &path ) {
 	return drivePath || uncPath;
 }
 
+/*
+==============
+Sys_MigrateLegacyWindowsSavePath
+
+openPR06 was named openPREY before 0.0.1. The first run after the rename moves
+the old save folder to the new name. If the move fails (another copy of the old
+build holds files open, say), this run keeps using the old folder.
+==============
+*/
+static void Sys_MigrateLegacyWindowsSavePath( const idStr &productRoot, idStr &savePath ) {
+	idStr legacyPath = productRoot;
+	legacyPath.AppendPath( "openPREY" );
+	legacyPath.SlashesToBackSlashes();
+
+	wchar_t wideSavePath[1024];
+	wchar_t wideLegacyPath[1024];
+	if ( MultiByteToWideChar( CP_UTF8, MB_ERR_INVALID_CHARS, savePath.c_str(), -1, wideSavePath, 1024 ) == 0 ||
+			MultiByteToWideChar( CP_UTF8, MB_ERR_INVALID_CHARS, legacyPath.c_str(), -1, wideLegacyPath, 1024 ) == 0 ) {
+		return;
+	}
+	if ( GetFileAttributesW( wideSavePath ) != INVALID_FILE_ATTRIBUTES ) {
+		return;
+	}
+	const DWORD legacyAttributes = GetFileAttributesW( wideLegacyPath );
+	if ( legacyAttributes == INVALID_FILE_ATTRIBUTES || ( legacyAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 ) {
+		return;
+	}
+	if ( !MoveFileExW( wideLegacyPath, wideSavePath, 0 ) ) {
+		savePath = legacyPath;
+	}
+}
+
 static bool Sys_BuildWindowsProductSavePath( const char *root, idStr &savePath ) {
 	if ( root == NULL || root[0] == '\0' ) {
 		savePath.Clear();
@@ -582,8 +614,10 @@ static bool Sys_BuildWindowsProductSavePath( const char *root, idStr &savePath )
 		return false;
 	}
 	savePath.StripTrailing( '\\' );
+	const idStr productRoot = savePath;
 	savePath.AppendPath( "openPR06" );
 	savePath.SlashesToBackSlashes();
+	Sys_MigrateLegacyWindowsSavePath( productRoot, savePath );
 	return true;
 }
 

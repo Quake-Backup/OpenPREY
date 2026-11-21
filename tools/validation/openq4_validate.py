@@ -775,6 +775,7 @@ def run_python_tests(args: argparse.Namespace, root: Path, env: dict[str, str]) 
         root / "tools" / "tests" / "openpr06_rebase_contract.py",
         root / "tools" / "tests" / "openpr06_runtime_branding.py",
         root / "tools" / "tests" / "openpr06_tool_branding.py",
+        root / "tools" / "tests" / "openpr06_former_name_guard.py",
         root / "tools" / "tests" / "p0_governance_evidence.py",
         root / "tools" / "tests" / "packaging_safety.py",
         root / "tools" / "tests" / "parallel_job_system.py",

@@ -4720,6 +4720,7 @@ static bool FS_ModManifestKeyIsKnown( const idStr &key ) {
 		   !key.Icmp( "website" ) ||
 		   !key.Icmp( "author" ) ||
 		   !key.Icmp( "requiredopenPR06Version" ) ||
+		   !key.Icmp( "requiredopenPREYVersion" ) ||
 		   !key.Icmp( "requiredopenQ4Version" ) ||
 		   !key.Icmp( "campaign" );
 }
@@ -4907,8 +4908,13 @@ static bool FS_ParseModManifest( const char *jsonText, idModInfo &modInfo, idStr
 			} else if ( !key.Icmp( "requiredopenPR06Version" ) ) {
 				modInfo.requiredopenQ4Version = value;
 				sawRequiredopenPR06Version = true;
-			} else if ( !key.Icmp( "requiredopenQ4Version" ) ) {
+			} else if ( !key.Icmp( "requiredopenPREYVersion" ) ) {
+				// Written before the project was renamed to openPR06.
 				legacyRequiredVersion = value;
+			} else if ( !key.Icmp( "requiredopenQ4Version" ) ) {
+				if ( legacyRequiredVersion.IsEmpty() ) {
+					legacyRequiredVersion = value;
+				}
 			} else if ( !key.Icmp( "campaign" ) ) {
 				// Optional: the single-player campaign the mod plays over.
 				if ( value.Icmp( "awakening" ) && value.Icmp( "quake4" ) ) {
@@ -4976,8 +4982,8 @@ static bool FS_ParseModManifest( const char *jsonText, idModInfo &modInfo, idStr
 		errorOut = "missing required field 'author'";
 		return false;
 	}
-	// openPR06 is authoritative when both keys are present. The inherited key
-	// remains readable for migration of existing third-party manifests.
+	// openPR06 is authoritative when several keys are present. The openPREY and
+	// inherited openQ4 keys remain readable for existing third-party manifests.
 	if ( !sawRequiredopenPR06Version && !legacyRequiredVersion.IsEmpty() ) {
 		modInfo.requiredopenQ4Version = legacyRequiredVersion;
 	}

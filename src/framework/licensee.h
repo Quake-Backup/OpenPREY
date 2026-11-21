@@ -72,13 +72,16 @@
 #endif
 #define	CD_EXE							PROJECT_NAME "-client_" OPENQ4_BINARY_ARCH ".exe"
 
-// Read-only compatibility names for settings written before the openPR06 casing settled.
+// Read-only compatibility names for settings written before the project was
+// renamed from openPREY to openPR06, and before the openPREY casing settled.
 #ifdef _XENON
 #define CONFIG_FILE						"save:/openPR06Config.cfg"
+#define PREVIOUS_CONFIG_FILE			"save:/openPREYConfig.cfg"
 #define INTERIM_CONFIG_FILE				"save:/OpenPREYConfig.cfg"
 #define LEGACY_CONFIG_FILE				"save:/OpenPreyConfig.cfg"
 #else
 #define CONFIG_FILE						"openPR06Config.cfg"
+#define PREVIOUS_CONFIG_FILE			"openPREYConfig.cfg"
 #define INTERIM_CONFIG_FILE				"OpenPREYConfig.cfg"
 #define LEGACY_CONFIG_FILE				"OpenPreyConfig.cfg"
 #endif

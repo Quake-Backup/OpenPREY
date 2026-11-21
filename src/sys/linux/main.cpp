@@ -561,28 +561,33 @@ void Sys_AsyncThread( void ) {
  Sys_DefaultSavePath
  ==============
  */
+static void Sys_SetProductSavePath( const char *dataRoot ) {
+	savepath = dataRoot;
+	savepath.StripTrailing( '/' );
+	idStr legacyPath = savepath;
+#if defined( ID_DEMO_BUILD )
+	savepath += "/openpr06-demo";
+	legacyPath += "/openprey-demo";
+#else
+	savepath += "/openpr06";
+	legacyPath += "/openprey";
+#endif
+	Posix_MigrateLegacySavePath( legacyPath, savepath );
+}
+
 const char *Sys_DefaultSavePath(void) {
 	const char *xdgDataHome = getenv( "XDG_DATA_HOME" );
 	if ( xdgDataHome && xdgDataHome[0] == '/' ) {
-		savepath = xdgDataHome;
-		savepath.StripTrailing( '/' );
-#if defined( ID_DEMO_BUILD )
-		savepath += "/openpr06-demo";
-#else
-		savepath += "/openpr06";
-#endif
+		Sys_SetProductSavePath( xdgDataHome );
 		return savepath.c_str();
 	}
 
 	const char *home = getenv( "HOME" );
 	if ( home && home[0] ) {
-		savepath = home;
-		savepath.StripTrailing( '/' );
-#if defined( ID_DEMO_BUILD )
-		savepath += "/.local/share/openpr06-demo";
-#else
-		savepath += "/.local/share/openpr06";
-#endif
+		idStr dataRoot = home;
+		dataRoot.StripTrailing( '/' );
+		dataRoot += "/.local/share";
+		Sys_SetProductSavePath( dataRoot.c_str() );
 	} else {
 		savepath = Posix_Cwd();
 	}

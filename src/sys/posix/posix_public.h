@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 
 void		Posix_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr );
 const char*	Posix_Cwd( void );
+// Moves a save folder left under the project's former openPREY name to savePath
+// when savePath does not exist yet; on failure savePath becomes the old folder.
+void		Posix_MigrateLegacySavePath( const idStr &legacyPath, idStr &savePath );
 
 // called first thing. does InitSigs and various things
 void		Posix_EarlyInit( );

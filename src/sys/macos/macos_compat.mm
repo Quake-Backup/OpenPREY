@@ -774,11 +774,15 @@ const char *Sys_DefaultSavePath( void ) {
 		idStr candidate = home;
 		candidate.AppendPath( "Library" );
 		candidate.AppendPath( "Application Support" );
+		idStr legacyCandidate = candidate;
 #if defined( ID_DEMO_BUILD )
 		candidate.AppendPath( "openPR06 Demo" );
+		legacyCandidate.AppendPath( "openPREY Demo" );
 #else
 		candidate.AppendPath( "openPR06" );
+		legacyCandidate.AppendPath( "openPREY" );
 #endif
+		Posix_MigrateLegacySavePath( legacyCandidate, candidate );
 		if ( Sys_SetUsableMacOSSavePath( candidate, "Application Support" ) ) {
 			return savepath.c_str();
 		}

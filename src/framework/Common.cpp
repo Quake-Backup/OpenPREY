@@ -8632,7 +8632,9 @@ void idCommonLocal::InitGame( void ) {
 	// skip the config file if "safe" is on the command line
 	if ( !SafeMode() ) {
 		if ( !openPR06_ExecConfigFromSavePath( CONFIG_FILE ) ) {
-			if ( openPR06_ExecConfigFromSavePath( INTERIM_CONFIG_FILE ) ) {
+			if ( openPR06_ExecConfigFromSavePath( PREVIOUS_CONFIG_FILE ) ) {
+				legacyConfigNameToMigrate = PREVIOUS_CONFIG_FILE;
+			} else if ( openPR06_ExecConfigFromSavePath( INTERIM_CONFIG_FILE ) ) {
 				legacyConfigNameToMigrate = INTERIM_CONFIG_FILE;
 			} else if ( openPR06_ExecConfigFromSavePath( LEGACY_CONFIG_FILE ) ) {
 				legacyConfigNameToMigrate = LEGACY_CONFIG_FILE;

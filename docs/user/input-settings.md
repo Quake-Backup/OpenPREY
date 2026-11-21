@@ -30,7 +30,7 @@ The stock **Options -> Controls** menu has these tabs:
 
 To rebind an action, select its row and press the key, mouse button or controller button you want. Analog sticks are configured through the controller cvars instead of being rebound as buttons.
 
-The retained interface (`ui_retained 1`) has openQ4's own Settings pages, including controller tuning, prompt styles and menu-navigation options. It's inherited and hasn't been checked with PREY.
+The retained interface (`ui_retained 1`, the default) adds **Mouse** and **Controller** tabs to Options -> Controls: acceleration, always run, toggle crouch, stick dead zone, look and move curves, invert look, trigger press point, rumble, gyro, touchpad, button prompt style and swapped confirm and back. Bound keys show as keycap, mouse and controller glyphs, and controllers have default bindings (`basepr/openpr06_bindings.cfg`). PREY's stock menus (`ui_retained 0`) have only the binding pages.
 
 ## Where openPR06 Stores Input Settings
 

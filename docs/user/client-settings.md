@@ -7,14 +7,14 @@ This guide helps you find the most useful openPR06 settings without digging thro
 
 ## In-Game Menus
 
-openPR06 starts with PREY's own menus (`ui_retained 0`), with a few openPR06 additions:
+openPR06 draws PREY's menus with its retained interface (`ui_retained 1`, the default): the same screens and layout as PREY's own, as vectors that stay sharp at any resolution, with keyboard and controller navigation. `ui_retained 0` brings back PREY's stock menus, which have the same pages with a few openPR06 additions:
 
 - **Options -> Controls**: key bindings for movement, combat, weapons, look, other actions and multiplayer, plus control profiles.
 - **Options -> Game Options**: decals, HUD, weapon visibility, subtitles, profanity filter, crosshair, dynamic difficulty, and mouse settings.
 - **Options -> Video**: resolution, fullscreen, brightness, gamma, quality presets and advanced rendering options, plus openPR06's **Post FX** and **Advanced FX** tabs for MSAA, post anti-aliasing, SSAO, bloom, HDR tone mapping and the CRT filter.
 - **Options -> Audio**: volume, music, speakers, output device and EAX reverb.
 
-Everything else is a console setting. openQ4's `Settings` pages (System, Controls, Game Options with controller and HUD sections) belong to the retained interface, `ui_retained 1`, which is inherited and hasn't been checked with PREY.
+The retained interface's Options page holds more: Mouse and Controller tabs, and HUD, Accessibility and System tabs under Game Options. Everything else is a console setting.
 
 ## Recommended First Checks
 

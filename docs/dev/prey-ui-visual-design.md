@@ -2,8 +2,9 @@
 
 Specification version 1.28, 21 November 2026.
 
-Status: reference survey and design contract. openPR06 renders the stock Prey
-GUIs by default. A vector replacement of every front-end screen, the home
+Status: reference survey and design contract. openPR06 presents the retained
+interface by default (`ui_retained 1`, since 0.15.0); `ui_retained 0` renders
+the stock Prey GUIs. A vector replacement of every front-end screen, the home
 screen's navigation and frames, every page, the death screen, the system
 check, the loading screen, MultiPrey, the message boxes and the multiplayer
 cards, is built for the retained interface and presents while `ui_retained`
@@ -1696,8 +1697,10 @@ Any future vector or retained-UI replacement of the Prey front end must:
 
 ### 12.5 The retained navigation
 
-**Status: built, off by default.** `ui_retained 1` selects it; `ui_retained 0`
-(the default) presents the stock menu unchanged. It is the first replacement
+**Status: built, on by default since 0.15.0.** `ui_retained 1` (the default)
+selects it; `ui_retained 0` presents the stock menu unchanged. Configurations
+saved before 0.15.0 stored `ui_retained 0` and are moved to 1 once
+(`ui_retainedDefaultMigrated`) unless the command line sets `ui_retained`. It is the first replacement
 made to section 12.3, in the manner of openQ4's retained menus: documents for
 the retained interface ([document format](ui/document-format.md)), generated
 by a script from this specification and committed.

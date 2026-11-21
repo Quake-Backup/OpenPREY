@@ -417,6 +417,7 @@ public:
 	virtual idVec3			GetGamePortalDst( qhandle_t handle );
 	virtual bool			IsGamePortal( qhandle_t handle );
 	gamePortal_t *			GamePortalForHandle( qhandle_t handle ) const;
+	int						GamePortalModelPoint( const idDict &dict, const idMat3 &axis, idVec3 &point ) const;
 	void					FreeGamePortals( void );
 	bool					AreasAreConnected( int areaNum1, int areaNum2, portalConnection_t connection );
 	void					FloodConnectedAreas( portalArea_t *area, int portalAttributeIndex );

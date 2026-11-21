@@ -1420,6 +1420,53 @@ static void R_GamePortalWinding( const idVec3 &origin, const idMat3 &axis, idWin
 
 /*
 ==============
+idRenderWorldLocal::GamePortalModelPoint
+
+When an entity's origin is in solid, the centre of its inline (map-compiled)
+model, or else the first area that model's bounds touch. Retail sub_4d4a90
+tests the origin alone and drops the link: in game/lotaa the origin of
+func_skybox_portal_36 lies on the solid edge of its own surface, so that sky
+lost its link while func_skybox_portal_37, beside it, kept one. Only models
+this world loaded qualify, so nothing is loaded from here.
+==============
+*/
+int idRenderWorldLocal::GamePortalModelPoint( const idDict &dict, const idMat3 &axis, idVec3 &point ) const {
+	const char *modelName = dict.GetString( "model" );
+	if ( modelName[0] == '\0' ) {
+		return -1;
+	}
+	const idRenderModel *model = NULL;
+	for ( int i = 0 ; i < localModels.Num() ; i++ ) {
+		if ( localModels[i] != NULL && idStr::Icmp( localModels[i]->Name(), modelName ) == 0 ) {
+			model = localModels[i];
+			break;
+		}
+	}
+	if ( model == NULL ) {
+		return -1;
+	}
+	const idBounds localBounds = model->Bounds();
+	if ( localBounds.IsCleared() ) {
+		return -1;
+	}
+	const idVec3 origin = dict.GetVector( "origin" );
+	const idVec3 center = origin + axis * localBounds.GetCenter();
+	int area = PointInArea( center );
+	if ( area >= 0 ) {
+		point = center;
+		return area;
+	}
+	idBounds worldBounds;
+	worldBounds.FromTransformedBounds( localBounds, origin, axis );
+	if ( BoundsInAreas( worldBounds, &area, 1 ) < 1 ) {
+		return -1;
+	}
+	point = center;
+	return area;
+}
+
+/*
+==============
 idRenderWorldLocal::RegisterGamePortals
 
 Called by the game as each map loads, after the world and before its PVS is
@@ -1448,7 +1495,7 @@ void idRenderWorldLocal::RegisterGamePortals( idMapFile *mapFile ) {
 
 		idVec3 src = dict.GetVector( "origin" );
 		const idMat3 srcAxis = R_GamePortalAxis( dict );
-		const idVec3 dst = targetDict.GetVector( "origin" );
+		idVec3 dst = targetDict.GetVector( "origin" );
 		const idMat3 dstAxis = R_GamePortalAxis( targetDict );
 
 		// a portal pair links both ways and starts closed until it opens
@@ -1457,8 +1504,14 @@ void idRenderWorldLocal::RegisterGamePortals( idMapFile *mapFile ) {
 			src += srcAxis[2] * dict.GetFloat( "offset_portal" );
 		}
 
-		const int srcArea = PointInArea( src );
-		const int dstArea = PointInArea( dst );
+		int srcArea = PointInArea( src );
+		if ( srcArea < 0 ) {
+			srcArea = GamePortalModelPoint( dict, srcAxis, src );
+		}
+		int dstArea = PointInArea( dst );
+		if ( dstArea < 0 ) {
+			dstArea = GamePortalModelPoint( targetDict, dstAxis, dst );
+		}
 		if ( srcArea < 0 ) {
 			common->Warning( "Entity '%s' has bad portal source (%s)", dict.GetString( "name" ), src.ToString() );
 			continue;

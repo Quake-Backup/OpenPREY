@@ -1,6 +1,6 @@
 # Unreleased openPR06 changes
 
-openPR06 has no published release yet. [v0.0.1.md](v0.0.1.md) is the draft for the first release and describes the rebase onto the openQ4 engine as of August 2026. This file collects what changed after that draft, for curation when the first release is cut. It promises no version or date. The nightly builds on the Releases page date from April 2026, before the rebase, and contain none of this.
+openPR06 has no published release yet. [v0.0.1.md](v0.0.1.md) is the draft for the first release and describes the rebase onto the openQ4 engine as of August 2026. This file collects what changed after that draft, for curation when the first release is cut. It promises no version or date. These entries are being curated as [0.15.0, the First Contact Edition](v0.15.0.md). The nightly builds on the Releases page date from April 2026, before the rebase, and contain none of this.
 
 Engine changes merged from openQ4 are listed in openQ4's own release notes. They are inherited, not yet checked against PREY, until the [rebase status ledger](../prey-rebase/status-ledger.md) records evidence for them.
 

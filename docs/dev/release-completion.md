@@ -2,6 +2,27 @@
 
 Use this file as the source list for release changelog entries.
 
+**Candidate release, 21 November 2026:** the first real release is being
+curated as **0.15.0, the First Contact Edition**, numbered alongside openQ4
+0.15.0, whose engine it ships. The player-facing draft is
+[releases/v0.15.0.md](releases/v0.15.0.md); it draws on
+[releases/unreleased.md](releases/unreleased.md) and supersedes the
+[0.0.1 draft](releases/v0.0.1.md). Keep it in step with any entry added
+before the release is cut. Nothing is published yet. Before cutting it:
+
+- openPR06 has no release workflow yet (see Carry Forward): the publication
+  lane must be rebuilt, and must package exactly the Windows x64 and Linux x64
+  archives the notes name.
+- Pass the version explicitly (`openq4_release_version.py --version-override
+  0.15.0`). The automatic bump gives `0.15.000`.
+- A local clone that fetched the `openq4-upstream` remote carries openQ4's
+  release tags (`v0.13.0` to `v0.14.1`), and the release tooling then takes
+  `v0.14.1` as the previous openPR06 release. `origin` has no such tags, so a
+  CI checkout is unaffected; check before running the tooling locally.
+- [LICENSING.md](../../LICENSING.md) leaves the distribution of the linked
+  GPL engine and SDK-EULA game module as an open question; settle it before
+  publishing binaries.
+
 Process:
 1. Add completed work under "Ready For Changelog".
 2. When cutting a release, move shipped items into release notes.

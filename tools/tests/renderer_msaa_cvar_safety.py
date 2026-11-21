@@ -204,7 +204,7 @@ def test_postaa_settings_surface_exposes_all_modes():
     )
     assert_true('values\t\t"0;1;2;3;4"' in system_gui, "Prey System menu Post AA choice should expose all modes")
     for language in ("english", "french", "italian", "spanish"):
-        lang_file = read_repo_file(Path("content") / "basepr" / "pak0" / "strings" / f"{language}_openprey.lang")
+        lang_file = read_repo_file(Path("content") / "basepr" / "pak0" / "strings" / f"{language}_openpr06.lang")
         line = next((candidate for candidate in lang_file.splitlines() if '"#str_122024"' in candidate), "")
         assert_true(line.count(";") == 4, f"{language} Post AA choices should list five labels")
 

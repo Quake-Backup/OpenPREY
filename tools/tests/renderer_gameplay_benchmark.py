@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run opt-in openPREY renderer gameplay benchmark and capture cases.
+"""Run opt-in openPR06 renderer gameplay benchmark and capture cases.
 
 Unlike renderer_validation_matrix.py, this runner enters maps. It is intended
 for local, target-hardware validation where stock Prey (2006) assets are available.
@@ -65,7 +65,7 @@ POSTINIT_CONNECT_WAIT_FRAMES = 30
 POSTINIT_RECONNECT_WAIT_FRAMES = 30
 MP_SERVER_CLIENT_GRACE_MSEC = 90000
 REPORT_SCHEMA_VERSION = 5
-GIT_PROVENANCE_POLICY = "current-openprey-head-and-dirty-state-v1"
+GIT_PROVENANCE_POLICY = "current-openpr06-head-and-dirty-state-v1"
 BUDGET_DISPLAY_CONTRACT_ID = "bordered-window-1280x720-v1"
 BUDGET_WIDTH = 1280
 BUDGET_HEIGHT = 720
@@ -133,7 +133,7 @@ BENCHMARK_EVIDENCE_MARKERS = (
     "MODE:",
     "Map:",
     "OPENQ4_BENCHMARK_VIEW_",
-    "openPREY map state:",
+    "openPR06 map state:",
     "origin:",
 )
 VIEW_BEGIN = "OPENQ4_BENCHMARK_VIEW_BEGIN"
@@ -145,7 +145,7 @@ EXEC_COMMANDS_END = "// OPENQ4_BENCHMARK_EXEC_COMMANDS_V1_END"
 # Each role already owns an isolated save path. Keep the engine-side log name
 # deliberately short so the complete fs_savepath/basepr/logs path remains
 # below the legacy Windows MAX_PATH boundary even for descriptive MP case IDs.
-ROLE_LOG_NAME = "openprey_gameplay.log"
+ROLE_LOG_NAME = "openpr06_gameplay.log"
 RUNTIME_DISPLAY_MODE_PATTERN = re.compile(
     r"^MODE:\s*([^,\r\n]+),\s*(\d+)\s+x\s+(\d+)\s+"
     r"(windowed|borderless|fullscreen)\b",
@@ -644,7 +644,7 @@ def host_arch() -> str:
 
 def find_client_executable(runtime_dir: Path) -> Path:
     suffix = ".exe" if os.name == "nt" else ""
-    candidate_prefixes = ("openPREY-client",)
+    candidate_prefixes = ("openPR06-client",)
     for prefix in candidate_prefixes:
         preferred = runtime_dir / f"{prefix}_{host_arch()}{suffix}"
         if preferred.exists():
@@ -664,7 +664,7 @@ def find_client_executable(runtime_dir: Path) -> Path:
     for candidate in candidates:
         if candidate.is_file():
             return candidate
-    raise FileNotFoundError(f"openPREY client executable not found under {runtime_dir}")
+    raise FileNotFoundError(f"openPR06 client executable not found under {runtime_dir}")
 
 
 def is_link_or_junction(path: Path) -> bool:
@@ -814,7 +814,7 @@ def compare_file_records(
 
 
 def default_basepath() -> str:
-    for name in ("OPENPREY_PREY_PATH", "OPENPREY_PREY_ROOT"):
+    for name in ("OPENPR06_PREY_PATH", "OPENPR06_PREY_ROOT"):
         configured = os.environ.get(name, "").strip()
         if configured:
             return configured
@@ -1477,7 +1477,7 @@ def write_postinit_reconnect_cfg(
 ) -> str:
     """Reconnect from active MP play, then queue capture for the second map.
 
-    openPREY has no post-map-load autoexec cvar, so the capture is queued the same
+    openPR06 has no post-map-load autoexec cvar, so the capture is queued the same
     way append_post_map_autoexec() does it: an optional waitMsec, then exec_savepath.
     """
     cfg_rel = "renderer-bench/postinit_reconnect.cfg"
@@ -3494,7 +3494,7 @@ def evaluate_scene_view_evidence(
     failures: list[str] = []
     observations: list[dict[str, Any]] = []
     state_pattern = re.compile(
-        r"openPREY map state: map=(\S*) entityFilter=(\S*) "
+        r"openPR06 map state: map=(\S*) entityFilter=(\S*) "
         r"expectedMap=(\S*) expectedEntityFilter=(\S*)"
     )
     pose_pattern = re.compile(r"origin: \(([^()]+)\) angles: \(([^()]+)\)")
@@ -3829,7 +3829,7 @@ def run_sp_spec(
     savepath = output_dir / "savepaths" / spec.id
     savepath.mkdir(parents=True, exist_ok=True)
     exec_commands = spec.exec_commands + args.exec_commands
-    log_name = "openprey_gameplay_sp.log"
+    log_name = "openpr06_gameplay_sp.log"
     log_path = find_log(savepath, log_name)
     if log_path is not None:
         log_path.unlink()
@@ -5322,7 +5322,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--tiers", default="", help="Comma-separated r_glTier values. Overrides profile tiers.")
     parser.add_argument("--maxfps", default="", help="Comma-separated com_maxfps values. Overrides profile values.")
     parser.add_argument("--swap-intervals", default="", help="Comma-separated r_swapInterval values. Overrides profile values.")
-    parser.add_argument("--display-modes", default="", help="Display mode. openPREY agent validation is windowed-only.")
+    parser.add_argument("--display-modes", default="", help="Display mode. openPR06 agent validation is windowed-only.")
     parser.add_argument("--width", type=int, default=BUDGET_WIDTH, help=f"Drawable width. Budget evidence requires {BUDGET_WIDTH}.")
     parser.add_argument("--height", type=int, default=BUDGET_HEIGHT, help=f"Drawable height. Budget evidence requires {BUDGET_HEIGHT}.")
     parser.add_argument("--shadow-presets", default="", help="Comma-separated shadow presets. Use --list to inspect values.")
@@ -5338,7 +5338,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--max-p99-ms", type=float, default=0.0, help="Fail when the parsed frame-pacing P99 exceeds this millisecond budget. Use 0 to disable.")
     parser.add_argument("--max-frame-ms", type=float, default=0.0, help="Fail when any sampled frame exceeds this millisecond budget. Use 0 to disable; the engine reports maxima to 0.01 ms.")
     parser.add_argument("--set-cvar", action="append", default=[], metavar="NAME=VALUE", help="Extra post-map cvar written into the generated benchmark cfg. Repeat for A/B diagnostics without extending the launch command line.")
-    parser.add_argument("--set-launch-cvar", action="append", default=[], metavar="NAME=VALUE", help="Extra cvar applied on the openPREY launch command line before the map loads. Use for load-time renderer knobs such as vertex/index buffer caching.")
+    parser.add_argument("--set-launch-cvar", action="append", default=[], metavar="NAME=VALUE", help="Extra cvar applied on the openPR06 launch command line before the map loads. Use for load-time renderer knobs such as vertex/index buffer caching.")
     parser.add_argument("--exec-command", action="append", default=[], metavar="COMMAND", help="Extra post-map console command written into the generated benchmark cfg. Repeat for targeted diagnostics such as flashlight impulses.")
     parser.add_argument("--autoexec-delay-ms", type=int, default=1000, help="Delay after active map draw before executing the generated benchmark cfg.")
     parser.add_argument("--settle-frames", type=int, default=360, help="Frames to wait after map/connect before sampling.")
@@ -5348,7 +5348,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--basepath", default=default_basepath(), help="Prey (2006) install/base path. Omit or set empty to use engine discovery.")
     parser.add_argument("--runtime-dir", default="", help="Staged runtime package. Defaults to .install; alternates must be named ordinary directories below .tmp/stock-runtime/.")
     parser.add_argument("--budget-contract", default=str(DEFAULT_CONTRACT_PATH), help="Versioned per-map CPU/GPU budget JSON. Its stable id and SHA-256 are bound into the report.")
-    parser.add_argument("--verify-report", default="", help="Replay-verify a prior real benchmark report, runtime, artifacts, timing marker, and budget contract without launching openPREY.")
+    parser.add_argument("--verify-report", default="", help="Replay-verify a prior real benchmark report, runtime, artifacts, timing marker, and budget contract without launching openPR06.")
     parser.add_argument("--output-dir", default="", help="Report/output directory. Defaults to <repo>/.tmp/renderer-gameplay/<timestamp>.")
     parser.add_argument("--reference-dir", default="", help="Optional TGA reference screenshot root for deterministic image comparison.")
     parser.add_argument("--require-references", action="store_true", help="Fail captures when --reference-dir has no matching reference image.")
@@ -5361,7 +5361,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--mp-client-delay", type=int, default=12, help="Seconds to wait before launching the MP loopback client.")
     parser.add_argument("--mp-client-delay-frames", type=int, default=480, help="Extra server frames before server-side capture in MP runs.")
     parser.add_argument("--limit", type=int, default=0, help="Limit generated specs, useful for bounded local smoke runs.")
-    parser.add_argument("--dry-run", action="store_true", help="Write the planned command lines without launching openPREY.")
+    parser.add_argument("--dry-run", action="store_true", help="Write the planned command lines without launching openPR06.")
     parser.add_argument("--list", action="store_true", help="List profiles, cases, and shadow presets without running.")
     parsed = parser.parse_args(argv)
     if not math.isfinite(parsed.max_frame_ms) or parsed.max_frame_ms < 0:

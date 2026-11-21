@@ -1,8 +1,8 @@
-# Contributing to openPREY
+# Contributing to openPR06
 
-Thank you for your interest in helping openPREY run PREY (2006) on modern systems with its own engine and game module. Bug reports, compatibility reports, testing feedback, documentation fixes and code are all welcome.
+Thank you for your interest in helping openPR06 run PREY (2006) on modern systems with its own engine and game module. Bug reports, compatibility reports, testing feedback, documentation fixes and code are all welcome.
 
-openPREY has no release yet. To play or test it you build it from source; see [Getting Started](../docs/user/getting-started.md) and [BUILDING.md](../BUILDING.md). The April 2026 nightlies on the Releases page predate the move onto the current openQ4 engine, so please don't report bugs against them.
+openPR06 has no release yet. To play or test it you build it from source; see [Getting Started](../docs/user/getting-started.md) and [BUILDING.md](../BUILDING.md). The April 2026 nightlies on the Releases page predate the move onto the current openQ4 engine, so please don't report bugs against them.
 
 ---
 
@@ -36,7 +36,7 @@ This project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By partic
 
 ### Reporting Bugs
 
-Before opening a new issue, please search [existing issues](https://github.com/themuffinator/openPREY/issues) to avoid duplicates.
+Before opening a new issue, please search [existing issues](https://github.com/themuffinator/openPR06/issues) to avoid duplicates.
 
 When filing a bug report, include as much of the following as possible:
 
@@ -45,14 +45,14 @@ When filing a bug report, include as much of the following as possible:
 - How your PREY (2006) install is laid out: original discs or another source, the install path, and whether `base/` holds the numbered `pak000.pk4`–`pak004.pk4` packs or the consolidated `pak_*.pk4` set.
 - Clear steps to reproduce the problem, the map, and whether it happens in single-player, multiplayer or on a dedicated server.
 - The expected behavior and what actually happened.
-- A log. Launch with `+set logFile 2 +set logFileName logs/openprey.log`, reproduce the problem, and attach `logs/openprey.log` from the `basepr/` folder in your save path (`%LOCALAPPDATA%\openPREY` on Windows, `~/.local/share/openprey` on Linux).
+- A log. Launch with `+set logFile 2 +set logFileName logs/openpr06.log`, reproduce the problem, and attach `logs/openpr06.log` from the `basepr/` folder in your save path (`%LOCALAPPDATA%\openPR06` on Windows, `~/.local/share/openpr06` on Linux).
 - For crashes on Windows, the crash log and minidump from the `crashes/` folder beside the executable.
 
 Windows x64 and Linux x64 are the supported platforms. macOS and ARM64 aren't supported yet; reports from those builds are welcome, but say clearly how you built them.
 
 ### Reporting Compatibility Issues
 
-openPREY targets the official PREY (2006) retail assets and ships its own engine and game module. It can't load mods built for the proprietary retail game DLLs. When reporting a compatibility problem:
+openPR06 targets the official PREY (2006) retail assets and ships its own engine and game module. It can't load mods built for the proprietary retail game DLLs. When reporting a compatibility problem:
 
 - Confirm the issue reproduces with the unmodified retail `base/` packs, not only with custom content or mods.
 - Note whether it's specific to single-player, multiplayer, a dedicated server or a particular map.
@@ -66,7 +66,7 @@ Feature suggestions are best opened as issues with the `[Request]` or `[Enhancem
 - Describe how it relates to stock-asset compatibility or the project goals in [AGENTS.md](../AGENTS.md).
 - Mention any prior art from PREY, its SDK, Doom 3 or other idTech 4 projects.
 
-openPREY values compatibility with the shipped PREY assets. Proposals that would break stock-map behavior or split the player base need extra justification.
+openPR06 values compatibility with the shipped PREY assets. Proposals that would break stock-map behavior or split the player base need extra justification.
 
 ### Contributing Code
 
@@ -79,7 +79,7 @@ openPREY values compatibility with the shipped PREY assets. Proposals that would
 
 ## Development Workflow
 
-[AGENTS.md](../AGENTS.md) holds the project rules: the licence boundary, the `basepr/` layout, the unified game module, install discovery and the debug loop. The [rebase plan](../docs/dev/prey-rebase/plan.md) explains how openPREY sits on the openQ4 engine, and the [status ledger](../docs/dev/prey-rebase/status-ledger.md) records what has been ported, how it was tested and what is deferred. Relate your work to those records and update them when it changes what they say.
+[AGENTS.md](../AGENTS.md) holds the project rules: the licence boundary, the `basepr/` layout, the unified game module, install discovery and the debug loop. The [rebase plan](../docs/dev/prey-rebase/plan.md) explains how openPR06 sits on the openQ4 engine, and the [status ledger](../docs/dev/prey-rebase/status-ledger.md) records what has been ported, how it was tested and what is deferred. Relate your work to those records and update them when it changes what they say.
 
 ### Prerequisites
 
@@ -119,12 +119,12 @@ In VS Code, the tasks in `.vscode/tasks.json` configure, build and stage the sam
 
 ### Engine Changes from openQ4
 
-openPREY takes engine work from openQ4 by merging `openq4-upstream/main`. When you merge:
+openPR06 takes engine work from openQ4 by merging `openq4-upstream/main`. When you merge:
 
-- Keep the PREY game trees, `content/basepr/` and openPREY naming on the openPREY side.
+- Keep the PREY game trees, `content/basepr/` and openPR06 naming on the openPR06 side.
 - Never import Quake 4 game code (`src/mpgame/`, Quake 4's `src/game/`) or `content/baseoq4/`.
-- PREY's game API is v7 (`src/game/Game.h`). Where new engine code calls Quake 4-only `idGame` methods, adapt it to v7 or gate it with the `OPENPREY-GATED(Dn)` markers described in the [rebase plan](../docs/dev/prey-rebase/plan.md).
-- Upstream merges also bring openQ4's Quake 4-specific documentation. Adapt or drop it rather than letting it describe Quake 4 as if it were openPREY.
+- PREY's game API is v7 (`src/game/Game.h`). Where new engine code calls Quake 4-only `idGame` methods, adapt it to v7 or gate it with the `OPENPR06-GATED(Dn)` markers described in the [rebase plan](../docs/dev/prey-rebase/plan.md).
+- Upstream merges also bring openQ4's Quake 4-specific documentation. Adapt or drop it rather than letting it describe Quake 4 as if it were openPR06.
 
 ### Before Submitting a Pull Request
 
@@ -133,7 +133,7 @@ openPREY takes engine work from openQ4 by merging `openq4-upstream/main`. When y
 - Check the log for new warnings or errors.
 - Run the source contracts that CI runs:
   ```bash
-  python tools/tests/openprey_rebase_contract.py
+  python tools/tests/openpr06_rebase_contract.py
   python tools/tests/linux_sanitizer_source_contract.py
   ```
 - Update documentation if your change affects player-facing behavior, build steps or technical assumptions.
@@ -156,7 +156,7 @@ openPREY takes engine work from openQ4 by merging `openq4-upstream/main`. When y
 
 ## Licensing and Attribution
 
-- openPREY engine code is licensed under the [GNU General Public License v3.0](../LICENSE).
+- openPR06 engine code is licensed under the [GNU General Public License v3.0](../LICENSE).
 - Game code in `src/game/`, `src/Prey/` and `src/preyengine/` is derived from the PREY SDK and remains under Human Head Studios' [SDK EULA](../LICENSES/PREY-SDK-EULA.rtf).
 - Never move engine code into the game trees or game code into the engine directories, and never relicense either side. Preserve original notices.
 - PREY's game assets remain the property of their rights holders and are not included.
@@ -168,7 +168,7 @@ Contributions follow the licence of the component they modify. See [LICENSING.md
 ## Getting Help
 
 - [Discord](https://discord.gg/T32mFejwR4): the best place for informal questions and community discussion.
-- [Issue tracker](https://github.com/themuffinator/openPREY/issues): bug reports, feature requests and structured technical discussion.
+- [Issue tracker](https://github.com/themuffinator/openPR06/issues): bug reports, feature requests and structured technical discussion.
 - [Website](https://www.darkmatter-quake.com): DarkMatter project news.
 
 Thank you for helping keep PREY playable on modern systems.

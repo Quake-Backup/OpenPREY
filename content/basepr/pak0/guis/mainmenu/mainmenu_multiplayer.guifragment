@@ -191,7 +191,7 @@
 				}
 
 				windowDef Multiplayer_Settings_PlayerModelBG {
-					rect		10, 105, 550, 230	// OPENPREY: 30 u up, with the Game Key row gone
+					rect		10, 105, 550, 230	// OPENPR06: 30 u up, with the Game Key row gone
 
 					windowDef Multiplayer_Settings_PlayerModelCaption {
 						rect		10, 18, 150, 16
@@ -785,7 +785,7 @@
 						}
 					}
 
-					// OPENPREY: openPREY has no Game Key check (the engine's key state is
+					// OPENPR06: openPR06 has no Game Key check (the engine's key state is
 					// always N/A) and no SetCDKey prompt, so Game Key Status is hidden and
 					// the rows below it move up a row.
 					buttonDef Multiplayer_Settings_CDKey {
@@ -1059,7 +1059,7 @@
 									}
 									choiceDef MCS_ServerTypeEdit {
 										rect		80, 0, 115, 24
-										cvar		"net_menulanserver"	// OPENPREY: was gui "server_type", which nothing read
+										cvar		"net_menulanserver"	// OPENPR06: was gui "server_type", which nothing read
 										choices		"#str_20148"
 										choiceType	0
 										textscale	0.33
@@ -1311,7 +1311,7 @@
 									choiceDef MCS_DedicatedEdit {
 										rect		80, 0, 115, 24
 										choices		"#str_20152"
-										cvar		"net_serverMenuDedicated"	// OPENPREY: was gui "dedicated", which nothing read
+										cvar		"net_serverMenuDedicated"	// OPENPR06: was gui "dedicated", which nothing read
 										choiceType	0
 										textalign	2
 										textscale	0.33

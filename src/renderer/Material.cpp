@@ -4667,7 +4667,7 @@ bool idMaterial::Parse( const char *text, const int textLength ) {
 		}
 	}
 
-	// OPENPREY
+	// OPENPR06
 	hasInteractionProgramStage = false;
 	for ( i = 0 ; i < numStages ; i++ ) {
 		if ( stages[i].lighting == SL_INTERACTION ) {
@@ -5614,7 +5614,7 @@ bool idMaterial::HasActiveCustomGLSLLighting( const float *registers ) const {
 ===================
 idMaterial::HasActiveInteractionProgramStage
 
-OPENPREY: Prey's shaderLevelN stages put per-light ARB programs on characters
+OPENPR06: Prey's shaderLevelN stages put per-light ARB programs on characters
 and some walls. The flag keeps the common material at one test.
 ===================
 */
@@ -5896,7 +5896,7 @@ static bool R_MaterialConstantRegistersSelfTest( void ) {
 		"rgb sound", "rgb glslPrograms",
 		"rgb 0.5 + 0.25 * ( time > 2 )", "alphaTest 0.25 + parm3", "if ( global2 )",
 		"colored",
-		// OPENPREY: Prey's thirteenth parm and its alias, the view registers the
+		// OPENPR06: Prey's thirteenth parm and its alias, the view registers the
 		// game sets per view, their stage keywords, and fragmentPrograms, which
 		// is a register here and a parse-time literal upstream
 		"rgb parm12", "rgb distance",

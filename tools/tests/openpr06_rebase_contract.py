@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static contracts for high-risk openPREY rebase decisions."""
+"""Static contracts for high-risk openPR06 rebase decisions."""
 
 from __future__ import annotations
 
@@ -141,13 +141,13 @@ def main() -> None:
     require(
         gui_path,
         gui,
-        "OPENPREY_GUI_SAVE_MAGIC",
-        "OPENPREY_GUI_SAVE_VERSION",
+        "OPENPR06_GUI_SAVE_MAGIC",
+        "OPENPR06_GUI_SAVE_VERSION",
         '"GUI save magic"',
         '"GUI save version"',
         "unsupported GUI stream marker",
     )
-    if gui.index("UI_WriteSaveGameInt( savefile, OPENPREY_GUI_SAVE_MAGIC") > gui.index("const int num = state.GetNumKeyVals()"):
+    if gui.index("UI_WriteSaveGameInt( savefile, OPENPR06_GUI_SAVE_MAGIC") > gui.index("const int num = state.GetNumKeyVals()"):
         raise SystemExit(f"{gui_path}: GUI marker must precede the serialized GUI payload")
 
     lwo_path = "src/renderer/Model_lwo.cpp"
@@ -178,14 +178,14 @@ def main() -> None:
             "OpenPrey_",
         )
 
-    require("meson.build", source("meson.build"), "'openprey_bse'")
+    require("meson.build", source("meson.build"), "'openpr06_bse'")
     require(
         "src/bse/BSE_API.h",
         source("src/bse/BSE_API.h"),
-        "openPREY_GetIntegratedBSEManager",
-        "openPREY_GetIntegratedBSEDeclEffectEdit",
-        "openPREY_AllocIntegratedBSEDeclEffect",
-        "openPREY_IsIntegratedBSEDeclEffect",
+        "openPR06_GetIntegratedBSEManager",
+        "openPR06_GetIntegratedBSEDeclEffectEdit",
+        "openPR06_AllocIntegratedBSEDeclEffect",
+        "openPR06_IsIntegratedBSEDeclEffect",
     )
 
     session_path = "src/framework/Session.cpp"
@@ -207,7 +207,7 @@ def main() -> None:
         '"exec_savepath"',
         "append_post_map_autoexec",
         '"profileLaunchCvars"',
-        'log_name = "openprey_gameplay_sp.log"',
+        'log_name = "openpr06_gameplay_sp.log"',
         '"caseId": spec.case_id',
         "spec.case_id",
         "--require-references",
@@ -222,7 +222,7 @@ def main() -> None:
     )
 
     for language in ("english", "french", "italian", "spanish"):
-        strings_path = f"content/basepr/pak0/strings/{language}_openprey.lang"
+        strings_path = f"content/basepr/pak0/strings/{language}_openpr06.lang"
         require(
             strings_path,
             source(strings_path),
@@ -230,7 +230,7 @@ def main() -> None:
         )
 
     validate_catalog_coverage()
-    print("openPREY rebase contract checks passed")
+    print("openPR06 rebase contract checks passed")
 
 
 if __name__ == "__main__":

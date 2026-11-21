@@ -1,4 +1,4 @@
-# openPREY platform and architecture roadmap
+# openPR06 platform and architecture roadmap
 
 This document records the current platform policy for the Prey (2006)-focused rebase.
 It is a roadmap, not a release-support claim.
@@ -25,33 +25,33 @@ It is a roadmap, not a release-support claim.
 | Windows/Linux ARM64 | Inherited build support exists | Prey runtime evidence pending | Gated |
 | macOS arm64/x64/universal2 | Inherited backend/tooling support exists | Prey runtime and package evidence pending | Experimental and gated |
 
-The active workflow is `.github/workflows/openprey-validation.yml`. It validates
+The active workflow is `.github/workflows/openpr06-validation.yml`. It validates
 deterministic `pak0.pk4`/`pak1.pk4` inputs, one staged `game_<arch>` module,
-`basepr/`, and openPREY desktop/icon payloads on the enabled x64 lanes.
+`basepr/`, and openPR06 desktop/icon payloads on the enabled x64 lanes.
 
 Inherited OpenQ4 ARM64, macOS, Universal2, signing, and manual-release workflows are
 retained only as manual static-test/reference fixtures. Every job is unconditionally
 false-gated because it asserts upstream OpenQ4's split `game-sp`/`game-mp` modules
 and package contracts. Those gates must not be removed until the lanes are rebuilt around the
-openPREY contract and backed by runtime evidence.
+openPR06 contract and backed by runtime evidence.
 
 ## Linux and Steam Deck
 
 SDL3 may use Wayland or X11 according to the available host. Preferred project
-environment variables use the `OPENPREY_*` prefix:
+environment variables use the `OPENPR06_*` prefix:
 
-- `OPENPREY_FORCE_X11=1`
-- `OPENPREY_WAYLAND_DISABLE_LIBDECOR=1`
-- `OPENPREY_WAYLAND_PREFER_LIBDECOR=1`
-- `OPENPREY_WAYLAND_SYNC_WINDOW_OPS=1`
-- `OPENPREY_STEAMDECK=1`
+- `OPENPR06_FORCE_X11=1`
+- `OPENPR06_WAYLAND_DISABLE_LIBDECOR=1`
+- `OPENPR06_WAYLAND_PREFER_LIBDECOR=1`
+- `OPENPR06_WAYLAND_SYNC_WINDOW_OPS=1`
+- `OPENPR06_STEAMDECK=1`
 
 Legacy `OPENQ4_*` names remain temporary migration aliases only. The staged
-`openPREY-steamdeck` launcher always forces windowed mode.
+`openPR06-steamdeck` launcher always forces windowed mode.
 
 ## macOS boundary
 
-macOS code and packaging helpers are retained from upstream, but openPREY currently
+macOS code and packaging helpers are retained from upstream, but openPR06 currently
 makes no signed-package or first-class runtime claim. One unified game module must be
 used by any future app bundle. OpenGL is the first compatibility target; Vulkan through
 MoltenVK and other backend parity remain explicit validation TODOs.
@@ -59,12 +59,12 @@ MoltenVK and other backend parity remain explicit validation TODOs.
 The inherited upstream policies,
 [`docs/dev/macos-support-matrix-policy.md`](macos-support-matrix-policy.md) and
 [`docs/dev/macos-renderer-backend-policy.md`](macos-renderer-backend-policy.md),
-still describe openQ4's macOS preview and are the starting point if openPREY ever
+still describe openQ4's macOS preview and are the starting point if openPR06 ever
 ungates macOS. In upstream terms: packages are `arm64 only`, signed off on the
 `macOS 11` floor and the latest public macOS release; Intel Mac, universal2 and
 Rosetta are not release targets; the two package variants are OpenGL and a
 Metal bridge, which is not a native Metal renderer; and the legacy native backend is
-comparison-only and not a supported release backend. None of this is an openPREY
+comparison-only and not a supported release backend. None of this is an openPR06
 claim until the macOS lanes are rebuilt and backed by PREY runtime evidence.
 
 ## Validation requirements

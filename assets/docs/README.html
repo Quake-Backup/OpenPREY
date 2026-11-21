@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
-  <title>openPREY - Project Overview</title>
+  <title>openPR06 - Project Overview</title>
   <!--
     Project overview, viewed from the repository. It shares the release package home's styling
     (assets/release/README.html), which follows docs/dev/prey-ui-visual-design.md.
   -->
   <style>
 /* Prey's display and body faces, written to assets/docs/fonts/ by tools/assets/fonts/embed_atlas_fonts.py. */
-@font-face{font-family:"openPREY Menu";src:url("fonts/openprey-menu.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"openPR06 Menu";src:url("fonts/openpr06-menu.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:"Talon UI Condensed";src:url("fonts/talon-ui-condensed.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
   </style>
   <style>
@@ -33,7 +33,7 @@
       --arc: #9AB1CA;                 /* prey.arc bars */
       --portal-body: #2F64DC;         /* prey.portal.body */
       --portal-core: #A4F9FE;         /* prey.portal.core */
-      --f-display: "openPREY Menu", "Eurostile Extended", "Microgramma", "Bahnschrift", sans-serif;
+      --f-display: "openPR06 Menu", "Eurostile Extended", "Microgramma", "Bahnschrift", sans-serif;
       --f-body: "Talon UI Condensed", "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
       --f-prose: "Bahnschrift", "Saira Condensed", "Roboto Condensed", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
       --f-mono: "Cascadia Code", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
@@ -581,7 +581,7 @@
 
     <div class="masthead">
       <figure class="picture">
-        <img src="img/banner.png" alt="openPREY: the Sphere and the spirit hawk behind the openPREY wordmark" width="1280" height="320">
+        <img src="img/banner.png" alt="openPR06: the Sphere and the spirit hawk behind the openPR06 wordmark" width="1280" height="320">
       </figure>
       <h1 class="tagline">The Modern Way to Play Prey</h1>
       <p class="lede">An open-source engine and game-code replacement that runs the original 2006 game on today's Windows and Linux PCs, with modern display handling, a choice of OpenGL or Vulkan rendering and one game module for single-player and multiplayer.</p>
@@ -601,9 +601,9 @@
   <main class="shell">
     <section class="frame" id="overview">
       <h2>Overview</h2>
-      <p>openPREY replaces Prey's engine and game binaries with its own: a GPL engine built on <a href="https://github.com/themuffinator/openQ4">openQ4</a> and a source-available game module built from the Prey SDK. The original campaign and multiplayer maps load from your retail game files.</p>
-      <p class="note">openPREY does not include any Prey game data. You need your own copy of Prey (2006), from the original discs or another legitimate source.</p>
-      <p class="note">openPREY is in early development. Representative campaign maps, save and load, and a two-client multiplayer session have been played on it, but full campaign completion and multiplayer parity are not claimed yet. See the <a href="../../TECHNICAL.md">technical reference</a> for the compatibility status.</p>
+      <p>openPR06 replaces Prey's engine and game binaries with its own: a GPL engine built on <a href="https://github.com/themuffinator/openQ4">openQ4</a> and a source-available game module built from the Prey SDK. The original campaign and multiplayer maps load from your retail game files.</p>
+      <p class="note">openPR06 does not include any Prey game data. You need your own copy of Prey (2006), from the original discs or another legitimate source.</p>
+      <p class="note">openPR06 is in early development. Representative campaign maps, save and load, and a two-client multiplayer session have been played on it, but full campaign completion and multiplayer parity are not claimed yet. See the <a href="../../TECHNICAL.md">technical reference</a> for the compatibility status.</p>
     </section>
 
     <section class="frame" id="highlights">
@@ -639,23 +639,23 @@
     <section class="frame" id="getting-started">
       <h2>Getting Started</h2>
       <ol>
-        <li><strong>Install Prey (2006).</strong> Leave it where it is; openPREY keeps to its own folder.</li>
-        <li><strong>Get openPREY.</strong> Build and stage it with the <a href="../../BUILDING.md">build guide</a>, or unpack a package from the <a href="https://github.com/themuffinator/openPREY/releases">releases page</a> once one is published.</li>
-        <li><strong>Keep folders distinct.</strong> Prefer separate Prey and openPREY folders. Never copy retail <code>.pk4</code> files into <code>basepr/</code>.</li>
-        <li><strong>Launch the client.</strong> Run <code>openPREY-client_x64</code> (<code>.exe</code> on Windows). openPREY finds your Prey install on its own.</li>
+        <li><strong>Install Prey (2006).</strong> Leave it where it is; openPR06 keeps to its own folder.</li>
+        <li><strong>Get openPR06.</strong> Build and stage it with the <a href="../../BUILDING.md">build guide</a>, or unpack a package from the <a href="https://github.com/themuffinator/openPR06/releases">releases page</a> once one is published.</li>
+        <li><strong>Keep folders distinct.</strong> Prefer separate Prey and openPR06 folders. Never copy retail <code>.pk4</code> files into <code>basepr/</code>.</li>
+        <li><strong>Launch the client.</strong> Run <code>openPR06-client_x64</code> (<code>.exe</code> on Windows). openPR06 finds your Prey install on its own.</li>
       </ol>
       <div class="cards two">
         <article class="card">
           <h3 class="band">Platform Notes</h3>
           <ul>
             <li>Windows x64 gets most of the runtime testing; Linux x64 is built in CI.</li>
-            <li>Set <code>OPENPREY_FORCE_X11=1</code> on Linux to force the XWayland fallback.</li>
-            <li>On a Steam Deck, run <code>openPREY-steamdeck</code>.</li>
+            <li>Set <code>OPENPR06_FORCE_X11=1</code> on Linux to force the XWayland fallback.</li>
+            <li>On a Steam Deck, run <code>openPR06-steamdeck</code>.</li>
           </ul>
         </article>
         <article class="card">
           <h3 class="band">If Auto-Detection Fails</h3>
-          <p>Launch with <code>+set fs_basepath "C:\path\to\Prey"</code>, pointing at the Prey root that contains <code>base/</code>, not at <code>base/</code> itself. The <a href="../../docs/user/getting-started.md">getting-started guide</a> lists every location openPREY checks.</p>
+          <p>Launch with <code>+set fs_basepath "C:\path\to\Prey"</code>, pointing at the Prey root that contains <code>base/</code>, not at <code>base/</code> itself. The <a href="../../docs/user/getting-started.md">getting-started guide</a> lists every location openPR06 checks.</p>
         </article>
       </div>
     </section>
@@ -667,7 +667,7 @@
           <h3 class="band">In Place</h3>
           <ul>
             <li>Runs the official retail Prey (2006) assets with its own engine and game module.</li>
-            <li>Unified <code>basepr/</code> runtime layout with openPREY's own <code>pak0.pk4</code> and <code>pak1.pk4</code>.</li>
+            <li>Unified <code>basepr/</code> runtime layout with openPR06's own <code>pak0.pk4</code> and <code>pak1.pk4</code>.</li>
             <li>Doom 3-lineage behaviour restored where Prey depends on it.</li>
           </ul>
         </article>
@@ -675,7 +675,7 @@
           <h3 class="band">Boundaries</h3>
           <ul>
             <li>Mods built for the original proprietary Prey game DLLs won't load.</li>
-            <li>Every client and server in a multiplayer game needs a matching openPREY build.</li>
+            <li>Every client and server in a multiplayer game needs a matching openPR06 build.</li>
             <li>Engine code stays GPL; SDK-derived game code stays under the Prey SDK EULA.</li>
           </ul>
         </article>
@@ -729,7 +729,7 @@
         <article class="card">
           <h3 class="band">Project</h3>
           <ul>
-            <li><strong>themuffinator</strong>: openPREY development and maintenance; author of openQ4</li>
+            <li><strong>themuffinator</strong>: openPR06 development and maintenance; author of openQ4</li>
             <li><strong>DarkMatter Productions</strong>: project stewardship and <a href="https://www.darkmatter-quake.com">website</a></li>
             <li><strong><a href="https://github.com/emileb">Emile Belanger (emileb)</a></strong>: original Android, SigmaTouch and OpenGL ES support, carried in with the openQ4 engine</li>
           </ul>
@@ -738,7 +738,7 @@
           <h3 class="band">Foundations</h3>
           <ul>
             <li><strong>Human Head Studios</strong>: Prey (2006) and the Prey SDK</li>
-            <li><strong><a href="https://github.com/themuffinator/openQ4">openQ4</a></strong>: the engine openPREY is built on</li>
+            <li><strong><a href="https://github.com/themuffinator/openQ4">openQ4</a></strong>: the engine openPR06 is built on</li>
             <li><strong>Justin Marshall</strong> and <strong>Robert Beckebans</strong>: reverse-engineering and renderer reference work</li>
             <li><strong>id Software</strong> and <strong>Raven Software</strong>: idTech 4 and the Quake 4 codebase behind openQ4</li>
           </ul>
@@ -755,9 +755,9 @@
     </section>
 
     <footer class="frame">
-      <p><strong>Licence.</strong> The openPREY engine is licensed under the <a href="../../LICENSE">GNU GPL version 3</a>, with the applicable <a href="../../LICENSES/DOOM-3-ADDITIONAL-TERMS.txt">Doom 3</a> or <a href="../../LICENSES/DOOM-3-BFG-ADDITIONAL-TERMS.txt">Doom 3 BFG</a> Additional Terms. The game code in <code>src/game</code>, <code>src/Prey</code> and <code>src/preyengine</code> is derived from the Prey SDK and remains under <a href="../../LICENSES/PREY-SDK-EULA.rtf">Human Head Studios' SDK EULA</a>. <a href="../../LICENSING.md">LICENSING.md</a> explains each component's terms. Prey's game assets remain the property of their rights holders and are not included.</p>
-      <p>openPREY is an independent project and is not affiliated with, endorsed by or sponsored by Human Head Studios, 2K, Bethesda, ZeniMax Media, id Software or Raven Software. PREY is a trademark of ZeniMax Media Inc.</p>
-      <p class="links"><a href="https://www.darkmatter-quake.com">Website</a> &middot; <a href="https://github.com/themuffinator/openPREY">Repository</a> &middot; <a href="https://github.com/themuffinator/openPREY/tree/main/src/game">Game Sources</a> &middot; <a href="https://github.com/themuffinator/openPREY/issues">Issue Tracker</a> &middot; <a href="#top">Back to Top</a></p>
+      <p><strong>Licence.</strong> The openPR06 engine is licensed under the <a href="../../LICENSE">GNU GPL version 3</a>, with the applicable <a href="../../LICENSES/DOOM-3-ADDITIONAL-TERMS.txt">Doom 3</a> or <a href="../../LICENSES/DOOM-3-BFG-ADDITIONAL-TERMS.txt">Doom 3 BFG</a> Additional Terms. The game code in <code>src/game</code>, <code>src/Prey</code> and <code>src/preyengine</code> is derived from the Prey SDK and remains under <a href="../../LICENSES/PREY-SDK-EULA.rtf">Human Head Studios' SDK EULA</a>. <a href="../../LICENSING.md">LICENSING.md</a> explains each component's terms. Prey's game assets remain the property of their rights holders and are not included.</p>
+      <p>openPR06 is an independent project and is not affiliated with, endorsed by or sponsored by Human Head Studios, 2K, Bethesda, ZeniMax Media, id Software or Raven Software. PREY is a trademark of ZeniMax Media Inc.</p>
+      <p class="links"><a href="https://www.darkmatter-quake.com">Website</a> &middot; <a href="https://github.com/themuffinator/openPR06">Repository</a> &middot; <a href="https://github.com/themuffinator/openPR06/tree/main/src/game">Game Sources</a> &middot; <a href="https://github.com/themuffinator/openPR06/issues">Issue Tracker</a> &middot; <a href="#top">Back to Top</a></p>
     </footer>
   </main>
 </body>

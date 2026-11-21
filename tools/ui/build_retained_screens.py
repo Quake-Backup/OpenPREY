@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 DarkMatter Productions. GPL-3.0-or-later.
-"""Generate openPREY's retained menu documents.
+"""Generate openPR06's retained menu documents.
 
     python tools/ui/build_retained_screens.py           write the documents
     python tools/ui/build_retained_screens.py --check   exit 1 if any is stale
@@ -1270,7 +1270,7 @@ def load_game_document() -> dict:
     """Load Game: the saves table beside the selected save's picture, its
     date and time, Time Played, and Load and Delete. In a game Load asks
     first, as the stock page does, and Delete always asks."""
-    doc = Document("openprey.loadgame")
+    doc = Document("openpr06.loadgame")
     for name in ("shot", "date", "time", "skill", "played", "error", "context"):
         doc.state[f"load.{name}"] = {"type": "string", "initial": ""}
     doc.state.update({"load.ingame": {"type": "boolean", "initial": False},
@@ -1369,7 +1369,7 @@ def save_game_document() -> dict:
     """Save Game: the saves table over the name field and Save. Selecting a
     save puts its name in the field; saving over one asks first, and a save
     the session refuses says why."""
-    doc = Document("openprey.savegame")
+    doc = Document("openpr06.savegame")
     doc.state.update({
         "save.name": {"type": "string", "initial": ""},
         "save.target": {"type": "string", "initial": ""},
@@ -1485,7 +1485,7 @@ def mods_frame(doc: Document, origin: str) -> dict:
 # ------------------------------------------------------------------- Credits
 # The stock credits are 169 lines, two banners and three pictures on a sheet
 # 5300 u tall that rises through a 400 u window in 130 s. Their places, sizes
-# and string keys are read from the stock script, which openPREY carries
+# and string keys are read from the stock script, which openPR06 carries
 # unchanged, so the retained page follows it line for line.
 
 CREDITS_CONTENT = ROOT / "content" / "basepr" / "pak0" / "guis" / "mainmenu" / "mainmenu_creditcontent.guifragment"
@@ -1558,7 +1558,7 @@ def credits_document() -> dict:
     appears as it rises to canvas y 350, headings and names in place and
     titles flying in from the trailing side over 500 ms. The sheet takes
     130 s and then starts again."""
-    doc = Document("openprey.credits")
+    doc = Document("openpr06.credits")
     total = CREDITS_ROLL_AT + CREDITS_ROLL_MS
     tracks = [track("credits-sheet", "top", [(0, ul(0)), (1, ul(0)), (CREDITS_ROLL_AT, ul(0)), (total, ul(-CREDITS_SHEET))])]
 
@@ -1656,7 +1656,7 @@ OPTION_SETTINGS = {
     "r_crtchromatic": ("r_crtChromatic", "number"),
 }
 # A stock choice whose options are written into the script rather than the
-# language tables takes a string of openPREY's instead.
+# language tables takes a string of openPR06's instead.
 OPTION_CHOICES = {"r_screenfraction": "#str_122060"}
 # Rows the stock page dims by a condition: Shader Detail has no effect while
 # shader programs are off or the Vulkan backend is active (section 12.1).
@@ -2114,7 +2114,7 @@ def plain_row(ident: str, row: dict, origin) -> tuple[dict, list[dict]]:
 
 def size_row(doc: Document, ident: str, row: dict, origin) -> tuple[dict, str]:
     """Window Size and Custom Resolution: two number fields either side of an
-    "x", centred in the value column, as openPREY's stock row lays them out
+    "x", centred in the value column, as openPR06's stock row lays them out
     (section 12.1)."""
     place, children = plain_row(ident, row, origin)
     fields = []
@@ -2472,7 +2472,7 @@ def options_document() -> dict:
     An active tab and its page are one surface: the page's outline breaks
     across the active tab and runs whole along every inactive one
     (section 6)."""
-    doc = Document("openprey.settings")
+    doc = Document("openpr06.settings")
     for section in ("controls", "game", "display", "audio"):      # the session clears these on arrival
         doc.state[f"from_{section}"] = {"type": "boolean", "initial": False}
     # The sound system's state, which the session's "sound" commands set on
@@ -3227,7 +3227,7 @@ def multiprey_document() -> dict:
     """MultiPrey (section 9): the full page, its three top tabs and their
     pages. The page opens on Find Servers, as the stock page does, which
     asks for a new list of servers; choosing Find Servers again asks again."""
-    doc = Document("openprey.multiplayer")
+    doc = Document("openpr06.multiplayer")
     for name in ("from_create", "from_join", "from_demos", "from_setup"):    # the session clears these on arrival
         doc.state[name] = {"type": "boolean", "initial": False}
     doc.state["tab.top"] = {"type": "number", "initial": MP_FIND_TAB}
@@ -3273,7 +3273,7 @@ for _name, _kind in (("gametype", "number"), ("kick", "number")):
 
 
 def card_document() -> dict:
-    doc = Document("openprey.mpmenu")
+    doc = Document("openpr06.mpmenu")
     for name in ("mp.protocol", "mp.revision"):
         doc.state[name] = {"type": "number", "initial": 0}
     doc.state["mp.cover_allowed"] = {"type": "boolean", "initial": False}
@@ -3552,7 +3552,7 @@ def death_document() -> dict:
     Load, Restart and Main Menu. It is drawn over the stock screen's star
     field, wordmark and fade from black, which guis/restart.gui keeps drawing
     beneath it (idSessionLocal::OpenRestartMenu), and arrives with that fade."""
-    doc = Document("openprey.restartmenu")
+    doc = Document("openpr06.restartmenu")
     names = ["death_load", "death_restart", "death_menu"]
     def around(index: int) -> dict:
         return {"up": names[index - 1], "down": names[(index + 1) % len(names)], "left": names[index], "right": names[index]}
@@ -3658,7 +3658,7 @@ def preset_check_document() -> dict:
     the claw frame grown to the readout, with the same rows, ladder and
     actions as guis/presetcheck.gui. It stands until the session replaces it
     with the main menu, so it has no leave of its own."""
-    doc = Document("openprey.presetcheck")
+    doc = Document("openpr06.presetcheck")
     for name in CHECK_STRINGS:
         doc.state[name] = {"type": "string", "initial": ""}
     for name in ("check_recommendedTier", "check_currentTier"):
@@ -3728,13 +3728,13 @@ def walk(node: dict):
 
 # ------------------------------------------------------------------ loading
 # guis/map/loading.gui, the one screen retail Prey loads every level under
-# (section 9), as openPREY's override draws it (section 12.1).
+# (section 9), as openPR06's override draws it (section 12.1).
 
 LOAD_NAME = rgb("#A6BFFF", 0.8)              # prey.load.name
 LOAD_AUTHOR = rgb("#D9D9FF", 0.75)
 LOAD_FILL = rgb("#5959FF", 0.65)             # prey.load.fill
 LOAD_OBJECTIVES = [0.86, 0.9, 1.0, 0.82]
-LOAD_STATUS = [0.75, 0.82, 1.0, 0.72]        # the stock's commented-out status line, as openPREY's override draws it
+LOAD_STATUS = [0.75, 0.82, 1.0, 0.72]        # the stock's commented-out status line, as openPR06's override draws it
 LOAD_COUNT = [0.75, 0.82, 1.0, 0.5]
 LOAD_HANDOFF_MS = 250                        # RETAINED_LOADING_HANDOFF_MSEC in the session
 
@@ -3935,7 +3935,7 @@ def loading_document() -> dict:
     the art (`loading_levelshot`): the map's loading art or the generic
     painting, composed with its edge tiles into one picture of the window's
     shape when it has them (`loading_bkgnd_canvasfill`)."""
-    doc = Document("openprey.loading")
+    doc = Document("openpr06.loading")
     doc.state.update({
         "map_loading": {"type": "number", "initial": 0},
         "loading_levelshot": {"type": "string", "initial": ""},
@@ -4019,7 +4019,7 @@ MSG_ENTRY_BYTES = 63                          # a password or an address
 
 
 def message_box_document() -> dict:
-    doc = Document("openprey.msgbox")
+    doc = Document("openpr06.msgbox")
     for name in ("title", "message", "left", "right", "mid", "str_entry"):
         doc.state[name] = {"type": "string", "initial": ""}
     for name in ("visible_msgbox", "visible_waitbox", "visible_left", "visible_right", "visible_mid", "visible_entry",
@@ -4127,7 +4127,7 @@ CHAT_FIELD = (100, 445, 380, 20)
 
 
 def chat_document() -> dict:
-    doc = Document("openprey.mpchat")
+    doc = Document("openpr06.mpchat")
     for name in ("mp.protocol", "mp.revision", "mp.chat.mode"):
         doc.state[name] = {"type": "number", "initial": 0}
     doc.state["mp.cover_allowed"] = {"type": "boolean", "initial": False}
@@ -4169,7 +4169,7 @@ NET_BOX = (120, 120, 400, 160)
 
 
 def connecting_document() -> dict:
-    doc = Document("openprey.connecting")
+    doc = Document("openpr06.connecting")
     doc.state["status"] = {"type": "string", "initial": ""}
     abort, cancel = doc.session("netAbort"), doc.session("soundCancel")
     doc.events["netCancelPick"] = [{"op": "action", "action": cancel}, {"op": "action", "action": abort}]
@@ -4198,8 +4198,8 @@ def walk(node: dict):
 # -------------------------------------------------------------------- output
 
 DOCUMENTS = {
-    "menu/title.rui": lambda: home_document("openprey.title", in_game=False),
-    "menu/pause.rui": lambda: home_document("openprey.pause", in_game=True),
+    "menu/title.rui": lambda: home_document("openpr06.title", in_game=False),
+    "menu/pause.rui": lambda: home_document("openpr06.pause", in_game=True),
     "menu/loadgame.rui": load_game_document,
     "menu/savegame.rui": save_game_document,
     "menu/restartmenu.rui": death_document,

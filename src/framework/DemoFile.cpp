@@ -571,8 +571,8 @@ bool idDemoFile::OpenForReading( const char *fileName, bool allowPreload, bool q
 		f->Rewind();
 	}
 
-	// openPREY reads no retail Quake 4 render demos, so no wrapper spelling is
-	// ambiguous and a block scheme is always openPREY's own.
+	// openPR06 reads no retail Quake 4 render demos, so no wrapper spelling is
+	// ambiguous and a block scheme is always openPR06's own.
 	if ( compression == DEMO_SCHEME_BLOCKS ) {
 		if ( bytes.direct == NULL ) {
 			// read through the idFile, which stands just past the wrapper: the

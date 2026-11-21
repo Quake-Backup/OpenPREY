@@ -1222,7 +1222,7 @@ void hhWeapon::PresentWeapon( bool showViewModel ) {
 		// deal with the third-person visible world model
 		// don't show shadows of the world model in first person
 #ifdef HUMANHEAD
-		// openPREY: the held weapon joins the player's own shadow whenever that
+		// openPR06: the held weapon joins the player's own shadow whenever that
 		// shadow shows. Retail asked for pm_modelView 1 as well, which left the
 		// first-person shadow empty-handed, and showed it in multiplayer always.
 		if ( g_showPlayerShadow.GetBool() || pm_thirdPerson.GetBool()
@@ -2361,7 +2361,7 @@ hhWeapon::Event_AddToAltClip
 void hhWeapon::Event_AddToAltClip( float amount ) {
 	HH_ASSERT( altFireController );
 
-	// openPREY: the event format is 'f'; an int parameter read the wrong register on Win64
+	// openPR06: the event format is 'f'; an int parameter read the wrong register on Win64
 	altFireController->AddToClip( static_cast<int>( amount ) );
 }
 

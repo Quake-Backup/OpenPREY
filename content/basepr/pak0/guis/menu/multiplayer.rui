@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.multiplayer",
+ "id": "openpr06.multiplayer",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {
   "from_create": {"type": "boolean", "initial": false},

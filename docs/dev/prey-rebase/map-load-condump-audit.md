@@ -5,7 +5,7 @@
 - Map manifest: `.vscode/prey-maps.json`
 - Renderer API: `gl`
 - Retail asset root: `C:\Program Files (x86)\R.G. Mechanics\Prey`
-- openPREY install root: `.install`
+- openPR06 install root: `.install`
 - Raw audit output: `.tmp/audit-gl`
 - Per-map timeout: 120s
 - Post-load settle time before conDump: 2500ms

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep active runtime diagnostics and artifacts branded as openPREY."""
+"""Keep active runtime diagnostics and artifacts branded as openPR06."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTRACTS = {
     "src/framework/RenderDoc.cpp": {
         "required": (
-            'captureTemplate.AppendPath( "openprey" );',
-            "Launch openPREY through RenderDoc first",
+            'captureTemplate.AppendPath( "openpr06" );',
+            "Launch openPR06 through RenderDoc first",
         ),
         "forbidden": (
             'captureTemplate.AppendPath( "openq4" );',
@@ -23,11 +23,11 @@ CONTRACTS = {
     "src/framework/Session.cpp": {
         "required": (
             "stamped game payload/footer",
-            "openPREY loads each map automatically",
-            "openPREY map state assertion needs a non-empty expected map",
-            "openPREY map state: map=%s",
-            "openPREY map state mismatch: expected map=%s",
-            "bakes openPREY-compatible lightgrid metadata",
+            "openPR06 loads each map automatically",
+            "openPR06 map state assertion needs a non-empty expected map",
+            "openPR06 map state: map=%s",
+            "openPR06 map state mismatch: expected map=%s",
+            "bakes openPR06-compatible lightgrid metadata",
         ),
         "forbidden": (
             "stamped openQ4 payload/footer",
@@ -37,25 +37,25 @@ CONTRACTS = {
         ),
     },
     "src/renderer/draw_arb2.cpp": {
-        "required": ("but openPREY keeps ARB2 because the legacy NV20 backend is not shipped",),
+        "required": ("but openPR06 keeps ARB2 because the legacy NV20 backend is not shipped",),
         "forbidden": ("but openQ4 keeps ARB2 because the legacy NV20 backend is not shipped",),
     },
     "src/renderer/RenderSystem.cpp": {
-        "required": ("but openPREY only ships the ARB2 backend",),
+        "required": ("but openPR06 only ships the ARB2 backend",),
         "forbidden": ("but openQ4 only ships the ARB2 backend",),
     },
     "src/renderer/RenderWorld_load.cpp": {
-        "required": ("openPREY will prefer it before the classic proc world",),
+        "required": ("openPR06 will prefer it before the classic proc world",),
         "forbidden": ("openQ4 will prefer it before the classic proc world",),
     },
     "src/renderer/RenderWorld_lightgrid.cpp": {
-        "required": ("previous openPREY bake through the runtime light-grid pass",),
+        "required": ("previous openPR06 bake through the runtime light-grid pass",),
         "forbidden": ("previous openQ4 bake through the runtime light-grid pass",),
     },
     "src/sys/posix/posix_main.cpp": {
         "required": (
-            '"%s/openprey-%u.lock"',
-            "another openPREY instance is already running",
+            '"%s/openpr06-%u.lock"',
+            "another openPR06 instance is already running",
         ),
         "forbidden": (
             '"%s/openq4-%u.lock"',
@@ -64,8 +64,8 @@ CONTRACTS = {
     },
     "tools/build/prepare_macos_moltenvk.sh": {
         "required": (
-            "above openPREY's ${MOLTENVK_MAX_MINOS} deployment target",
-            "until openPREY's own macos_deployment_target moves off",
+            "above openPR06's ${MOLTENVK_MAX_MINOS} deployment target",
+            "until openPR06's own macos_deployment_target moves off",
         ),
         "forbidden": (
             "above openQ4's ${MOLTENVK_MAX_MINOS} deployment target",
@@ -90,7 +90,7 @@ def main() -> None:
     if failures:
         raise SystemExit("Runtime-branding contract failed:\n  - " + "\n  - ".join(failures))
 
-    print("openPREY runtime-branding checks passed")
+    print("openPR06 runtime-branding checks passed")
 
 
 if __name__ == "__main__":

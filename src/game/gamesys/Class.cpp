@@ -399,7 +399,7 @@ void idClass::Init( void ) {
 ================
 idClass::ValidateEventCallbackSignatures
 
-openPREY: compares each EVENT() binding's C++ parameter register classes with
+openPR06: compares each EVENT() binding's C++ parameter register classes with
 the event's format string. See idEventCallbackSignature in Class.h.
 ================
 */
@@ -450,7 +450,7 @@ int idClass::ValidateEventCallbackSignatures( void ) {
 ================
 idClass::ListEventCallbacks_f
 
-openPREY: prints every event definition and every class's own EVENT() bindings
+openPR06: prints every event definition and every class's own EVENT() bindings
 in a stable, machine-readable form, for comparing the game module's script
 event surface against the retail binary.
 ================

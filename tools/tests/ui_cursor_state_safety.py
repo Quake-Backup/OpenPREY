@@ -59,7 +59,7 @@ def main() -> None:
     corrected = between(device_context, "void idDeviceContext::GetAspectCorrectedScreenExpansion", "\n}\n")
     require(corrected, "windowWidth, windowHeight, true, xExpand, yExpand", "aspect-corrected expansion helper")
 
-    # openPREY: retail Prey's pointer box (PREY.exe 1.4), 16 canvas units on a
+    # openPR06: retail Prey's pointer box (PREY.exe 1.4), 16 canvas units on a
     # menu GUI and 32 on a world GUI.
     draw_cursor = between(source, "void idUserInterfaceLocal::DrawCursor()", "const idDict &idUserInterfaceLocal::State()")
     require(draw_cursor, "DrawCursor(&cursorX, &cursorY, 16.0f );", "menu GUI pointer size")

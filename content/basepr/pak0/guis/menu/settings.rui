@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.settings",
+ "id": "openpr06.settings",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {
   "from_controls": {"type": "boolean", "initial": false},

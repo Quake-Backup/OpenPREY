@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   metadata:
-    if: ${{ false }} # OPENPREY-GATED: split-module/OpenQ4 source contract
+    if: ${{ false }} # OPENPR06-GATED: split-module/OpenQ4 source contract
     name: Resolve Universal2 Candidate Sources
     runs-on: ubuntu-24.04
     outputs:
@@ -134,7 +134,7 @@ jobs:
           echo "version_tag=${version_tag}" >> "$GITHUB_OUTPUT"
 
   thin_build:
-    if: ${{ false }} # OPENPREY-GATED: split-module/OpenQ4 source contract
+    if: ${{ false }} # OPENPR06-GATED: split-module/OpenQ4 source contract
     name: macOS ${{ matrix.binary_arch }} ${{ matrix.bridge }} Universal2 Thin Candidate
     needs: metadata
     runs-on: ${{ matrix.runner }}
@@ -280,7 +280,7 @@ jobs:
   assemble:
     name: macOS universal2 ${{ matrix.bridge }} Release Candidate
     needs: [metadata, thin_build]
-    if: ${{ false && needs.thin_build.result == 'success' }} # OPENPREY-GATED
+    if: ${{ false && needs.thin_build.result == 'success' }} # OPENPR06-GATED
     runs-on: macos-15
     timeout-minutes: 90
     strategy:

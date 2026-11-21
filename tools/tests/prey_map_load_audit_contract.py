@@ -19,7 +19,7 @@ AUDIT_SCRIPT = ROOT / "tools" / "validation" / "prey_map_load_condump_audit.py"
 
 
 def load_audit_module():
-    spec = importlib.util.spec_from_file_location("openprey_map_load_audit", AUDIT_SCRIPT)
+    spec = importlib.util.spec_from_file_location("openpr06_map_load_audit", AUDIT_SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Could not load {AUDIT_SCRIPT}")
     module = importlib.util.module_from_spec(spec)
@@ -154,7 +154,7 @@ class AuditContracts(unittest.TestCase):
         replay = "\n".join(
             (
                 "------------- Warnings ---------------",
-                "during openPREY initialization...",
+                "during openPR06 initialization...",
                 uppercase_base,
                 "1 warnings",
             )

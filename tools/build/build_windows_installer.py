@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build an openPREY Windows installer from a packaged release directory."""
+"""Build an openPR06 Windows installer from a packaged release directory."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from game_layer import PACKAGED_LAYER_GAME_DIRS  # noqa: E402
 from openq4_pak import OPENQ4_BULK_PACK_NAMES, OPENQ4_PACK_NAMES  # noqa: E402
 
 
-PRODUCT_NAME = "openPREY"
+PRODUCT_NAME = "openPR06"
 PRODUCT_PUBLISHER = "DarkMatter Productions"
 SETUP_ICON_RELATIVE = Path("assets") / "icons" / "prey.ico"
 TEMPLATE_RELATIVE = Path("tools") / "build" / "openQ4Installer.iss.in"
@@ -47,14 +47,14 @@ ARCHITECTURE_DIRECTIVES = {
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Compile an Inno Setup installer using an already-packaged openPREY "
+            "Compile an Inno Setup installer using an already-packaged openPR06 "
             "Windows release directory."
         )
     )
     parser.add_argument(
         "--package-dir",
         required=True,
-        help="Prepared openPREY Windows package directory to embed in the installer.",
+        help="Prepared openPR06 Windows package directory to embed in the installer.",
     )
     parser.add_argument(
         "--version",
@@ -75,7 +75,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--source-root",
         default=".",
-        help="openPREY repository root (used for installer assets).",
+        help="openPR06 repository root (used for installer assets).",
     )
     parser.add_argument(
         "--output-dir",
@@ -232,7 +232,7 @@ def resolve_iscc_path(explicit_path: str | None) -> Path:
     )
 
 
-CONTENT_PACK_NUMBERS = range(10)  # pak0.pk4 to pak9.pk4 are openPREY's own pack names
+CONTENT_PACK_NUMBERS = range(10)  # pak0.pk4 to pak9.pk4 are openPR06's own pack names
 SHA256_HEX = re.compile(r"[0-9a-f]{64}")
 
 
@@ -363,7 +363,7 @@ end;
 procedure InitializeContentPacks;
 begin
   ContentPackDownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing),
-    'Downloading the openPREY light-grid and loadscreen packs this installation needs.', @OnContentPackProgress);
+    'Downloading the openPR06 light-grid and loadscreen packs this installation needs.', @OnContentPackProgress);
 end;
 
 function FetchContentPacks: Boolean;
@@ -402,8 +402,8 @@ begin
       ContentPackDownloadPage.Download;
     except
       if not ContentPackDownloadPage.AbortedByUser then
-        SuppressibleMsgBox('openPREY could not download its content packs: ' + GetExceptionMessage + #13#10#13#10 +
-          'Check your connection and try again, or download the full openPREY package instead.', mbCriticalError, MB_OK, IDOK);
+        SuppressibleMsgBox('openPR06 could not download its content packs: ' + GetExceptionMessage + #13#10#13#10 +
+          'Check your connection and try again, or download the full openPR06 package instead.', mbCriticalError, MB_OK, IDOK);
       Result := False;
     end;
   finally
@@ -419,8 +419,8 @@ begin
   if GetArrayLength(ContentPackAction) <> ContentPackCount then
     if not FetchContentPacks then
     begin
-      SuppressibleMsgBox('openPREY was installed without its light-grid and loadscreen packs. ' +
-        'Run setup again, or download the full openPREY package.', mbCriticalError, MB_OK, IDOK);
+      SuppressibleMsgBox('openPR06 was installed without its light-grid and loadscreen packs. ' +
+        'Run setup again, or download the full openPR06 package.', mbCriticalError, MB_OK, IDOK);
       Exit;
     end;
   for I := 0 to ContentPackCount - 1 do
@@ -432,7 +432,7 @@ begin
     else
       Source := ExpandConstant('{{tmp}}\\') + ContentPackName(I) + '.download';
     if not FileCopy(Source, ContentPackTarget(I), False) then
-      SuppressibleMsgBox('openPREY could not install ' + ContentPackName(I) + ' into ' + ContentPackTarget(I) + '.',
+      SuppressibleMsgBox('openPR06 could not install ' + ContentPackName(I) + ' into ' + ContentPackTarget(I) + '.',
         mbCriticalError, MB_OK, IDOK);
   end;
 end;"""
@@ -470,7 +470,7 @@ def render_installer_script(
     download_packs: list[dict[str, object]] | None = None,
 ) -> str:
     arch_allowed, arch_install_mode = ARCHITECTURE_DIRECTIVES[arch]
-    installer_basename = f"openprey-{version_tag}-windows-{arch}-setup"
+    installer_basename = f"openpr06-{version_tag}-windows-{arch}-setup"
     download_packs = download_packs or []
     excludes = ",".join(f"\\basepr\\{pack['name']}" for pack in download_packs)
 
@@ -544,8 +544,8 @@ def main(argv: list[str]) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
-    script_path = output_dir / f"openprey-{version_tag}-windows-{args.arch}-setup.iss"
-    installer_path = output_dir / f"openprey-{version_tag}-windows-{args.arch}-setup.exe"
+    script_path = output_dir / f"openpr06-{version_tag}-windows-{args.arch}-setup.iss"
+    installer_path = output_dir / f"openpr06-{version_tag}-windows-{args.arch}-setup.exe"
     try:
         validate_output_paths(output_dir, script_path, installer_path)
     except RuntimeError as exc:

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   cross-build:
-    if: ${{ false }} # OPENPREY-GATED: split-module/OpenQ4 source contract
+    if: ${{ false }} # OPENPR06-GATED: split-module/OpenQ4 source contract
     name: Linux ARM64 Cross Build (x64 host)
     runs-on: ubuntu-24.04
     timeout-minutes: 90

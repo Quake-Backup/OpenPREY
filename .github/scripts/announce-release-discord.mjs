@@ -9,9 +9,9 @@ const defaultReleaseEmoji = ":video_game:";
 const defaultMentions = "";
 const releaseEmoji = (process.env.DISCORD_RELEASE_EMOJI || defaultReleaseEmoji).trim();
 const mentions = (process.env.DISCORD_RELEASE_MENTIONS || defaultMentions).trim();
-const feedbackChannel = (process.env.DISCORD_FEEDBACK_CHANNEL || "the openPREY community channels").trim();
+const feedbackChannel = (process.env.DISCORD_FEEDBACK_CHANNEL || "the openPR06 community channels").trim();
 const avatarUrl = (process.env.DISCORD_RELEASE_AVATAR_URL ||
-  "https://raw.githubusercontent.com/themuffinator/openPREY/main/assets/img/avatar.png").trim();
+  "https://raw.githubusercontent.com/themuffinator/openPR06/main/assets/img/avatar.png").trim();
 
 function requireValue(value, name) {
   if (!value) {
@@ -110,8 +110,8 @@ async function loadRelease() {
 
 function cleanReleaseName(release) {
   const rawName = (release.name || release.tag_name || "release").replace(/\s+/g, " ").trim();
-  const unbrandedName = rawName.replace(/^(?:openq4|openprey)\b[\s:-]*/i, "").trim();
-  return unbrandedName ? `openPREY ${unbrandedName}` : "openPREY";
+  const unbrandedName = rawName.replace(/^(?:openq4|openpr06)\b[\s:-]*/i, "").trim();
+  return unbrandedName ? `openPR06 ${unbrandedName}` : "openPR06";
 }
 
 function buildIntro(release, notes) {
@@ -119,18 +119,18 @@ function buildIntro(release, notes) {
   const mode = release.prerelease ? "prerelease" : "release";
 
   if (/(renderer|lighting|shadow|bloom|flare|opengl|performance|frame|gpu)/.test(lower)) {
-    return `The new openPREY ${mode} is ready, with rendering and performance work that needs real gameplay miles across supported platforms.`;
+    return `The new openPR06 ${mode} is ready, with rendering and performance work that needs real gameplay miles across supported platforms.`;
   }
 
   if (/(linux|macos|windows|steam deck|sdl|controller|gamepad|package|installer)/.test(lower)) {
-    return `The new openPREY ${mode} is ready, with platform and packaging improvements for cleaner installs and broader testing.`;
+    return `The new openPR06 ${mode} is ready, with platform and packaging improvements for cleaner installs and broader testing.`;
   }
 
   if (/(single-player|multiplayer|\bsp\b|\bmp\b|gameplay|map|asset|pk4|compatibility)/.test(lower)) {
-    return `The new openPREY ${mode} is ready, focused on stock-asset compatibility and in-game behavior that should be tested with original Prey (2006) content.`;
+    return `The new openPR06 ${mode} is ready, focused on stock-asset compatibility and in-game behavior that should be tested with original Prey (2006) content.`;
   }
 
-  return `The new openPREY ${mode} is ready. Grab a platform package, try it with the original Prey (2006) assets, and send back anything that looks off.`;
+  return `The new openPR06 ${mode} is ready. Grab a platform package, try it with the original Prey (2006) assets, and send back anything that looks off.`;
 }
 
 function extractHighlights(notes) {
@@ -311,7 +311,7 @@ async function main() {
   const headline = `${releaseEmoji} ${displayName} release published!${mentions ? ` ${mentions}` : ""}`.trim();
 
   const payload = {
-    username: "openPREY Releases",
+    username: "openPR06 Releases",
     avatar_url: safeAvatarUrl,
     allowed_mentions: { parse: ["roles"] },
     content: headline,
@@ -326,7 +326,7 @@ async function main() {
           { name: "State", value: release.prerelease ? "Prerelease" : "Stable release", inline: true },
           ...buildDownloadFields(release),
         ],
-        footer: { text: "openPREY - open-source engine and game code for Prey (2006)" },
+        footer: { text: "openPR06 - open-source engine and game code for Prey (2006)" },
         timestamp: release.published_at || new Date().toISOString(),
       },
     ],

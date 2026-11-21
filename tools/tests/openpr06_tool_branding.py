@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pin openPREY identity in active release and developer-facing helpers."""
+"""Pin openPR06 identity in active release and developer-facing helpers."""
 
 from __future__ import annotations
 
@@ -25,9 +25,9 @@ def reject(text: str, token: str, label: str) -> None:
 
 def validate_common_runtime_copy() -> None:
     common = read("src/framework/Common.cpp")
-    require(common, 'fileName = "logs/openprey_%Y%m%d_%H%M%S.log";', "automatic log naming")
-    require(common, '"openPREY Warning"', "runtime warning title")
-    require(common, '"applies the selected openPREY performance preset"', "console help")
+    require(common, 'fileName = "logs/openpr06_%Y%m%d_%H%M%S.log";', "automatic log naming")
+    require(common, '"openPR06 Warning"', "runtime warning title")
+    require(common, '"applies the selected openPR06 performance preset"', "console help")
     reject(common, '"logs/openq4_%Y%m%d_%H%M%S.log"', "automatic log naming")
     reject(common, '"openQ4 Warning"', "runtime warning title")
     reject(common, '"applies the selected openQ4 performance preset"', "console help")
@@ -38,12 +38,12 @@ def validate_discord_release_copy() -> None:
     workflow = read(".github/workflows/discord-release.yml")
 
     for token in (
-        'return unbrandedName ? `openPREY ${unbrandedName}` : "openPREY";',
-        "The new openPREY ${mode} is ready",
+        'return unbrandedName ? `openPR06 ${unbrandedName}` : "openPR06";',
+        "The new openPR06 ${mode} is ready",
         "original Prey (2006) assets",
-        'username: "openPREY Releases"',
-        'footer: { text: "openPREY - open-source engine and game code for Prey (2006)" }',
-        "themuffinator/openPREY/main/assets/img/avatar.png",
+        'username: "openPR06 Releases"',
+        'footer: { text: "openPR06 - open-source engine and game code for Prey (2006)" }',
+        "themuffinator/openPR06/main/assets/img/avatar.png",
     ):
         require(announcer, token, "Discord release announcer")
 
@@ -57,7 +57,7 @@ def validate_discord_release_copy() -> None:
         reject(announcer, token, "Discord release announcer")
 
     require(workflow, "vars.DISCORD_RELEASE_MENTIONS || ''", "Discord release workflow")
-    require(workflow, "the openPREY community channels", "Discord release workflow")
+    require(workflow, "the openPR06 community channels", "Discord release workflow")
     reject(workflow, "1425985498693898260", "Discord release workflow")
     reject(workflow, "1509926146018513077", "Discord release workflow")
 
@@ -67,8 +67,8 @@ def validate_listen_server_helper() -> None:
     for token in (
         '[string]$Map = "game/dmroadhouse"',
         '[string]$BasePath = ""',
-        "function New-openPREYCommonArgs",
-        '"openPREY-client_x64.exe"',
+        "function New-openPR06CommonArgs",
+        '"openPR06-client_x64.exe"',
         '"r_fullscreen", "0"',
         '"fs_game", "basepr"',
         '"si_gameType", "deathmatch"',
@@ -84,12 +84,12 @@ def validate_renderdoc_helper() -> None:
     helper = read("tools/debug/renderdoc_capture.ps1")
     for token in (
         '[string]$BasePath = ""',
-        '"openPREY-client_x64.exe"',
-        '".home\\basepr\\renderdoc\\openprey"',
-        '"logs/openprey.log"',
+        '"openPR06-client_x64.exe"',
+        '".home\\basepr\\renderdoc\\openpr06"',
+        '"logs/openpr06.log"',
         '"fs_game", "basepr"',
         '"si_gameType", "deathmatch"',
-        '-Filter "openprey*.rdc"',
+        '-Filter "openpr06*.rdc"',
     ):
         require(helper, token, "RenderDoc helper")
 
@@ -100,12 +100,12 @@ def validate_renderdoc_helper() -> None:
 def validate_linux_desktop_helper() -> None:
     helper = read("tools/linux/install_desktop_launcher.sh")
     for token in (
-        'OPENPREY_INSTALL_ROOT:-${OPENQ4_INSTALL_ROOT:-',
-        'OPENPREY_BASEPATH:-${OPENQ4_BASEPATH:-',
-        "openPREY-client_${arch}",
-        "openprey.svg",
+        'OPENPR06_INSTALL_ROOT:-${OPENQ4_INSTALL_ROOT:-',
+        'OPENPR06_BASEPATH:-${OPENQ4_BASEPATH:-',
+        "openPR06-client_${arch}",
+        "openpr06.svg",
         "assets/icons/prey.svg",
-        "Name=openPREY",
+        "Name=openPR06",
         "Prey (2006)",
         "Keywords=prey;idtech;fps;multiplayer;",
     ):
@@ -127,7 +127,7 @@ def main() -> None:
     validate_listen_server_helper()
     validate_renderdoc_helper()
     validate_linux_desktop_helper()
-    print("openPREY active-tool branding checks passed")
+    print("openPR06 active-tool branding checks passed")
 
 
 if __name__ == "__main__":

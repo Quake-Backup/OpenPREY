@@ -6,7 +6,7 @@
 	#define THERMOMETER_HEIGHT	60
 	windowDef lighterThermometer {
 		rect		74, 402, THERMOMETER_WIDTH, THERMOMETER_HEIGHT
-		screenalignx	left		// openPREY: stays beside the health figure under aspect expansion
+		screenalignx	left		// openPR06: stays beside the health figure under aspect expansion
 		screenaligny	bottom
 		visible		("gui::lightertemp" > 0)
 

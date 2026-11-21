@@ -1,5 +1,5 @@
 project(
-  'openPREY',
+  'openPR06',
   ['c', 'cpp'],
   version: '0.0.1',
   meson_version: '>=1.6.0',
@@ -9,7 +9,7 @@ project(
 host_system = host_machine.system()
 host_cpu_family = host_machine.cpu_family()
 if not ['windows', 'linux', 'darwin', 'android'].contains(host_system)
-  error('Unsupported host system for openPREY Meson build: ' + host_system)
+  error('Unsupported host system for openPR06 Meson build: ' + host_system)
 endif
 
 binary_arch = host_cpu_family
@@ -50,7 +50,7 @@ endif
 
 if host_cpu_family != 'x86_64' and not (host_system == 'linux' and host_cpu_family == 'aarch64')
   warning(
-    'openPREY currently targets x64 as the active compatibility baseline. '
+    'openPR06 currently targets x64 as the active compatibility baseline. '
     + 'Non-x64 builds are considered experimental during platform bring-up.'
   )
 endif
@@ -292,16 +292,16 @@ if get_option('build_native_tests')
   test('openq4-bse-particle-order', bse_particle_order_test, timeout: 30)
   test('openq4-vulkan-material-sources', py,
     args: [files('tools/build/vulkan_material_sources.py'), '--check'], timeout: 30)
-  test('openprey-retained-screens', py,
+  test('openpr06-retained-screens', py,
     args: [files('tools/ui/build_retained_screens.py'), '--check'], timeout: 30)
   # The loading screen's name notch textures (stock screen), from their construction.
-  test('openprey-loading-notch', py,
+  test('openpr06-loading-notch', py,
     args: [files('tools/ui/loading_notch.py'), '--check'], timeout: 120)
   # Repaints the initializing screen's textures from their seeds: about a minute.
-  test('openprey-retained-initialization', py,
+  test('openpr06-retained-initialization', py,
     args: [files('tools/ui/build_retained_initialization.py'), '--check'], timeout: 300)
   # The main menu's 3D backdrop: meshes, textures, material and renderDef.
-  test('openprey-menu-scene', py,
+  test('openpr06-menu-scene', py,
     args: [files('tools/assets/generate_menu_scene.py'), '--check'], timeout: 300)
   test('openq4-vulkan-material-cache', py,
     args: [files('tools/tests/renderer_vulkan_material_cache.py')], timeout: 60)
@@ -1930,7 +1930,7 @@ openq4_version_resources = []
 if host_system == 'windows' and resource_compiler.found()
   windows_mod = import('windows')
   openq4_version_resources = windows_mod.compile_resources(
-    'src/sys/win32/rc/openprey_version.rc',
+    'src/sys/win32/rc/openpr06_version.rc',
     include_directories: [root_include_dir],
     # rc.exe reports no header dependencies, so without this the version
     # strings stay at whichever commit first compiled the resource.
@@ -2011,7 +2011,7 @@ if build_engine
   # extracting PK4 members. A system copy does not contain that small extension.
   stb_vorbis_dep = subproject('stb_vorbis', default_options: fallback_opt).get_variable('stb_vorbis_dep')
 
-  # openPREY: libvorbisfile re-decodes retail Prey Oggs whose damaged pages stop
+  # openPR06: libvorbisfile re-decodes retail Prey Oggs whose damaged pages stop
   # stb_vorbis early. Configure libogg first so libvorbis and every consumer
   # share the same static fallback and the public ogg headers propagate.
   ogg_dep = dependency(
@@ -2642,7 +2642,7 @@ else
   endforeach
   # GCC/Clang default to -ffp-contract=fast, which fuses a*b+c into an FMA
   # wherever the target has one. AArch64 always does; the x86-64 SSE2 baseline
-  # openPREY's x86-64 baseline does not. That makes identical source produce
+  # openPR06's x86-64 baseline does not. That makes identical source produce
   # different float results per architecture in collision, AAS and physics
   # code, which is exactly the class of divergence behind arm64-only map and
   # savegame failures. MSVC already defaults to precise contraction.
@@ -2783,7 +2783,7 @@ if build_engine
   endif
 
   bse_library = static_library(
-    'openprey_bse',
+    'openpr06_bse',
     bse_sources,
     include_directories: bse_client_include_dirs,
     cpp_args: bse_cpp_args,
@@ -3109,7 +3109,7 @@ if build_engine or build_games
   # Prey uses one unified game module for both single-player and multiplayer,
   # so a single idlib archive serves it.
   game_idlib_library = static_library(
-    'openprey_game_idlib',
+    'openpr06_game_idlib',
     game_idlib_sources,
     include_directories: game_idlib_include_dirs,
     cpp_args: game_common_cpp_args,
@@ -3416,7 +3416,7 @@ if build_renderer_vk and build_engine
     '-DOPENQ4_RENDERER_MODULE',
     '-DOPENQ4_RENDERER_VK_MODULE',
     '-DOPENQ4_RENDERER_BACKEND_NAME="vulkan"',
-    '-DOPENQ4_RENDERER_BACKEND_DESC="openPREY native Vulkan renderer module"',
+    '-DOPENQ4_RENDERER_BACKEND_DESC="openPR06 native Vulkan renderer module"',
     '-DVMA_STATIC_VULKAN_FUNCTIONS=0',
     '-DVMA_DYNAMIC_VULKAN_FUNCTIONS=1',
     # VK_KHR_portability_subset lives in vulkan_beta.h. Defined for every host so
@@ -3511,7 +3511,7 @@ endif
 
 if build_games
   custom_target(
-    'openprey_stage_game_direct_run',
+    'openpr06_stage_game_direct_run',
     input: game_module_target,
     output: 'stage-game-' + binary_arch + '.stamp',
     command: [
@@ -3543,7 +3543,7 @@ endif
 install_data(
   'assets/icons/prey.ico',
   install_dir: install_root_dir,
-  rename: 'openPREY.ico',
+  rename: 'openPR06.ico',
 )
 
 install_data('LICENSE', 'LICENSING.md', 'CONTRIBUTORS.md', install_dir: install_root_dir)
@@ -3566,7 +3566,7 @@ endif
 install_data(
   'assets/icons/prey.icns',
   install_dir: install_root_dir,
-  rename: 'openPREY.icns',
+  rename: 'openPR06.icns',
 )
 
 if host_system != 'windows'
@@ -3586,22 +3586,22 @@ endif
 
 if host_system == 'linux'
   linux_desktop_conf = configuration_data()
-  linux_desktop_conf.set('OPENPREY_CLIENT_BINARY', engine_client_binary_name)
-  linux_desktop_conf.set('OPENPREY_PROJECT_VERSION', openq4_version_short)
-  linux_desktop_conf.set('OPENPREY_PROJECT_VERSION_FULL', openq4_version_full)
+  linux_desktop_conf.set('OPENPR06_CLIENT_BINARY', engine_client_binary_name)
+  linux_desktop_conf.set('OPENPR06_PROJECT_VERSION', openq4_version_short)
+  linux_desktop_conf.set('OPENPR06_PROJECT_VERSION_FULL', openq4_version_full)
   linux_steamdeck_launcher = configure_file(
-    input: 'assets/linux/openPREY-steamdeck.in',
-    output: 'openPREY-steamdeck',
+    input: 'assets/linux/openPR06-steamdeck.in',
+    output: 'openPR06-steamdeck',
     configuration: linux_desktop_conf,
   )
   linux_desktop_entry = configure_file(
-    input: 'assets/linux/openprey.desktop.in',
-    output: 'openprey.desktop',
+    input: 'assets/linux/openpr06.desktop.in',
+    output: 'openpr06.desktop',
     configuration: linux_desktop_conf,
   )
   linux_steamdeck_desktop_entry = configure_file(
-    input: 'assets/linux/openprey-steamdeck.desktop.in',
-    output: 'openprey-steamdeck.desktop',
+    input: 'assets/linux/openpr06-steamdeck.desktop.in',
+    output: 'openpr06-steamdeck.desktop',
     configuration: linux_desktop_conf,
   )
   install_data(
@@ -3622,7 +3622,7 @@ if host_system == 'linux'
     install_data(
       'assets/icons/prey.svg',
       install_dir: install_root_dir / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps',
-      rename: 'openprey.svg',
+      rename: 'openpr06.svg',
     )
   endif
 
@@ -3633,7 +3633,7 @@ if host_system == 'linux'
       install_data(
         icon_png,
         install_dir: install_root_dir / 'share' / 'icons' / 'hicolor' / (icon_size + 'x' + icon_size) / 'apps',
-        rename: 'openprey.png',
+        rename: 'openpr06.png',
       )
     endif
   endforeach

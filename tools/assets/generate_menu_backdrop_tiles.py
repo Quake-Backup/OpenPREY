@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the main menu's aspect-expansion tiles from the retail Prey art.
 
-Prey paints its front-end backdrop for a 4:3 screen. openPREY widens the
+Prey paints its front-end backdrop for a 4:3 screen. openPR06 widens the
 canvas to the screen's aspect (docs/dev/prey-ui-visual-design.md, sections 3
 and 12), and the extra canvas needs art that continues the painting. This tool
 synthesises that art from the painting itself:
@@ -83,7 +83,7 @@ KNOWN_PREY_BASES = (
 def find_prey_base(explicit: str | None) -> Path:
 	candidates = [explicit] if explicit else []
 	if not explicit:
-		env = os.environ.get("OPENPREY_RETAIL_BASE")
+		env = os.environ.get("OPENPR06_RETAIL_BASE")
 		if env:
 			candidates.append(env)
 		candidates.extend(KNOWN_PREY_BASES)

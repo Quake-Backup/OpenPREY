@@ -39,7 +39,7 @@ This file is part of the openQ4 Source Code. See docs/legal for details.
 ===============================================================================
 */
 
-// openPREY: the palette follows docs/dev/prey-ui-visual-design.md section 4.
+// openPR06: the palette follows docs/dev/prey-ui-visual-design.md section 4.
 // Surfaces are the Sphere's slate shell (prey.sphere.shell and its lit rim),
 // dark but never black so the window reads apart from the black in-game
 // console; text and focus use the portal-rim cyan the in-game console shares.

@@ -788,7 +788,7 @@ only in a view where the volumes were missing. Once marked, the light had
 them, so each such view counted as clean; after 240 it left the fallback,
 drew those receivers unshadowed for one frame, and was marked again, for as
 long as the receiver was in view. Every view that draws such a receiver now
-renews the hold (`RB_ShadowMapDrawReceiverFallbacks`). The openPREY session
+renews the hold (`RB_ShadowMapDrawReceiverFallbacks`). The openPR06 session
 found it in Prey, where four lights cycled five times each in 900 frames; no
 stock Quake 4 view tried here has such a receiver, so the correction is
 checked by the code path and its contract, not by a reproduction. Vulkan
@@ -971,7 +971,7 @@ views above on both renderers; the fourteen scenarios on both back ends; the
 continuous-motion qualification; the in-engine self-tests; and the static
 tests that read the touched files.
 
-#### Correction, 14 November: the handedness was the wrong way round (openPREY)
+#### Correction, 14 November: the handedness was the wrong way round (openPR06)
 
 Found in PREY (2006), whose outdoor maps are lit by parallel lights: 28 of
 them cast shadows, most in the Land of the Ancients maps. With shadow maps on,

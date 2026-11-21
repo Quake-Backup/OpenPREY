@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.mpchat",
+ "id": "openpr06.mpchat",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {
   "mp.protocol": {"type": "number", "initial": 0},

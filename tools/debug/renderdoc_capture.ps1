@@ -26,13 +26,13 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workspaceRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptDir "..\.."))
 $installDir = Join-Path $workspaceRoot ".install"
 $savePath = Join-Path $workspaceRoot ".home"
-$exePath = Join-Path $installDir "openPREY-client_x64.exe"
-$captureTemplate = Join-Path $workspaceRoot ".home\basepr\renderdoc\openprey"
+$exePath = Join-Path $installDir "openPR06-client_x64.exe"
+$captureTemplate = Join-Path $workspaceRoot ".home\basepr\renderdoc\openpr06"
 $captureDir = Split-Path -Parent $captureTemplate
 $renderDocDoc = Join-Path $workspaceRoot (Join-Path "docs" (Join-Path "dev" "renderdoc-workflow.md"))
 
 if (-not (Test-Path -LiteralPath $exePath)) {
-    throw "openPREY client executable not found: $exePath"
+    throw "openPR06 client executable not found: $exePath"
 }
 
 if (-not [string]::IsNullOrWhiteSpace($BasePath) -and -not (Test-Path -LiteralPath (Join-Path $BasePath "base"))) {
@@ -68,14 +68,14 @@ if ([string]::IsNullOrWhiteSpace($Map)) {
 }
 
 if (-not $AllowUnsupported) {
-    throw "RenderDoc capture is not currently supported with the shipping openPREY OpenGL renderer. The renderer is still hard-wired to ARB2 / compatibility-profile features that RenderDoc drops during startup. See $renderDocDoc. Use -AllowUnsupported only if you intentionally want to reproduce this limitation while testing renderer modernization."
+    throw "RenderDoc capture is not currently supported with the shipping openPR06 OpenGL renderer. The renderer is still hard-wired to ARB2 / compatibility-profile features that RenderDoc drops during startup. See $renderDocDoc. Use -AllowUnsupported only if you intentionally want to reproduce this limitation while testing renderer modernization."
 }
 
 New-Item -ItemType Directory -Force -Path $captureDir | Out-Null
 
 $gameArgs = @(
     "+set", "logFile", "2",
-    "+set", "logFileName", "logs/openprey.log",
+    "+set", "logFileName", "logs/openpr06.log",
     "+set", "developer", "1",
     "+set", "r_fullscreen", "0",
     "+set", "r_postAA", $PostAA.ToString(),
@@ -139,8 +139,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $logCandidates = @(
-    (Join-Path $workspaceRoot ".home\basepr\logs\openprey.log"),
-    (Join-Path $workspaceRoot ".home\base\logs\openprey.log")
+    (Join-Path $workspaceRoot ".home\basepr\logs\openpr06.log"),
+    (Join-Path $workspaceRoot ".home\base\logs\openpr06.log")
 )
 $rendererCompatibilityFailure = $false
 
@@ -158,14 +158,14 @@ foreach ($logPath in $logCandidates) {
 }
 
 if ($rendererCompatibilityFailure) {
-    throw "RenderDoc did not launch successfully because the injected run dropped required openPREY compatibility / ARB2 OpenGL features. RenderDoc capture is not yet supported with the current openPREY renderer."
+    throw "RenderDoc did not launch successfully because the injected run dropped required openPR06 compatibility / ARB2 OpenGL features. RenderDoc capture is not yet supported with the current openPR06 renderer."
 }
 
 if ($LaunchOnly) {
     exit 0
 }
 
-$captures = Get-ChildItem -LiteralPath $captureDir -Filter "openprey*.rdc" -ErrorAction SilentlyContinue |
+$captures = Get-ChildItem -LiteralPath $captureDir -Filter "openpr06*.rdc" -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTime -Descending
 
 if (-not $captures) {

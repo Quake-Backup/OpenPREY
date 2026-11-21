@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-openPREY can render PREY (2006) with a cel-shaded look: lighting quantized into flat bands, and black ink around the shapes. It ships off, so stock PREY (2006) still looks like PREY (2006) until you ask for something else.
+openPR06 can render PREY (2006) with a cel-shaded look: lighting quantized into flat bands, and black ink around the shapes. It ships off, so stock PREY (2006) still looks like PREY (2006) until you ask for something else.
 
 ## Quick Start
 

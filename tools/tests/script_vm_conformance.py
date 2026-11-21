@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Check the 64-bit script VM against the 32-bit behaviour retail Prey scripts rely on.
 
-Retail Prey ran its script VM on 32-bit x86; openPREY widens the VM's scalar
+Retail Prey ran its script VM on 32-bit x86; openPR06 widens the VM's scalar
 slots to pointer size. This runner loads a retail map with the development
-fixture content/basepr/dev/script/openprey_vm_conformance.script staged as that
+fixture content/basepr/dev/script/openpr06_vm_conformance.script staged as that
 map's loose map script inside an isolated fs_savepath, so the fixture compiles
 on top of the full retail program (prey_main.script and every map script). The
 fixture prints one VMTEST line per check; the runner fails on any FAIL line,
@@ -33,11 +33,11 @@ sys.path.insert(0, str(ROOT / "tools" / "validation"))
 
 from prey_map_load_condump_audit import default_executable, detect_basepath  # noqa: E402
 
-FIXTURE = ROOT / "content" / "basepr" / "dev" / "script" / "openprey_vm_conformance.script"
+FIXTURE = ROOT / "content" / "basepr" / "dev" / "script" / "openpr06_vm_conformance.script"
 RESULT_RE = re.compile(r"VMTEST (PASS|FAIL|DONE)\b(.*)")
 ERROR_RE = re.compile(
     r"(?i)(script error|error:.*\.script|compile error|exceeded|stack overflow|"
-    r"Entity not found for event|not supported on entity.*openprey|unknown event|ERROR:)"
+    r"Entity not found for event|not supported on entity.*openpr06|unknown event|ERROR:)"
 )
 CONSOLE_CODE_RE = re.compile(r"\^[0-9A-Za-z]")
 

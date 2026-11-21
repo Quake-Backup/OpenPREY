@@ -1061,7 +1061,7 @@ void main() {
 			abs( dFdx( vShadowCoord3.z ) ) + abs( dFdy( vShadowCoord3.z ) ) );
 	}
 
-	// OPENPREY: the visibility pass for receivers drawn by their own Prey ARB
+	// OPENPR06: the visibility pass for receivers drawn by their own Prey ARB
 	// interaction program, which cannot sample the map: the light's filtered
 	// visibility goes to destination alpha, and that program's additive
 	// contribution is then scaled by it (draw_arb2.cpp).

@@ -1,4 +1,4 @@
-# openPREY → openQ4 Rebase: Implementation Guide
+# openPR06 → openQ4 Rebase: Implementation Guide
 
 Status: executed rebase record (2026-08-01). Implementation is complete after a
 post-closure catalog/source audit corrected FW-19, FW-38, the WP5.7 GUI stream/flag
@@ -30,12 +30,12 @@ functions/lines/commits the change must be re-seated against.
   implementation state, validation state, and final evidence. Do not infer runtime
   validation from a successful port or compile.
 - **Refs used throughout:**
-  - `FORK_PREY = e634332b` (openPREY initial commit)
+  - `FORK_PREY = e634332b` (openPR06 initial commit)
   - `FORK_OQ4 = abb9a688` (identical upstream tree)
   - `UPSTREAM = openq4-upstream/main` (`d41186e42d...`, 2026-07-31)
   - `OLD = new-prey` (pre-rebase branch), `NEW = prey-on-oq4` (rebase branch)
-- **Golden rule (cross-pollination):** wherever openPREY and upstream both implement
-  something, take upstream's version and delete openPREY's. The initial plan identified
+- **Golden rule (cross-pollination):** wherever openPR06 and upstream both implement
+  something, take upstream's version and delete openPR06's. The initial plan identified
   31 obsolete/drop items; execution finished at 34 intentionally dropped deltas. If an
   undocumented collision is found during a future sync, prefer upstream and note it in
   the ledger.
@@ -75,7 +75,7 @@ git -C E:\Repositories\openPREY diff --shortstat e634332b abb9a688     # expect:
 Because the fork trees are identical, you can synthesize a merge base for tooling:
 
 ```bash
-# per-file 3-way: base = fork, ours = upstream, theirs = openPREY
+# per-file 3-way: base = fork, ours = upstream, theirs = openPR06
 git show abb9a688:src/renderer/tr_subview.cpp > /tmp/base.cpp
 git show openq4-upstream/main:src/renderer/tr_subview.cpp > /tmp/ours.cpp
 git show new-prey:src/renderer/tr_subview.cpp > /tmp/theirs.cpp
@@ -100,12 +100,12 @@ Files: `src/game/Entity.cpp`, `src/Prey/game_trigger.cpp/.h`, plus the repro cfg
 worth keeping (move `repro_roadhouse_trigger_timing.cfg` out of `.install/` into
 `tools/fixtures/` first). Commit alone: `fix: swept-hull player trigger detection`.
 
-### WP0.2 — commit the openPREY casing rebrand pass
+### WP0.2 — commit the openPR06 casing rebrand pass
 
 Files (uncommitted): `src/framework/licensee.h` (PROJECT_NAME/window classes/
 CONFIG_FILE + INTERIM/LEGACY fallbacks/CD_BASEDIR), `.github/workflows/*`,
 `.vscode/tasks.json`, `meson.build`, docs, TODO. Add untracked
-`src/sys/win32/rc/openprey_version.rc` (replacing deleted `OpenPreyVersion.rc`).
+`src/sys/win32/rc/openpr06_version.rc` (replacing deleted `OpenPreyVersion.rc`).
 This commit is superseded by WP1.2's systematic sweep but preserves the intent and the
 config-migration shim constants for reuse.
 
@@ -115,8 +115,8 @@ Both are dispositioned obsolete-upstream (RD-11, RD-10) — they will NOT be por
 must not be lost from history:
 
 ```bash
-git add src/renderer/RenderWorld_lightgrid.cpp basepy/glprogs/openprey_bloom_*.{fs,vs} \
-        basepy/glprogs/openprey_hdr_luminance.{fs,vs} basepy/glprogs/lightgrid_indirect.{fs,vs}
+git add src/renderer/RenderWorld_lightgrid.cpp basepy/glprogs/openpr06_bloom_*.{fs,vs} \
+        basepy/glprogs/openpr06_hdr_luminance.{fs,vs} basepy/glprogs/lightgrid_indirect.{fs,vs}
 git add -u   # remaining uncommitted renderer/session files
 ```
 
@@ -139,13 +139,13 @@ Assumed choice: `basepr` (per TODO "keep basepr as the sole namespace").
 
 ### WP0.5 — purge tracked `.install/` state (assets-07, disposition: drop)
 
-1. Salvage: move unique repro cfgs (`.install/openprey/repro_*.cfg`, `.install/base/`
+1. Salvage: move unique repro cfgs (`.install/openpr06/repro_*.cfg`, `.install/base/`
    cfgs, `preykey` test fixture) to `tools/fixtures/`.
-2. `git rm -r --cached .install/basepy .install/openprey` (and the already-deleted
+2. `git rm -r --cached .install/basepy .install/openpr06` (and the already-deleted
    binaries/icons); commit the working-tree deletions of `OpenPrey-client_x64`,
    `-ded_x64`, `.icns`, `.ico`.
 3. Add `.install/` to `.gitignore` (keep only what upstream keeps: nothing but icons —
-   and openPREY's icons live in `assets/icons/`, so ignore the whole tree).
+   and openPR06's icons live in `assets/icons/`, so ignore the whole tree).
 
 ### WP0.6 — tag and snapshot
 
@@ -157,7 +157,7 @@ git push origin new-prey --tags   # if pushing is desired at this point
 Acceptance for Phase 0: `git status` is clean on `new-prey`; `pre-oq4-rebase` tag
 exists; `git grep -c basepy` returns 0 (or documented exceptions).
 
-## 3. Phase 1 — scaffold (upstream tree under openPREY identity)
+## 3. Phase 1 — scaffold (upstream tree under openPR06 identity)
 
 ### WP1.1 — create the branch and prove the baseline builds
 
@@ -172,22 +172,22 @@ tools/build/meson_setup.ps1            # upstream's setup script (now in-tree on
 meson compile -C builddir
 ```
 
-Record deviations (toolchain, subproject fetch issues) before any openPREY change lands.
+Record deviations (toolchain, subproject fetch issues) before any openPR06 change lands.
 Note: upstream requires the gamelibs stage (`meson.build` refuses to build without
 `.tmp/gamelibs_stage`) — for this baseline either clone `openQ4-game` beside the repo or
 configure engine-only if upstream's options allow; otherwise defer the full build gate
 to WP1.4 and only validate `meson setup` here.
 
-### WP1.2 — systematic rebrand sweep (FW-01, rebrand-openprey, FW-02, assets-08, linux-desktop-icons)
+### WP1.2 — systematic rebrand sweep (FW-01, rebrand-openpr06, FW-02, assets-08, linux-desktop-icons)
 
 Do this as a scripted, reviewable pass — the branding surface tripled upstream.
 
-1. **Identity constants** (`src/framework/licensee.h`): port openPREY's block onto
-   upstream's file — GAME_NAME/PROJECT_NAME `openPREY`, `BASE_GAMEDIR "base"`,
-   `BASE_MPGAMEDIR "base"`, `OPENPREY_GAMEDIR "basepr"` (replacing upstream's openq4
+1. **Identity constants** (`src/framework/licensee.h`): port openPR06's block onto
+   upstream's file — GAME_NAME/PROJECT_NAME `openPR06`, `BASE_GAMEDIR "base"`,
+   `BASE_MPGAMEDIR "base"`, `OPENPR06_GAMEDIR "basepr"` (replacing upstream's openq4
    gamedir constant, keep the macro name upstream code expects or rename all uses),
    `CDKEY_FILE "preykey"` + CDKEY_TEXT, `GAME_PLAYERDEFNAME player_tommy`,
-   CONFIG_FILE `openPREYConfig.cfg` + INTERIM/LEGACY fallbacks (from WP0.2), window/
+   CONFIG_FILE `openPR06Config.cfg` + INTERIM/LEGACY fallbacks (from WP0.2), window/
    console class names, `CD_BASEDIR`, savegame gamename constants (coordinate with
    WP5.9: add `"Prey"` to upstream's `SAVEGAME_GAME_NAME_*` set rather than replacing).
    Also port FW-02's Prey feature-toggle macro block verbatim (SINGLE_MAP_BUILD,
@@ -196,17 +196,17 @@ Do this as a scripted, reviewable pass — the branding surface tripled upstream
 2. **Version pipeline**: do NOT reintroduce a hardcoded version rc. Rebrand
    `tools/build/openq4_version.py` / `openq4_release_version.py` outputs (generated
    header consumed by the version rc and AutoVersion.h); rename the rc to
-   `openprey_version.rc` and point the meson rc target at it.
-3. **Paths**: Windows `LocalAppData\openPREY`; Linux `~/.local/share/openprey` +
-   `/usr/local/games/basepr` defaults; macOS `Application Support/openPREY`, bundle id
-   `com.darkmatter.openprey`; single-instance mutex/lock names; crash artifacts
-   `openprey_crash_*`. Keep legacy-dir read fallbacks (pattern already exists in the
+   `openpr06_version.rc` and point the meson rc target at it.
+3. **Paths**: Windows `LocalAppData\openPR06`; Linux `~/.local/share/openpr06` +
+   `/usr/local/games/basepr` defaults; macOS `Application Support/openPR06`, bundle id
+   `com.darkmatter.openpr06`; single-instance mutex/lock names; crash artifacts
+   `openpr06_crash_*`. Keep legacy-dir read fallbacks (pattern already exists in the
    OLD branch — copy the fallback lists).
-4. **Env vars**: `OPENPREY_*` with `OPENQ4_*` accepted as legacy fallback (pattern from
+4. **Env vars**: `OPENPR06_*` with `OPENQ4_*` accepted as legacy fallback (pattern from
    OLD `meson_setup.ps1` / `sync_gamelibs.ps1`).
 5. **Desktop/icons** (assets-08 + linux-desktop-icons): copy `assets/icons/prey.*` from
    OLD; rename into upstream's expected set (upstream now also wants 1024/512/40/20 px
-   — generate from `prey_256.svg`); add `assets/linux/openprey.desktop.in` (+ a
+   — generate from `prey_256.svg`); add `assets/linux/openpr06.desktop.in` (+ a
    Steam-Deck variant cloned from upstream's); wire into upstream's meson icon/desktop
    loops (`meson.build:1638-1715` region); replace splash bmp.
 6. **Console theme** (FW-20 partial, console-color-tweak): express Prey cyan accent and
@@ -224,7 +224,7 @@ Suggested: 3–6 commits (identity, version pipeline, paths/env, desktop/icons, 
 1. Create `content/basepr/pak0/` mirroring upstream's `content/baseoq4/pak0` layout;
    move the OLD `basepr/` (ex-`basepy/`) trees in: `guis/`, `materials/`, `strings/`,
    `script/`, `glprogs/` (contents decided in WP4.8 — for now copy Prey-only shaders:
-   `interaction.vfp`; do NOT copy the openprey_* post-FX mirrors, they are dropped by
+   `interaction.vfp`; do NOT copy the openpr06_* post-FX mirrors, they are dropped by
    assets-02).
 2. `mod.json.in`: clone upstream's, set Prey identity; wire `configure_file`.
 3. Pak assembly: reuse upstream's `tools/build/build_pak0.py` + manifest custom_target,
@@ -234,13 +234,13 @@ Suggested: 3–6 commits (identity, version pipeline, paths/env, desktop/icons, 
    validation loop needs them in the search path (recommend: `dev/` staged only for
    local runs via `fs_devpath`).
 4. Strings: retain the private `#str_122xxx` IDs and move each pack to the maintainable
-   `<lang>_openprey.lang` convention in `content/basepr/pak0/strings/` (WP7.4).
+   `<lang>_openpr06.lang` convention in `content/basepr/pak0/strings/` (WP7.4).
 
 ### WP1.4 — Phase 1 gate
 
 - `meson setup` + engine-only compile succeeds (game staging may still point at
   upstream's expectations — acceptable to stub `build_games=false` until WP3.1).
-- Client launches to console/menu shell with openPREY branding (retail assets not yet
+- Client launches to console/menu shell with openPR06 branding (retail assets not yet
   required — expect missing-asset warnings, not crashes).
 - Grep audit from WP1.2.7 recorded.
 
@@ -364,7 +364,7 @@ FW-39 (surviving parts).
 - FW-06: `OpenExplicitFileAppend` virtual + impl (vtable — ABI rule 2; fine now, game
   module doesn't exist yet).
 - FW-07: Warning→DPrintf at `OSPathToRelativePath` failure.
-- FW-08: `exec_savepath` command; `openPREY_ExecConfigFromSavePath` probing
+- FW-08: `exec_savepath` command; `openPR06_ExecConfigFromSavePath` probing
   CONFIG→INTERIM→LEGACY; `WriteConfiguration()` in `idCommonLocal::Quit`.
 - FW-09: Prey GUI compat cvar block (gui_filter_pb, g_subtitles, com_profanity,
   r_shaderlevel, r_correctspecular, r_normalizebumpmap, r_skipGlowOverlay — NOTE
@@ -374,7 +374,7 @@ FW-39 (surviving parts).
 - FW-10: `MaterialKeyForBinding` + `SetGameSensitivityFactor`/`FixupKeyTranslations`
   virtuals; check localized key names against upstream's TTF key-name work when
   choosing display strings.
-- FW-19: swap accepted demo magics to the openPREY casing set inside upstream's
+- FW-19: swap accepted demo magics to the openPR06 casing set inside upstream's
   multi-magic mechanism (`DemoFile.cpp:36-38` pattern) — do not port OLD's parallel
   implementation.
 - FW-28: ReadCDKey/WriteCDKey implementations into upstream's empty stubs
@@ -401,7 +401,7 @@ Items: lglcd-idsys-hooks, sound-04, ui-10, ui-03, ui-04, toolchain-warn-suppress
 - ui-03: ON_TABACTIVATE/ON_SLIDERCHANGE/ON_STARTUP/ON_MAXCHARS enum + ScriptNames +
   `CallStartup()`; EditWindow ON_MAXCHARS firing (sites survive upstream).
 - ui-04: GuiScript `inc`/`resetCapture` commands + `SetInternalVarValue` routing.
-- toolchain-warn-suppression: add openPREY's `warning_level=0` / `/W0` /
+- toolchain-warn-suppression: add openPR06's `warning_level=0` / `/W0` /
   `-fpermissive` for Prey-era sources into upstream's `shared_cpp_args` (scope to game
   targets if practical; engine can stay at upstream's warning level).
 
@@ -417,19 +417,19 @@ never let them drift. Sub-steps ordered so the build breaks early and locally.
 ### WP3.1 — staging + build integration (unified-game-module, gamelib-sync-scripts, assets-10; decision D1)
 
 1. **Stage the canonical Prey game trees** from `E:\Repositories\OpenPrey-game` (or
-   `OPENPREY_GAMELIBS_REPO=<path>`): `src/game`, `src/Prey`, `src/preyengine`, and
+   `OPENPR06_GAMELIBS_REPO=<path>`): `src/game`, `src/Prey`, `src/preyengine`, and
    required shared headers. `tools/build/stage_gamelibs.py` copies them into
-   `<builddir>/.tmp/openprey_gamelibs_stage/` with manifest/hashing. The per-build
+   `<builddir>/.tmp/openpr06_gamelibs_stage/` with manifest/hashing. The per-build
    location prevents concurrent platform configurations from rewriting one another's
    source inputs. Do not create an in-repo mirror. This
    keeps upstream's configure-time gate and include-dir mechanism intact
-   (`include_directories('.tmp/openprey_gamelibs_stage/src/game')` resolves
+   (`include_directories('.tmp/openpr06_gamelibs_stage/src/game')` resolves
    `precompiled.h`'s `#include "../game/Game.h"` to PREY's Game.h — v7 contract).
 2. **Meson targets**: replace upstream's split `game-sp_/game-mp_` targets
    (root `meson.build` ~180-370/1303-1335 + `content/baseoq4/meson.build`) with ONE
    `game_<arch>` `shared_module` built from the staged tree (source list from OLD
    the preserved game-source manifest incl. per-file exclusions), linked against a single
-   `openprey_game_idlib` flavour, `vs_module_defs: src/game/Game.def`,
+   `openpr06_game_idlib` flavour, `vs_module_defs: src/game/Game.def`,
    `/BASE:0x180000000` already upstream, Linux/darwin export maps cloned from
    upstream's `linux_game_module.map`/`darwin_game_module.exp` (regenerate symbol
    list for `GetGameAPI`), installed to `basepr/`. Keep `build_games` option;
@@ -445,7 +445,7 @@ Inside upstream's phase-instrumented `LoadGameDLL` (`Common.cpp:~5388-5560`,
 
 - Module selection always resolves to the unified base name; candidate list
   `game_x64`/`game_x86`/`gamex64`/`gamex86`/`game` (OLD helper trio
-  `openPREY_IsValidGameModuleName`/`SelectGameModuleBaseName`/
+  `openPR06_IsValidGameModuleName`/`SelectGameModuleBaseName`/
   `BuildGameModuleCandidateList`); keep phase tracking, diagnostics, and the macOS
   universal2 fallback branch.
 - `gameImport_t` population: exactly the 13 Prey v7 systems (+ optional `hhProfiler*`
@@ -515,9 +515,9 @@ One commit per header; engine+game rebuild after each.
 ### WP3.5 — MVD / bots / repeater gating (decision D9)
 
 - The executed gates are compile-time constants, not a Meson or runtime option:
-  `OPENPREY_ENABLE_MVD=0`, `OPENPREY_ENABLE_BOTS=0`, and
-  `OPENPREY_ENABLE_REPEATER=0`. Recording/playback, bot, and repeater entry points are
-  inert; every gated site has an `OPENPREY-GATED(D9)` marker so re-enablement is
+  `OPENPR06_ENABLE_MVD=0`, `OPENPR06_ENABLE_BOTS=0`, and
+  `OPENPR06_ENABLE_REPEATER=0`. Recording/playback, bot, and repeater entry points are
+  inert; every gated site has an `OPENPR06-GATED(D9)` marker so re-enablement is
   greppable.
 - `MultiViewDemo` schema constant: when later enabled, its game schema version must be
   Prey's `GAME_API_VERSION=7` (ledger interface map row 18) — leave a TODO at the
@@ -532,12 +532,12 @@ One commit per header; engine+game rebuild after each.
 tools/build/meson_setup.ps1 compile -C builddir     # full build incl. game module
 meson install -C builddir --no-rebuild --skip-subprojects
 # from .install/: SP start on the self-contained test map
-.\openPREY-client_x64 +set r_fullscreen 0 +set fs_savepath ..\.home +map game/roadhouse_quick
+.\openPR06-client_x64 +set r_fullscreen 0 +set fs_savepath ..\.home +map game/roadhouse_quick
 ```
 
 Acceptance: unified `game_x64.dll` builds, stages to `basepr/`, loads through all
 diagnostics phases, `roadhouse_quick` reaches gameplay; MP listen server starts
-(`spawnServer`) with the same module; lowercase `logs/openprey_*.log` files show no
+(`spawnServer`) with the same module; lowercase `logs/openpr06_*.log` files show no
 contract-drift fatals.
 
 ## 6. Phase 4 — renderer workstream
@@ -695,7 +695,7 @@ Items: RD-06, RD-07, RD-08.
 
 Items: RD-12, RD-18 (+corelibs-20).
 
-- RD-12: `openPREY_RemapLegacyImageName` inserted at upstream's
+- RD-12: `openPR06_RemapLegacyImageName` inserted at upstream's
   `R_NormalizeInternalImageName` call sites (`ImageManager.cpp:273`, sites
   560/609/662/733); retail texture fallbacks re-sited in `ActuallyLoadImage`
   (`Image_load.cpp:385`); `_threshold` intrinsic + `_replay` placeholder; opaque
@@ -716,9 +716,9 @@ Items: RD-12, RD-18 (+corelibs-20).
 Items: RD-10, RD-11, RD-13, RD-22, FW-33, FW-23 (framework twins).
 
 1. Nothing to port. Actions: mark `DROPPED` in ledger; then:
-2. Re-express openPREY defaults as cvar defaults only (from OLD: r_hdrToneMap etc. —
+2. Re-express openPR06 defaults as cvar defaults only (from OLD: r_hdrToneMap etc. —
    diff OLD `RenderSystem_init.cpp` cvar defaults vs upstream and carry the wanted
-   ones in one commit `rebase: openPREY renderer cvar defaults`).
+   ones in one commit `rebase: openPR06 renderer cvar defaults`).
 3. RD-22 residual: verify `Model_lwo` uintptr_t casts exist upstream (ledger could not
    confirm — grep upstream's +43-line Model_lwo diff; port the two casts if absent).
 4. Lightgrid: validate upstream's system against Prey content in Phase 8 (bake one map
@@ -728,7 +728,7 @@ Items: RD-10, RD-11, RD-13, RD-22, FW-33, FW-23 (framework twins).
 
 Items: assets-02 (drop+adopt), assets-03 (rework).
 
-- Delete OLD's `openprey_*` post-FX shader mirrors from content (never copied in
+- Delete OLD's `openpr06_*` post-FX shader mirrors from content (never copied in
   WP1.3); ensure `content/basepr/pak0/glprogs/` carries upstream's current GLSL set
   (either by referencing upstream's content dir in the pak manifest or copying —
   prefer a build-time copy from a single source to avoid drift) and upstream's
@@ -856,7 +856,7 @@ onto the new path (keep the cvar name working).
 Redesign against the TTF-aware glyph pipeline: per-glyph injection re-anchored at
 `PaintChar` (`DeviceContext.cpp:1226`); handle scaledFont.renderScale, icon glyphs,
 variable-length escapes; Window-side credit arming re-seats with ui-01. With D10
-(TTF off for openPREY), first implement for the bitmap path and no-op under TTF with
+(TTF off for openPR06), first implement for the bitmap path and no-op under TTF with
 a logged notice; TTF support is follow-up.
 
 ### WP5.9 — session features (FW-22, FW-25, FW-30, FW-31, FW-32, FW-24)
@@ -951,7 +951,7 @@ desktop/icons in the artifact.
 
 Re-express Prey identity as configuration on upstream's grown `package_nightly.py`
 (+ `build_windows_installer.py`, `package_linux_appimage.py`,
-`assemble_macos_universal2.py`): PRODUCT_NAME openPREY, stem openprey, GAME_DIR
+`assemble_macos_universal2.py`): PRODUCT_NAME openPR06, stem openpr06, GAME_DIR
 basepr, unified module name, Prey pk4 exclusion rules, OpenAL payload; drop OLD's
 ad-hoc .app bundling in favor of upstream's.
 
@@ -972,8 +972,8 @@ ad-hoc .app bundling in favor of upstream's.
 
 ### WP7.4 — strings (assets-04)
 
-**Executed decision:** retain openPREY's private `#str_122xxx` menu IDs so existing GUI
-and engine bindings stay stable. Rename `*999.lang` to `<lang>_openprey.lang` in
+**Executed decision:** retain openPR06's private `#str_122xxx` menu IDs so existing GUI
+and engine bindings stay stable. Rename `*999.lang` to `<lang>_openpr06.lang` in
 `content/basepr/pak0/strings/`; no ID remap is required. The status ledger records this
 choice under assets-04.
 
@@ -994,7 +994,7 @@ choice under assets-04.
 | Package archive/runtime | **Passed**; the Windows x64 archive manifest and payload were inspected, then an isolated windowed launch reached Roadhouse and wrote an engine screenshot |
 | Root validator | **Passed**; the push profile completed every active check, including staged-payload validation |
 | Post-audit Windows full build | **951/951 build targets completed** after the corrective source changes |
-| Post-closure rebase audit | All 137 catalog IDs reconcile exactly with the ledger. FW-19, FW-38, WP5.7 GUI guards, and old external-BSE workflow naming were corrected and added to `openprey_rebase_contract.py`; active CI was expanded to request engine + dedicated + GL/Vulkan renderers + unified game module builds on Windows/Linux. Hosted execution remains CI-pending. |
+| Post-closure rebase audit | All 137 catalog IDs reconcile exactly with the ledger. FW-19, FW-38, WP5.7 GUI guards, and old external-BSE workflow naming were corrected and added to `openpr06_rebase_contract.py`; active CI was expanded to request engine + dedicated + GL/Vulkan renderers + unified game module builds on Windows/Linux. Hosted execution remains CI-pending. |
 | Post-audit GUI save stream | **Passed**; a fresh windowed Roadhouse save contained 54 `PGUI` v1 markers, restored through `Game Map Init SaveGame` without GUI stream errors, wrote an engine screenshot, and shut down cleanly. |
 | Final staging/content audit | **Passed**; plain Meson install now runs `clean_runtime_install.py`, staged-payload validation rejects non-runtime artifacts, and PK4 source/build/staged checks keep all `roadhouse_quick` fixture content under `content/basepr/dev/` rather than `pak0.pk4`. |
 | Final Roadhouse clean-log audit | **Passed**; a fresh staged Windows launch into `game/roadhouse` wrote an engine screenshot and shut down with zero warnings/errors after fixing the missing autosave string, loading-music decl-load scope, and benchmark harness post-map command path. The repaired smoke profile passed through `renderer_gameplay_benchmark.py`. |
@@ -1019,7 +1019,7 @@ Recorded representative runtime evidence:
 6. Two isolated `roadhouse_quick` dmap runs emitted byte-identical `.cm`/`.proc` files,
    and the generated geometry loaded successfully. A bounded light-grid bake completed,
    while a deliberately zero-probe bake honored `-quit` and shut down cleanly.
-7. Runtime logs use lowercase `logs/openprey_*.log` names.
+7. Runtime logs use lowercase `logs/openpr06_*.log` names.
 
 Still unrun or incomplete: the exhaustive SP/MP/manual visual matrix, localization,
 full subtitle/censor/audio matrix, full ModernGL/Vulkan parity, genuine CD-era checksum
@@ -1159,7 +1159,7 @@ The mirror clip-plane workaround remains active and tracked in
 | openal-dll-staging | obsolete-upstream | — |
 | linux-desktop-icons | reapply-clean | 1.2 |
 | vscode-prey-launch | reapply-rework | 7.3 |
-| rebrand-openprey | reapply-rework | 1.2 |
+| rebrand-openpr06 | reapply-rework | 1.2 |
 | portability-64bit-fixes | obsolete-upstream | — |
 | cpu-easyargs-win64 | reapply-rework | 6.3 |
 | macos-native-bringup | obsolete-upstream | — |
@@ -1191,7 +1191,7 @@ The mirror clip-plane workaround remains active and tracked in
 | SetSpiritWalkEffect / SetVoiceDucker DSP | WP5.5 no-ops; TODO |
 | Classic-layout PK4 checksums | WP6.1; docs TODO |
 | Mirror clip plane retail math | `references/retail_mirror_clip_parity_plan.md` |
-| ARM64/macOS/signing/manual-publish release lanes | Rebuild false-gated inherited lanes around `OpenPrey-game`, `basepr`, the unified module, and openPREY release identities |
+| ARM64/macOS/signing/manual-publish release lanes | Rebuild false-gated inherited lanes around `OpenPrey-game`, `basepr`, the unified module, and openPR06 release identities |
 | Remote default-branch cut-over | WP8.3.2 local branch cut-over is complete; remote retargeting is an operational follow-up |
 | Upstream-first PR candidates | plan §3.2 list; WP8.3.4 |
 
@@ -1206,7 +1206,7 @@ the following compatibility or provenance classes; they are not active product i
 
 - **Migration-compatible entry points and inputs:** established helper filenames such as
   `openq4_validate.py`, generated-header names, and the documented `OPENQ4_*` environment
-  aliases accepted while callers migrate to `OPENPREY_*`.
+  aliases accepted while callers migrate to `OPENPR06_*`.
 - **Serialized/runtime compatibility:** legacy save/config names, old game-module loader
   aliases, inherited renderer or save markers, and explicit diagnostics for unsupported
   retail Quake 4 data. Removing these would silently break migration or format detection.
@@ -1220,5 +1220,5 @@ the following compatibility or provenance classes; they are not active product i
   whose upstream name is factual provenance.
 
 The former closed-source `openQ4-BSE` companion workflow is not in that allowlist. The
-active target and integrated API use openPREY names, and the build wrappers no longer
+active target and integrated API use openPR06 names, and the build wrappers no longer
 detect or clean its removed option/artifacts. BSE is built only from `src/bse` in-tree.

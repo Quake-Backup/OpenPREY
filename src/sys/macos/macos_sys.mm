@@ -73,7 +73,7 @@ int main(int argc, const char *argv[]) {
 
 const char *macosx_scanForLibraryDirectory(void)
 {
-    return "/Library/openPREY";
+    return "/Library/openPR06";
 }
 
 //===========================================================================
@@ -219,7 +219,7 @@ void Sys_Error(const char *error, ...)
 
     NSLog(@"Sys_Error: %@", formattedString);
     NSAlert *alert = [[NSAlert alloc] init];
-    [alert setMessageText:@"openPREY Error"];
+    [alert setMessageText:@"openPR06 Error"];
     [alert setInformativeText:formattedString];
     [alert setAlertStyle:NSAlertStyleCritical];
     [alert runModal];

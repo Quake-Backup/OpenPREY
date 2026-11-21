@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-openPREY's engine uses an authenticated remote-console protocol, `rcon2`, by
+openPR06's engine uses an authenticated remote-console protocol, `rcon2`, by
 default. It replaces the legacy idTech 4 packet, which sent the administration
 password verbatim over UDP. Gameplay, server discovery, the connection
 handshake's wire layout and the retail PREY asset format are unchanged.
@@ -112,24 +112,24 @@ executable game code.
 
 The pure handshake also carries a game-code checksum. The engine sends a fixed
 token, `0x68fb90b1`, inherited unchanged from openQ4's network protocol (it is
-the checksum of a Quake 4 game pak). openPREY doesn't require, mount, download,
+the checksum of a Quake 4 game pak). openPR06 doesn't require, mount, download,
 extract or execute any archive for it. The engine accepts the token only when
-the game module (`game_x64`) was already loaded from openPREY's trusted local
+the game module (`game_x64`) was already loaded from openPR06's trusted local
 package and module roots. A missing module, an unsupported platform ID, an
 empty pure asset list, or a different token fails closed instead of weakening
 pure mode or starting a code download.
 
 By default, `net_serverAllowServerMod 0` also prevents a selected mod from
 supplying its own game module. Content-only mods can continue to use the base
-openPREY module. An administrator who intentionally operates a code-bearing mod
+openPR06 module. An administrator who intentionally operates a code-bearing mod
 must set `net_serverAllowServerMod 1` and distribute a complete, trusted package
 to clients separately; the setting does not make module code downloadable.
-openPREY never loads a game module from the save folder or from inside a PK4.
+openPR06 never loads a game module from the save folder or from inside a PK4.
 
 A mod is recognised only with a complete `mod.json` (`name`, `version`,
-`releaseDate`, `website`, `author` and `requiredopenPREYVersion`; the older
+`releaseDate`, `website`, `author` and `requiredopenPR06Version`; the older
 `requiredopenQ4Version` key is still read). If a field is missing, the log says
-`Ignoring fs_game '<mod>'` and the server runs the normal openPREY game, so
+`Ignoring fs_game '<mod>'` and the server runs the normal openPR06 game, so
 clients without that mod can join it.
 
 The token is the same on every platform. It is not a cryptographic measurement
@@ -186,12 +186,12 @@ tool:
 // Server: accept legacy packets.
 net_serverAllowLegacyRcon 1
 
-// openPREY client: send a legacy packet.
+// openPR06 client: send a legacy packet.
 net_clientUseLegacyRcon 1
 ```
 
-An openPREY client talking to an openPREY server needs both settings to use the
-legacy path. A third-party legacy tool needs the server setting; an openPREY
+An openPR06 client talking to an openPR06 server needs both settings to use the
+legacy path. A third-party legacy tool needs the server setting; an openPR06
 client talking to an old server needs the client setting. Legacy mode sends the
 password and command in plaintext and should be enabled only temporarily on a
 trusted network. Return both variables to `0` when compatibility testing ends.
@@ -201,13 +201,13 @@ explicitly enables the legacy path.
 
 ## Retail PREY clients and servers
 
-openPREY speaks network protocol 2.41, inherited from openQ4, not the retail
-PREY protocol. Retail PREY clients can't join an openPREY server, and openPREY
+openPR06 speaks network protocol 2.41, inherited from openQ4, not the retail
+PREY protocol. Retail PREY clients can't join an openPR06 server, and openPR06
 can't join a retail server.
 
 - A server scan leaves servers with another protocol out of the list; the
   console logs `server <address> ignored - protocol ...` for each one.
-- A client with another protocol that tries an openPREY server is answered with
+- A client with another protocol that tries an openPR06 server is answered with
   `server uses protocol 2.41`.
 
 Joining retail servers would be a separate project, not a version-number

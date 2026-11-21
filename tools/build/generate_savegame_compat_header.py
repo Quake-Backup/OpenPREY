@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the source snapshot stamp used by openPREY savegames."""
+"""Generate the source snapshot stamp used by openPR06 savegames."""
 
 from __future__ import annotations
 

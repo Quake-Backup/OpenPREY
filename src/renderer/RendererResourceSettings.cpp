@@ -37,7 +37,7 @@ constexpr const char* DependencyNames[] = {
     "com_productionMode", "com_makingBuild", "com_SingleDeclFile"
 };
 constexpr size_t NumDependencies = sizeof(DependencyNames) / sizeof(DependencyNames[0]);
-// openPREY: upstream added two names here without growing the recovery record,
+// openPR06: upstream added two names here without growing the recovery record,
 // so recording the last two wrote past the end of its array.
 static_assert(NumDependencies == std::tuple_size<decltype(openq4::imageRecovery::Data::dependencies)>::value,
     "the image recovery record must hold one dependency per DependencyNames entry");

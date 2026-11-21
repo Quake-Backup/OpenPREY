@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   macos-debug:
-    if: ${{ false }} # OPENPREY-GATED: split-module/OpenQ4 source contract
+    if: ${{ false }} # OPENPR06-GATED: split-module/OpenQ4 source contract
     name: macOS ${{ matrix.bridge_label }} Debug
     runs-on: macos-15
     timeout-minutes: 120
@@ -287,7 +287,7 @@ jobs:
   # Compatibility-only compile check for Apple's deprecated framework. Release,
   # package, and standard validation paths use pinned OpenAL Soft instead.
   macos-openal-migration:
-    if: ${{ false }} # OPENPREY-GATED: split-module/OpenQ4 source contract
+    if: ${{ false }} # OPENPR06-GATED: split-module/OpenQ4 source contract
     name: macOS Apple OpenAL Compatibility Corridor (compile only)
     runs-on: macos-15
     timeout-minutes: 90

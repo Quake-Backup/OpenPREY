@@ -273,9 +273,9 @@ public:
 	const char *			GetReleaseDate( int index ) const { return mods[index].releaseDate.c_str(); }
 	const char *			GetWebsite( int index ) const { return mods[index].website.c_str(); }
 	const char *			GetAuthor( int index ) const { return mods[index].author.c_str(); }
-	const char *			GetRequiredopenPREYVersion( int index ) const { return mods[index].requiredopenQ4Version.c_str(); }
+	const char *			GetRequiredopenPR06Version( int index ) const { return mods[index].requiredopenQ4Version.c_str(); }
 	// Temporary source-compatibility alias for callers using the inherited API.
-	const char *			GetRequiredopenQ4Version( int index ) const { return GetRequiredopenPREYVersion( index ); }
+	const char *			GetRequiredopenQ4Version( int index ) const { return GetRequiredopenPR06Version( index ); }
 	const idModInfo &		GetInfo( int index ) const { return mods[index]; }
 
 private:

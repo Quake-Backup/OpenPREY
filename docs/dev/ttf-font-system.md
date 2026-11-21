@@ -1,9 +1,9 @@
 # TrueType font system
 
-openPREY renders GUI, HUD and console text from scalable TrueType faces. The
+openPR06 renders GUI, HUD and console text from scalable TrueType faces. The
 menu, alien and console faces are reconstructed from Prey (2006)'s retail
 bitmap fonts; Prey's narrow body face is replaced by Talon UI Condensed, drawn
-for openPREY (see [Talon UI Condensed](#talon-ui-condensed-the-body-face)).
+for openPR06 (see [Talon UI Condensed](#talon-ui-condensed-the-body-face)).
 The renderer rasterises them at the
 display's resolution instead of magnifying the fixed 12/24/48-pixel atlases.
 The original bitmap path remains available as the compatibility fallback.
@@ -27,7 +27,7 @@ Arabic, Hebrew, punctuation and HUD-symbol coverage supplied by the shared
 generator.
 
 `talon-ui-condensed.ttf` is licensed under the SIL Open Font License 1.1
-([LICENSES/OFL-1.1.txt](../../LICENSES/OFL-1.1.txt)): Talon UI Condensed is openPREY's own
+([LICENSES/OFL-1.1.txt](../../LICENSES/OFL-1.1.txt)): Talon UI Condensed is openPR06's own
 drawing, and its glyphs for the scripts it does not draw are derived from the
 Noto fonts, which are under the same licence. The traced faces keep the
 attribution to the retail bitmap fonts in their name tables.
@@ -58,7 +58,7 @@ temporary donor directory (alongside their OFL notices):
 Then build the complete set:
 
 ```powershell
-python tools/assets/fonts/build_openprey_fonts.py `
+python tools/assets/fonts/build_openpr06_fonts.py `
   --source .tmp/prey-fontsrc `
   --donors .tmp/fontdonors `
   --output content/basepr/pak0/fonts
@@ -70,7 +70,7 @@ made. Talon UI Condensed needs no retail extraction, so it alone rebuilds
 with:
 
 ```powershell
-python tools/assets/fonts/build_openprey_fonts.py --faces talon-ui-condensed `
+python tools/assets/fonts/build_openpr06_fonts.py --faces talon-ui-condensed `
   --donors .tmp/fontdonors --output content/basepr/pak0/fonts
 ```
 
@@ -119,7 +119,7 @@ atlas's `@font-face` block, so the atlas always draws what the engine ships.
    then applies axis snapping and curve fitting to retain sharp stems and
    corners. Prey's 48-point atlases are small for what they carry (the menu
    face's capitals are 18 pixels tall, and the alien digits are pixel-art
-   diagonals), so `build_openprey_fonts.py` first resamples each 48-point
+   diagonals), so `build_openpr06_fonts.py` first resamples each 48-point
    glyph six times with bicubic reconstruction and a light Gaussian
    (σ 0.32 source pixels). Curves are then fitted to the edge rather than to
    the 1/255 quantisation and staircase noise, with the curve tolerance held at
@@ -136,7 +136,7 @@ atlas's `@font-face` block, so the atlas always draws what the engine ships.
 
 Talon UI Condensed replaced the tracing of Prey's narrow body face on
 21 November 2026. The name says what it is: *Talon* for its place in
-openPREY's identity (Prey's hawk, and the PREY wordmark its bowls are drawn
+openPR06's identity (Prey's hawk, and the PREY wordmark its bowls are drawn
 from), *UI* for its job as the interface and HUD text face rather than a
 display face, and *Condensed* for its narrow frame. It ships as
 `fonts/talon-ui-condensed.ttf`, not under the retail face's language-folder
@@ -182,7 +182,7 @@ curves are sampled densely; `to_path` then finds each run of samples that came
 from a curve (outline turning less than 14° per vertex along short edges),
 fits it with cubic Béziers under fixed end tangents, converts those to
 quadratics within 0.4 units, and leaves straight runs and corners as lines.
-`TalonFaceBuilder` in `build_openprey_fonts.py` hands the drawn glyphs and
+`TalonFaceBuilder` in `build_openpr06_fonts.py` hands the drawn glyphs and
 marks to the shared `FaceBuilder` in place of a retail trace. The line box
 stays the retail face's (ascender 1920, descender at least 299 font units).
 

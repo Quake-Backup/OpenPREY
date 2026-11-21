@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 DarkMatter Productions. GPL-3.0-or-later.
-"""The light textures of openPREY's retained initializing screen.
+"""The light textures of openPR06's retained initializing screen.
 
 build_retained_initialization.py writes these beside the document. Each is
 drawn here from fixed seeds with numpy (value noise, fractal sums and domain

@@ -168,7 +168,7 @@ def validate_loading_screen_sounds() -> None:
     """The stock screens' load_screen_ready and load_screen_click are "play"
     menu commands that the gate never dispatches, and the retained screen has no
     scripts, so the session plays each one once per gate (menu-sounds.md)."""
-    # openPREY: the stock screens these name are Quake 4's (content/baseoq4); PREY
+    # openPR06: the stock screens these name are Quake 4's (content/baseoq4); PREY
     # ships neither, so only the session side is checked here.
 
     source = read("src/framework/Session.cpp")

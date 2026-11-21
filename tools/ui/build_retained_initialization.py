@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 DarkMatter Productions. GPL-3.0-or-later.
-"""Generate openPREY's retained initializing screen.
+"""Generate openPR06's retained initializing screen.
 
     python tools/ui/build_retained_initialization.py           write the document and its textures
     python tools/ui/build_retained_initialization.py --check   exit 1 if any is stale
@@ -17,7 +17,7 @@ lens ring and a burst of rays from fixed seeds, and the screen scales, turns
 and tints them. A quad costs four
 vertices however soft its light, where a vector gradient that soft costs
 thousands, and it scales and turns without being compiled again. The edges
-that must stay sharp are vectors: the wordmark, traced from openPREY's own
+that must stay sharp are vectors: the wordmark, traced from openPR06's own
 menu face (content/basepr/pak0/fonts/menu.ttf), the beam, the stars and the
 progress rule. Nothing comes from the retail archives.
 
@@ -530,7 +530,7 @@ def status(doc: ui.Document) -> dict:
 
 def document() -> dict:
     rng = random.Random(2006)
-    doc = ui.Document("openprey.initialization")
+    doc = ui.Document("openpr06.initialization")
     doc.state["message"] = {"type": "string", "initial": "#str_04343"}
     doc.state["step"] = {"type": "number", "initial": 0}
     doc.state["motion_reduced"] = {"type": "boolean", "initial": False, "cvar": "ui_retainedReducedMotion"}

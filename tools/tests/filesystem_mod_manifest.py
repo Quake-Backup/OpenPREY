@@ -125,7 +125,7 @@ def validate_json_parser_contract() -> None:
     require(manifest_parser, "unexpected data after manifest object", "mod.json trailing data rejection")
 
 
-def validate_openprey_version_key_contract() -> None:
+def validate_openpr06_version_key_contract() -> None:
     source = read("src/framework/FileSystem.cpp")
     header = read("src/framework/FileSystem.h")
     manifest_template = read("content/basepr/mod.json.in")
@@ -137,32 +137,32 @@ def validate_openprey_version_key_contract() -> None:
         "modManifestStatus_t idFileSystemLocal::ReadModManifestFile(",
     )
 
-    require(known_keys, '"requiredopenPREYVersion"', "primary openPREY manifest key")
+    require(known_keys, '"requiredopenPR06Version"', "primary openPR06 manifest key")
     require(known_keys, '"requiredopenQ4Version"', "legacy manifest key migration alias")
     require_before(
         manifest_parser,
-        '!key.Icmp( "requiredopenPREYVersion" )',
+        '!key.Icmp( "requiredopenPR06Version" )',
         '!key.Icmp( "requiredopenQ4Version" )',
         "primary manifest key before migration alias",
     )
     require(
         manifest_parser,
-        "!sawRequiredopenPREYVersion && !legacyRequiredVersion.IsEmpty()",
+        "!sawRequiredopenPR06Version && !legacyRequiredVersion.IsEmpty()",
         "legacy key fallback only when the primary key is absent",
     )
     require(
         manifest_parser,
-        "missing required field 'requiredopenPREYVersion'",
+        "missing required field 'requiredopenPR06Version'",
         "primary manifest-key diagnostic",
     )
-    require(manifest_reader, "invalid required openPREY version", "openPREY version parse diagnostic")
-    require(manifest_reader, "requires openPREY %s or newer", "openPREY compatibility diagnostic")
-    require(header, "GetRequiredopenPREYVersion", "primary openPREY manifest accessor")
-    require(manifest_template, '"requiredopenPREYVersion"', "staged basepr manifest template")
+    require(manifest_reader, "invalid required openPR06 version", "openPR06 version parse diagnostic")
+    require(manifest_reader, "requires openPR06 %s or newer", "openPR06 compatibility diagnostic")
+    require(header, "GetRequiredopenPR06Version", "primary openPR06 manifest accessor")
+    require(manifest_template, '"requiredopenPR06Version"', "staged basepr manifest template")
     reject(manifest_template, '"requiredopenQ4Version"', "staged manifest legacy key")
     require(
         package_tool,
-        'manifest.get("requiredopenPREYVersion")',
+        'manifest.get("requiredopenPR06Version")',
         "release package manifest validation",
     )
 
@@ -244,7 +244,7 @@ def validate_campaign_contract() -> None:
     require(parser, "modInfo.campaign.Clear();", "campaign starts empty")
     require(parser, 'value.Icmp( "awakening" ) && value.Icmp( "quake4" )', "campaign accepts only its two values")
     require(parser, "field 'campaign' must be", "an unknown campaign rejects the manifest")
-    for field in ("name", "version", "releaseDate", "website", "author", "requiredopenPREYVersion"):
+    for field in ("name", "version", "releaseDate", "website", "author", "requiredopenPR06Version"):
         require(parser, f"missing required field '{field}'", "the required fields stay required")
     reject(parser, "missing required field 'campaign'", "campaign stays optional")
     # The mod's campaign is read after fs_game is validated and before the
@@ -272,7 +272,7 @@ def validate_validation_coverage() -> None:
 def main() -> None:
     validate_manifest_status_contract()
     validate_json_parser_contract()
-    validate_openprey_version_key_contract()
+    validate_openpr06_version_key_contract()
     validate_manifest_only_contract()
     validate_game_module_fallback_contract()
     validate_invalid_mod_fallback_contract()

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 openPREY contributors
+// Copyright (C) 2026 openPR06 contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "../snd_local.h"

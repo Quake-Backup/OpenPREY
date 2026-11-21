@@ -31,8 +31,8 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
           DISCORD_RELEASE_EMOJI: ${{ vars.DISCORD_RELEASE_EMOJI || ':video_game:' }}
           DISCORD_RELEASE_MENTIONS: ${{ vars.DISCORD_RELEASE_MENTIONS || '' }}
-          DISCORD_FEEDBACK_CHANNEL: ${{ vars.DISCORD_FEEDBACK_CHANNEL || 'the openPREY community channels' }}
-          DISCORD_RELEASE_AVATAR_URL: ${{ vars.DISCORD_RELEASE_AVATAR_URL || 'https://raw.githubusercontent.com/themuffinator/openPREY/main/assets/img/avatar.png' }}
+          DISCORD_FEEDBACK_CHANNEL: ${{ vars.DISCORD_FEEDBACK_CHANNEL || 'the openPR06 community channels' }}
+          DISCORD_RELEASE_AVATAR_URL: ${{ vars.DISCORD_RELEASE_AVATAR_URL || 'https://raw.githubusercontent.com/themuffinator/openPR06/main/assets/img/avatar.png' }}
         shell: bash
         run: |
           set -euo pipefail

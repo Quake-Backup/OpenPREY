@@ -55,11 +55,11 @@ hhGameLocal					gameLocal;
 //#endif
 idGame *					game = &gameLocal;	// statically pointed at an idGameLocal
 
-int openPREY_GetSpawnIdForEntity( const idEntity *ent ) {
+int openPR06_GetSpawnIdForEntity( const idEntity *ent ) {
 	if ( ent == NULL ) {
 		return 0;
 	}
-	return ( openPREY_GetSpawnId( ent->entityNumber ) << GENTITYNUM_BITS_PLUSCENT ) | ent->entityNumber;
+	return ( openPR06_GetSpawnId( ent->entityNumber ) << GENTITYNUM_BITS_PLUSCENT ) | ent->entityNumber;
 }
 
 #ifdef HUMANHEAD
@@ -312,7 +312,7 @@ void idGameLocal::Init( void ) {
 
 #endif
 
-	// openPREY: configs saved under the retail default hold g_showPlayerShadow 0,
+	// openPR06: configs saved under the retail default hold g_showPlayerShadow 0,
 	// which would keep the player's own shadow hidden after the default changed.
 	if ( !g_showPlayerShadowMigrated.GetBool() ) {
 		g_showPlayerShadow.SetBool( true );
@@ -1437,7 +1437,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	savegame.ReadBuildNumber();
 	if ( !savegame.IsOpenQ4SaveGameCompatible() ) {
-		Warning( "Savegame payload is not compatible with this openPREY build: %s",
+		Warning( "Savegame payload is not compatible with this openPR06 build: %s",
 			savegame.GetOpenQ4SaveGameCompatibilityError() );
 		program.Restart();
 		return false;

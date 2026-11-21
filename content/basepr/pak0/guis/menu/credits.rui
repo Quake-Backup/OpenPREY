@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.credits",
+ "id": "openpr06.credits",
  "canvas": {"height": 720, "minWidth": 960},
  "actions": {
   "creditsBack": {"operation": "session.menu", "arguments": {"command": "creditsBack"}},

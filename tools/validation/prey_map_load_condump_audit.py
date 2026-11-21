@@ -263,12 +263,12 @@ def load_manifest(path: Path) -> list[MapEntry]:
 def default_executable(install_root: Path) -> Path:
     system = platform.system().lower()
     if system == "windows":
-        return install_root / "openPREY-client_x64.exe"
-    return install_root / "openPREY-client_x64"
+        return install_root / "openPR06-client_x64.exe"
+    return install_root / "openPR06-client_x64"
 
 
 def detect_basepath() -> str:
-    env = os.environ.get("OPENPREY_PREY_BASEPATH") or os.environ.get("PREY_BASEPATH")
+    env = os.environ.get("OPENPR06_PREY_BASEPATH") or os.environ.get("PREY_BASEPATH")
     if env and Path(env).exists():
         return str(Path(env).resolve())
 
@@ -807,7 +807,7 @@ def write_audit_markdown(
     lines.append(f"- Map manifest: {code(rel(args.manifest))}")
     lines.append(f"- Renderer API: {code(args.renderer_api)}")
     lines.append(f"- Retail asset root: {code(args.basepath or '(engine auto-discovery)')}")
-    lines.append(f"- openPREY install root: {code(rel(args.install_root))}")
+    lines.append(f"- openPR06 install root: {code(rel(args.install_root))}")
     lines.append(f"- Raw audit output: {code(rel(run_root))}")
     lines.append(f"- Per-map timeout: {args.timeout:.0f}s")
     lines.append(f"- Post-load settle time before conDump: {args.settle_ms}ms")

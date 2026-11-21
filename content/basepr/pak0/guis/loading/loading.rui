@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.loading",
+ "id": "openpr06.loading",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {
   "map_loading": {"type": "number", "initial": 0},

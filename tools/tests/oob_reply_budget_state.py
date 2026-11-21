@@ -51,7 +51,7 @@ def server_info() -> list[tuple[str, str]]:
         for path in sorted((ROOT / folder).rglob("*.cpp")):
             for match in CVAR.finditer(path.read_text(encoding="utf-8", errors="replace")):
                 found.setdefault(match[1], match[2] if match[2] is not None else "default")
-    # openPREY: PREY's game declares far fewer server-info CVars than Quake 4's;
+    # openPR06: PREY's game declares far fewer server-info CVars than Quake 4's;
     # the engine and game together have 19.
     if len(found) < 15 or any(key not in found for key in ("si_name", "si_map", "si_gameType", "fs_game",
                                                             "net_serverDedicated")):

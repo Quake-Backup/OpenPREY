@@ -558,7 +558,7 @@ void idAI::Event_AttackMissile( const char *jointname, const idDict *projDef, in
 =====================
 idAI::Event_ScriptAttackMissile
 
-openPREY: "attackMissile" carries only the joint name. Binding the event
+openPR06: "attackMissile" carries only the joint name. Binding the event
 straight to Event_AttackMissile left projDef and boneDir to whatever the
 caller's registers held on Win64, so a script call could launch from a
 garbage projectile dictionary. Event_AttackMissile is virtual (HUMANHEAD), so

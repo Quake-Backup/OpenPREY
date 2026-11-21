@@ -1,6 +1,6 @@
 # Prey subviews: skybox portals, direct portals and mirrors
 
-How openPREY draws the views that Prey materials nest inside another view, what
+How openPR06 draws the views that Prey materials nest inside another view, what
 retail `PREY.exe` does, and what each backend has to guarantee. Front-end code
 is in `src/renderer/tr_subview.cpp`; the retail reference is
 `references/PREY.exe_disassembly.txt` (`sub_4f14e0` is `R_GenerateSubViews`,
@@ -109,7 +109,7 @@ player's PVS and stays dormant: it never thinks and never presents a model. In
   `FindGamePortal`, `SetPortalState`).
 - **Who follows them:** the game's `idPVS` and its connected-area test. No
   renderer flood does: the view, light and connected-area floods walk the real
-  portal chains. openPREY's sound propagation and reverb skip them too.
+  portal chains. openPR06's sound propagation and reverb skip them too.
   Retail's game-portal sound areas are not implemented.
 
 `g_showGamePortals -1` draws them all and `g_showGamePortals n` the n-th, as

@@ -1219,9 +1219,9 @@ bool idVRSystemOpenXR::CreateInstance( void ) {
 	XrInstanceCreateInfo createInfo;
 	memset( &createInfo, 0, sizeof( createInfo ) );
 	createInfo.type = XR_TYPE_INSTANCE_CREATE_INFO;
-	idStr::Copynz( createInfo.applicationInfo.applicationName, "openPREY", sizeof( createInfo.applicationInfo.applicationName ) );
+	idStr::Copynz( createInfo.applicationInfo.applicationName, "openPR06", sizeof( createInfo.applicationInfo.applicationName ) );
 	createInfo.applicationInfo.applicationVersion = 1;
-	idStr::Copynz( createInfo.applicationInfo.engineName, "openPREY", sizeof( createInfo.applicationInfo.engineName ) );
+	idStr::Copynz( createInfo.applicationInfo.engineName, "openPR06", sizeof( createInfo.applicationInfo.engineName ) );
 	createInfo.applicationInfo.engineVersion = 1;
 	createInfo.applicationInfo.apiVersion = XR_API_VERSION_1_0;
 	createInfo.enabledExtensionCount = enabledCount;
@@ -1667,7 +1667,7 @@ bool idVRSystemOpenXR::CreateSession( void ) {
 			static bool warned = false;
 			if ( !warned ) {
 				common->Warning( "OpenXR: the OpenGL renderer runs on EGL (native Wayland) and the active runtime cannot bind it (%s); "
-					"use r_renderApi vulkan, or start openPREY with OPENPREY_FORCE_X11=1", VR_EGL_ENABLE_EXTENSION_NAME );
+					"use r_renderApi vulkan, or start openPR06 with OPENPR06_FORCE_X11=1", VR_EGL_ENABLE_EXTENSION_NAME );
 				warned = true;
 			}
 			return false;

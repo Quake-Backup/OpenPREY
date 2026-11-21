@@ -224,7 +224,7 @@ public:
 		// Preserve the engine's numeric value and avoid raising the libc++
 		// requirement to its newer floating-point from_chars implementation.
 		if (!(cvar->GetFlags() & (CVAR_FLOAT | CVAR_INTEGER | CVAR_BOOL))) return false;
-		// openPREY: a float CVar reads as the decimal it is set to. Widened
+		// openPR06: a float CVar reads as the decimal it is set to. Widened
 		// from its 32-bit value, 1.1 reads as 1.10000002, just off a slider's
 		// 0.1 grid, and stepping down from there only snaps back to 1.1, so
 		// Prey's Brightness, Gamma and effect sliders could never go down.
@@ -1397,7 +1397,7 @@ private:
 	int reducedBlurWidth=0, reducedBlurHeight=0;
 	static std::string FontFamily(const std::string& family) {
 		// The faces a document may name; anything else draws in Chain.
-		// openPREY: "menu" is Prey's display face and "alien" its Hider script;
+		// openPR06: "menu" is Prey's display face and "alien" its Hider script;
 		// Chain folds onto Prey's body face (R_CanonicalFontName).
 		static const char* const faces[] = {"marine","lowpixel","profont","r_strogg","strogg","menu","alien"};
 		for (const char* face : faces) if (family == face) return face;
@@ -2175,7 +2175,7 @@ bool RetainedUI_CanUpdateInitialization() {
 		!ui_retainedReducedMotion.GetBool() &&
 		renderSystem && renderSystem->IsOpenGLRunning();
 }
-// openPREY: the initializing screen is always this retained document; it has
+// openPR06: the initializing screen is always this retained document; it has
 // no stock counterpart for ui_retained to choose. A NULL message carries the
 // screen on as the last step left it, for the session's fallback screen
 // between startup and the menu (Session_DrawFallbackLoadingScreen); a screen
@@ -2220,7 +2220,7 @@ bool RetainedUI_DrawInitialization(const char* message) {
 	const bool changed = message != nullptr &&
 		(oldMessage == previous.end() || oldMessage->second != openq4::ui::StateValue(std::string(message)));
 	if (changed) {
-		// openPREY: Prey's six startup steps are #str_04346 (sound) to
+		// openPR06: Prey's six startup steps are #str_04346 (sound) to
 		// #str_04351 (menus); #str_04343 (loading) is step 0.
 		int step = carried ? 6 : 0;
 		for (int i=0; i<6 && !carried; ++i) {

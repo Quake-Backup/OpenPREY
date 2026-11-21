@@ -3,19 +3,19 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-Linux builds of openPREY stage an `openPREY-steamdeck` launcher beside the client in `.install/`, with a matching `share/applications/openprey-steamdeck.desktop` entry. PREY (2006) isn't sold on Steam, so you add openPREY to Steam yourself as a non-Steam game and point it at your own copy of PREY.
+Linux builds of openPR06 stage an `openPR06-steamdeck` launcher beside the client in `.install/`, with a matching `share/applications/openpr06-steamdeck.desktop` entry. PREY (2006) isn't sold on Steam, so you add openPR06 to Steam yourself as a non-Steam game and point it at your own copy of PREY.
 
 ## Launching
 
-- Use `openPREY-steamdeck` instead of `openPREY-client_x64`.
-- The launcher exports `OPENPREY_STEAMDECK=1`, starts the client with `+set com_platformProfile steamdeck +set r_fullscreen 0`, and passes on any extra command-line arguments.
-- SDL3 picks native Wayland or X11 (XWayland) itself. Launch with `OPENPREY_FORCE_X11=1` to force XWayland; the launcher and direct client launches both honor it.
-- If native Wayland hits a libdecor startup or window-decoration problem on a specific compositor, launch with `OPENPREY_WAYLAND_DISABLE_LIBDECOR=1`.
-- If you launch `openPREY-client_x64` directly on a Steam Deck or SteamOS host, openPREY selects the `steamdeck` profile while `com_platformProfile` is still `default`. Set `OPENPREY_NO_STEAMDECK_AUTODETECT=1` or `OPENPREY_DISABLE_STEAMDECK_AUTODETECT=1` to turn that off.
+- Use `openPR06-steamdeck` instead of `openPR06-client_x64`.
+- The launcher exports `OPENPR06_STEAMDECK=1`, starts the client with `+set com_platformProfile steamdeck +set r_fullscreen 0`, and passes on any extra command-line arguments.
+- SDL3 picks native Wayland or X11 (XWayland) itself. Launch with `OPENPR06_FORCE_X11=1` to force XWayland; the launcher and direct client launches both honor it.
+- If native Wayland hits a libdecor startup or window-decoration problem on a specific compositor, launch with `OPENPR06_WAYLAND_DISABLE_LIBDECOR=1`.
+- If you launch `openPR06-client_x64` directly on a Steam Deck or SteamOS host, openPR06 selects the `steamdeck` profile while `com_platformProfile` is still `default`. Set `OPENPR06_NO_STEAMDECK_AUTODETECT=1` or `OPENPR06_DISABLE_STEAMDECK_AUTODETECT=1` to turn that off.
 
 ## What the Profile Sets
 
-The `steamdeck` profile runs `openprey_profile_steamdeck.cfg` from openPREY's `pak0` on top of the normal defaults. It sets:
+The `steamdeck` profile runs `openpr06_profile_steamdeck.cfg` from openPR06's `pak0` on top of the normal defaults. It sets:
 
 - `in_joystick 1`, so the Deck's controls work as an SDL gamepad;
 - `in_gyro 1` with `in_gyroSensitivity 0.20` and `in_gyroDeadZone 0.015`, for gyro aiming;
@@ -41,7 +41,7 @@ Tuning and haptics:
 
 ## Steam Input and Diagnostics
 
-Use a Steam Input layout that presents the Deck as a gamepad with its gyro and trackpads available to SDL. Steam-level gyro-to-mouse or trackpad-to-mouse mappings work, but they hide those inputs from openPREY's own `in_gyro` and `in_touchpadMode` handling.
+Use a Steam Input layout that presents the Deck as a gamepad with its gyro and trackpads available to SDL. Steam-level gyro-to-mouse or trackpad-to-mouse mappings work, but they hide those inputs from openPR06's own `in_gyro` and `in_touchpadMode` handling.
 
 Run `listControllers` from the console when diagnosing Deck input. It prints the active SDL gamepad/joystick, GUID, type, path, power state, touchpad count, sensor capability, gyro/touchpad cvars, touchscreen routing and low-battery rumble state. Save the log output with bug reports.
 
@@ -70,12 +70,12 @@ With an update budget set, the renderer spends each frame's shadow renders on th
 
 ## Finding Your PREY Files
 
-Copy your PREY (2006) installation onto the Deck, then tell openPREY where it is:
+Copy your PREY (2006) installation onto the Deck, then tell openPR06 where it is:
 
-- Set `OPENPREY_PREY_PATH` (or `OPENPREY_PREY_ROOT`) to the PREY folder that contains `base`, or
+- Set `OPENPR06_PREY_PATH` (or `OPENPR06_PREY_ROOT`) to the PREY folder that contains `base`, or
 - launch with `+set fs_basepath "/path/to/Prey"`, pointing at the folder that contains `base`, not at `base` itself.
 
-On Linux, multiple paths in these variables can be separated with `:` or `;`. openPREY also keeps openQ4's scan of Steam library folders for a `steamapps/common/Prey` folder, which only helps if you placed your copy there yourself. See [Getting Started](getting-started.md#if-auto-detection-fails) for more.
+On Linux, multiple paths in these variables can be separated with `:` or `;`. openPR06 also keeps openQ4's scan of Steam library folders for a `steamapps/common/Prey` folder, which only helps if you placed your copy there yourself. See [Getting Started](getting-started.md#if-auto-detection-fails) for more.
 
 ## Notes
 

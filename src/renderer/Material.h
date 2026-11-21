@@ -710,7 +710,7 @@ public:
 	bool				HasActiveStockLightingInteractions(const float* registers) const;
 	bool				CanUseStockShadowMapReceiverForCustomGLSLLighting(const float* registers) const;
 
-	// OPENPREY: whether a stage that passes its condition is one of Prey's
+	// OPENPR06: whether a stage that passes its condition is one of Prey's
 	// per-light ARB interaction programs (SL_INTERACTION: skin, cloth, hair,
 	// parallax and masked interactions). Only the ARB2 interaction path can
 	// draw such a stage.
@@ -1123,7 +1123,7 @@ private:
 	// per-surface interaction and shadow-receiver chain scans early-out without
 	// walking every stage; register conditions are still evaluated when set.
 	bool				hasCustomGLSLLightingStage;
-	bool				hasInteractionProgramStage;	// OPENPREY: any SL_INTERACTION stage
+	bool				hasInteractionProgramStage;	// OPENPR06: any SL_INTERACTION stage
 	int					refCount;
 	bool				readsHighQualityHint;		// the parse resolved a non-forced quality hint
 	bool				parsedIgnoringHighQuality;	// image_ignoreHighQuality as that parse read it

@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../SoundVorbisStream.h"
 #include "../SoundMemoryBudget.h"
 #include "../SoundQueue.h"
-// openPREY: libvorbisfile recovers retail Prey Oggs that stb_vorbis stops on.
+// openPR06: libvorbisfile recovers retail Prey Oggs that stb_vorbis stops on.
 #include <vorbis/vorbisfile.h>
 static_assert( SoundVorbisStream::ChunkFrames == SOUND_QUEUE_DECODE_FRAMES,
 	"voice queues fill a buffer in decoder-sized reads" );
@@ -71,7 +71,7 @@ static std::atomic<bool> openQ4_openALBufferAllocationWarningIssued( false );
 
 extern idCVar sys_lang;
 
-// openPREY: bounded resynchronisation past damaged Ogg pages, as libvorbisfile
+// openPR06: bounded resynchronisation past damaged Ogg pages, as libvorbisfile
 // reports them (OV_HOLE). Retail Prey ships a few such files.
 static const int OGG_MAX_HOLE_RETRIES = 16;
 
@@ -1840,7 +1840,7 @@ static bool SoundSample_ProbeOggStream( idFile* file, int& channels, int& rate, 
 ========================
 SoundSample_DecodeOggWithVorbisFile
 
-openPREY: stb_vorbis cannot open every stream libvorbis wrote. It has no floor
+openPR06: stb_vorbis cannot open every stream libvorbis wrote. It has no floor
 type 0 (VORBIS_feature_not_supported), and retail Prey ships one sample that
 uses it, sound/elements/mepowerup01.ogg. libvorbisfile reads every Vorbis
 stream, so it decodes such a file whole. The PCM is reserved against
@@ -2198,7 +2198,7 @@ bool idSoundSample_OpenAL::BeginOggLoad( const idStr& filename, idSoundSampleDec
 			const bool streamed = BeginOggStreamEnvelope( filename, fileIn, channels, rate, frames, asyncDecode ) || LoadOggStream( filename );
 			if( streamed ) return true;
 			// A stream with no positioned page at all cannot seek: decode it whole.
-			// openPREY: so does one stb_vorbis cannot open (floor 0), which only
+			// openPR06: so does one stb_vorbis cannot open (floor 0), which only
 			// libvorbisfile reads; the stream decoders are stb_vorbis.
 			int probeChannels = 0, probeRate = 0;
 			unsigned int probeFrames = 0;
@@ -2297,7 +2297,7 @@ bool idSoundSample_OpenAL::BeginOggLoad( const idStr& filename, idSoundSampleDec
 	stb_vorbis* vorbis = arena ? stb_vorbis_open_memory( fileData, fileLen, &vorbisError, &alloc ) : NULL;
 	if( vorbis == NULL )
 	{
-		// openPREY: libvorbisfile reads what stb_vorbis cannot open (floor 0).
+		// openPR06: libvorbisfile reads what stb_vorbis cannot open (floor 0).
 		int vfChannels = 0, vfRate = 0;
 		unsigned int vfFrames = 0;
 		short* pcm = SoundSample_DecodeOggWithVorbisFile( fileData, fileLen, GetName(), reservation,
@@ -2426,7 +2426,7 @@ bool idSoundSample_OpenAL::FinishOggDecode( const idStr& filename, const unsigne
 	unsigned int decodedFrames = decodedFramesIn;
 	if( decodedFrames < static_cast<unsigned int>( playLength ) && buffers.Num() > 0 && buffers[0].buffer != NULL )
 	{
-		// openPREY: give a damaged file to libvorbisfile before accepting it short.
+		// openPR06: give a damaged file to libvorbisfile before accepting it short.
 		const unsigned int recovered = SoundSample_RecoverOggWithVorbisFile( filename.c_str(),
 			static_cast<short*>( buffers[0].buffer ), NumChannels(), SampleRate(), static_cast<unsigned int>( playLength ) );
 		if( recovered > decodedFrames )

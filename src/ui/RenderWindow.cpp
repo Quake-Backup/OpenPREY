@@ -142,7 +142,7 @@ static bool RenderWindowResolveCanvasView( idDeviceContext *dc, const idRectangl
 	}
 
 	// A 90 degree horizontal field puts a tangent of 1 at the rect's sides;
-	// GUI y runs down, a frustum's up. openPREY: "fovY" puts tan( fovY / 2 )
+	// GUI y runs down, a frustum's up. openPR06: "fovY" puts tan( fovY / 2 )
 	// at the rect's top and bottom instead.
 	const float unitsPerTangent = fovY > 0.0f ? drawRect.h * 0.5f / idMath::Tan( DEG2RAD( fovY ) * 0.5f ) : drawRect.w * 0.5f;
 	const float centreX = drawRect.x + drawRect.w * 0.5f;
@@ -207,7 +207,7 @@ static void RenderWindowApplyPreviewEffects( renderEntity_t &renderEntity, const
 
 /*
 ================
-The scene camera (openPREY)
+The scene camera (openPR06)
 
 The main menu's 3D backdrop (docs/dev/prey-ui-visual-design.md, section 12.2)
 draws the Sphere and Earth under one camera that opens close on the Sphere and

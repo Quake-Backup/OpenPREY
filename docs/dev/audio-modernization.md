@@ -413,7 +413,7 @@ stereo.
 **Streams stb_vorbis cannot open.** stb_vorbis has no Vorbis floor type 0
 (`VORBIS_feature_not_supported`, error 4). One retail Prey sample uses it:
 `sound/elements/mepowerup01.ogg` in `pak003.pk4`, the power-up speaker in
-`game/feedingtowerd` (1 of 2,707 retail Oggs, openPREY issue #39). Its PCM is
+`game/feedingtowerd` (1 of 2,707 retail Oggs, openPR06 issue #39). Its PCM is
 over `s_streamThresholdKB`, but the stream decoders are stb_vorbis, so stream
 selection now sends a file that stb_vorbis cannot open to the whole decode
 instead of failing without a message. There `SoundSample_DecodeOggWithVorbisFile`
@@ -458,7 +458,7 @@ and muted Dialogue Volume. After each opening it records the map's audio residen
 `soundShaderParms_t::subIndex` holds a 1-based handle to it, with 0 meaning none:
 retail `Prey.exe` returns position + 1 from its lookup. The field is part of the
 game ABI, and the game zero-fills its per-entity override parms, so an override
-replaces the shader's handle only when it is non-zero. Earlier openPREY builds used
+replaces the shader's handle only when it is non-zero. Earlier openPR06 builds used
 0-based handles with -1 for none. Every entity sound then picked up table 0: in
 `game/roadhouse`, the opening mirror monologue showed over footsteps, passing cars
 and other characters' lines, well before the mirror scene. A cue lasts until the

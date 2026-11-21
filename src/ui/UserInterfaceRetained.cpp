@@ -269,17 +269,17 @@ bool SessionMenuCommand(const std::string& command) {
         "mpAdminPass","mpAdminSelect","mpAdminKick","mpAdminBan","mpAdminSwitch","mpAdminBans","mpAdminBanPick","mpAdminUnban",
         "mpAdminApply","mpAdminConsole","mpRefereeLogin","mpSettingsName","mpSettingsClan","mpBuy",
         "arenaRestart","arenaLeave",
-        // openPREY: New Game's skill frame and Prey's menu sounds (Session_menu.cpp).
+        // openPR06: New Game's skill frame and Prey's menu sounds (Session_menu.cpp).
         "newGameNormal","newGameWicked","newGameCasino",
         "soundClick","soundCancel","soundTick","soundSlideInSmall","soundSlideOutSmall",
         "soundSlideIn","soundSlideOut","soundTabFlip","videoDetect","videoApply",
-        // openPREY: the Options page's Controls > Profiles and Reset Defaults.
+        // openPR06: the Options page's Controls > Profiles and Reset Defaults.
         "profileScan","profileSelect","profileLoad","profileSave","profileDelete","settingsResetApply",
-        // openPREY: the MultiPrey page's player name and model, and its filters.
+        // openPR06: the MultiPrey page's player name and model, and its filters.
         "mpPreyName","mpPreyModel","joinApplyFilters",
-        // openPREY: the in-game multiplayer card's stock commands.
+        // openPR06: the in-game multiplayer card's stock commands.
         "mpPreySpectate","mpPreyReady","mpPreyTeam","mpPreyChat","mpPreyMap","mpPreyMapScan",
-        // openPREY: the connecting screen's Cancel.
+        // openPR06: the connecting screen's Cancel.
         "netAbort"};
 	return commands.contains(command);
 }
@@ -367,7 +367,7 @@ bool SessionMenuValueCommand(const std::string& command) {
 		"audioVolume","audioMusic","audioDialogue","audioBackend","audioDevice","audioEax","audioSpeakers","audioHrtf",
 		"audioSubtitles","audioSubtitleSize","audioSubtitleBackground","audioSubtitleSpeakers","audioSubtitleUntranscribed",
 		"gameGunPosition","gameForceModel","gameCrosshair","gameCorpseTime","gameLanguage",
-		// openPREY: the Options page's Video tab (Session_menu.cpp).
+		// openPR06: the Options page's Video tab (Session_menu.cpp).
 		"videoMode","videoMonitor","videoRefresh","videoMaxFps","videoPreset","videoFullscreen"};
 	return commands.contains(command);
 }
@@ -404,7 +404,7 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		{"s_voiceVolume",{0,0,1}},{"s_micInputLevel",{0,0,10}},
 		// The stock GAME OPTIONS page, in its order (mouse and controller
 		// now on CONTROLS).
-		// openPREY: Prey's ui_autoSwitch is a Boolean, where Quake 4's took 0 to 2.
+		// openPR06: Prey's ui_autoSwitch is a Boolean, where Quake 4's took 0 to 2.
 		{"in_freeLook",{1}},{"ui_autoReload",{1}},{"ui_autoSwitch",{1}},{"in_toggleZoom",{1}},{"pm_zoomedSlow",{0,1,100,true}},
 		{"g_decals",{1}},{"ui_showGun",{1}},{"g_simpleItems",{0,0,3,true,{},{0,1,2,3}}},
 		{"g_mpFlatOpponentWeapons",{0,0,1,true,{},{0,1}}},{"m_pitch",{2,0,0,false,{"0.022","-0.022"}}},{"m_smooth",{0,1,8,true}},
@@ -433,7 +433,7 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		{"vr_hapticStrength",{2,0,0,false,{"0","0.5","1"}}},{"vr_twoHanded",{0,0,1,true,{},{0,1}}},
 		{"vr_comfortVignette",{2,0,0,false,{"0","0.5","1"}}},{"vr_physicalCrouch",{0,0,1,true,{},{0,1}}},
 		{"vr_playSpace",{0,0,2,true,{},{0,1,2}}},{"vr_body",{0,0,2,true,{},{0,1,2}}},
-		// openPREY: Prey's Options page, Game Options tab (guis/menu/settings.rui),
+		// openPR06: Prey's Options page, Game Options tab (guis/menu/settings.rui),
 		// beside the settings above that it shares with Quake 4's.
 		{"g_showHud",{1}},{"g_subtitles",{1}},{"com_profanity",{1}},{"g_useDDA",{1}},
 		// Its Audio tab; the rows the sound system acts on are session verbs.
@@ -889,7 +889,7 @@ struct idUserInterfaceRetained::Impl {
 		const char* shader = activate ? "main_menu_selection" : "main_menu_mouseover";
 		idSoundWorld* world = soundSystem != NULL ? soundSystem->GetPlayingSoundWorld() : NULL;
 #if defined(HUMANHEAD)
-		// openPREY: PREY declares neither stock cue. Its documents name the menu sound
+		// openPR06: PREY declares neither stock cue. Its documents name the menu sound
 		// each event plays (soundClick, soundTick and the rest, Session_menu.cpp), as
 		// retail PREY's GUIs do, so the stream stays silent rather than play a
 		// default sound beside them.

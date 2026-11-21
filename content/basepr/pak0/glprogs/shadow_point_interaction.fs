@@ -661,7 +661,7 @@ void main() {
     vec3 receiverNormal = cross(dFdx(vPointShadowVector), dFdy(vPointShadowVector));
     receiverNormal *= inversesqrt(max(dot(receiverNormal, receiverNormal), 1.0e-20));
     gPointReceiverPlane = vec4(receiverNormal, dot(receiverNormal, vPointShadowVector) / max(uPointShadowFar, 1.0));
-	// OPENPREY: the visibility pass for receivers drawn by their own Prey ARB
+	// OPENPR06: the visibility pass for receivers drawn by their own Prey ARB
 	// interaction program, which cannot sample the map: the light's filtered
 	// visibility goes to destination alpha, and that program's additive
 	// contribution is then scaled by it (draw_arb2.cpp).

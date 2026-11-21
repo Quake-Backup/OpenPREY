@@ -8,7 +8,7 @@ detail from several frames. On OpenGL and Vulkan it smooths edges and upscales
 a lower-resolution 3D scene back to your screen far more cleanly than a plain
 stretch.
 
-openPREY's first rendering target is the legacy GL/ARB2 interaction path that
+openPR06's first rendering target is the legacy GL/ARB2 interaction path that
 matches PREY's original materials. Full PREY parity on the ModernGL and Vulkan
 paths is deferred (`TODO-RENDER-BACKENDS` in the ledger), and nobody has yet
 checked how TAA treats PREY's portals, spirit walk or glow effects.

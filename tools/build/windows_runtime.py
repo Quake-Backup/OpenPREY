@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Helpers for validating and staging openPREY's Windows runtime payload."""
+"""Helpers for validating and staging openPR06's Windows runtime payload."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from game_layer import PACKAGED_LAYER_GAME_DIRS
 from openq4_pak import OPENQ4_PACK_NAMES, copy_file_if_changed
 
 
-PRODUCT_NAME = "openPREY"
+PRODUCT_NAME = "openPR06"
 GAME_DIR_NAME = "basepr"
 OPENAL_RUNTIME_OVERRIDES = {
     "x64": [Path("src/external/openal-soft/bin/win64/OpenAL32.dll")],
@@ -28,12 +28,12 @@ WINDOWS_ROOT_RUNTIME_PATTERNS = (
 # narrow manifest: these names can only be foreign POSIX engine binaries or
 # obsolete renderer-validation backups in a Windows runtime tree.
 WINDOWS_STALE_STAGE_FILE_MANIFEST = (
-    "openPREY-client_x86",
-    "openPREY-client_x64",
-    "openPREY-client_arm64",
-    "openPREY-ded_x86",
-    "openPREY-ded_x64",
-    "openPREY-ded_arm64",
+    "openPR06-client_x86",
+    "openPR06-client_x64",
+    "openPR06-client_arm64",
+    "openPR06-ded_x86",
+    "openPR06-ded_x64",
+    "openPR06-ded_arm64",
     "renderer-gl_x86.dll.mainbak",
     "renderer-gl_x64.dll.mainbak",
     "renderer-gl_arm64.dll.mainbak",
@@ -229,7 +229,7 @@ def infer_runtime_flavor(root_dir: Path) -> str:
     if has_release and has_debug:
         raise RuntimeError(
             f"Mixed MSVC CRT flavors detected under '{root_dir}'. "
-            "openPREY runtime binaries must all use the same CRT flavor."
+            "openPR06 runtime binaries must all use the same CRT flavor."
         )
     if has_debug:
         return RuntimeFlavor.DEBUG
@@ -257,11 +257,11 @@ def detect_binary_arch(root_dir: Path) -> str:
     )
     if len(arches) > 1:
         raise RuntimeError(
-            f"Mixed openPREY binary architectures detected under '{root_dir}': {', '.join(arches)}"
+            f"Mixed openPR06 binary architectures detected under '{root_dir}': {', '.join(arches)}"
         )
     if arches:
         return arches[0]
-    raise RuntimeError(f"Could not determine openPREY binary architecture from '{root_dir}'.")
+    raise RuntimeError(f"Could not determine openPR06 binary architecture from '{root_dir}'.")
 
 
 def has_engine_binary(paths: list[Path]) -> bool:
@@ -470,7 +470,7 @@ def _copy_file_if_changed(source_path: Path, target_dir: Path) -> Path | None:
 
 def resolve_openal_runtime_path(source_root: Path, arch: str) -> Path | None:
     override_root_raw = (
-        os.environ.get("OPENPREY_OPENAL_ROOT", "").strip()
+        os.environ.get("OPENPR06_OPENAL_ROOT", "").strip()
         or os.environ.get("OPENQ4_OPENAL_ROOT", "").strip()
     )
     if override_root_raw:
@@ -533,7 +533,7 @@ def stage_runtime_payloads(
         for binary_name, imports in sorted(violations.items()):
             violation_lines.append(f"{binary_name}: {', '.join(imports)}")
         raise RuntimeError(
-            "openPREY Windows binaries still import the MSVC/UCRT runtime. "
+            "openPR06 Windows binaries still import the MSVC/UCRT runtime. "
             "Expected static CRT linkage for all builds.\n"
             + "\n".join(violation_lines)
         )
@@ -543,7 +543,7 @@ def stage_runtime_payloads(
     if openal_runtime is None and has_engine_binary(binaries):
         raise RuntimeError(
             f"OpenAL32.dll runtime not found for Windows {arch}. "
-            "Set OPENPREY_OPENAL_ROOT to a prepared OpenAL Soft package or add the bundled runtime."
+            "Set OPENPR06_OPENAL_ROOT to a prepared OpenAL Soft package or add the bundled runtime."
         )
     for target in targets:
         target.mkdir(parents=True, exist_ok=True)

@@ -1,8 +1,8 @@
-"""Talon UI Condensed, openPREY's interface and HUD face (``fonts/talon-ui-condensed.ttf``).
+"""Talon UI Condensed, openPR06's interface and HUD face (``fonts/talon-ui-condensed.ttf``).
 
 ``outlines()`` returns every drawn glyph as a font-unit Path2D with its
 advance, the code points that share another glyph, and the combining marks.
-``build_openprey_fonts.py`` hands these to the shared face builder, which
+``build_openpr06_fonts.py`` hands these to the shared face builder, which
 composes the accented letters and fills the remaining scripts from Noto.
 """
 from __future__ import annotations

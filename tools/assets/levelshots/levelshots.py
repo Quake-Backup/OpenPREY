@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Recover, capture and stage openPREY's loading-screen recaptures.
+"""Recover, capture and stage openPR06's loading-screen recaptures.
 
     levelshots.py solve <slot> <map> ...       find each map's retail loading-screen camera
     levelshots.py capture <slot> [<set> ...]   five-tile captures at the cameras in poses.json
@@ -7,7 +7,7 @@
 
 <slot> is a, b, c or d: each slot is its own savepath and port, so up to four
 clients can run at once. Needs a staged package (.install), Python with
-OpenCV, NumPy and Pillow, `unzip` on PATH, and OPENPREY_RETAIL_BASE set to the
+OpenCV, NumPy and Pillow, `unzip` on PATH, and OPENPR06_RETAIL_BASE set to the
 retail install's base folder. Work files go to .tmp/levelshots/.
 See docs/dev/levelshot-capture.md.
 """

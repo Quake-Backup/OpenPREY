@@ -1,6 +1,6 @@
 # Savegame Reliability
 
-This document describes openPREY's save/load compatibility checks, the upstream
+This document describes openPR06's save/load compatibility checks, the upstream
 failure recorded in [OpenQ4 issue #84](https://github.com/themuffinator/openQ4/issues/84),
 and the defensive checks expected when the save format changes.
 
@@ -14,7 +14,7 @@ could therefore serialize an indeterminate `pathLen`, and the restore-side range
 check correctly rejected it.
 
 The Q4-specific move-state implementation from that report is not part of Prey's
-unified game module. openPREY retains the broadly applicable outcome: serialized
+unified game module. openPR06 retains the broadly applicable outcome: serialized
 counts, indices, strings, object references, script state, animation state, and
 articulated-physics state are range-checked before they can allocate or index
 runtime storage. Saves produced by incompatible builds are not repaired in place.
@@ -52,7 +52,7 @@ An upstream merge that raises the session's version needs the same change in
 the game library.
 
 Prey's game records are not portable. Bitfields, script storage and several
-structures are written as the compiler laid them out, so openPREY's version 5
+structures are written as the compiler laid them out, so openPR06's version 5
 payload carries the exact stamp of the build that wrote it
 (`<os>-<compiler-abi>-<architecture>-<endian>-raw1`, for example
 `windows-msvcabi-x64-le-raw1`) instead of upstream's `le64-portable1`
@@ -76,7 +76,7 @@ Two layers decide whether a payload loads:
 - The game library, once the saved map has loaded, requires its own payload
   version, wire ABI, build number, source stamp and source-file count to match
   exactly. On a mismatch it logs `Savegame payload is not compatible with this
-  openPREY build` and declines the restore, and the session starts the saved
+  openPR06 build` and declines the restore, and the session starts the saved
   map from its beginning with the save's persistent player data. A payload in
   the earlier version 2 framing takes this path too: on Windows x64 it still
   passes the engine preflight, which keeps upstream's version 2 reader, and the
@@ -224,7 +224,7 @@ Menu discovery validates the session header and aggregates saves from the active
 game directory, `basepr`, and the retail `base` directory. A save can therefore
 remain visible even when its gameplay payload cannot be restored. Selecting one
 that fails the engine preflight produces a precise warning while the current map
-continues running. Selecting one from another build of openPREY on the same
+continues running. Selecting one from another build of openPR06 on the same
 platform passes the preflight, and the game library then starts its map afresh
 as described under [Save Pipeline](#save-pipeline).
 

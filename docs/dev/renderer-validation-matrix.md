@@ -960,7 +960,7 @@ For each gameplay case, validate the matrix variants that the hardware supports:
 | display mode | windowed only for agent validation |
 | renderer diagnostics | `r_rendererMetrics 1`, `r_rendererMetrics 2`, `r_rendererModernAutoPromote 0`, and one signed `r_rendererModernAutoPromote 1` candidate run with the complete `r_rendererPromotionEvidence` token after the other rows are clean |
 
-After each gameplay smoke, inspect the configured log file under `fs_savepath\basepr\logs\openprey.log` or the case-specific log emitted by the launch tool. Fix errors and warnings, then repeat the loop until the case is clean.
+After each gameplay smoke, inspect the configured log file under `fs_savepath\basepr\logs\openpr06.log` or the case-specific log emitted by the launch tool. Fix errors and warnings, then repeat the loop until the case is clean.
 
 Milestone C GPU-animation captures follow the stricter backend-local A/B
 procedure in [Shared Renderer Contracts and GPU Animation](gpu-skinning-modernization.md):

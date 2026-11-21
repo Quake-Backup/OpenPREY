@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-This guide covers PREY's own game options and the audio settings openPREY's engine adds.
+This guide covers PREY's own game options and the audio settings openPR06's engine adds.
 
 openQ4's other gameplay toggles (corpse cleanup and sinking, the hit marker, damage numbers and the weapon-wheel offset) live in Quake 4 game code. PREY's game module doesn't have them, so they aren't covered here.
 
@@ -23,7 +23,7 @@ openQ4's other gameplay toggles (corpse cleanup and sinking, the hit marker, dam
 
 The same page also has mouse options (`m_pitch` for inverted mouse, `m_smooth`, `sensitivity`, `in_freelook` and `in_toggleZoom`); see [Input Settings](input-settings.md).
 
-## openPREY Game Cvars
+## openPR06 Game Cvars
 
 | Setting | Default | What it does |
 |---|---:|---|
@@ -67,7 +67,7 @@ Lip-synced speech and sounds on the voice-over asset paths share this control. M
 
 ## Room Reverb
 
-A map's reverb table tells the game which reverb each of its rooms, corridors and outdoor areas uses. openPREY plays these the way EAX sound hardware did:
+A map's reverb table tells the game which reverb each of its rooms, corridors and outdoor areas uses. openPR06 plays these the way EAX sound hardware did:
 
 - the reverb follows you from area to area, and the areas next to you keep their own reverb, so a gunshot in the next room still sounds like that room;
 - each nearby area's reverb comes from the doorway that leads to it;
@@ -84,7 +84,7 @@ It needs OpenAL's EFX extension. OpenAL Soft provides it: Windows builds bundle 
 
 ## Speaker Layout
 
-openPREY follows your audio device by default. Headphones and stereo speakers get stereo, with OpenAL Soft's 3D headphone audio (HRTF) switching on by itself when the system reports headphones, and a 5.1 or 7.1 system gets all of its channels.
+openPR06 follows your audio device by default. Headphones and stereo speakers get stereo, with OpenAL Soft's 3D headphone audio (HRTF) switching on by itself when the system reports headphones, and a 5.1 or 7.1 system gets all of its channels.
 
 - `s_numberOfSpeakers 0` (default): use the output device's own layout. Set it from the console.
 - `s_numberOfSpeakers 2`: always stereo.

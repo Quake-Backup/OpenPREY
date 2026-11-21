@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-This guide covers keyboard, mouse and controller input in openPREY: the stock PREY menus, console commands, config files and common troubleshooting.
+This guide covers keyboard, mouse and controller input in openPR06: the stock PREY menus, console commands, config files and common troubleshooting.
 
 ## Quick Start
 
@@ -32,22 +32,22 @@ To rebind an action, select its row and press the key, mouse button or controlle
 
 The retained interface (`ui_retained 1`) has openQ4's own Settings pages, including controller tuning, prompt styles and menu-navigation options. It's inherited and hasn't been checked with PREY.
 
-## Where openPREY Stores Input Settings
+## Where openPR06 Stores Input Settings
 
-At startup, openPREY loads config in this order:
+At startup, openPR06 loads config in this order:
 
 1. `default.cfg` from your PREY installation's `base` folder
-2. `openprey_defaults.cfg` (if present; openPREY doesn't ship one yet)
-3. `openprey_profile_<profile>.cfg` when a platform profile is active; openPREY ships `openprey_profile_steamdeck.cfg`
-4. `openPREYConfig.cfg`
+2. `openpr06_defaults.cfg` (if present; openPR06 doesn't ship one yet)
+3. `openpr06_profile_<profile>.cfg` when a platform profile is active; openPR06 ships `openpr06_profile_steamdeck.cfg`
+4. `openPR06Config.cfg`
 5. `autoexec.cfg` (if present)
 
 What this means in practice:
 
 - Default binds come from PREY's own `default.cfg`.
-- openPREY-specific overrides can be layered on top through `openprey_defaults.cfg`.
+- openPR06-specific overrides can be layered on top through `openpr06_defaults.cfg`.
 - Platform-specific overrides are applied through `com_platformProfile`.
-- Your saved personal changes live in `openPREYConfig.cfg`, written under the writable save/config area (`fs_savepath`, which defaults to `fs_homepath`).
+- Your saved personal changes live in `openPR06Config.cfg`, written under the writable save/config area (`fs_savepath`, which defaults to `fs_homepath`).
 - You can place your own final overrides in `autoexec.cfg`.
 
 ## Mouse Settings
@@ -73,7 +73,7 @@ The stock **Options -> Game Options** menu sets free look, toggle zoom, inverted
 
 For CPI-normalized tuning, set `m_cpi` to the mouse hardware value and use `360 / sensitivity` as an approximate centimetres-per-360 target.
 
-SDL3 builds use relative mouse capture during gameplay on Windows and Linux. On Linux, openPREY requests unscaled relative deltas from SDL where the desktop stack supports them and preserves fractional movement before it reaches the engine's event queue. `Mouse1` through `Mouse8` are bindable by name on SDL3 and the native X11 fallback, and the wheel is `MWHEELUP` and `MWHEELDOWN`.
+SDL3 builds use relative mouse capture during gameplay on Windows and Linux. On Linux, openPR06 requests unscaled relative deltas from SDL where the desktop stack supports them and preserves fractional movement before it reaches the engine's event queue. `Mouse1` through `Mouse8` are bindable by name on SDL3 and the native X11 fallback, and the wheel is `MWHEELUP` and `MWHEELDOWN`.
 
 ## Controller Settings
 
@@ -113,7 +113,7 @@ Generic SDL joysticks use raw axes. These cvars default to `-1` (automatic), whi
 | `in_joystickUseDedicatedLookAxes` | `-1` | `-1` uses look axes only when a paired look stick is available, `0` keeps classic single-stick behavior, and `1` forces dedicated look axes when any mapped look axis exists. |
 | `in_joystickMoveAxisX` / `in_joystickMoveAxisY` | `0` / `1` | Raw joystick axes used for movement or classic stick look. |
 | `in_joystickLookAxisX` / `in_joystickLookAxisY` | `2` / `3` | Raw joystick axes used for dedicated look on four-axis devices. |
-| `in_joystickUpAxis` / `in_joystickUpAxisNegative` | `4` / `5` | Optional vertical/throttle axes; when both exist, openPREY uses positive minus negative. |
+| `in_joystickUpAxis` / `in_joystickUpAxisNegative` | `4` / `5` | Optional vertical/throttle axes; when both exist, openPR06 uses positive minus negative. |
 
 Set an axis cvar to `-1` for automatic, or to a raw SDL axis number from `0` to `31`. These only affect generic SDL joysticks; SDL gamepads keep the fixed `JOY` button layout below.
 
@@ -132,7 +132,7 @@ Set an axis cvar to `-1` for automatic, or to a raw SDL axis number from `0` to 
 
 ## Controller Buttons
 
-SDL gamepads use fixed `JOY` button names, so binds work across Xbox, PlayStation and Steam Input layouts. PREY's `default.cfg` predates controller support, and openPREY doesn't add controller binds yet, so bind the buttons you want from **Options -> Controls** or the console.
+SDL gamepads use fixed `JOY` button names, so binds work across Xbox, PlayStation and Steam Input layouts. PREY's `default.cfg` predates controller support, and openPR06 doesn't add controller binds yet, so bind the buttons you want from **Options -> Controls** or the console.
 
 | Button | Name |
 |---|---|
@@ -251,7 +251,7 @@ seta in_joystickRumbleScale 0.50
 seta com_platformProfile steamdeck
 ```
 
-On a Steam Deck or SteamOS, direct `openPREY-client_x64` launches auto-select this profile while `com_platformProfile` is still `default`. Set `OPENPREY_NO_STEAMDECK_AUTODETECT=1` to keep direct launches on the default profile.
+On a Steam Deck or SteamOS, direct `openPR06-client_x64` launches auto-select this profile while `com_platformProfile` is still `default`. Set `OPENPR06_NO_STEAMDECK_AUTODETECT=1` to keep direct launches on the default profile.
 
 ## Troubleshooting
 
@@ -268,6 +268,6 @@ On a Steam Deck or SteamOS, direct `openPREY-client_x64` launches auto-select th
 | Steam Deck gyro doesn't work | Confirm `in_gyro 1`, run `listControllers`, and make sure Steam Input isn't hiding the gyro from the game. |
 | Steam Deck touchpad moves aim instead of menus | Set `in_touchpadMode 1`; use `2` only when you want touchpad mouse-look during gameplay. |
 | Mouse look is backwards vertically | Flip the sign of `m_pitch`, or set `in_joystickInvertLook` for a controller. |
-| A binding change didn't stick | Quit normally so `openPREYConfig.cfg` is rewritten, or put the `bind` in `autoexec.cfg`. |
+| A binding change didn't stick | Quit normally so `openPR06Config.cfg` is rewritten, or put the `bind` in `autoexec.cfg`. |
 
 For Steam Deck launcher details, see the [Steam Deck guide](steam-deck.md).

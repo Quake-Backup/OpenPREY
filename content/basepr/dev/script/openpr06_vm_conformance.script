@@ -1,12 +1,12 @@
 /***********************************************************************
 
-openprey_vm_conformance.script
+openpr06_vm_conformance.script
 
 Development fixture for tools/tests/script_vm_conformance.py. The runner
 copies it over maps/<map>.script inside an isolated fs_savepath, so WorldSpawn
 compiles it after the retail program and starts the global main().
 
-Retail Prey ran its script VM on 32-bit x86. openPREY widens the VM's scalar
+Retail Prey ran its script VM on 32-bit x86. openPR06 widens the VM's scalar
 slots to pointer size on 64-bit, so every place where the interpreter, the
 compiler and the event system agree on a size or offset is a parity risk:
 function parameters after a vector, stack locals, vector components, object
@@ -20,17 +20,17 @@ Output lines (read by the runner):
 
 ***********************************************************************/
 
-float	openprey_vm_pass;
-float	openprey_vm_fail;
-float	openprey_vm_gFloat = 2.5;
-vector	openprey_vm_gVector = '1 2 3';
-string	openprey_vm_gString = "global";
-float	openprey_vm_gAfterVector = 7;
-float	openprey_vm_threadResult;
-vector	openprey_vm_threadVector;
-string	openprey_vm_threadString;
+float	openpr06_vm_pass;
+float	openpr06_vm_fail;
+float	openpr06_vm_gFloat = 2.5;
+vector	openpr06_vm_gVector = '1 2 3';
+string	openpr06_vm_gString = "global";
+float	openpr06_vm_gAfterVector = 7;
+float	openpr06_vm_threadResult;
+vector	openpr06_vm_threadVector;
+string	openpr06_vm_threadString;
 
-object openprey_vm_base {
+object openpr06_vm_base {
 	float	f;
 	vector	v;
 	string	s;
@@ -42,7 +42,7 @@ object openprey_vm_base {
 	float	fieldSum();
 };
 
-object openprey_vm_obj : openprey_vm_base {
+object openpr06_vm_obj : openpr06_vm_base {
 	vector	v2;
 	float	f2;
 
@@ -50,26 +50,26 @@ object openprey_vm_obj : openprey_vm_base {
 	float	mixed( vector a, float b, string c, entity d, vector e2, float f3 );
 };
 
-void openprey_vm_base::init() {
+void openpr06_vm_base::init() {
 	f = 11;
 	v = '4 5 6';
 	s = "field";
 	tail = 13;
 }
 
-float openprey_vm_base::describe( float a, vector b ) {
+float openpr06_vm_base::describe( float a, vector b ) {
 	return 1;
 }
 
-float openprey_vm_base::fieldSum() {
+float openpr06_vm_base::fieldSum() {
 	return f + v_x + v_y + v_z + tail;
 }
 
-float openprey_vm_obj::describe( float a, vector b ) {
+float openpr06_vm_obj::describe( float a, vector b ) {
 	return a + b_x + b_y + b_z + 100;
 }
 
-float openprey_vm_obj::mixed( vector a, float b, string c, entity d, vector e2, float f3 ) {
+float openpr06_vm_obj::mixed( vector a, float b, string c, entity d, vector e2, float f3 ) {
 	if ( c != "vmObj" ) {
 		return -1;
 	}
@@ -79,14 +79,14 @@ float openprey_vm_obj::mixed( vector a, float b, string c, entity d, vector e2, 
 	return a_x + a_y + a_z + b + e2_x + e2_y + e2_z + f3;
 }
 
-namespace openprey_vm {
+namespace openpr06_vm {
 
 	void check( string name, float got, float expected ) {
 		if ( got == expected ) {
-			openprey_vm_pass++;
+			openpr06_vm_pass++;
 			sys.println( "VMTEST PASS " + name );
 		} else {
-			openprey_vm_fail++;
+			openpr06_vm_fail++;
 			sys.println( "VMTEST FAIL " + name + " got '" + got + "' expected '" + expected + "'" );
 		}
 	}
@@ -97,40 +97,40 @@ namespace openprey_vm {
 			diff = -diff;
 		}
 		if ( diff < 0.001 ) {
-			openprey_vm_pass++;
+			openpr06_vm_pass++;
 			sys.println( "VMTEST PASS " + name );
 		} else {
-			openprey_vm_fail++;
+			openpr06_vm_fail++;
 			sys.println( "VMTEST FAIL " + name + " got '" + got + "' expected '" + expected + "'" );
 		}
 	}
 
 	void checkVec( string name, vector got, vector expected ) {
 		if ( got == expected ) {
-			openprey_vm_pass++;
+			openpr06_vm_pass++;
 			sys.println( "VMTEST PASS " + name );
 		} else {
-			openprey_vm_fail++;
+			openpr06_vm_fail++;
 			sys.println( "VMTEST FAIL " + name + " got '" + got + "' expected '" + expected + "'" );
 		}
 	}
 
 	void checkStr( string name, string got, string expected ) {
 		if ( got == expected ) {
-			openprey_vm_pass++;
+			openpr06_vm_pass++;
 			sys.println( "VMTEST PASS " + name );
 		} else {
-			openprey_vm_fail++;
+			openpr06_vm_fail++;
 			sys.println( "VMTEST FAIL " + name + " got '" + got + "' expected '" + expected + "'" );
 		}
 	}
 
 	void checkEnt( string name, entity got, entity expected ) {
 		if ( got == expected ) {
-			openprey_vm_pass++;
+			openpr06_vm_pass++;
 			sys.println( "VMTEST PASS " + name );
 		} else {
-			openprey_vm_fail++;
+			openpr06_vm_fail++;
 			sys.println( "VMTEST FAIL " + name + " got '" + got.getName() + "' expected '" + expected.getName() + "'" );
 		}
 	}
@@ -280,12 +280,12 @@ namespace openprey_vm {
 	// ---- threads ----
 
 	void threadBody( vector a, float b, string c, entity d ) {
-		openprey_vm_threadVector = a;
-		openprey_vm_threadString = c;
+		openpr06_vm_threadVector = a;
+		openpr06_vm_threadString = c;
 		if ( d == sys.getEntity( "player1" ) ) {
-			openprey_vm_threadResult = b;
+			openpr06_vm_threadResult = b;
 		} else {
-			openprey_vm_threadResult = -1;
+			openpr06_vm_threadResult = -1;
 		}
 	}
 
@@ -293,8 +293,8 @@ namespace openprey_vm {
 		vector keep = a;
 		float keepB = b;
 		sys.wait( 0.05 );
-		openprey_vm_threadVector = keep;
-		openprey_vm_threadResult = keepB;
+		openpr06_vm_threadVector = keep;
+		openpr06_vm_threadResult = keepB;
 	}
 
 	// ---- the run ----
@@ -302,8 +302,8 @@ namespace openprey_vm {
 	void run() {
 		entity vmPlayer;
 		entity vmEnt;
-		openprey_vm_obj vmObj;
-		openprey_vm_base vmBase;
+		openpr06_vm_obj vmObj;
+		openpr06_vm_base vmBase;
 		vector v;
 		float f;
 		string s;
@@ -312,7 +312,7 @@ namespace openprey_vm {
 		vmPlayer = sys.getEntity( "player1" );
 		if ( vmPlayer == $null_entity ) {
 			sys.println( "VMTEST FAIL setup got 'no player1' expected 'player1'" );
-			openprey_vm_fail++;
+			openpr06_vm_fail++;
 		}
 
 		// parameters
@@ -347,13 +347,13 @@ namespace openprey_vm {
 
 		// locals and globals
 		check( "locals.mixed", localsMixed(), 1 + 2 + 30 + 4 + 5 + 7 + 8 + 90 + 10 + 12 );
-		check( "globals.float", openprey_vm_gFloat, 2.5 );
-		checkVec( "globals.vector", openprey_vm_gVector, '1 2 3' );
-		check( "globals.vector_component", openprey_vm_gVector_y, 2 );
-		openprey_vm_gVector_z = 30;
-		checkVec( "globals.vector_component_write", openprey_vm_gVector, '1 2 30' );
-		check( "globals.after_vector", openprey_vm_gAfterVector, 7 );
-		checkStr( "globals.string", openprey_vm_gString, "global" );
+		check( "globals.float", openpr06_vm_gFloat, 2.5 );
+		checkVec( "globals.vector", openpr06_vm_gVector, '1 2 3' );
+		check( "globals.vector_component", openpr06_vm_gVector_y, 2 );
+		openpr06_vm_gVector_z = 30;
+		checkVec( "globals.vector_component_write", openpr06_vm_gVector, '1 2 30' );
+		check( "globals.after_vector", openpr06_vm_gAfterVector, 7 );
+		checkStr( "globals.string", openpr06_vm_gString, "global" );
 
 		// arithmetic and conversion
 		check( "math.vector_dot", '1 2 3' * '4 5 6', 32 );
@@ -378,7 +378,7 @@ namespace openprey_vm {
 		check( "event.sys_trace_vvvvfe", f, 1 );
 
 		// events on an entity, through a spawned script object
-		sys.setSpawnArg( "scriptobject", "openprey_vm_obj" );
+		sys.setSpawnArg( "scriptobject", "openpr06_vm_obj" );
 		sys.setSpawnArg( "origin", "16 32 48" );
 		vmEnt = sys.spawn( "target_null" );
 		sys.waitFrame();
@@ -412,25 +412,25 @@ namespace openprey_vm {
 		check( "object.method_mixed_parms", vmObj.mixed( '1 2 3', 4, "vmObj", vmEnt, '5 6 7', 8 ), 36 );
 
 		// threads with arguments
-		openprey_vm_threadResult = 0;
+		openpr06_vm_threadResult = 0;
 		thread threadBody( '1 2 3', 4, "thr", vmPlayer );
 		sys.waitFrame();
-		check( "thread.float_after_vector", openprey_vm_threadResult, 4 );
-		checkVec( "thread.vector", openprey_vm_threadVector, '1 2 3' );
-		checkStr( "thread.string", openprey_vm_threadString, "thr" );
+		check( "thread.float_after_vector", openpr06_vm_threadResult, 4 );
+		checkVec( "thread.vector", openpr06_vm_threadVector, '1 2 3' );
+		checkStr( "thread.string", openpr06_vm_threadString, "thr" );
 
-		openprey_vm_threadResult = 0;
+		openpr06_vm_threadResult = 0;
 		thread threadWaitBody( '4 5 6', 7 );
 		sys.wait( 0.2 );
-		check( "thread.locals_survive_wait", openprey_vm_threadResult, 7 );
-		checkVec( "thread.vector_survives_wait", openprey_vm_threadVector, '4 5 6' );
+		check( "thread.locals_survive_wait", openpr06_vm_threadResult, 7 );
+		checkVec( "thread.vector_survives_wait", openpr06_vm_threadVector, '4 5 6' );
 
 		vmEnt.remove();
 
-		sys.println( "VMTEST DONE pass=" + openprey_vm_pass + " fail=" + openprey_vm_fail );
+		sys.println( "VMTEST DONE pass=" + openpr06_vm_pass + " fail=" + openpr06_vm_fail );
 	}
 }
 
 void main() {
-	thread openprey_vm::run();
+	thread openpr06_vm::run();
 }

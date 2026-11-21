@@ -3,7 +3,7 @@
 > [!NOTE]
 > Inherited from openQ4 and not yet checked against PREY. This page describes what the engine code does; PREY behavior stays validation-pending until the [rebase status ledger](../dev/prey-rebase/status-ledger.md) records evidence for it.
 
-Multiplayer is experimental in openPREY. A listen server with two clients has been played; wider testing hasn't been recorded yet.
+Multiplayer is experimental in openPR06. A listen server with two clients has been played; wider testing hasn't been recorded yet.
 
 This guide covers the engine's multiplayer networking: finding and joining servers, IPv4 and IPv6 addressing, bandwidth settings and simulated network conditions for testing.
 
@@ -13,7 +13,7 @@ This guide covers the engine's multiplayer networking: finding and joining serve
 - IPv4 ports use the complete unsigned 16-bit range, including high ports above `32767`.
 - IPv6 is enabled by default. A server binds both families on the same port, so one address works for every client.
 - LAN scanning finds IPv6 servers through link-local multicast, which replaces the IPv4 broadcast that IPv6 does not have.
-- Use matching openPREY builds and content on the server and clients: pure servers report missing packages, while non-pure servers report data out of sync. Voice packets are sent only to peers advertising the supported voice protocol.
+- Use matching openPR06 builds and content on the server and clients: pure servers report missing packages, while non-pure servers report data out of sync. Voice packets are sent only to peers advertising the supported voice protocol.
 
 ## Find and join a server
 
@@ -47,7 +47,7 @@ connect 203.0.113.25:32000
 connect play.example.net:28004
 ```
 
-The first form is suitable for a local network, the second illustrates an internet-facing IPv4 address, and the third uses a hostname with an IPv4 DNS record. If the port is omitted, openPREY uses the default server port `28004`.
+The first form is suitable for a local network, the second illustrates an internet-facing IPv4 address, and the third uses a hostname with an IPv4 DNS record. If the port is omitted, openPR06 uses the default server port `28004`.
 
 Endpoint ports are parsed as unsigned 16-bit values from `0` through `65535`. For a direct connection, an omitted port or literal `:0` selects `28004`; ports from `1` through `65535` select that exact destination. Internet server-list entries also preserve the full range, so servers using ports `32768` through `65535` remain connectable.
 
@@ -66,9 +66,9 @@ connect 2001:db8::1
 connect play.example.net:28004
 ```
 
-The first form is an ordinary global IPv6 address. The second adds a *zone index*, which a link-local `fe80::/10` address needs so the system knows which network interface to use; openPREY prints and accepts the numeric index. The third omits the port, which selects the default server port `28004` — brackets are optional when there is no port. The fourth resolves a hostname: if it has both an A and a AAAA record, openPREY tries the IPv4 address first, so use the bracketed literal to go straight to IPv6.
+The first form is an ordinary global IPv6 address. The second adds a *zone index*, which a link-local `fe80::/10` address needs so the system knows which network interface to use; openPR06 prints and accepts the numeric index. The third omits the port, which selects the default server port `28004` — brackets are optional when there is no port. The fourth resolves a hostname: if it has both an A and a AAAA record, openPR06 tries the IPv4 address first, so use the bracketed literal to go straight to IPv6.
 
-A hostname can have several addresses. openPREY connects to the first one, and if
+A hostname can have several addresses. openPR06 connects to the first one, and if
 three connection attempts a second apart go unanswered it tries the host's other
 addresses in turn: up to eight of them, alternating between IPv4 and IPv6, and
 starting over after the last. The console names each address as it is tried, and
@@ -84,7 +84,7 @@ Run `netIPv6SelfTest` from the console to check IPv6 parsing, canonical formatti
 
 ### Why IPv6 packets are smaller
 
-IPv6 guarantees only a 1280-byte path MTU and forbids routers from splitting a datagram in transit, so openPREY fragments its own messages more aggressively on an IPv6 connection than on IPv4. This is automatic and needs no configuration; it prevents the failure where a client connects and then stalls forever waiting for a snapshot that no router will deliver.
+IPv6 guarantees only a 1280-byte path MTU and forbids routers from splitting a datagram in transit, so openPR06 fragments its own messages more aggressively on an IPv6 connection than on IPv4. This is automatic and needs no configuration; it prevents the failure where a client connects and then stalls forever waiting for a snapshot that no router will deliver.
 
 ## CVar Reference
 
@@ -101,7 +101,7 @@ IPv6 guarantees only a 1280-byte path MTU and forbids routers from splitting a d
 
 ## Testing under simulated network conditions
 
-openPREY can add the delay, jitter, loss and duplication of a real connection to
+openPR06 can add the delay, jitter, loss and duplication of a real connection to
 its own packets, so a server and client on one computer behave like players on
 the internet. Every setting applies to the computer that sets it, in both
 directions of each connection:

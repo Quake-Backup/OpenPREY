@@ -83,7 +83,7 @@ const char *Text( const char *id ) {
 }
 
 const char *UpdatesTitle( void ) {
-	// openPREY: retail Prey's own "Updates" title (openQ4 uses Quake 4's #str_104837).
+	// openPR06: retail Prey's own "Updates" title (openQ4 uses Quake 4's #str_104837).
 	return Text( "#str_04837" );
 }
 

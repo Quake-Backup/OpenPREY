@@ -4,7 +4,7 @@
 {
  "format": "retained-ui",
  "version": 1,
- "id": "openprey.pause",
+ "id": "openpr06.pause",
  "canvas": {"height": 720, "minWidth": 960},
  "state": {
   "page.open": {"type": "boolean", "initial": false},

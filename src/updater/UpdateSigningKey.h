@@ -24,8 +24,8 @@ version.
 // reports a newer release, but the game opens the release page instead of
 // installing it in place.
 //
-// openPREY: empty. The key upstream compiles in is openQ4's release key, which
-// must never authorize an openPREY install; openPREY releases have no signing
+// openPR06: empty. The key upstream compiles in is openQ4's release key, which
+// must never authorize an openPR06 install; openPR06 releases have no signing
 // key or update manifest yet.
 #define OPENQ4_UPDATE_SIGNING_PUBLIC_KEY ""
 

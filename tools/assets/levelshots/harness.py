@@ -1,4 +1,4 @@
-"""Headless openPREY clients for levelshot work (no input synthesis).
+"""Headless openPR06 clients for levelshot work (no input synthesis).
 
 A Client boots a map from the staged package (.install) in a hidden window and
 serves levelshotProbe request files until closed. Every client uses its own
@@ -17,9 +17,9 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
-WORK = Path(os.environ.get("OPENPREY_LEVELSHOT_WORK", str(ROOT / ".tmp" / "levelshots")))
-INSTALL = Path(os.environ.get("OPENPREY_LEVELSHOT_INSTALL", str(ROOT / ".install")))
-EXE = INSTALL / ("openPREY-client_x64.exe" if os.name == "nt" else "openPREY-client_x64")
+WORK = Path(os.environ.get("OPENPR06_LEVELSHOT_WORK", str(ROOT / ".tmp" / "levelshots")))
+INSTALL = Path(os.environ.get("OPENPR06_LEVELSHOT_INSTALL", str(ROOT / ".install")))
+EXE = INSTALL / ("openPR06-client_x64.exe" if os.name == "nt" else "openPR06-client_x64")
 PORTS = {"a": "28411", "b": "28412", "c": "28413", "d": "28414"}
 # probe size: the retail art's 4:3 view
 W, H = 1024, 768
@@ -27,9 +27,9 @@ W, H = 1024, 768
 
 def retail_base() -> Path:
     """The retail install's base folder (pak_data.pk4); never guessed from a store layout."""
-    base = os.environ.get("OPENPREY_RETAIL_BASE")
+    base = os.environ.get("OPENPR06_RETAIL_BASE")
     if not base:
-        raise SystemExit("set OPENPREY_RETAIL_BASE to the retail Prey install's base folder (it holds pak_data.pk4)")
+        raise SystemExit("set OPENPR06_RETAIL_BASE to the retail Prey install's base folder (it holds pak_data.pk4)")
     return Path(base)
 
 

@@ -5183,7 +5183,7 @@ void hhPlayer::Think( void ) {
 		headRenderEnt = NULL;
 	}
 
-	// openPREY: g_showPlayerShadow decides in multiplayer too (see MP_PLAYERNOSHADOW_DEFAULT)
+	// openPR06: g_showPlayerShadow decides in multiplayer too (see MP_PLAYERNOSHADOW_DEFAULT)
 	if ( g_showPlayerShadow.GetBool() ) {
 		renderEntity.suppressShadowInViewID	= 0;
 		if ( headRenderEnt ) {
@@ -6864,7 +6864,7 @@ bool hhPlayer::UpdateAnimationControllers( void ) {
 		theAnimator = GetAnimator();
 	}
 
-	// openPREY: a "playerBoundCamera" view (roadhouse's mirror intro) follows the head's
+	// openPR06: a "playerBoundCamera" view (roadhouse's mirror intro) follows the head's
 	// camera joint, so the head bone that joint hangs from must not flap with the voice.
 	// That flap only stayed still while voice amplitude read a constant 1.
 	jointHandle_t viewJoint = INVALID_JOINT;

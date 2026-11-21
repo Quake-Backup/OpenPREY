@@ -50,11 +50,11 @@ def expect_appimage_error(callback, token: str, label: str) -> None:
 
 
 def validate_filename_policy() -> None:
-    if APPIMAGE.appimage_filename("0.1.011", "x64") != "openprey-0.1.011-x86_64.AppImage":
+    if APPIMAGE.appimage_filename("0.1.011", "x64") != "openpr06-0.1.011-x86_64.AppImage":
         raise AssertionError("x64 AppImage filename does not use the standard architecture spelling")
     if (
         APPIMAGE.appimage_filename("0.1.011", "arm64", "-preview")
-        != "openprey-0.1.011-preview-aarch64.AppImage"
+        != "openpr06-0.1.011-preview-aarch64.AppImage"
     ):
         raise AssertionError("preview ARM64 AppImage filename is not explicit or architecture-standard")
     expect_appimage_error(
@@ -77,14 +77,14 @@ def validate_filename_policy() -> None:
 def validate_desktop_and_apprun_generation() -> None:
     desktop = """[Desktop Entry]
 Type=Application
-Name=openPREY
-Exec=openPREY-client_x64
-Icon=openprey
+Name=openPR06
+Exec=openPR06-client_x64
+Icon=openpr06
 Categories=Game;
 """
     rendered = APPIMAGE.render_appimage_desktop(desktop)
-    require(rendered, "Exec=openprey\n", "AppImage desktop entry")
-    if "Exec=openPREY-client_x64" in rendered:
+    require(rendered, "Exec=openpr06\n", "AppImage desktop entry")
+    if "Exec=openPR06-client_x64" in rendered:
         raise AssertionError("AppImage desktop entry retained the package-specific client filename")
     expect_appimage_error(
         lambda: APPIMAGE.render_appimage_desktop(desktop + "Exec=duplicate\n"),
@@ -92,8 +92,8 @@ Categories=Game;
         "duplicate AppImage desktop Exec",
     )
     expect_appimage_error(
-        lambda: APPIMAGE.render_appimage_desktop(desktop.replace("Icon=openprey", "Icon=other")),
-        "Icon=openprey",
+        lambda: APPIMAGE.render_appimage_desktop(desktop.replace("Icon=openpr06", "Icon=other")),
+        "Icon=openpr06",
         "mismatched AppImage desktop icon",
     )
 
@@ -102,10 +102,10 @@ Categories=Game;
         for token in (
             "#!/bin/sh",
             "set -eu",
-            "usr/share/openprey",
-            f"openPREY-client_{arch}",
+            "usr/share/openpr06",
+            f"openPR06-client_{arch}",
             "LD_LIBRARY_PATH",
-            'exec "./openPREY-client_',
+            'exec "./openPR06-client_',
             '"$@"',
         ):
             require(apprun, token, f"{arch} AppRun")

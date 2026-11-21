@@ -419,7 +419,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #include "../aas/AASFileManager.h"
 
 // Exposed to both engine and game. This resolves from the staged companion
-// source tree; the canonical header remains in openPREY-game.
+// source tree; the canonical header remains in openPR06-game.
 #include "../preyengine/profiler.h"
 
 // game

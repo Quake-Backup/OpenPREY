@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regression checks for text encoding and the code-point font path.
 
-openPREY text is UTF-8 end to end.  String tables are authored in it, the loader
+openPR06 text is UTF-8 end to end.  String tables are authored in it, the loader
 normalises a legacy 8-bit table *up* to it (idLangDict::Load), and the GUI draws
 by Unicode code point rather than by byte, so a language is limited by what the
 fonts have art for rather than by what one 8-bit codepage can express.
@@ -47,7 +47,7 @@ CODEPAGE_LANGUAGES = {
 # Polish had a retail release with atlases for its own codepage.
 SCALABLE_ONLY_LANGUAGES = ("czech", "hungarian", "russian", "turkish", "ukrainian")
 
-# Languages whose five non-dialogue tables (code, guis, maps, mappack, openprey)
+# Languages whose five non-dialogue tables (code, guis, maps, mappack, openpr06)
 # translate every English entry, with the endonym the language chooser shows
 # for each.  Campaign dialogue (lips) falls back to English or to retail media.
 FULL_TABLE_LANGUAGES = {
@@ -574,11 +574,11 @@ def validate_language_menu() -> None:
                 f"{len(offered)} values; a choiceDef silently mismatches when they disagree"
             )
         lists.setdefault(path.stem.split("_", 1)[0], set()).add(names.group(1))
-    # Both the guis and the openprey table of a language define the list, and
+    # Both the guis and the openpr06 table of a language define the list, and
     # whichever loads last wins; they must not disagree.
     for language, variants in sorted(lists.items()):
         if len(variants) != 1:
-            raise AssertionError(f"{language}: the guis and openprey tables carry different #str_229908 lists")
+            raise AssertionError(f"{language}: the guis and openpr06 tables carry different #str_229908 lists")
 
 
 def validate_translated_tables() -> None:
@@ -595,7 +595,7 @@ def validate_translated_tables() -> None:
     english = {}
     tables = {language: {} for language in FULL_TABLE_LANGUAGES}
     defined = {language: {} for language in FULL_TABLE_LANGUAGES}
-    for category in ("code", "guis", "maps", "mappack", "openprey"):
+    for category in ("code", "guis", "maps", "mappack", "openpr06"):
         source = entry.findall((STRINGS_DIR / f"english_{category}.lang").read_text(encoding="utf-8"))
         source_keys = [key for key, _ in source]
         english.update(source)
@@ -650,13 +650,13 @@ def validate_translated_tables() -> None:
 
 
 def validate_openq4_placeholders() -> None:
-    """Every language's openPREY table keeps the English printf placeholders in
+    """Every language's openPR06 table keeps the English printf placeholders in
     order, so a format the engine fills (the SYSTEM display lists) never reads
     the wrong argument. Partly translated tables are checked for their keys."""
     entry = re.compile(r'^\s*"(#str_\w+)"\s+"((?:\\.|[^"\\])*)"', re.MULTILINE)
     formats = re.compile(r'%(?:[-+0#]*\d*(?:\.\d+)?(?:hh|ll|[hljztL])?[diuoxXfFeEgGaAcsp]|%)')
-    english = dict(entry.findall((STRINGS_DIR / "english_openprey.lang").read_text(encoding="utf-8")))
-    for path in sorted(STRINGS_DIR.glob("*_openprey.lang")):
+    english = dict(entry.findall((STRINGS_DIR / "english_openpr06.lang").read_text(encoding="utf-8")))
+    for path in sorted(STRINGS_DIR.glob("*_openpr06.lang")):
         for key, translated in entry.findall(path.read_text(encoding="utf-8")):
             original = english.get(key)
             if original is not None:

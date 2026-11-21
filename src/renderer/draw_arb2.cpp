@@ -1871,7 +1871,7 @@ typedef struct {
 	GLint			shadowCascadeBlend;
 	GLint			shadowWholeLightCascade;
 	GLint			shadowDebugMode;
-	GLint			shadowVisibilityMask;	// OPENPREY
+	GLint			shadowVisibilityMask;	// OPENPR06
 	GLint			shadowReceiverDebugReason;
 	GLint			translucentShadowEnabled;
 	GLint			translucentShadowDensity;
@@ -1985,7 +1985,7 @@ typedef struct {
 	GLint			shadowFilterTaps;
 	GLint			shadowFilterMode;
 	GLint			shadowDebugMode;
-	GLint			shadowVisibilityMask;	// OPENPREY
+	GLint			shadowVisibilityMask;	// OPENPR06
 	GLint			shadowReceiverDebugReason;
 	GLint			pointShadowTexelScale;
 	GLint			pointShadowDepthMode;
@@ -2228,7 +2228,7 @@ typedef enum {
 	SHADOWMAP_RECEIVER_FALLBACK_INVALID_SURFACE = 0,
 	SHADOWMAP_RECEIVER_FALLBACK_CUSTOM_GLSL,
 	SHADOWMAP_RECEIVER_FALLBACK_GENERATED_GEOMETRY,
-	SHADOWMAP_RECEIVER_FALLBACK_INTERACTION_PROGRAM,	// OPENPREY: Prey per-light ARB program
+	SHADOWMAP_RECEIVER_FALLBACK_INTERACTION_PROGRAM,	// OPENPR06: Prey per-light ARB program
 	SHADOWMAP_RECEIVER_FALLBACK_COUNT
 } shadowMapReceiverFallbackReason_t;
 
@@ -7015,7 +7015,7 @@ static void RB_ShadowMapStatsReport( void ) {
 	const int receiverFallbackInvalid = g_shadowMapStats.receiverFallbackSurfaces[SHADOWMAP_RECEIVER_FALLBACK_INVALID_SURFACE];
 	const int receiverFallbackCustomGLSL = g_shadowMapStats.receiverFallbackSurfaces[SHADOWMAP_RECEIVER_FALLBACK_CUSTOM_GLSL];
 	const int receiverFallbackGenerated = g_shadowMapStats.receiverFallbackSurfaces[SHADOWMAP_RECEIVER_FALLBACK_GENERATED_GEOMETRY];
-	// OPENPREY: Prey's per-light ARB programs count in the total; the line keeps
+	// OPENPR06: Prey's per-light ARB programs count in the total; the line keeps
 	// the reasons upstream's report readers know.
 	const int receiverFallbackSurfaces = receiverFallbackInvalid + receiverFallbackCustomGLSL + receiverFallbackGenerated
 		+ g_shadowMapStats.receiverFallbackSurfaces[SHADOWMAP_RECEIVER_FALLBACK_INTERACTION_PROGRAM];
@@ -10463,7 +10463,7 @@ static shadowMapReceiverFallbackReason_t RB_SurfaceShadowMapReceiverFallbackReas
 	if ( RB_SurfaceHasActiveCustomGLSLLighting( surf ) && !RB_SurfaceUsesWrappedCustomGLSLShadowReceiver( surf ) ) {
 		return SHADOWMAP_RECEIVER_FALLBACK_CUSTOM_GLSL;
 	}
-	// OPENPREY: a Prey per-light ARB program (skin, cloth, hair, parallax,
+	// OPENPR06: a Prey per-light ARB program (skin, cloth, hair, parallax,
 	// masked interaction) has no shadow-map sampler, and the stock receiver
 	// cannot draw its stage. Sending such a surface through the stock receiver
 	// with that stage filtered out left it unlit by every mapped light: black
@@ -10539,7 +10539,7 @@ static bool RB_SurfaceNeedsShadowMapReceiverFallback( const drawSurf_t *surf ) {
 }
 
 /*
-OPENPREY: shadow-map visibility for Prey's own interaction programs.
+OPENPR06: shadow-map visibility for Prey's own interaction programs.
 
 A surface drawn by a Prey ARB interaction program (skin, cloth, hair,
 parallax, masked) cannot sample a shadow map, so it used to keep the light's
@@ -11880,7 +11880,7 @@ static bool RB_GLSLShadowMap_CreateDrawInteractions( const drawSurf_t *surf ) {
 		return false;
 	}
 
-	// OPENPREY: the visibility pass writes destination alpha only
+	// OPENPR06: the visibility pass writes destination alpha only
 	GL_State( g_shadowMapVisibilityMaskPass
 		? ( GLS_COLORMASK | GLS_DEPTHMASK | backEnd.depthFunc )
 		: ( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | backEnd.depthFunc ) );
@@ -12162,7 +12162,7 @@ static bool RB_GLSLPointShadowMap_CreateDrawInteractions( const drawSurf_t *surf
 		return false;
 	}
 
-	// OPENPREY: the visibility pass writes destination alpha only
+	// OPENPR06: the visibility pass writes destination alpha only
 	GL_State( g_shadowMapVisibilityMaskPass
 		? ( GLS_COLORMASK | GLS_DEPTHMASK | backEnd.depthFunc )
 		: ( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | backEnd.depthFunc ) );
@@ -12892,7 +12892,7 @@ static void RB_ShadowMapTrackWrappedCustomGLSLReceivers( const viewLight_t *vLig
 	}
 }
 
-// OPENPREY: the receivers a mapped pass left to the stencil volumes, with their
+// OPENPR06: the receivers a mapped pass left to the stencil volumes, with their
 // fallback reasons; once the visibility pass has shadowed the Prey program
 // receivers from the map, they are not among them.
 static int RB_CountShadowMapStencilReceiverSurfaces( const drawSurf_t *surf, int *reasons, const bool programReceiversMasked ) {
@@ -12963,7 +12963,7 @@ static void RB_ShadowMapDrawReceiverFallbacks( const viewLight_t *vLight, const 
 	RB_ShadowMapEndTimedPhase( timedPhase );
 }
 
-// OPENPREY: whether this pass's Prey program receivers can take the light's
+// OPENPR06: whether this pass's Prey program receivers can take the light's
 // map. The pass must draw into a target with real destination alpha.
 static bool RB_ShadowMapProgramReceiversMaskable( const drawSurf_t *interactions ) {
 	if ( !r_shadowMapProgramReceivers.GetBool()
@@ -12979,7 +12979,7 @@ static bool RB_ShadowMapProgramReceiversMaskable( const drawSurf_t *interactions
 	return alphaBits >= 8;
 }
 
-// OPENPREY: the visibility pass and the program receivers it scales (see
+// OPENPR06: the visibility pass and the program receivers it scales (see
 // RB_ShadowMapModulatedStateBits). The light's map is bound and current.
 // False leaves every program receiver to the stencil volumes, and nothing of
 // them has been drawn.
@@ -13024,7 +13024,7 @@ static bool RB_ShadowMapDrawVisibilityMaskedReceivers( const viewLight_t *vLight
 	return true;
 }
 
-// OPENPREY: a mapped pass's fallback receivers: the Prey program receivers
+// OPENPR06: a mapped pass's fallback receivers: the Prey program receivers
 // through the visibility pass, and only what it cannot cover through the
 // light's stencil volumes. A hybrid pass already relies on stencil supplements
 // for part of its map, so its program receivers keep the volumes as well.
@@ -13200,7 +13200,7 @@ static void RB_ShadowMapRunPass( const viewLight_t *vLight, shadowMapPassKind_t 
 		return;
 	}
 
-	// OPENPREY: stock receivers drawn by the receiver program; a pass with none
+	// OPENPR06: stock receivers drawn by the receiver program; a pass with none
 	// still renders its map when its Prey program receivers can take it
 	const bool stockMapReceivers = RB_DrawSurfChainHasFilteredSurface( interactions, RB_SurfaceEligibleForShadowMapReceiver );
 	if ( !stockMapReceivers && ( deferReceiverDraw || !RB_ShadowMapProgramReceiversMaskable( interactions ) ) ) {
@@ -18609,7 +18609,7 @@ void R_LoadARBProgram( int progIndex ) {
 	}
 	end[3] = 0;
 
-	// OPENPREY: Prey's distortion programs (heathaze, heatHazeWithMask(AndVertex),
+	// OPENPR06: Prey's distortion programs (heathaze, heatHazeWithMask(AndVertex),
 	// refraction, distort, liquid, membrane) scale the deform by the projection
 	// distance as the dot of ( 1, 0, z, 1 ) with projection row 0, which is the
 	// row's scale term only while the projection is symmetric. An off-axis
@@ -19049,7 +19049,7 @@ void R_ARB2_Init( void ) {
 			common->Printf( "%s: prefers NV20 compatibility path\n", renderer.c_str() );
 		} else {
 			common->Printf(
-				"%s: retail would prefer the NV20 compatibility path, but openPREY keeps ARB2 because the legacy NV20 backend is not shipped\n",
+				"%s: retail would prefer the NV20 compatibility path, but openPR06 keeps ARB2 because the legacy NV20 backend is not shipped\n",
 				renderer.c_str() );
 		}
 	}

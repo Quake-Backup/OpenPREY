@@ -15,7 +15,7 @@ state, expression trees and transactional updates to this canonical format.
 
 Author `.rui` (Retained UI) files as UTF-8 JSON with `//` and `/* ... */`
 comments. A file identifies itself with `"format":"retained-ui"`, `"version":1`
-and a stable `id`. The format is shared by openQ4, openD3, openPREY and
+and a stable `id`. The format is shared by openQ4, openD3, openPR06 and
 openETQW, so neither the extension nor the format name carries one game's
 name. Documents were called `.q4ui` with `"format":"openq4-ui"` before
 11 November 2026. The parser still accepts the old format name, and a save

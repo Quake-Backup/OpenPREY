@@ -57,7 +57,7 @@ private:
 
 	void CommonInit();
 	void FreeModelJoints();
-	// openPREY: the scene camera and bodies of the main menu's 3D backdrop
+	// openPR06: the scene camera and bodies of the main menu's 3D backdrop
 	// (docs/dev/prey-ui-visual-design.md section 12.2), in RenderWindow.cpp.
 	idMat3 ModelAxis( int model, int time ) const;
 	float OrbitProgress( int time ) const;
@@ -85,7 +85,7 @@ private:
 	idStr needUpdate;
 	idWinVec4 lightOrigin[MAX_RENDERWINDOW_LIGHTS];
 	idWinVec4 lightColor[MAX_RENDERWINDOW_LIGHTS];
-	// openPREY: a light's radius (light_radius), 0 for the stock default.
+	// openPR06: a light's radius (light_radius), 0 for the stock default.
 	idWinVec4 lightRadius[MAX_RENDERWINDOW_LIGHTS];
 	idWinVec4 modelOrigin;
 	idWinVec4 modelRotate;
@@ -107,7 +107,7 @@ private:
 	// included, keeping the projection the rect defines (RenderWindow.cpp).
 	bool canvasFill;
 
-	// openPREY scene keys (RenderWindow.cpp, "The scene camera"). fovY: a
+	// openPR06 scene keys (RenderWindow.cpp, "The scene camera"). fovY: a
 	// vertical field of view in degrees across the rect, 0 for the stock 90
 	// degree horizontal one. modelRotateN/modelSpinN: a model's own rotation
 	// and its turn about a local axis (xyz) once in w seconds, counted from

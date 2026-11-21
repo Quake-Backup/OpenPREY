@@ -1,8 +1,8 @@
-# openPREY UI Visual Design
+# openPR06 UI Visual Design
 
 Specification version 1.27, 21 November 2026.
 
-Status: reference survey and design contract. openPREY renders the stock Prey
+Status: reference survey and design contract. openPR06 renders the stock Prey
 GUIs by default. A vector replacement of every front-end screen, the home
 screen's navigation and frames, every page, the death screen, the system
 check, the loading screen, MultiPrey, the message boxes and the multiplayer
@@ -11,7 +11,7 @@ is 1 (section 12.5); the initializing screen and the 3D menu backdrop are on
 whatever it says (sections 12.6 and 12.2). Sections 1 to 11 record what makes the Prey
 interface look and behave like Prey, so that fixes, widescreen work, new
 settings pages and every further replacement stay inside that identity.
-Section 12 covers openPREY's own additions.
+Section 12 covers openPR06's own additions.
 
 | Part | State |
 | --- | --- |
@@ -48,7 +48,7 @@ disagree about a Prey screen, this one governs.
     - [10.8 The rifle scope](#108-the-rifle-scope)
 11. [In-world device GUIs](#11-in-world-device-guis)
     - [11.4 Type and the translation mechanic](#114-type-and-the-translation-mechanic)
-12. [openPREY additions and modern direction](#12-openprey-additions-and-modern-direction)
+12. [openPR06 additions and modern direction](#12-openpr06-additions-and-modern-direction)
     - [12.2 The 3D backdrop and entrance](#122-the-3d-backdrop-and-entrance)
     - [12.5 The retained navigation](#125-the-retained-navigation)
     - [12.6 The initializing screen](#126-the-initializing-screen)
@@ -78,7 +78,7 @@ units and convert them last.
    fonts and sounds. Both known retail layouts apply (`pak000.pk4` to
    `pak004.pk4`, or `pak_data.pk4`, `pak_sound.pk4` and the `pak_en_*`
    language packs; see [official-pk4-checksums.md](official-pk4-checksums.md)).
-2. Repository `content/basepr/` overrides establish openPREY's current
+2. Repository `content/basepr/` overrides establish openPR06's current
    behaviour: aspect expansion, the extra video pages and the loading level
    name (section 12).
 3. This specification records geometry, colour, type, motion and state, and
@@ -87,7 +87,7 @@ units and convert them last.
    renderer, resolution and the command used (Appendix A).
 
 The effective copy of a stock file is the one the virtual filesystem resolves
-last. openPREY's `pak0.pk4` and `pak1.pk4` in `basepr/` override thirteen
+last. openPR06's `pak0.pk4` and `pak1.pk4` in `basepr/` override thirteen
 retail scripts (section 12.1 names them); measure those from
 `content/basepr/pak0/`, everything else from the retail archives.
 
@@ -115,7 +115,7 @@ canvas maps to the central 960x720 dp and aspect expansion supplies the rest.
   fill the duration. The stock `"500" "500" "500"` is therefore 250 ms
   accelerating and 250 ms decelerating, an even ease-in-out.
 - Cite the effective file. Line references in this document are to the files
-  under `content/basepr/pak0/guis/` where openPREY overrides a script, and to
+  under `content/basepr/pak0/guis/` where openPR06 overrides a script, and to
   the retail archives otherwise.
 - Record numbers and descriptions only. Extracted art, fonts and captures stay
   outside tracked source.
@@ -215,7 +215,7 @@ that drops one of them is not visually complete.
 
 ## 3. Coordinates, density and aspect expansion
 
-The stock grid is the 640x480 canvas. openPREY expands it to the screen's
+The stock grid is the 640x480 canvas. openPR06 expands it to the screen's
 aspect and gives GUI scripts these values and keys (section 12.1 says where
 each is used):
 
@@ -333,7 +333,7 @@ one place, and from sampled interface art (Appendix B).
 | `prey.slider` | rail `#323C45` with `#94B2CC` ticks, knob `#BBCDDE` | Sliders |
 | `prey.arc` | `#859BAF` to `#9DB8D0`; bars `#9AB1CA` | Navigation arc and bars |
 | `prey.scrim` | `#000000` at 0.80 (Reset Defaults); 0.40–0.50 (confirmations); 0.60 (`msg`) | Dialog overlay |
-| `prey.softfocus` | A 5 u (7.5 dp) Gaussian blur at 0.80 saturation of the screen beneath, under any scrim | Retained pop-ups (openPREY; section 12.5); in no stock screen |
+| `prey.softfocus` | A 5 u (7.5 dp) Gaussian blur at 0.80 saturation of the screen beneath, under any scrim | Retained pop-ups (openPR06; section 12.5); in no stock screen |
 
 ### World and brand
 
@@ -406,11 +406,11 @@ body behind the text rather than recolouring the text.
 ## 5. Typography and language
 
 Prey ships three faces in `fonts/english/` (each in 12, 24 and 48-point
-atlases). openPREY ships scalable TrueType faces in
+atlases). openPR06 ships scalable TrueType faces in
 `content/basepr/pak0/fonts/` (see [ttf-font-system.md](ttf-font-system.md)):
 `menu.ttf` and `alien.ttf` are tracings of the retail display and alien
 faces, whose advances match the retail records exactly, and
-`talon-ui-condensed.ttf` is Talon UI Condensed, openPREY's own body face,
+`talon-ui-condensed.ttf` is Talon UI Condensed, openPR06's own body face,
 which replaced the tracing of the retail body
 face. The retail atlases themselves stay out of Git. Use the shipped faces for
 any replacement or reference drawing.
@@ -420,7 +420,7 @@ any replacement or reference drawing.
 | Face (path) | Character | Stock use |
 | --- | --- | --- |
 | Display (`fonts/menu`) | Very wide extended geometric face; lower case renders as small capitals | Main navigation, frame titles, bottom bars, loading level name |
-| Body (`fonts/english`, internal name `prey`) | Retail: condensed, heavy, squared curves, very tall x-height. openPREY ships Talon UI Condensed in its place: Impact's condensed frame with the wordmark's superellipse bowls, a step lighter and twice as open | Setting rows, values, buttons, lists, dialogs, help, HUD text |
+| Body (`fonts/english`, internal name `prey`) | Retail: condensed, heavy, squared curves, very tall x-height. openPR06 ships Talon UI Condensed in its place: Impact's condensed frame with the wordmark's superellipse bowls, a step lighter and twice as open | Setting rows, values, buttons, lists, dialogs, help, HUD text |
 | Alien (`fonts/alien`) | The Hider script: one stem per glyph built from dots, bars, hooks and rings, every glyph at full cell height | Untranslated device GUIs (section 11) |
 
 Measured from glyph ink in the 48-point atlases:
@@ -484,8 +484,8 @@ legends of `help` and `mpmain` go smaller (0.15–0.20).
 - Use each face's own spacing. The stock never tracks text.
 
 All display strings use the language system. Preserve `#str_*` keys and format
-arguments. New openPREY GUI strings use the `#str_122xxx` range
-(`strings/english_openprey.lang`).
+arguments. New openPR06 GUI strings use the `#str_122xxx` range
+(`strings/english_openpr06.lang`).
 
 ## 6. Framing and geometry
 
@@ -620,7 +620,7 @@ exceptions.
 end and a slim rail with small rivet groups between them. Only the loading
 screen uses it, as the progress outline (304x30 u) around a 256x12 u fill.
 Despite its name it is not the home bottom bar, which is a claw frame.
-openPREY also bends it into the loading screen's name notch (section 12.1).
+openPR06 also bends it into the loading screen's name notch (section 12.1).
 
 ## 7. Components and interaction states
 
@@ -652,7 +652,7 @@ separate focus state; a replacement uses the hover treatment plus a rim at full
 ### The stock opening
 
 `AnimPortalIn` (`guis/mainmenu.gui:126`) plays whenever the menu opens, out
-of game and in game, in the stock and in openPREY today. Section 12.2 keeps
+of game and in game, in the stock and in openPR06 today. Section 12.2 keeps
 it for the menu opened in game and replaces it out of game with the entrance,
 once that is built.
 
@@ -721,7 +721,7 @@ after they appear, over 900 ms, to 0 or to white 0.7.
 | `guisounds_menu_connect` | Refreshing or filtering the server list |
 | `guisounds_menu_volumetick` | Volume slider |
 
-Use counts are for the retail main menu and `mpmain`. In openPREY's copies
+Use counts are for the retail main menu and `mpmain`. In openPR06's copies
 the three added Video pages bring `clickin` to 128 and `tabflip` to 46, and
 `tick` falls to 18 with the three Texture Quality segments (section 12.1).
 
@@ -741,8 +741,8 @@ brightens without sliding, and ambient rotation stops.
 | New Game | Small frame: title bar "Start a New Game", heading "Choose Skill", Tommy's portrait (110x110 u), Normal and Cherokee buttons (Cherokee is the harder "wicked" mode, drawn at 0.30 and inert until unlocked; Casino appears after the Roadhouse), a description on hover, bottom title "Return to Main Menu" |
 | Load Game | Full page: a three-column list (Name, Date, Time) in a framed table beside a level-shot frame, Time Played, Load and Delete buttons |
 | Save Game | Full page: the same list, a captioned name field and one 145x25 u Save button |
-| MultiPrey | Full page with top tabs Player Settings, Create Server and Find Servers; Player Settings has Player Name, Data Rate and Auto Weapon Switch rows over the player-model picker (openPREY hides the stock Game Key Status row); Find Servers holds a server table (status icons, Server, Players, Ping, Type, Map), Quick Refresh, Refresh All, Internet/LAN segments, a details panel with side tabs, PunkBuster state, Join Game |
-| Options | Full page with four top tabs (Controls, Game Options, Video, Audio). All but Audio have side tabs (Controls: Movement, Combat, Weapons, Look, System, MultiPrey, Profiles; Video: the stock Video, Advanced 1 and Advanced 2 pages plus openPREY's Display, Post FX and Advanced FX). Each page is a header bar, then setting rows on a 30 u pitch. Bottom title: Return to Main Menu, Reset to defaults. Apply Changes is a button on the Video page |
+| MultiPrey | Full page with top tabs Player Settings, Create Server and Find Servers; Player Settings has Player Name, Data Rate and Auto Weapon Switch rows over the player-model picker (openPR06 hides the stock Game Key Status row); Find Servers holds a server table (status icons, Server, Players, Ping, Type, Map), Quick Refresh, Refresh All, Internet/LAN segments, a details panel with side tabs, PunkBuster state, Join Game |
+| Options | Full page with four top tabs (Controls, Game Options, Video, Audio). All but Audio have side tabs (Controls: Movement, Combat, Weapons, Look, System, MultiPrey, Profiles; Video: the stock Video, Advanced 1 and Advanced 2 pages plus openPR06's Display, Post FX and Advanced FX). Each page is a header bar, then setting rows on a 30 u pitch. Bottom title: Return to Main Menu, Reset to defaults. Apply Changes is a button on the Video page |
 | Exit / Quit Game | Small frame: "Are you sure?", Yes and No; Exit adds "Exit to Operating System" above the prompt |
 | Dialog: Reset Defaults | 0.80 black scrim; a 360x250 u claw frame with a centred title, explanation, five check boxes and two buttons |
 | Dialog: confirmations | Load, delete, overwrite, restart-required and PunkBuster notices: 0.40–0.50 black scrim; a 360x140 u claw frame at 142,132 with a message and buttons |
@@ -787,7 +787,7 @@ in `guis/hud/`, `guis/mphud.gui`, `guis/scoreboard.gui` and `guis/cursor.gui`
 
 The groups are edge clusters: health and lighter at the bottom left, ammo at
 the bottom right, pickups down the right edge, weapons and the boss bar at the
-top centre. Under aspect expansion openPREY pins the health figures and the
+top centre. Under aspect expansion openPR06 pins the health figures and the
 lighter to the bottom-left corner, the ammo meters and the pickup column to the bottom-right
 and subtitles to the bottom edge (`screenalignx`, `screenaligny`). Keep every
 cluster on its edge or corner and the crosshair, damage arcs and tips on the
@@ -912,7 +912,7 @@ ring of instruments in reds and oranges grows out of its centre. It carries no
 steel blue, and no text in the body face except the key tips.
 
 The measurements below come from the stock art and from captures of the stock
-overlay as openPREY draws it, over black and over mid-grey (Appendix A).
+overlay as openPR06 draws it, over black and over mid-grey (Appendix A).
 
 #### Parts
 
@@ -971,7 +971,7 @@ renderer's scope-view flag is set (`renderSystem->SetScopeView`) so that
 materials can show a scope-only stage, and turning slows with the field of
 view (`src/Prey/prey_weaponrifle.cpp:255-372`).
 
-#### Design for openPREY
+#### Design for openPR06
 
 1. Keep every part, colour, blend and timing above. The scope is Hunter
    technology: no steel blue, no numerals or labels in the body face, and no
@@ -1002,7 +1002,7 @@ view (`src/Prey/prey_weaponrifle.cpp:255-372`).
 
 #### Aspect expansion as built
 
-openPREY's `guis/weapons/sniperoverlay.gui` builds rules 2 to 4 with the stock
+openPR06's `guis/weapons/sniperoverlay.gui` builds rules 2 to 4 with the stock
 art, in the legacy GUI. The instrument, the zoom scale and pointer, the text
 block and the key tips keep their canvas rectangles; the canvas scales
 uniformly, so the instrument is a circle on the screen's centre at every
@@ -1130,7 +1130,7 @@ rust mean organic structure. Green and red keep their go and stop meanings.
   1000 ms after its local pilot enters and ramps over a further 1000 ms
   (`src/Prey/game_vehicle.cpp:567-608`). No stock GUI reads
   `translationAlpha`; the engine draws the reveal.
-- **The reveal.** openPREY draws it as the 2007 engine does (`PREY.exe`
+- **The reveal.** openPR06 draws it as the 2007 engine does (`PREY.exe`
   `idWindow::DrawText` and the window's `DrawTranslation`, read from the
   binary; `src/ui/Window.cpp` `idWindow::Draw`). Each redraw the GUI reads
   `translationAlpha`, clamped to 0–1. Every window in the alien face then
@@ -1145,7 +1145,7 @@ rust mean organic structure. Green and red keep their go and stop meanings.
 - `notranslation 1` only withholds the English: the alien text still fades,
   so biolab digit columns are gone at 1 and return as the console
   untranslates. `notranslation 0` (`guis/biolabs/jennyscan1.gui:180`) is the
-  default. Retail parses the key into a window flag; openPREY keeps it as the
+  default. Retail parses the key into a window flag; openPR06 keeps it as the
   window variable earlier builds made, so saved games keep their layout, and
   reads it once the window is parsed. Windows in any other face never change.
 - Two retail paths stay unimplemented because nothing shipped uses them. The
@@ -1155,7 +1155,7 @@ rust mean organic structure. Green and red keep their go and stop meanings.
   (`src/Prey/game_vehicle.cpp:600`). `idUserInterface::Translate(fontname)`,
   reached by the GUI command `setfont` (`src/Prey/game_console.cpp:257-266`),
   re-fonts every window in retail; no stock GUI sends `setfont`, and
-  openPREY's slot of that name looks up language strings.
+  openPR06's slot of that name looks up language strings.
 
 ### 11.5 Interaction and motion
 
@@ -1209,11 +1209,11 @@ square and scales with the canvas height, as the menu does.
   channel of 2 in `droid_recharge.gui:448`, a no-op hover in `generic_1`)
   are recorded in Appendix C; fix them only on purpose and say so.
 
-## 12. openPREY additions and modern direction
+## 12. openPR06 additions and modern direction
 
 ### 12.1 Current additions
 
-openPREY's overrides in `content/basepr/pak0/` change thirteen stock scripts:
+openPR06's overrides in `content/basepr/pak0/` change thirteen stock scripts:
 `mainmenu.gui` and its Options, MultiPrey and Mods fragments, `restart.gui`,
 `map/loading.gui`, `hud.gui` and its health, ammo, pickup and subtitle
 fragments, `subtitles.gui` and `weapons/sniperoverlay.gui`. `pak1` adds
@@ -1342,7 +1342,7 @@ painting). This subsection is the design contract, written as the menu
 behaves; "As built" below records how the engine and the generator meet it
 and where they differ. The Interface Atlas draws it to these numbers.
 
-openPREY's main menu draws the Sphere and Earth as lit 3D bodies under one
+openPR06's main menu draws the Sphere and Earth as lit 3D bodies under one
 camera, in place of the stock's painted layers. Out of game it opens close on
 the Sphere's shell, a little off-centre, then swings round the Sphere on a
 curve as it pulls away, quickly and smoothly, until the frame lays over the
@@ -1532,7 +1532,7 @@ R, in `content/basepr/pak1/models/menu/scene/`:
 Atlas's scene: its numbers and its seeded generator are ported, and the
 measured tables of the painting's gaps and green patches are read from the
 atlas page itself, so the two cannot drift apart. `--check` reports a stale
-output (Meson test `openprey-menu-scene`). The Sphere's textures are raster
+output (Meson test `openpr06-menu-scene`). The Sphere's textures are raster
 art the script paints from fixed seeds; Earth's map and the sun are the
 game's own, read from the installed game at run time. Nothing from the retail
 archives is written to the repository.
@@ -1613,7 +1613,7 @@ click runs it instead of reaching the windows
 **Opening the menu.** `idSessionLocal::StartMenu` used to send `playIntro`
 only while `com_skipLogoVideos` was 0, and it defaults to 1. The menu
 therefore always opened with `noIntro`, behind a blackout that waited for a
-music command openPREY's menu never sends. Now the opening plays out of game
+music command openPR06's menu never sends. Now the opening plays out of game
 and brings the screen up from black itself; the session's 350 ms blackout
 covers only `noIntro`.
 
@@ -1719,7 +1719,7 @@ by a script from this specification and committed.
 
 `tools/ui/build_retained_screens.py` writes them from the measurements of
 sections 3 to 8 and the Interface Atlas's constructions; `--check` reports a
-stale document, and the Meson test `openprey-retained-screens` runs it. Edit
+stale document, and the Meson test `openpr06-retained-screens` runs it. Edit
 the generator, never the documents.
 
 #### What is replaced and what is kept
@@ -1896,7 +1896,7 @@ does. The list holds 32 mods.
 A full page like Load Game, reached from either home. Its window (620x400 u
 at 0,31 in the frame) shows the stock credits sheet, 5300 u tall, rising at
 the stock rate. The generator reads the 169 credits, two banners and three
-pictures from the stock script openPREY carries
+pictures from the stock script openPR06 carries
 (`guis/mainmenu/mainmenu_creditcontent.guifragment`): each one's rectangle,
 `textscale` and string key. The document holds those numbers and keys only.
 
@@ -2066,7 +2066,7 @@ while `gui::retainedHome` is 1 (`idSessionLocal::OpenRestartMenu`).
 
 Retail Prey loads every level under one screen, `guis/map/loading.gui`
 (`idSessionLocal::LoadLoadingGui` in `PREY.exe` 1.4); the session presents
-`guis/loading/loading.rui` in its place. The document draws what openPREY's
+`guis/loading/loading.rui` in its place. The document draws what openPR06's
 override of that screen draws (section 12.1), at its measurements, and
 nothing of the stock screen draws beneath it.
 
@@ -2121,7 +2121,7 @@ the 570x370 u tab page as Options' do.
   across and three down (58 u on a 62 u pitch), drawn at 0.8 at rest and in
   full under the pointer or focus, the chosen one outlined. A portrait
   chooses its model (`ui_modelNum`). A data rate the stock choices do not
-  offer (openPREY's default, 128000) shows as its number.
+  offer (openPR06's default, 128000) shows as its number.
 - **Create Server.** The stock Create and Advanced side tabs (80 u wide,
   sharing 310 u below a 40 u margin) beside the 440x350 u inner page. Create
   names the server and shows the chosen map's picture (170x120 u) over Game
@@ -2307,7 +2307,7 @@ up shows it with every step done and no status line.
 `tools/ui/build_retained_initialization.py` writes the document, and
 `tools/ui/initialization_textures.py` paints its nine textures into
 `content/basepr/pak1/guis/assets/initialization/` from fixed seeds. `--check`
-reports either as stale (the Meson test `openprey-retained-initialization`);
+reports either as stale (the Meson test `openpr06-retained-initialization`);
 edit the generators, never their output.
 
 #### Composition
@@ -2386,7 +2386,7 @@ the screen can draw, so the rule moves from step 0 straight to step 4.
 
 ## 13. Project branding
 
-openPREY's own marks live in `assets/`:
+openPR06's own marks live in `assets/`:
 
 | Asset | Path | Use |
 | --- | --- | --- |
@@ -2395,12 +2395,12 @@ openPREY's own marks live in `assets/`:
 | README banner | `assets/docs/img/banner.png` | "open" in a white geometric sans beside "PREY" in dark navy extended capitals, over the Sphere and the glowing spirit hawk |
 | Release package home | `assets/release/README.html` | The `README.html` at the root of every package: the portal rim, Sphere and Earth's limb behind the hawk and wordmark, the arc of hooks as its section menu, the home bottom bar for its documentation links, and claw-cornered frames with setting-row plates and 3-slice buttons for its content |
 | Project overview and documentation portal | `assets/docs/README.html`; `SITE_CSS` in `tools/build/generate_release_docs.py` | The same vocabulary for the repository overview page and every packaged documentation page; side columns are tab containers whose links are side tabs |
-| Web faces | `assets/docs/fonts/openprey-menu.woff`, `talon-ui-condensed.woff` | The display tracing and Talon UI Condensed, subset for the pages above by `tools/assets/fonts/embed_atlas_fonts.py`; the release home embeds them so it works offline from an unpacked archive |
+| Web faces | `assets/docs/fonts/openpr06-menu.woff`, `talon-ui-condensed.woff` | The display tracing and Talon UI Condensed, subset for the pages above by `tools/assets/fonts/embed_atlas_fonts.py`; the release home embeds them so it works offline from an unpacked archive |
 | Consoles | `kConsole*Color` in `src/framework/Console.cpp`, `S_COLOR_CONSOLE` in `src/idlib/Str.cpp`, `src/sys/sys_console_theme.h` | In-game console: black field (`prey.space`), text, edge and accents in `prey.portal.core` `#A4F9FE`, selection `prey.portal.body` `#2F64DC`, version `#6D7F95`. System console (Win32 and SDL): dark slate from `prey.sphere.shell`, never black: window `#0F171B`, log `#172229`, input `#121B21`, buttons `#1F2D36`/`#2A3D48`, borders `#2A3D48`/`#4A6F84`, text `#A4F9FE`, secondary text `#7F95AA`; the fatal-error strip keeps its red-orange |
 
 Rules for project material:
 
-- Write the project name `openPREY`: lower-case "open", upper-case "PREY".
+- Write the project name `openPR06`: lower-case "open", upper-case "PREY".
   The game is "Prey" in running text and `PREY` only in the wordmark.
 - Set "PREY" in a wide extended face with generous tracking, never condensed.
   Pair it with a plain geometric sans for "open" and for taglines.
@@ -2412,7 +2412,7 @@ Rules for project material:
   warm element.
 - The retail wordmark and box art belong to their owners. Project material
   reconstructs the style; it does not reuse the retail bitmaps.
-- `assets/` holds only openPREY's own marks. The upstream Quake 4 icons,
+- `assets/` holds only openPR06's own marks. The upstream Quake 4 icons,
   splash and trailer logo were removed in `d39359088`; if a merge from
   `openq4-upstream/main` brings them back, leave them out of `assets/` and
   out of every package.
@@ -2432,7 +2432,7 @@ sections it draws:
 | 04 Type | The three faces with their metrics, the alien script, the type ramp at 1 u to a pixel | 5 |
 | 05 Claw frame | The claw corner's construction and an assembled frame with its title bars | 6, Appendix B |
 | 06 Plates | Buttons at rest, hovered and unavailable; header bar, setting rows, group box, radio segments, title bars, picture frame | 6, 7 |
-| 07 Controls | The Options page at its stock size: top and side tabs joined to their page, openPREY's Video page row for row, stock binding rows, an example page of list, radio segments and check boxes, an edit field and the Reset Defaults dialog | 6, 7, 9, 12.1 |
+| 07 Controls | The Options page at its stock size: top and side tabs joined to their page, openPR06's Video page row for row, stock binding rows, an example page of list, radio segments and check boxes, an edit field and the Reset Defaults dialog | 6, 7, 9, 12.1 |
 | 08 HUD | The single-player HUD with live gauges, weapon bar, pickups, damage arcs, tips, the eight crosshairs and the spirit walk | 10.1 to 10.5 |
 | 09 Rifle scope | The scope overlay: raising, zoom, heading and aspect | 10.8 |
 | 10 Scoreboard | Deathmatch and team layouts | 10.6 |
@@ -2443,7 +2443,7 @@ Example rows, names and scene dressing are placeholders and are labelled as
 such. The home sheet labels the 3D backdrop as built.
 
 - It contains no retail art or captures. It draws in the three faces
-  openPREY ships in `content/basepr/pak0/fonts` (the display and alien
+  openPR06 ships in `content/basepr/pak0/fonts` (the display and alien
   tracings and Talon UI Condensed)
   ([ttf-font-system.md](ttf-font-system.md)), subset to Latin and embedded as
   WOFF by `tools/assets/fonts/embed_atlas_fonts.py`; run that tool after any
@@ -2460,7 +2460,7 @@ such. The home sheet labels the 3D backdrop as built.
 - The file is a complete standards-mode HTML document (doctype, `<head>` with
   charset and viewport, `<body>`), so opened from disk it renders exactly as
   the published copy does. Keep every `<style>` block in the head.
-- A published copy for sharing is kept as the "openPREY Interface Atlas"
+- A published copy for sharing is kept as the "openPR06 Interface Atlas"
   artifact; the tracked file is the source of truth.
 
 ## Appendix A. Survey method
@@ -2472,11 +2472,11 @@ three faces' `.dat` metrics and atlases, `materials/guiresources.mtr`,
 aggregated for colours, faces, `textscale`, materials, transitions and sounds;
 interface art was sampled for colour, alpha profile and visible bounds.
 
-Captures came from openPREY itself, in a hidden window at 1280x960 so the 4:3
+Captures came from openPR06 itself, in a hidden window at 1280x960 so the 4:3
 canvas maps to 2 pixels per unit, with the stock GUIs loaded through `testGUI`:
 
 ```text
-openPREY-client_x64.exe +set fs_basepath <Prey install> +set fs_savepath <private dir>
+openPR06-client_x64.exe +set fs_basepath <Prey install> +set fs_savepath <private dir>
   +set r_fullscreen 0 +set r_hiddenWindow 1 +set r_mode -1
   +set r_windowWidth 1280 +set r_windowHeight 960
   +set r_customWidth 1280 +set r_customHeight 960
@@ -2486,7 +2486,7 @@ openPREY-client_x64.exe +set fs_basepath <Prey install> +set fs_savepath <privat
 
 `r_windowWidth` and `r_windowHeight` set the hidden window's size; the
 `r_custom*` pair alone can yield 1280x720 frames. `win_allowMultipleInstances`
-keeps the launch from exiting when another openPREY client is already running.
+keeps the launch from exiting when another openPR06 client is already running.
 
 The configuration runs `testGUI <file>`, `waitMsec`, `GuiEvent` and
 `screenshot`. To open sub-menus without host input, the survey used a private
@@ -2520,7 +2520,7 @@ capture no longer needs a private copy of `mainmenu.gui`:
 - `openq4_browser report`, `select` and `hover` read and drive the server
   browser.
 
-Launch `.install/openPREY-client_x64.exe` in a window (`+set r_fullscreen 0`)
+Launch `.install/openPR06-client_x64.exe` in a window (`+set r_fullscreen 0`)
 with a private `fs_savepath` under `.tmp/<task>/` and `+set logFile 2` for a
 log. `wait` counts frames, and the menu draws several hundred a second: wait
 about 1500 before the first action and 3000 to outlast a two-second timeout.
@@ -2584,7 +2584,7 @@ composition.
 ## Appendix C. Observations recorded during the survey
 
 These were seen while capturing and are recorded for follow-up. C.1 lists
-what is still open, C.2 what openPREY has since fixed and how each fix was
+what is still open, C.2 what openPR06 has since fixed and how each fix was
 checked, and C.3 slips in the retail data, which stay as shipped unless a
 change says otherwise (section 11.7). None of them changes a measurement in
 the sections above.
@@ -2599,7 +2599,7 @@ the sections above.
   page beneath it in the capture. The scrim is a GUI fill drawn under image
   plates, so this is likely the same draw-order cause; it has not been
   rechecked since `70b9d052a`.
-- openPREY's Post FX and Advanced FX pages sit on a 28 u row pitch with labels
+- openPR06's Post FX and Advanced FX pages sit on a 28 u row pitch with labels
   at 0,0,200,25 and `textaligny 0`; stock pages use 30 u, 5,5,190,20 and −6.
   Bring them to the stock pitch when they are next edited.
 - `hud/hud_lighter.guifragment` carries no `screenalign` keys, although the
@@ -2637,7 +2637,7 @@ the sections above.
   (123 scripts, 517 images) that are byte-identical to the retail files,
   besides the 13 modified scripts and 16 new images, 15 of them edge tiles.
 
-### C.2 Fixed in openPREY
+### C.2 Fixed in openPR06
 
 Each entry names its commit, or is marked uncommitted where the fix was still
 in the working tree when version 1.14 was written. The engine entries are
@@ -2655,7 +2655,7 @@ carries their summaries.
   commit that fixed it was not identified; the renderer-reload fixes merged
   from openQ4 (`966d8ae6f`) are the likeliest.
 
-- **Tab labels under OpenGL** (`70b9d052a`): in openPREY's Options and
+- **Tab labels under OpenGL** (`70b9d052a`): in openPR06's Options and
   MultiPrey pages, the four top tab labels and the active side tab's label did
   not draw under OpenGL. They were drawn, then covered by their own tab
   plates: `RB_STD_DrawView` split 2D GUI views by material sort around the fog
@@ -2677,7 +2677,7 @@ carries their summaries.
   'elevatortext' … 'guis/elevatorcall.gui' has an inconsistent parent`. The
   script defines two text windows named `elevatortext`. Retail kept both,
   because a plain leaf window became an `idSimpleWindow` that a later
-  definition of the same name could not replace; openPREY keeps every window
+  definition of the same name could not replace; openPR06 keeps every window
   as a full `idWindow`, so the second definition was parsed into the first,
   which dropped the first text line and cleared the window's parent pointer. A
   repeated name now makes a second window where retail did, and a window that
@@ -2712,7 +2712,7 @@ carries their summaries.
   - Reset Defaults: `resetgame`, `resetvideo` and `resetaudio` now each
     reset the cvars that their Options page shows, as listed in
     `Session_ResetMainMenuCVars`. Retail reset every cvar flagged
-    `CVAR_GAME`, `CVAR_RENDERER` or `CVAR_SOUND`. In openPREY those flags also
+    `CVAR_GAME`, `CVAR_RENDERER` or `CVAR_SOUND`. In openPR06 those flags also
     cover the player name, server settings and developer cvars, so the reset
     leaves those alone. After the Video reset the engine detects a preset, as
     a first launch does (retail ran `setMachineSpec`). If a reset changes a
@@ -2723,7 +2723,7 @@ carries their summaries.
     `bind` lines). Load runs only that file's binding commands, and Delete
     removes the file. Path, wildcard, quote and command characters are dropped
     from a profile name.
-  - MultiPrey > Player Settings no longer shows Game Key Status. openPREY has
+  - MultiPrey > Player Settings no longer shows Game Key Status. openPR06 has
     no key check (its key state is always N/A) and no key prompt, so the row
     is hidden. Auto Weapon Switch and the player-model block move up 30 u
     (`mainmenu_multiplayer.guifragment`).
@@ -2733,7 +2733,7 @@ carries their summaries.
     a reply comes or two seconds pass. With no reply it now says that the
     update server did not reply; it no longer says "Prey is up to date". The
     version-reply prompt's missing `#str_104330` is now defined
-    (`src/framework/async/AsyncClient.cpp`, `strings/*_openprey.lang`).
+    (`src/framework/async/AsyncClient.cpp`, `strings/*_openpr06.lang`).
 
   Captures used `openq4_guiAction <window> release`, which runs a window's
   `onActionRelease`. Resume Game, the Profiles buttons and the message box
@@ -2827,7 +2827,7 @@ carries their summaries.
   and Apply Changes were checked again: one version check and one
   `vid_restart`, and the menus queued nothing that the session sent.
 - **Server browser status strings** (uncommitted,
-  `content/basepr/pak0/strings/*_openprey.lang`): the server browser's status
+  `content/basepr/pak0/strings/*_openpr06.lang`): the server browser's status
   line and progress notice (`idServerScan::UpdateBrowserStatus` and
   `UpdateLoadProgress`) used Quake 4 string IDs that Prey's language files
   lack. Retail Prey has no strings for them, because its browser showed no
@@ -2836,7 +2836,7 @@ carries their summaries.
   after MultiPrey opened. `#str_42861` (the idle count) and `#str_41502` (the
   mod filter's "All") are five-digit IDs, which the lookup does not warn
   about, so they showed as the bare ID. The English, French, Italian and
-  Spanish `*_openprey.lang` files now supply them under Quake 4's IDs:
+  Spanish `*_openpr06.lang` files now supply them under Quake 4's IDs:
   `#str_107293`, `#str_107294` ("Scanned %d Prey servers"), `#str_107297`,
   `#str_107298`, `#str_107736`, `#str_42861` and `#str_41502`. They also
   supply the favorite labels `#str_200292` and `#str_200293`, which warned
@@ -2850,14 +2850,14 @@ carries their summaries.
   %s" with a server name were not shown.
 - **Server detail strings** (uncommitted,
   `src/framework/async/ServerScan.cpp`,
-  `content/basepr/pak0/strings/*_openprey.lang`): a listed or selected
+  `content/basepr/pak0/strings/*_openpr06.lang`): a listed or selected
   server's details looked up Quake 4 string IDs that Prey's files lack, or
   that mean something else in them. The tooltip's settings labels
   (`idServerScan::GetServerDetails`) warned "Unknown string id": Map, Yes and
   No (`#str_107702` to `#str_107704`), Time Limit (`#str_107659`), Pure
   (`#str_107662`), Team Damage (`#str_107664`), Auto Balance Teams
   (`#str_107666`) and Allow Spectators (`#str_104254`). The English, French,
-  Italian and Spanish `*_openprey.lang` files now supply them under those IDs,
+  Italian and Spanish `*_openpr06.lang` files now supply them under those IDs,
   in Prey's mixed case: retail Prey writes the same terms "Yes", "Time Limit",
   "Team Damage" and "Allow Spectators" (`#str_20125`, `#str_20154`,
   `#str_20151`, `#str_04254`). The selected server's `server_passworded` used
@@ -2869,9 +2869,9 @@ carries their summaries.
   Clan Arena, Freeze Tag and Red Rover (`#str_41300` to `#str_41303`) and
   Round Limit (`#str_41404`) are Tommy's subtitle lines in retail's
   `strings/english001.lang`. DeadZone's Control Time (`#str_122008`) is
-  openPREY's own "Post Anti-Aliasing". The DeadZone type (`#str_42860`) is a
+  openPR06's own "Post Anti-Aliasing". The DeadZone type (`#str_42860`) is a
   five-digit ID that Prey lacks, so it showed bare. The code now names them by
-  openPREY IDs: `#str_122046` to `#str_122049` for the four types,
+  openPR06 IDs: `#str_122046` to `#str_122049` for the four types,
   `#str_122050` Round Limit, `#str_122051` Control Time, and the existing
   `#str_122001` for DeadZone. None of these types can come from a Prey server.
   Prey's game library offers only `singleplayer`, `deathmatch` and `Team DM`
@@ -2880,7 +2880,7 @@ carries their summaries.
   DM" (`#str_20194`). The Quake 4 rows stay, as upstream has them, but they
   can still show as the retained Join page's game-type filter names
   (`idServerScan::GameTypeFilterName`). Checked in the windowed client from
-  `.install/` against `.install/openPREY-ded_x64.exe` on `game/dmshuttle1`
+  `.install/` against `.install/openPR06-ded_x64.exe` on `game/dmshuttle1`
   (`net_ip 127.0.0.1`, `si_usePass 1`). After `openq4_guiSet gui::lanSet 1`,
   `openq4_guiAction MainOG_Title4`, `openq4_browser select 0`, `openq4_browser
   hover 0` and `openq4_browser report`, the client's `qconsole.log` held no
@@ -2912,14 +2912,14 @@ carries their summaries.
 ### Version 1.27, 21 November 2026
 
 - Section 5: the body face is Talon UI Condensed (`talon-ui-condensed.ttf`),
-  drawn for openPREY, in place of the
+  drawn for openPR06, in place of the
   tracing of the retail body face: Impact's condensed frame and tall
   x-height with the wordmark's superellipse bowls, stems 0.19 of the cap
   height against 0.215, counters about twice as open, and the same set width
   within 1.2%. Its measurements join the face table; section 12.5 notes that
   retained body text draws about 2% larger under the unchanged `FONT_FIT`.
 - Section 13: the web faces and the Interface Atlas embed Talon UI Condensed
-  (CSS family `Talon UI Condensed`, formerly `openPREY Default`).
+  (CSS family `Talon UI Condensed`, formerly `openPR06 Default`).
 
 ### Version 1.26, 21 November 2026
 
@@ -3087,9 +3087,9 @@ document:
   screen's width about the canvas centre, as section 3 describes the
   build.
 - Its Controls sheet showed a shortened Options page whose Video tab mixed
-  openPREY's six side tabs with the stock Texture Quality segments. It is
+  openPR06's six side tabs with the stock Texture Quality segments. It is
   now the page at its stock size, with a 0.50 body, the six tabs 55 u
-  tall and openPREY's Video page row for row (section 12.1); the radio
+  tall and openPR06's Video page row for row (section 12.1); the radio
   segments and check boxes move to an example page.
 
 Its faint captions inside drawings take the 4.5:1 colour, and its brand
@@ -3104,9 +3104,9 @@ retail archives; no measurement of the stock interface changes.
   specified. Sections 3, 8, 9 and 12.2 no longer describe the 3D backdrop and
   its entrance as if they were in the build; section 12.2 opens with its
   status.
-- Counts, recounted against the retail archives: openPREY overrides thirteen
+- Counts, recounted against the retail archives: openPR06 overrides thirteen
   stock scripts, not eleven, and adds sixteen images (sections 1 and 12.1,
-  Appendix C); `clickin` is used 128 times and `tabflip` 46 in openPREY's
+  Appendix C); `clickin` is used 128 times and `tabflip` 46 in openPR06's
   copies, and `tick` 18 (section 8).
 - Side tabs: the stock Video page had three side tabs 110 u tall, not five
   at 66 u (section 12.1). The engine shares a column's height, less its
@@ -3114,7 +3114,7 @@ retail archives; no measurement of the stock interface changes.
 - Section 3 lists the aspect-expansion values and keys in a table, with
   `naturalmatscale`, `canvasfill` and `matcanvasfill`. Section 12.1's
   aspect-expansion entry is split by screen.
-- Line references into openPREY's `guis/mainmenu.gui` follow the rebuilt
+- Line references into openPR06's `guis/mainmenu.gui` follow the rebuilt
   backdrop (sections 8 and 12.2, Appendix C).
 - Section 14 lists the atlas's twelve sheets with the sections each draws,
   the Scoreboard sheet among them, and corrects the entrance to six frames.
@@ -3195,7 +3195,7 @@ plate at the outline and runs only the active plate into the page.
 ### Version 1.8, 11 November 2026
 
 Section 10.8 is re-measured from captures of the stock scope overlay drawn by
-openPREY (Appendix A), which correct version 1.7 in several places. The
+openPR06 (Appendix A), which correct version 1.7 in several places. The
 clamps are translucent 17° wedges under a cap, not the clawed heads held in
 their art's unused alpha channel. The reticle is a ring 17.5 u in radius, not
 22 u, and its wedges cross it. The rings stand at 165 and 175 u. The lens is
@@ -3219,7 +3219,7 @@ still draws the separator under the active tab.
 
 Section 10.8 specifies the rifle scope: its twelve parts measured from the
 stock overlay and art, the zoom range and the value that drives the lens and
-the pointer, the raising sequence, and eight rules for openPREY, among them a
+the pointer, the raising sequence, and eight rules for openPR06, among them a
 circular instrument on the true centre and a lens that covers the whole
 screen at any aspect. The rules for HUD changes move to 10.9.
 
@@ -3308,7 +3308,7 @@ gains `r_windowWidth`, `r_windowHeight` and `win_allowMultipleInstances`.
 
 ### Version 1.2, 10 November 2026
 
-The Interface Atlas now draws in Prey's own faces: openPREY's TrueType
+The Interface Atlas now draws in Prey's own faces: openPR06's TrueType
 tracings, rebuilt with a smoother 48-point trace (build 1.100, see
 [ttf-font-system.md](ttf-font-system.md)) and embedded as subset WOFF. Its
 sizes follow the engine's 48 s u em, display text carries the menu face's
@@ -3327,12 +3327,12 @@ capture.
 
 ### Version 1.0, 10 November 2026
 
-First specification of the Prey interface for openPREY: brand registers and
+First specification of the Prey interface for openPR06: brand registers and
 recognition traits; the front-end palette from `menucolors.guifragment` and
 sampled art; the three faces' measured metrics and ramp; the arc of hooks, the
 claw-cornered frame, title bars, plates, tabs and controls; the opening, hover,
 growth and credits motion; the sound map; screen compositions; the HUD's
 silhouette gauges, palette, shear and feedback; the multiplayer HUD and
 scoreboard; vehicle and weapon displays; the eight device families, the Sphere
-overlay stack and the translation mechanic; openPREY's current additions;
+overlay stack and the translation mechanic; openPR06's current additions;
 project branding rules; and the Interface Atlas.

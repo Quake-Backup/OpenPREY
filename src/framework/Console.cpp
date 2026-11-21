@@ -64,7 +64,7 @@ void SCR_DrawTextRightAlign( float &y, const char *text, ... ) id_attribute((for
 #define	COMMAND_HISTORY			64
 static const char *kConsoleHistoryFileName = "consolehistory.dat";
 
-// openPREY: the Prey palette from docs/dev/prey-ui-visual-design.md section 4.
+// openPR06: the Prey palette from docs/dev/prey-ui-visual-design.md section 4.
 // The accent is the portal-rim cyan (prey.portal.core) that the wordmark and
 // portals share; the field behind the log stays black like Prey's space.
 static const idVec4 kConsoleBorderColor( 0.6431373f, 0.9764706f, 0.9960784f, 1.0f ); // #a4f9fe prey.portal.core

@@ -408,9 +408,9 @@ def validate_list_sources_guards() -> None:
 # guard/copy fixture must use the host platform's artifact names; explicit
 # per-platform policy output is pinned by validate_fast_stage_cross_platform_policy.
 FAST_STAGE_HOST_FIXTURES = {
-    "win32": ("openPREY-client_x64.exe", "renderer-gl_x64.dll", "game_x64.dll"),
-    "linux": ("openPREY-client_x64", "renderer-gl_x64.so", "game_x64.so"),
-    "darwin": ("openPREY-client_x64", "renderer-vk_x64.dylib", "game_x64.dylib"),
+    "win32": ("openPR06-client_x64.exe", "renderer-gl_x64.dll", "game_x64.dll"),
+    "linux": ("openPR06-client_x64", "renderer-gl_x64.so", "game_x64.so"),
+    "darwin": ("openPR06-client_x64", "renderer-vk_x64.dylib", "game_x64.dylib"),
 }
 
 
@@ -418,7 +418,7 @@ def validate_fast_stage_guards_and_copy() -> None:
     if sys.platform not in FAST_STAGE_HOST_FIXTURES:
         raise AssertionError(f"unsupported fast-stage host platform: {sys.platform}")
     client_name, renderer_name, game_name = FAST_STAGE_HOST_FIXTURES[sys.platform]
-    source_root = WORK / "fast-stage" / "openPREY"
+    source_root = WORK / "fast-stage" / "openPR06"
     build_dir = source_root / "builddir"
     install_dir = source_root / ".install"
     write_file(build_dir / client_name, b"client\n")
@@ -451,7 +451,7 @@ def validate_fast_stage_guards_and_copy() -> None:
         raise AssertionError(f"stage_fast_install.py accepted build dir under install dir: {overlap_result.stderr}")
 
     symlink_root = WORK / "fast-stage-symlink"
-    symlink_source_root = symlink_root / "openPREY"
+    symlink_source_root = symlink_root / "openPR06"
     symlink_build_dir = symlink_source_root / "builddir"
     symlink_install_dir = symlink_source_root / ".install"
     symlink_build_target = symlink_root / "real-builddir"
@@ -543,12 +543,12 @@ def validate_fast_stage_cross_platform_policy() -> None:
     source_root = WORK / "fast-stage-platform-policy" / "builddir"
     source_game = source_root / "basepr"
     root_files = (
-        "openPREY-client_x64",
-        "openPREY-ded_x64",
-        "openPREY-client_x64.exe",
-        "openPREY-client_x64.pdb",
-        "openPREY-ded_x64.exe",
-        "openPREY-ded_x64.pdb",
+        "openPR06-client_x64",
+        "openPR06-ded_x64",
+        "openPR06-client_x64.exe",
+        "openPR06-client_x64.pdb",
+        "openPR06-ded_x64.exe",
+        "openPR06-ded_x64.pdb",
         "renderer-gl_x64.dll",
         "renderer-gl_x64.pdb",
         "renderer-vk_x64.dll",
@@ -579,10 +579,10 @@ def validate_fast_stage_cross_platform_policy() -> None:
     expected = {
         "win32": (
             {
-                "openPREY-client_x64.exe",
-                "openPREY-client_x64.pdb",
-                "openPREY-ded_x64.exe",
-                "openPREY-ded_x64.pdb",
+                "openPR06-client_x64.exe",
+                "openPR06-client_x64.pdb",
+                "openPR06-ded_x64.exe",
+                "openPR06-ded_x64.pdb",
                 "renderer-gl_x64.dll",
                 "renderer-gl_x64.pdb",
                 "renderer-vk_x64.dll",
@@ -599,8 +599,8 @@ def validate_fast_stage_cross_platform_policy() -> None:
         ),
         "linux": (
             {
-                "openPREY-client_x64",
-                "openPREY-ded_x64",
+                "openPR06-client_x64",
+                "openPR06-ded_x64",
                 "renderer-gl_x64.so",
                 "renderer-vk_x64.so",
             },
@@ -613,8 +613,8 @@ def validate_fast_stage_cross_platform_policy() -> None:
         ),
         "darwin": (
             {
-                "openPREY-client_x64",
-                "openPREY-ded_x64",
+                "openPR06-client_x64",
+                "openPR06-ded_x64",
                 "renderer-vk_x64.dylib",
             },
             {
@@ -691,7 +691,7 @@ def validate_dev_only_fixtures_not_in_pak_sources() -> None:
         dev / "maps" / "game" / "roadhouse_quick.proc",
         dev / "maps" / "game" / "roadhouse_quick.aas48",
         dev / "script" / "map_roadhouse_quick.script",
-        dev / "script" / "openprey_vm_conformance.script",
+        dev / "script" / "openpr06_vm_conformance.script",
     )
     for fixture_path in required_dev_fixture_paths:
         if not fixture_path.is_file():
@@ -699,7 +699,7 @@ def validate_dev_only_fixtures_not_in_pak_sources() -> None:
 
     shipped_fixture_sources = sorted(
         path
-        for pattern in ("*roadhouse_quick*", "*openprey_vm_conformance*")
+        for pattern in ("*roadhouse_quick*", "*openpr06_vm_conformance*")
         for path in pak0.rglob(pattern)
         if path.is_file()
     )
@@ -720,7 +720,7 @@ def validate_plain_install_cleanup() -> None:
     ):
         write_file(artifact)
     for runtime in (
-        install_root / "openPREY-client_x64.exe",
+        install_root / "openPR06-client_x64.exe",
         install_root / "renderer-gl_x64.dll",
         game_dir / "game_x64.dll",
     ):
@@ -747,7 +747,7 @@ def validate_plain_install_cleanup() -> None:
         if artifact.exists():
             raise AssertionError(f"clean_runtime_install.py left non-runtime artifact staged: {artifact}")
     for runtime in (
-        install_root / "openPREY-client_x64.exe",
+        install_root / "openPR06-client_x64.exe",
         install_root / "renderer-gl_x64.dll",
         game_dir / "game_x64.dll",
     ):
@@ -766,7 +766,7 @@ def validate_plain_install_cleanup() -> None:
 
 
 def validate_stale_content_prune_symlink_handling() -> None:
-    source_root = WORK / "stale-content" / "openPREY"
+    source_root = WORK / "stale-content" / "openPR06"
     staged_game_dir = source_root / ".install" / "basepr"
     outside = WORK / "stale-content-outside.cfg"
     write_file(outside, b"outside\n")
@@ -782,7 +782,7 @@ def validate_stale_content_prune_symlink_handling() -> None:
         if stale_link.exists() or stale_link.is_symlink():
             raise AssertionError("stale-content prune did not unlink the stale symlink")
 
-    linked_game_root = WORK / "stale-content-linked" / "openPREY"
+    linked_game_root = WORK / "stale-content-linked" / "openPR06"
     linked_target = WORK / "stale-content-linked-target"
     linked_game_dir = linked_game_root / ".install" / "basepr"
     linked_game_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -890,14 +890,14 @@ def validate_package_name_and_copy_guards() -> None:
             "release archive output symlink",
         )
 
-    executable = archive_root / "bin" / "openPREY-client_x64"
+    executable = archive_root / "bin" / "openPR06-client_x64"
     write_file(executable, b"#!/bin/sh\n")
     zip_path = WORK / "package-archive-metadata.zip"
     PACKAGE.create_release_archive(
         archive_root,
         zip_path,
         "zip",
-        {Path("bin") / "openPREY-client_x64"},
+        {Path("bin") / "openPR06-client_x64"},
     )
     with ZipFile(zip_path, "r") as archive:
         for info in archive.infolist():
@@ -907,7 +907,7 @@ def validate_package_name_and_copy_guards() -> None:
                 raise AssertionError(f"zip entry kept host mtime: {info.filename} {info.date_time}")
             if info.create_system != 3:
                 raise AssertionError(f"zip entry did not use portable Unix mode metadata: {info.filename}")
-        executable_info = archive.getinfo(f"{archive_root.name}/bin/openPREY-client_x64")
+        executable_info = archive.getinfo(f"{archive_root.name}/bin/openPR06-client_x64")
         if ((executable_info.external_attr >> 16) & 0o777) != 0o755:
             raise AssertionError("zip executable mode was not normalized to 0755")
 
@@ -916,7 +916,7 @@ def validate_package_name_and_copy_guards() -> None:
         archive_root,
         tar_path,
         "tar.gz",
-        {Path("bin") / "openPREY-client_x64"},
+        {Path("bin") / "openPR06-client_x64"},
     )
     with tarfile.open(tar_path, "r:gz") as archive:
         for member in archive.getmembers():
@@ -924,7 +924,7 @@ def validate_package_name_and_copy_guards() -> None:
                 raise AssertionError(f"tar entry kept host ownership metadata: {member.name}")
             if member.mtime != PACKAGE.DETERMINISTIC_TAR_MTIME:
                 raise AssertionError(f"tar entry kept host mtime: {member.name}")
-        executable_member = archive.getmember(f"{archive_root.name}/bin/openPREY-client_x64")
+        executable_member = archive.getmember(f"{archive_root.name}/bin/openPR06-client_x64")
         if executable_member.mode != 0o755:
             raise AssertionError("tar executable mode was not normalized to 0755")
 
@@ -1119,7 +1119,7 @@ def validate_unchanged_pack_rebuild_stays_current() -> None:
 def validate_version_manifest_integrity() -> None:
     expect_runtime_error(
         lambda: PACKAGE.parse_version_manifest_bytes(
-            b"openPREY\nversion=1\nversion=2\nversion_tag=1\nplatform=linux\narch=x64\n",
+            b"openPR06\nversion=1\nversion=2\nversion_tag=1\nplatform=linux\narch=x64\n",
             "test",
         ),
         "duplicate key",
@@ -1127,7 +1127,7 @@ def validate_version_manifest_integrity() -> None:
     )
     expect_runtime_error(
         lambda: PACKAGE.parse_version_manifest_bytes(
-            b"openPREY\n=1\nversion_tag=1\nplatform=linux\narch=x64\n",
+            b"openPR06\n=1\nversion_tag=1\nplatform=linux\narch=x64\n",
             "test",
         ),
         "empty key",
@@ -1227,7 +1227,7 @@ def validate_meson_source_symlink_guards() -> None:
 
 def validate_windows_runtime_staging_guards() -> None:
     expected_stale_stage_files = {
-        f"openPREY-{kind}_{arch}"
+        f"openPR06-{kind}_{arch}"
         for kind in ("client", "ded")
         for arch in ("x86", "x64", "arm64")
     } | {
@@ -1241,12 +1241,12 @@ def validate_windows_runtime_staging_guards() -> None:
         raise AssertionError("Windows stage cleanup must only prune the known empty skins directory")
 
     hygiene_root = WORK / "windows-runtime" / "stage-hygiene"
-    stale_client = hygiene_root / "openPREY-client_x64"
-    stale_dedicated = hygiene_root / "openPREY-ded_x64"
+    stale_client = hygiene_root / "openPR06-client_x64"
+    stale_dedicated = hygiene_root / "openPR06-ded_x64"
     stale_backup = hygiene_root / "renderer-vk_x64.dll.mainbak"
-    current_client = hygiene_root / "openPREY-client_x64.exe"
+    current_client = hygiene_root / "openPR06-client_x64.exe"
     current_renderer = hygiene_root / "renderer-vk_x64.dll"
-    unlisted_extensionless = hygiene_root / "openPREY-client_custom"
+    unlisted_extensionless = hygiene_root / "openPR06-client_custom"
     empty_skins = hygiene_root / "basepr" / "skins"
     for path in (stale_client, stale_dedicated, stale_backup, current_client, current_renderer, unlisted_extensionless):
         write_file(path)
@@ -1254,8 +1254,8 @@ def validate_windows_runtime_staging_guards() -> None:
 
     hygiene_result = WINDOWS_RUNTIME.cleanup_windows_stage_target(hygiene_root)
     if set(hygiene_result["removed_stale_files"]) != {
-        "openPREY-client_x64",
-        "openPREY-ded_x64",
+        "openPR06-client_x64",
+        "openPR06-ded_x64",
         "renderer-vk_x64.dll.mainbak",
     }:
         raise AssertionError(f"unexpected Windows stale-stage cleanup result: {hygiene_result!r}")
@@ -1276,7 +1276,7 @@ def validate_windows_runtime_staging_guards() -> None:
         raise AssertionError("Windows stage cleanup must preserve a populated basepr/skins directory")
 
     stale_directory_root = WORK / "windows-runtime" / "stage-hygiene-stale-directory"
-    (stale_directory_root / "openPREY-client_x64").mkdir(parents=True)
+    (stale_directory_root / "openPR06-client_x64").mkdir(parents=True)
     expect_runtime_error(
         lambda: WINDOWS_RUNTIME.cleanup_windows_stage_target(stale_directory_root),
         "not a regular file",
@@ -1329,18 +1329,18 @@ def validate_windows_runtime_staging_guards() -> None:
         raise AssertionError("malformed PE should not report runtime imports")
 
     mixed_root = WORK / "windows-runtime" / "mixed"
-    write_file(mixed_root / "openPREY-client_x64.exe", b"MZ\n")
+    write_file(mixed_root / "openPR06-client_x64.exe", b"MZ\n")
     write_file(mixed_root / "basepr" / "game_arm64.dll", b"MZ\n")
     expect_runtime_error(
         lambda: WINDOWS_RUNTIME.detect_binary_arch(mixed_root),
-        "Mixed openPREY binary architectures",
+        "Mixed openPR06 binary architectures",
         "mixed Windows runtime architecture detection",
     )
 
     missing_openal_source = WORK / "windows-runtime" / "missing-openal-source"
     missing_openal_build = WORK / "windows-runtime" / "missing-openal-build"
-    write_file(missing_openal_build / "openPREY-client_x64.exe", b"MZ\n")
-    original_openal_root = os.environ.pop("OPENPREY_OPENAL_ROOT", None)
+    write_file(missing_openal_build / "openPR06-client_x64.exe", b"MZ\n")
+    original_openal_root = os.environ.pop("OPENPR06_OPENAL_ROOT", None)
     try:
         expect_runtime_error(
             lambda: WINDOWS_RUNTIME.stage_runtime_payloads(
@@ -1353,11 +1353,11 @@ def validate_windows_runtime_staging_guards() -> None:
         )
     finally:
         if original_openal_root is not None:
-            os.environ["OPENPREY_OPENAL_ROOT"] = original_openal_root
+            os.environ["OPENPR06_OPENAL_ROOT"] = original_openal_root
 
     symlink_binary_root = WORK / "windows-runtime" / "symlink-binary"
     real_binary = symlink_binary_root / "real.exe"
-    link_binary = symlink_binary_root / "openPREY-client_x64.exe"
+    link_binary = symlink_binary_root / "openPR06-client_x64.exe"
     write_file(real_binary, b"MZ\n")
     if make_symlink(real_binary, link_binary):
         expect_runtime_error(
@@ -1408,8 +1408,8 @@ def validate_windows_runtime_staging_guards() -> None:
     generated = generated_build / "content/basepr"
     write_file(generated / "game_x64.dll", b"runtime\n")
     write_file(generated / "mod.json", b"{}\n")
-    for artifact in ("game_x64.dll.p/module.obj", "libopenprey_game_core.a.p/Game.obj",
-                     "game_core.lib.p/Game.obj", "libopenprey_game_core.a", "game_x64.lib",
+    for artifact in ("game_x64.dll.p/module.obj", "libopenpr06_game_core.a.p/Game.obj",
+                     "game_core.lib.p/Game.obj", "libopenpr06_game_core.a", "game_x64.lib",
                      "game_x64.exp", "stray.obj", "stray.o"):
         write_file(generated / artifact, b"build-only\n")
     WINDOWS_RUNTIME.stage_build_game_directory(runtime_source, generated_build)
@@ -1430,13 +1430,13 @@ def validate_windows_runtime_staging_guards() -> None:
             "symlinked generated runtime tree payload",
         )
 
-    original_openal_root = os.environ.get("OPENPREY_OPENAL_ROOT")
+    original_openal_root = os.environ.get("OPENPR06_OPENAL_ROOT")
     try:
         override_root = WORK / "windows-runtime" / "openal-override"
         override_root_link = WORK / "windows-runtime" / "openal-override-link"
         write_file(override_root / "bin" / "OpenAL32.dll", b"dll\n")
         if make_symlink(override_root, override_root_link, target_is_directory=True):
-            os.environ["OPENPREY_OPENAL_ROOT"] = str(override_root_link)
+            os.environ["OPENPR06_OPENAL_ROOT"] = str(override_root_link)
             expect_runtime_error(
                 lambda: WINDOWS_RUNTIME.resolve_openal_runtime_path(runtime_source, "x64"),
                 "OpenAL override root must not be a symlink",
@@ -1448,7 +1448,7 @@ def validate_windows_runtime_staging_guards() -> None:
         write_file(outside_runtime, b"dll\n")
         (override_runtime_link_root / "bin").mkdir(parents=True, exist_ok=True)
         if make_symlink(outside_runtime, override_runtime_link_root / "bin" / "OpenAL32.dll"):
-            os.environ["OPENPREY_OPENAL_ROOT"] = str(override_runtime_link_root)
+            os.environ["OPENPR06_OPENAL_ROOT"] = str(override_runtime_link_root)
             expect_runtime_error(
                 lambda: WINDOWS_RUNTIME.resolve_openal_runtime_path(runtime_source, "x64"),
                 "OpenAL override runtime must not be a symlink",
@@ -1457,7 +1457,7 @@ def validate_windows_runtime_staging_guards() -> None:
 
         missing_override = WORK / "windows-runtime" / "openal-missing"
         missing_override.mkdir(parents=True, exist_ok=True)
-        os.environ["OPENPREY_OPENAL_ROOT"] = str(missing_override)
+        os.environ["OPENPR06_OPENAL_ROOT"] = str(missing_override)
         expect_runtime_error(
             lambda: WINDOWS_RUNTIME.resolve_openal_runtime_path(runtime_source, "x64"),
             "OpenAL override runtime not found",
@@ -1465,9 +1465,9 @@ def validate_windows_runtime_staging_guards() -> None:
         )
     finally:
         if original_openal_root is None:
-            os.environ.pop("OPENPREY_OPENAL_ROOT", None)
+            os.environ.pop("OPENPR06_OPENAL_ROOT", None)
         else:
-            os.environ["OPENPREY_OPENAL_ROOT"] = original_openal_root
+            os.environ["OPENPR06_OPENAL_ROOT"] = original_openal_root
 
 
 def validate_prepare_windows_openal_path_boundary_guard() -> None:

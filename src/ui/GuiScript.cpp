@@ -409,7 +409,7 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src) {
 =========================
 Script_NamedEvent
 
-openPREY: a `set "cmd"` raised on another window by the event was lost; that
+openPR06: a `set "cmd"` raised on another window by the event was lost; that
 window's next idWindow::Time cleared it. Opening MultiPrey lost Find Servers'
 "UpdateServers ; CheckUpdate", and Options' Apply Changes lost
 "video restart". While the GUI is active, idUserInterfaceLocal::RunNamedEvent

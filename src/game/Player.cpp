@@ -1270,7 +1270,7 @@ void idPlayer::Spawn( void ) {
 	renderEntity.suppressSurfaceInViewID = entityNumber+1;
 
 	//HUMANHEAD rww - preserve the same look in sp where we have been self-shadowing
-	// openPREY: multiplayer players keep that look as well. Retail also made them
+	// openPR06: multiplayer players keep that look as well. Retail also made them
 	// noSelfShadow, which together with MP_PLAYERNOSHADOW_DEFAULT left a player
 	// model in multiplayer with no shadow of its own at all.
 	if (gameLocal.isMultiplayer) {
@@ -5355,7 +5355,7 @@ void idPlayer::Think( void ) {
 		}
 	}
 
-	// openPREY: g_showPlayerShadow decides in multiplayer too (see MP_PLAYERNOSHADOW_DEFAULT)
+	// openPR06: g_showPlayerShadow decides in multiplayer too (see MP_PLAYERNOSHADOW_DEFAULT)
 	if ( g_showPlayerShadow.GetBool() ) {
 		renderEntity.suppressShadowInViewID	= 0;
 		if ( headRenderEnt ) {
@@ -6734,7 +6734,7 @@ void idPlayer::ClientPredictionThink( void ) {
 		headRenderEnt = NULL;
 	}
 
-	// openPREY: g_showPlayerShadow decides in multiplayer too (see MP_PLAYERNOSHADOW_DEFAULT)
+	// openPR06: g_showPlayerShadow decides in multiplayer too (see MP_PLAYERNOSHADOW_DEFAULT)
 	if ( g_showPlayerShadow.GetBool() ) {
 		renderEntity.suppressShadowInViewID	= 0;
 		if ( headRenderEnt ) {

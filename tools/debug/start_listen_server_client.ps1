@@ -27,7 +27,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-function New-openPREYCommonArgs {
+function New-openPR06CommonArgs {
     param(
         [Parameter(Mandatory = $true)]
         [string]$SavePath,
@@ -85,7 +85,7 @@ function New-openPREYCommonArgs {
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workspaceRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptDir "..\.."))
 $installDir = Join-Path $workspaceRoot ".install"
-$exePath = Join-Path $installDir "openPREY-client_x64.exe"
+$exePath = Join-Path $installDir "openPR06-client_x64.exe"
 
 if ([string]::IsNullOrWhiteSpace($SaveRoot)) {
     $SaveRoot = Join-Path $workspaceRoot ".tmp"
@@ -94,11 +94,11 @@ if ([string]::IsNullOrWhiteSpace($SaveRoot)) {
 }
 
 if (-not (Test-Path -LiteralPath $exePath)) {
-    throw "openPREY client executable not found: $exePath"
+    throw "openPR06 client executable not found: $exePath"
 }
 
 if (-not (Test-Path -LiteralPath $installDir)) {
-    throw "openPREY install directory not found: $installDir"
+    throw "openPR06 install directory not found: $installDir"
 }
 
 if (-not [string]::IsNullOrWhiteSpace($BasePath) -and -not (Test-Path -LiteralPath (Join-Path $BasePath "base"))) {
@@ -117,7 +117,7 @@ New-Item -ItemType Directory -Force -Path $serverSavePath, $clientSavePath | Out
 $maxFPSValue = $MaxFPS.ToString()
 $swapIntervalValue = $SwapInterval.ToString()
 
-$serverArgs = New-openPREYCommonArgs `
+$serverArgs = New-openPR06CommonArgs `
     -SavePath $serverSavePath `
     -LogFileName "logs/listen-server.log" `
     -InstallDir $installDir `
@@ -138,7 +138,7 @@ $serverArgs += @(
     "+spawnServer", $Map
 )
 
-$clientArgs = New-openPREYCommonArgs `
+$clientArgs = New-openPR06CommonArgs `
     -SavePath $clientSavePath `
     -LogFileName "logs/listen-client.log" `
     -InstallDir $installDir `

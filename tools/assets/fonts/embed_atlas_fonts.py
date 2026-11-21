@@ -1,4 +1,4 @@
-"""Embed openPREY's shipped faces into the Interface Atlas and the release pages.
+"""Embed openPR06's shipped faces into the Interface Atlas and the release pages.
 
 Usage:
     python tools/assets/fonts/embed_atlas_fonts.py
@@ -8,13 +8,13 @@ range the pages draw and packs each as WOFF. It then rewrites the ``@font-face``
 block between each target's markers:
 
 - ``docs/dev/prey-ui/atlas/prey-interface-atlas.html`` (all three faces,
-  ``openprey-atlas-fonts`` markers);
+  ``openpr06-atlas-fonts`` markers);
 - ``assets/release/README.html`` (display and body faces,
-  ``openprey-release-fonts`` markers);
+  ``openpr06-release-fonts`` markers);
 
 and writes the display and body faces to ``assets/docs/fonts/`` for the
 packaged documentation portal and project overview, which load them by URL.
-Run it after rebuilding the faces with ``build_openprey_fonts.py`` so no page
+Run it after rebuilding the faces with ``build_openpr06_fonts.py`` so no page
 drifts from what the engine ships. The retail atlases are not read here.
 """
 from __future__ import annotations
@@ -34,17 +34,17 @@ WOFF_DIR = ROOT / "assets" / "docs" / "fonts"
 
 # CSS family name -> (shipped face, file written to WOFF_DIR or None)
 FACES = {
-    "openPREY Menu": ("menu.ttf", "openprey-menu.woff"),
+    "openPR06 Menu": ("menu.ttf", "openpr06-menu.woff"),
     "Talon UI Condensed": ("talon-ui-condensed.ttf", "talon-ui-condensed.woff"),
-    "openPREY Alien": ("alien.ttf", None),
+    "openPR06 Alien": ("alien.ttf", None),
 }
 
 # page -> (marker name, families embedded in it)
 TARGETS = (
-    (ROOT / "docs" / "dev" / "prey-ui" / "atlas" / "prey-interface-atlas.html", "openprey-atlas-fonts",
-     ("openPREY Menu", "Talon UI Condensed", "openPREY Alien")),
-    (ROOT / "assets" / "release" / "README.html", "openprey-release-fonts",
-     ("openPREY Menu", "Talon UI Condensed")),
+    (ROOT / "docs" / "dev" / "prey-ui" / "atlas" / "prey-interface-atlas.html", "openpr06-atlas-fonts",
+     ("openPR06 Menu", "Talon UI Condensed", "openPR06 Alien")),
+    (ROOT / "assets" / "release" / "README.html", "openpr06-release-fonts",
+     ("openPR06 Menu", "Talon UI Condensed")),
 )
 
 # Basic Latin, Latin-1, general punctuation, arrows, multiplication and minus.

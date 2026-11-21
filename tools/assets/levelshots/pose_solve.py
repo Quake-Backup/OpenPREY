@@ -22,7 +22,7 @@ import numpy as np
 import harness
 
 # a match lifted from this far away (distant sky geometry) cannot fix a position
-MAX_DEPTH = float(os.environ.get("OPENPREY_LEVELSHOT_MAX_DEPTH", "1e9"))
+MAX_DEPTH = float(os.environ.get("OPENPR06_LEVELSHOT_MAX_DEPTH", "1e9"))
 SEED_CLASSES = ("info_player_start", "info_player_deathmatch", "info_player_teleport", "info_player_spawn")
 SKIP_PREFIX = ("light", "speaker", "trigger", "func_static", "worldspawn", "info_portalsky", "path_", "target_")
 

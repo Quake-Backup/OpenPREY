@@ -1,17 +1,17 @@
 /*
 ===========================================================================
 
-openPREY Source Code
+openPR06 Source Code
 Copyright (C) 2026 DarkMatter Productions
 
-This file is part of the openPREY Source Code.
+This file is part of the openPR06 Source Code.
 
-openPREY Source Code is free software: you can redistribute it and/or modify
+openPR06 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-openPREY Source Code is distributed in the hope that it will be useful,
+openPR06 Source Code is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -596,7 +596,7 @@ The .ttf files are language independent, so the language folder is tried first
 and then the shared location.
 
 The default face - Prey's narrow body face, which resolves to "fonts/english"
-or "fonts/<language>" - is drawn by openPREY's own Talon UI Condensed, shipped
+or "fonts/<language>" - is drawn by openPR06's own Talon UI Condensed, shipped
 under its own name (R_TTF_BODY_FACE_FILE) rather than as "english.ttf". It is
 the last candidate for exactly that request, so a "fonts/<language>.ttf" still
 overrides it and every other face keeps its own file. Without it, a language

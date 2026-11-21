@@ -161,7 +161,7 @@ static void R_ErrorForMissingRequiredOpenGLFeatures( void ) {
 	if ( RenderDoc_IsInjected() ) {
 		common->Printf(
 			"RenderDoc detected during OpenGL initialization.\n"
-			"openPREY currently requires OpenGL compatibility / ARB2-era features "
+			"openPR06 currently requires OpenGL compatibility / ARB2-era features "
 			"that are unavailable in the injected context.\n" );
 		R_ErrorForUnsupportedCompatibilityOpenGL();
 	}
@@ -3768,7 +3768,7 @@ static bool R_GetDefaultLevelShotBaseName( idStr &baseName ) {
 		return false;
 	}
 
-	// OPENPREY: Prey keeps a map's loading art at guis/assets/loading/<map>.
+	// OPENPR06: Prey keeps a map's loading art at guis/assets/loading/<map>.
 	baseName = va( "guis/assets/loading/%s", mapName.c_str() );
 	return true;
 }

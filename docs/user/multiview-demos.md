@@ -1,7 +1,7 @@
 # Multi-View Demos
 
 Multi-view demo (MVD) recording and playback are intentionally unavailable in the
-current openPREY compatibility baseline.
+current openPR06 compatibility baseline.
 
 The inherited implementation depends on extended OpenQ4 game-API calls and a schema
 that is not part of PREY's unified v7 game API. Those paths are default-off so they

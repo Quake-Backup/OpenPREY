@@ -793,6 +793,7 @@ def run_python_tests(args: argparse.Namespace, root: Path, env: dict[str, str]) 
         root / "tools" / "tests" / "renderer_gpu_frame_timing.py",
         root / "tools" / "tests" / "renderer_gpu_skinning.py",
         root / "tools" / "tests" / "renderer_vulkan_gui_upload.py",
+        root / "tools" / "tests" / "parallax_occlusion_contract.py",
         root / "tools" / "tests" / "material_constant_registers_contract.py",
         root / "tools" / "tests" / "renderer_gl_window_view_contract.py",
         root / "tools" / "tests" / "renderer_classic_cinematic_post_domain.py",

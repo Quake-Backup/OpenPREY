@@ -7382,6 +7382,9 @@ void idWindow::FixupParms() {
 	for (i = 0; i < c; i++) {
 		children[i]->FixupParms();
 	}
+	// openQ4: resolving a large menu's variable names takes a while; the
+	// startup screen keeps presenting between its windows.
+	common->LoadingCheckpoint();
 	for (i = 0; i < SCRIPT_COUNT; i++) {
 		if (scripts[i]) {
 			scripts[i]->FixupParms(this);

@@ -238,9 +238,13 @@ Declared targets, pending physical qualification:
 Cases to qualify: caps 30/60/120/144/165/240/360 and `0`, vsync and VRR where
 available, low-FPS catch-up (fewer draws than ticks), menus and loading, hidden
 windows, and the preset caps. The declared policy, pinned by
-`presentation_hf_contract.py`, is as follows. Loading screens redraw at the
-lower of `com_maxfps` and 60 Hz, never faster, and back off when a redraw is
-slow. Uncapped, they redraw at most once per tick. A window that shows nothing
+`presentation_hf_contract.py`, is as follows. Loading screens and the startup
+screen present on a steady cadence at the display's refresh rate, or its
+largest whole divisor of at most 90 Hz (144 Hz presents 72), never faster than
+a lower `com_maxfps`, and slow by whole refresh periods while a redraw would
+take more than 40% of the time ([loading presentation](loading-presentation.md)).
+A dedicated server's load pacifier runs at the lower of `com_maxfps` and 60 Hz,
+at most once per tick uncapped. A window that shows nothing
 (hidden, minimized, not created yet, or an app in the background) presents at
 most 60 Hz on every platform, uncapped included; the state comes from SDL's
 window flags (`Sys_SDL_IsGameWindowShown`, `openq4::PresentationCapForWindow`).
@@ -1226,6 +1230,232 @@ locate the sky, and full-frame captures with the clip on lost the whole sky
 (`pshots1`, `pshots2`: up to 2.4 million pixels changed against an off/off
 capture noise of at most 27 levels). An exact clip would need the main view's
 depth before the backdrop is drawn, which reorders the frame.
+
+### Filtered SSAO occlusion, 21 November 2026
+
+Players reported that SSAO had started to dither. Each pixel rotated its
+spiral of samples by interleaved-gradient noise, and nothing filtered the
+result: at full resolution the noise read as fine grain, and once Quality and
+Enhanced took the half-resolution pass (FPS-04) the noise was evaluated on
+every other pixel, where it aliases into a coarse ordered pattern that the
+2x2 upsample then blocked out. The debug view showed it plainly; at 12
+samples it was the dominant texture of every occluded surface.
+
+Both renderers now draw SSAO the same way at every resolution, and native
+PBR's occlusion field uses the same passes:
+
+1. **Occlusion target** (mode 3; `RB_DrawSSAOOcclusion`,
+   `VK_Post_DrawSSAOOcclusion`). An RGBA16F target of the view's size, or
+   half of it rounded up with `R_SSAOHalfResolution`. Each texel holds the raw
+   AO of one view pixel (the even pixel of its 2x2 block at half resolution),
+   that pixel's view depth (negative where sky or a foreground model takes
+   none) and the view depth's slope per view pixel, taken from the same
+   differences that reconstruct the normal. The spiral's rotation and radial
+   offset come from a 4x4 ordered (Bayer) index of the texel instead of noise:
+   neighbours differ as much as possible and every 4x4 window holds all
+   sixteen patterns once.
+2. **Filter** (mode 5, twice). A separable tent over five texels, weights
+   1/2, 1, 1, 1, 1/2, horizontally into a second target of the same size and
+   vertically back. The patterns repeat every four texels, so the two halves
+   weigh one pattern together and each of the sixteen counts exactly once:
+   the pattern cancels. Each tap also counts by how well its plane (depth plus
+   slope) predicts the centre texel's depth, within 3% of the depth or one
+   unit, so occlusion keeps to its surface across silhouettes and grazing
+   floors. Texels without AO pass through.
+3. **Resolve** (mode 4 for classic views, mode 1 for the field). At full
+   resolution a pixel reads its own texel; at half resolution it blends the
+   texels of the even pixels around it bilinearly (one, two or four), each
+   weighted by how well its plane predicts the pixel's depth, so occlusion
+   slides with every pixel instead of stepping with each texel; with no tap
+   on the pixel's surface, the closest in depth stands in. The classic
+   resolve multiplies the factor into every scene sample as before; the field
+   writes it for native PBR's indirect light and the classic factor, which
+   therefore stays identical to a classic-only frame.
+
+A single 5x5 tent in the resolve gave the same picture (within half a level of
+noise) but read 16-25 texels per view pixel; the separable passes read ten
+per occlusion texel plus one to four per view pixel, about a third as many at
+half resolution.
+
+`r_ssaoDebug` writes the resolved AO, white wherever none applies, on every
+path; the field's debug view now matches it (sky was the scene there). The
+validation references (`r_glSSAOReferenceComposition`,
+`r_vkSSAOReferenceComposition`) darken a scene copy with the same filtered
+occlusion. Mode 0, the unfiltered single pass, remains only as the fallback
+when the occlusion target cannot be created, and logs that once.
+
+Native PBR's field now follows `r_ssaoResolution` too, so Quality's PBR views
+take the half-resolution pass instead of a full-resolution one.
+
+Image check, OpenGL and Vulkan, 1280x800, frozen storage2 and hub2 poses,
+`r_ssaoDebug 1`. High-frequency noise (mean absolute difference from a 5x5
+box blur, over occluded pixels) fell from 6.1 to 1.5 levels at Quality and
+from 5.4 to 1.8 at Ultra in storage2, and from 3.6-3.9 to 0.7-1.1 in hub2.
+Mean occlusion moved by at most 0.03 levels: no bias. OpenGL and Vulkan agree
+to 0.01-0.02 levels on average (550-830 of a million pixels differ by more
+than one level, at silhouettes). Half resolution now follows full resolution
+smoothly along gradients.
+
+The PBR laboratory's SSAO controls pass 10/10 on OpenGL, OpenGL with the
+native PBR owner, and Vulkan: native PBR keeps its direct light exactly,
+classic pixels and the debug view match a classic-only frame exactly (0
+pixels), and forced half resolution now differs from full by 0.68 levels on
+average (it was about 2.1; the limit is 4) with no bias (under 0.002).
+
+### Ground-truth ambient occlusion (REN-10), 21 November 2026
+
+`r_ssaoMethod` (archived, default `0`; `ssaoMethod_t` in `tr_local.h`)
+selects the kernel of the occlusion pass: `0` SSAO, the shipped obscurance
+estimate; `1` HBAO; `2` GTAO; `3` a brute-force reference for comparisons.
+All four write the same occlusion target and go through the same filter,
+resolve and native PBR field, so the application (the classic multiply,
+indirect-only PBR occlusion), the resolution policy, MSAA, dynamic
+resolution, subviews, the view weapon (a foreground model, untouched) and
+both renderers are shared. `0` is SSAO exactly: the SSAO capture taken after
+the other methods ran in the same process is byte-identical to the one
+before.
+
+**Naming.** The controls keep their `r_ssao*` names. SSAO, screen-space
+ambient occlusion, is the family: HBAO and GTAO are SSAO techniques that
+read the same depth buffer, and `r_ssao`, `r_ssaoRadius`, `r_ssaoSamples`,
+`r_ssaoResolution`, `r_ssaoMaxDistance` and `r_ssaoDebug` mean the same for
+every method. Only method `0`'s own estimator is "SSAO" in the narrow sense;
+the cvar help and these notes call it the obscurance estimate where the
+difference matters. Renaming the family would change the presets (a SYSTEM
+catalog ripple), the Display menu rows and their language-table entries, saved
+configs and every test, for no change in behaviour.
+
+**HBAO** (`HorizonBasedOcclusion`, after Bavoil, Sainz and Dimitrov 2008).
+Per screen direction it marches out to the radius and, each time a sample
+rises above the highest horizon so far (its elevation measured above the
+pixel's tangent plane, raised by a sine of 0.1 so a surface never occludes
+itself), adds the rise in the horizon's sine, attenuated by
+1 - (distance / radius)^2; the result is one minus the mean over directions.
+Directions are weighted evenly, not by cosine, and the bias and attenuation
+discount near and far occluders, so HBAO is an estimate like SSAO's:
+`r_ssaoIntensity` and `r_ssaoPower` set its strength (without them it reads
+4-9 levels lighter than the reference). `r_ssaoSamples` is the depth budget:
+four directions of up to eight steps below 24 samples (Quality's 12 is four of
+three), eight at 24 and above (Ultra's 32 is eight of four). Steps are evenly
+spaced, offset by whole pixels and stop at the view's edge; the sixteen
+patterns turn the directions by a sixteenth of the angle between them, so the
+filter averages 64 or 128 directions. Multi-bounce stays GTAO's: the fit
+expects a visibility.
+
+**GTAO** (`GroundTruthOcclusion` in `glprogs/ssao.fs` and `post_ssao.frag`,
+after Jimenez et al. 2016). Per slice through the view direction it finds the
+highest horizon on each side out to `r_ssaoRadius` and integrates the
+cosine-weighted visible arc between them analytically. `r_ssaoSamples` is the
+depth budget, so GTAO costs about what SSAO does at each preset: one slice of
+up to eight steps a side below 24 samples (Quality's 12 is one slice of six),
+two slices at 24 and above (Ultra's 32 is two of eight). Steps are spaced
+quadratically and offset by whole pixels, so every reconstructed position
+sits on the texel its depth came from. The sixteen sample patterns turn the
+slices by a sixteenth of a half turn, so the separable filter averages
+sixteen (Quality) or thirty-two (Ultra) slice directions per pixel. Horizons
+fade to the surface's own over the last fifth of the radius. GTAO ignores
+`r_ssaoIntensity` and `r_ssaoPower`: its result is a visibility, not an
+artistic curve.
+
+Three corrections that the reference comparison found:
+
+- Slices turn evenly about the view direction in view space and are walked
+  along their own line on the screen. Even turns of the screen direction are
+  uneven about an off-centre pixel's view direction; at the screen's edges
+  that darkened open surfaces by 3-4% (an analytic open floor came out 0.963,
+  the reference 0.998).
+- One slice of an open surface seen at an angle can exceed 1; only the
+  average over slice directions is 1. The occlusion target keeps up to 2 and
+  the resolve clamps, otherwise one-slice GTAO (Quality) darkened every
+  tilted floor to about 0.85.
+- Samples off the view are skipped. A clamped edge texel otherwise stood in
+  as a false wall along the screen's border.
+
+**Multi-bounce and specular occlusion.** Native PBR already folds the field
+through the coloured multi-bounce fit and Lagarde's specular occlusion
+(`PBRMultiBounceAO`, `PBRSpecularOcclusion` in `PBRMath.h`); GTAO gives those
+terms the visibility they expect. Classic surfaces have no albedo at the
+resolve, so they bounce with one grey albedo, `r_ssaoMultiBounceAlbedo`
+(archived, `0.3`, `0` off), in the classic resolve and in the field's classic
+factor alike (`ClassicOcclusionFactor`), which keeps classic pixels identical
+with and without native PBR. SSAO is unchanged.
+
+**Temporal accumulation.** In a jittered view (temporal AA) HBAO and GTAO
+turn their patterns by a quarter pattern per frame (`R_SSAOMethodInfo`), so
+the history accumulates four times the directions; without temporal AA the patterns
+hold still and nothing crawls. Screenshot frames render without jitter by
+design, so captures never show the turn: it is checked by its code path only.
+
+**The reference** (`ReferenceOcclusion`, developer only). 256
+cosine-weighted rays per pixel, each marched in 24 steps to the radius
+through the depth buffer, full resolution and unfiltered
+(`R_SSAOHalfResolution` and `R_SSAOFiltered` both decline it). A ray is
+occluded where it passes behind a visible surface within the radius of the
+pixel, which is the scene GTAO's horizons describe. Without that radius test
+a cable well in front of a wall occluded the whole wall behind it: the
+classic screen-space halo, in the reference instead of in the method.
+
+**Qualification** (`tools/tests/renderer_ao_reference.py`, 1280x800, three
+stock poses, both renderers). Mean absolute difference from the reference in
+8-bit levels over the pixels any method occludes; "halo" is the mean
+darkening beyond the reference within four pixels of a silhouette in the lit
+frame:
+
+| Pose | Tier | SSAO error | HBAO error | GTAO error | SSAO halo | HBAO halo | GTAO halo |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| storage2 | Quality | 7.14 | 6.21 | 4.67 | 3.7-4.1 | 2.4-2.8 | 1.2-1.3 |
+| storage2 | Ultra | 6.95 | 6.09 | 3.73 | 3.6-3.9 | 3.4-3.9 | 1.1-1.2 |
+| hub2 | Quality | 5.90 | 5.91 | 4.16 | 2.5-2.6 | 2.8-2.9 | 1.2 |
+| hub2 | Ultra | 5.83 | 6.09 | 3.37 | 2.6-2.8 | 3.5-3.7 | 1.0 |
+| hub2, looking down | Quality | 3.42 | 3.35 | 2.93 | 1.0 | 1.8 | 0.6 |
+| hub2, looking down | Ultra | 3.39 | 3.58 | 2.45 | 1.0 | 2.4 | 0.6 |
+
+GTAO is 15-50% closer to the reference than SSAO everywhere and darkens
+silhouettes a third to a half as much. HBAO, at the shipped
+`r_ssaoIntensity` 1.35 and `r_ssaoPower` 1.6, is as close as SSAO overall
+(closer in storage2, up to 0.26 levels further in hub2) with somewhat more
+silhouette darkening; at intensity 1 and power 1 it had the least halo of all
+(0.2-0.5) but read 4-9 levels lighter than the reference. Crawl, the part of a method's change
+under a 1.5-unit sideways move that the reference's own change does not
+explain, is 2.5 against SSAO's 3.5 levels in storage2, 2.4 against 2.7 in
+hub2, and 1.6 for both looking down (HBAO 3.1, 2.6 and 1.6). OpenGL and
+Vulkan agree to 0.001-0.01 levels on average for HBAO and GTAO alike. GTAO with 4x MSAA (effective 4) and at 75%
+resolution scale draws on both renderers with no validation messages and
+agrees across them to 0.006 levels.
+
+The PBR laboratory runs every SSAO control with HBAO and GTAO too
+(`hbao-*`, `gtao-*`, 20/20 on OpenGL, the native OpenGL owner and Vulkan):
+native PBR keeps its direct light exactly, its indirect light darkens,
+classic pixels and the debug view match a classic-only frame exactly, and
+forced half resolution stays within the half-resolution limits with no bias.
+
+Not covered here: VR stereo draws each eye as its own view through the same
+passes, and the HBAO and GTAO kernels use only the GLSL 1.10 constructs
+SSAO already uses, so they are available wherever SSAO is; neither VR
+headsets nor the GLES/mobile tiers were run. A preset decision between the
+methods is the owner's, after the cost below.
+
+**Cost** (2560x1440, hidden window at 60 Hz on a GPU other sessions were
+using, so the low end of each distribution is the uncontended cost). Vulkan:
+the minimum over 600 frames of the SSAO phase (occlusion, both filter passes
+and the resolve), two launches each. OpenGL has no SSAO pass timer: the 5th
+percentile of the whole GPU frame in alternating windows of one launch,
+against SSAO off.
+
+| Pose | Tier | Vulkan SSAO | Vulkan HBAO | Vulkan GTAO | OpenGL SSAO | OpenGL HBAO | OpenGL GTAO |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| hub2 | Quality | 0.38 | 0.37 | 0.33 | +1.08 | +1.27 | +1.07 |
+| storage2 | Quality | 0.51 | 0.46 | 0.43 | +1.66 | +1.50 | +1.68 |
+| hub2 | Ultra | 1.81 | 1.46 | 1.35 | +2.34 | +1.95 | +1.96 |
+| storage2 | Ultra | 2.79 | 2.16 | 1.88 | +2.92 | +2.51 | +2.45 |
+
+GTAO costs the same as SSAO or up to a third less at the same sample
+budget: its steps run along lines from the pixel instead of a spiral around
+it, which the texture cache prefers. HBAO lies between them on Vulkan and at
+Ultra on OpenGL, and within 0.2 ms of SSAO at Quality on OpenGL. Both fit
+every FPS-01 tier SSAO fits. The reference costs several frames' worth and never belongs
+in a preset. The filter itself, measured the same way against the old
+unfiltered SSAO before this work, costs about 0.3 ms on Vulkan at both tiers.
 
 ### Portal-sky mask, 5 November 2026
 

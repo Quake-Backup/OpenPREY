@@ -4,6 +4,7 @@
 #include "UserInterfaceRetained.h"
 #include "RetainedHud.h"
 #include <span>
+#include <thread>
 #include "GuiStateNumber.h"
 #include "Rectangle.h"
 #ifndef ID_DEDICATED
@@ -265,7 +266,8 @@ bool SessionMenuCommand(const std::string& command) {
         "joinConnect","joinSearch","joinSearchClear","joinSortNext",
         "mpClose","mpMainMenu","mpDisconnect","mpStockPage","mpTeamAction",
         "mpSelectPlayer","mpMute","mpFriend","mpWelcomeAction","mpVoteYes","mpVoteNo","mpCallVote",
-        "mpRail","mpSettingsControls","mpSettingsGame","mpSettingsSystem","mpMatch","mpMatchSelect","mpSummaryChat",
+        "mpRail","mpSettingsControls","mpSettingsGame","mpSettingsSystem","mpSettingsAudio","weaponOrderOpen","weaponOrderPick",
+		"weaponOrderReset","mpMatch","mpMatchSelect","mpSummaryChat",
         "mpAdminPass","mpAdminSelect","mpAdminKick","mpAdminBan","mpAdminSwitch","mpAdminBans","mpAdminBanPick","mpAdminUnban",
         "mpAdminApply","mpAdminConsole","mpRefereeLogin","mpSettingsName","mpSettingsClan","mpBuy",
         "arenaRestart","arenaLeave",
@@ -353,7 +355,8 @@ std::optional<std::string> SessionMenuPlayerRequest(const ActionInvocation& invo
 bool SessionMenuValueCommand(const std::string& command) {
 	static const std::set<std::string> commands = {"mpVoteMap","mpVoteGameType","mpVoteTimeLimit","mpVoteFragLimit",
 		"mpVoteCaptureLimit","mpVoteTourneyLimit","mpVoteControlTime","mpVoteBalance","mpVoteShuffle","mpVoteRestart",
-		"mpVoteBuying","mpVoteKick","mpModelSelf","mpModelEnemy","mpModelTeam","mpCrosshair","mpMatchRole","mpMatchScope","mpMatchRuleValue",
+		"mpVoteBuying","mpVoteKick","mpVoteNextMap","mpVoteRandomMap","mpVoteRoundLimit","mpVoteOvertime","mpVoteRuleset",
+		"mpVoteInstagib","mpVoteReadyAll","mpVoteCoinToss","mpModelSelf","mpModelEnemy","mpModelTeam","mpCrosshair","mpMatchRole","mpMatchScope","mpMatchRuleValue",
 		"mpMatchSeriesProfile",
 		"mpAdminMap","mpAdminGameType","mpAdminTimeLimit","mpAdminFragLimit","mpAdminCaptureLimit","mpAdminTourneyLimit",
 		"mpAdminControlTime","mpAdminBalance","mpAdminShuffle","mpAdminRestart","mpAdminBuying",
@@ -363,7 +366,8 @@ bool SessionMenuValueCommand(const std::string& command) {
 		"createBuying","createBots","createBotSkill","createShuffle","createOvertime","createMercy","createRoundLimit",
 		"createRuleset","createGrapple","createInstagib",
 		"createQuadHog","createVampiric","createFrenzy","createWeaponArena","createPowerups","createSelfDamage","createKnockback",
-		"createFallDamage","createWeaponRespawn","createPreset",
+		"createFallDamage","createWeaponRespawn","createPreset","createMapRotation","createMapQueue","createItemTimers",
+		"createTimeouts","createSpectatorLock","createInactivity","createMaxBrightskin","createForcedModels","weaponOrderEnable",
 		"audioVolume","audioMusic","audioDialogue","audioBackend","audioDevice","audioEax","audioSpeakers","audioHrtf",
 		"audioSubtitles","audioSubtitleSize","audioSubtitleBackground","audioSubtitleSpeakers","audioSubtitleUntranscribed",
 		"gameGunPosition","gameForceModel","gameCrosshair","gameCorpseTime","gameLanguage",
@@ -391,6 +395,11 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		"1 0.1 0.85","1 1 1"};
 	static const std::map<std::string,PlayerSetting> settings = {
 		{"ui_handicap",{0,1,100,true}},
+		// Player Setup's HUD tab and the card's Settings page: the multiplayer
+		// HUD's options and how a spectator follows a player.
+		{"hud_hitSound",{0,0,3,true,{},{0,1,2,3}}},{"hud_crosshairNames",{0,0,2,true,{},{0,1,2}}},{"hud_crosshairAmmo",{1}},
+		{"hud_itemTimers",{1}},{"hud_teamLocations",{1}},{"hud_localClock",{0,0,2,true,{},{0,1,2}}},
+		{"ui_spectatorSpeed",{0,25,300,true}},{"g_spectatorFollowView",{0,0,2,true,{},{0,1,2}}},
 		// Join Game's list view: rows or tiles.
 		{"ui_browserView",{0,0,1,true,{},{0,1}}},
 		{"cl_player_outline_enemy",{2,0,0,false,levels}},{"cl_player_outline_team",{2,0,0,false,levels}},
@@ -427,12 +436,12 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		{"r_screenshotFormat",{0,0,1,true,{},{0,1}}},{"g_autoSkipCinematics",{1}},{"ui_cinematicShake",{0,0,1,false}},{"g_screenShake",{0,0,1,false}},{"g_enhancedPhysics",{1}},
 		{"cl_gunfov",{0,0,179,false}},{"cl_gunfov_adjust",{0,0,1,true,{},{0,1}}},
 		{"cl_gun_x",{0,-5,5,false}},{"cl_gun_y",{0,-5,5,false}},{"cl_gun_z",{0,-5,5,false}},{"g_weaponMuzzleKick",{1}},{"g_viewKick",{0,0,1,false}},
-		{"vr_enable",{0,0,1,true,{},{0,1}}},{"vr_aimMode",{0,0,1,true,{},{1,0}}},{"vr_leftHanded",{0,0,1,true,{},{0,1}}},
+		{"vr_enable",{1}},{"vr_aimMode",{0,0,1,true,{},{1,0}}},{"vr_leftHanded",{0,0,1,true,{},{0,1}}},
 		{"vr_turnMode",{0,0,1,true,{},{0,1}}},{"vr_snapTurnAngle",{0,30,90,true,{},{30,45,60,90}}},
-		{"vr_moveDirection",{0,0,1,true,{},{0,1}}},{"vr_roomScale",{0,0,1,true,{},{0,1}}},{"vr_aimLaser",{0,0,2,true,{},{0,1,2}}},
-		{"vr_hapticStrength",{2,0,0,false,{"0","0.5","1"}}},{"vr_twoHanded",{0,0,1,true,{},{0,1}}},
-		{"vr_comfortVignette",{2,0,0,false,{"0","0.5","1"}}},{"vr_physicalCrouch",{0,0,1,true,{},{0,1}}},
-		{"vr_playSpace",{0,0,2,true,{},{0,1,2}}},{"vr_body",{0,0,2,true,{},{0,1,2}}},
+		{"vr_moveDirection",{0,0,1,true,{},{0,1}}},{"vr_roomScale",{1}},{"vr_aimLaser",{0,0,2,true,{},{0,1,2}}},
+		{"vr_hapticStrength",{2,0,0,false,{"0","0.5","1"}}},{"vr_twoHanded",{1}},
+		{"vr_comfortVignette",{2,0,0,false,{"0","0.5","1"}}},{"vr_physicalCrouch",{1}},
+		{"vr_playSpace",{0,0,2,true,{},{0,1,2}}},{"vr_body",{0,0,2,true,{},{0,1,2}}}},
 		// openPR06: Prey's Options page, Game Options tab (guis/menu/settings.rui),
 		// beside the settings above that it shares with Quake 4's.
 		{"g_showHud",{1}},{"g_subtitles",{1}},{"com_profanity",{1}},{"g_useDDA",{1}},
@@ -2709,6 +2718,12 @@ bool UI_RetainedTakePrefetched(const std::string& path, int size, std::string& s
 	// made again by the load from the file as it is, which reports its
 	// diagnostics.
 	ID_TIME_T contentStamp = FILE_NOT_FOUND_TIMESTAMP;
+	// The parse may still be running on its worker: the startup or loading
+	// screen keeps presenting while this waits for it.
+	while (!entry->job->TryWait()) {
+		common->LoadingCheckpoint();
+		std::this_thread::yield();
+	}
 	if (!entry->job->Wait() || !entry->read || !entry->loaded || size != entry->size ||
 		fileSystem->ReadFileContentStamp(path.c_str(),nullptr,&contentStamp) != size ||
 		contentStamp == FILE_NOT_FOUND_TIMESTAMP || contentStamp != entry->contentStamp) return false;

@@ -116,6 +116,8 @@ void VK_PostProcess_CaptureWorldDepth( const viewDef_t *viewDef, int fillPhase, 
 bool VK_PostProcess_PrepareSSAOField( const viewDef_t *viewDef );
 bool VK_PostProcess_DrawSceneEffects( const viewDef_t *viewDef );
 bool VK_SceneEffects_DrawPreFog( const viewDef_t *viewDef, int processed );
+void VK_PostProcess_DrawVolumetricLights( const viewDef_t *viewDef, bool classicLights );
+bool VK_PostProcess_CompositeVolumetrics( const viewDef_t *viewDef );
 bool VK_PostProcess_DrawUnderwater( const viewDef_t *viewDef );
 bool VK_PostProcess_GlowRequested( const viewDef_t *viewDef );
 bool VK_PostProcess_BeginGlow( const viewDef_t *viewDef );
@@ -277,7 +279,10 @@ enum vkSpecialPipelineKind_t {
 	VK_SPECIAL_FOG,
 	VK_SPECIAL_SHADOW_OVERLAY_PANEL,
 	VK_SPECIAL_SHADOW_OVERLAY_POINT_PANEL,
-	VK_SPECIAL_SHADOW_OVERLAY_TEXT
+	VK_SPECIAL_SHADOW_OVERLAY_TEXT,
+	// REN-09 volumetric march through a projected or point shadow map
+	VK_SPECIAL_VOLUMETRIC_PROJECTED,
+	VK_SPECIAL_VOLUMETRIC_POINT
 };
 
 typedef struct vkSpecialPipeline_s {
@@ -2161,6 +2166,38 @@ VkPipeline VK_Exec_ShadowOverlayTextPipeline( void ) {
 
 VkPipelineLayout VK_Exec_ShadowOverlayPipelineLayout( void ) {
 	return vkExec.shadowOverlayPipelineLayout;
+}
+
+/*
+====================
+VK_Exec_VolumetricShadowPipeline
+
+REN-09: the volumetric march of a shadow-mapped light into the scattering
+target. One covering triangle from gl_VertexIndex (post_fullscreen.vert), no
+vertex input, additive, on the shadow interaction layout so set 7 carries
+the light's shadow map and its march block.
+====================
+*/
+VkPipeline VK_Exec_VolumetricShadowPipeline( bool pointLight, VkShaderModule vertModule,
+		VkShaderModule fragModule ) {
+	const vkSpecialPipelineKind_t kind = pointLight
+		? VK_SPECIAL_VOLUMETRIC_POINT : VK_SPECIAL_VOLUMETRIC_PROJECTED;
+	const vkPipelineTarget_t target = VK_Exec_CurrentPipelineTarget();
+	VkPipeline cached = VK_Exec_FindSpecialPipeline( kind, target );
+	if ( cached != VK_NULL_HANDLE ) {
+		return cached;
+	}
+	if ( vertModule == VK_NULL_HANDLE || fragModule == VK_NULL_HANDLE
+			|| vkExec.shadowInteractionPipelineLayout == VK_NULL_HANDLE ) {
+		return VK_NULL_HANDLE;
+	}
+	VkPipelineVertexInputStateCreateInfo vertexInput;
+	memset( &vertexInput, 0, sizeof( vertexInput ) );
+	vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	return VK_Exec_StoreSpecialPipeline( kind, target,
+			VK_Exec_CreatePipeline( vertModule, fragModule,
+				&vertexInput, GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE,
+				vkExec.shadowInteractionPipelineLayout, false, false, target ) );
 }
 
 // position + st off the idDrawVert stream, shared by the caster pipelines
@@ -11467,7 +11504,7 @@ bool VK_Exec_BuildAuthoredMaterialUniforms( const viewDef_t *viewDef, const draw
     else if ( drawSurf->space->weaponDepthHack ) { block.projection[14] *= 0.25f; }
     myGlMultMatrix( block.modelView.data(), block.projection.data(), block.modelViewProjection.data() );
     VK_FixupClipSpaceZ( block.modelViewProjectionVulkan.data(), block.modelViewProjection.data() );
-    for ( int i = 0; i < oq4material::MaxTextures; ++i ) {
+    for ( int i = 0; i < oq4material::MaxTextureMatrices; ++i ) {
         for ( int j = 0; j < 4; ++j ) { block.textureMatrix[i][j * 5] = 1.0f; }
     }
     if ( din == NULL && stage->texture.hasMatrix ) { RB_GetShaderTextureMatrix( drawSurf->shaderRegisters, &stage->texture, block.textureMatrix[0].data() ); }
@@ -12307,7 +12344,7 @@ static bool VK_Exec_BuildARBMaterialUniforms( const viewDef_t *viewDef, const dr
 	myGlMultMatrix( block.modelView.data(), block.projection.data(), block.modelViewProjection.data() );
 	VK_FixupClipSpaceZ( block.modelViewProjectionVulkan.data(), block.modelViewProjection.data() );
 	// The ARB material path loads no texture matrix.
-	for ( int i = 0; i < oq4material::MaxTextures; i++ ) {
+	for ( int i = 0; i < oq4material::MaxTextureMatrices; i++ ) {
 		for ( int j = 0; j < 4; j++ ) {
 			block.textureMatrix[ i ][ j * 5 ] = 1.0f;
 		}
@@ -15826,6 +15863,9 @@ void VK_GuiExecutor_Draw3DView( const viewDef_t *viewDef ) {
 		VK_Interactions_DrawLights( viewDef );
 	}
 	lightTiming.End();
+	// REN-09: every light's shadow map is still resident; march them into
+	// the scattering target before anything else draws over the scene.
+	VK_PostProcess_DrawVolumetricLights( viewDef, !sharedWorldInteractionOwned );
 	// r_shadowMapDebugOverlay draws where RB_ARB2_DrawInteractions draws it:
 	// after the last receiver, while the shadow atlas and point cubes still
 	// hold this view's contents. One call site covers both walkers and the
@@ -15903,6 +15943,16 @@ void VK_GuiExecutor_Draw3DView( const viewDef_t *viewDef ) {
 				}
 				VK_TemporalPresentation_EndView( viewDef, sceneScaleState, false );
 				return;
+			}
+			// REN-09: the scattered light and the medium over the opaque
+			// scene, before fog, blend lights and translucent surfaces.
+			if ( VK_PostProcess_CompositeVolumetrics( viewDef ) ) {
+				backEnd.currentRenderCopied = false;
+				backEnd.currentDepthCopied = false;
+				currentSpace = NULL;
+				weaponDepthRange = false;
+				viewport.maxDepth = 1.0f;
+				vkCmdSetViewport( cmd, 0, 1, &viewport );
 			}
 			compositionTiming.End();
 			vkGpuPhaseScope fogTiming( cmd, VK_GPU_PHASE_WORLD_FOG, profileMainView );

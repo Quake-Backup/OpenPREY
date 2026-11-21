@@ -451,6 +451,8 @@ void idMaterial::CommonInit() {
 	pbrInfo.emissiveColorRegisters[0] = -1;
 	pbrInfo.emissiveColorRegisters[1] = -1;
 	pbrInfo.emissiveColorRegisters[2] = -1;
+	pbrInfo.heightScaleRegister = -1;
+	pbrInfo.heightReferenceRegister = -1;
 	pbrInfo.autoLegacyFallback = true;
 	R_ResetSpecularProbeMaterialInfo( specularProbeInfo );
 
@@ -561,26 +563,9 @@ void idMaterial::FreeData() {
 				stages[i].texture.cinematic = NULL;
 			}
 			if ( stages[i].newStage != NULL ) {
-				// the handles are only valid in the GL context generation that compiled
-				// them; after a full restart they may alias live objects in the new
-				// context (partial restarts keep the context, so the generation matches)
-				if ( stages[i].newStage->glslProgramObject != 0
-						&& stages[i].newStage->glslProgramGeneration == tr.glContextGeneration
-						&& glConfig.isInitialized ) {
-					if ( stages[i].newStage->glslVertexShaderObject != 0 ) {
-						glDetachObjectARB(
-							(GLhandleARB)stages[i].newStage->glslProgramObject,
-							(GLhandleARB)stages[i].newStage->glslVertexShaderObject );
-						glDeleteObjectARB( (GLhandleARB)stages[i].newStage->glslVertexShaderObject );
-					}
-					if ( stages[i].newStage->glslFragmentShaderObject != 0 ) {
-						glDetachObjectARB(
-							(GLhandleARB)stages[i].newStage->glslProgramObject,
-							(GLhandleARB)stages[i].newStage->glslFragmentShaderObject );
-						glDeleteObjectARB( (GLhandleARB)stages[i].newStage->glslFragmentShaderObject );
-					}
-					glDeleteObjectARB( (GLhandleARB)stages[i].newStage->glslProgramObject );
-				}
+				// releases the stage's program, its own or its share of a shared
+				// one; handles from an older GL context generation are not deleted
+				R_FreeGLSLProgram( stages[i].newStage );
 				Mem_Free( stages[i].newStage );
 				stages[i].newStage = NULL;
 			}
@@ -619,6 +604,8 @@ void idMaterial::FreeData() {
 	pbrInfo.emissiveColorRegisters[0] = -1;
 	pbrInfo.emissiveColorRegisters[1] = -1;
 	pbrInfo.emissiveColorRegisters[2] = -1;
+	pbrInfo.heightScaleRegister = -1;
+	pbrInfo.heightReferenceRegister = -1;
 	pbrInfo.autoLegacyFallback = true;
 	R_ResetSpecularProbeMaterialInfo( specularProbeInfo );
 }
@@ -1911,8 +1898,8 @@ void idMaterial::ParseShaderTexture( idLexer &src, newShaderStage_t *newStage ) 
 		return;
 	}
 
-	if ( newStage->numShaderTextures >= MAX_FRAGMENT_IMAGES ) {
-		common->Warning( "material '%s' exceeded shaderTexture limit (%d)", GetName(), MAX_FRAGMENT_IMAGES );
+	if ( newStage->numShaderTextures >= MAX_SHADER_TEXTURES ) {
+		common->Warning( "material '%s' exceeded shaderTexture limit (%d)", GetName(), MAX_SHADER_TEXTURES );
 		SetMaterialFlag( MF_DEFAULTED );
 		return;
 	}
@@ -2715,6 +2702,7 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 			if ( src.ReadTokenOnLine( &token ) ) {
 				if ( !newStage.glslProgram ) {
 					newStage.glslProgram = true;
+					newStage.glslProgramShareable = true;
 					idStr::Copynz( newStage.glslProgramName, token.c_str(), sizeof( newStage.glslProgramName ) );
 				} else {
 					common->Warning( "multiple glslProgram declarations in material '%s'", GetName() );
@@ -3147,6 +3135,23 @@ bool idMaterial::ParsePBRBlock( idLexer &src, const textureRepeat_t trpDefault )
 			if ( !ParsePBRImage( src, pbrInfo.emissive, TD_PBR_COLOR, trpDefault ) ) return false;
 			continue;
 		}
+		if ( !token.Icmp( "heightMap" ) ) {
+			if ( pbrInfo.height.present ) {
+				src.Warning( "PBR heightMap is duplicated in material '%s'", GetName() );
+				SetMaterialFlag( MF_DEFAULTED );
+				return false;
+			}
+			if ( !ParsePBRImage( src, pbrInfo.height, TD_MATERIAL_DATA, trpDefault ) ) return false;
+			continue;
+		}
+		if ( !token.Icmp( "heightScale" ) ) {
+			pbrInfo.heightScaleRegister = ParseExpression( src );
+			continue;
+		}
+		if ( !token.Icmp( "heightReference" ) ) {
+			pbrInfo.heightReferenceRegister = ParseExpression( src );
+			continue;
+		}
 		if ( !token.Icmp( "legacyBumpMap" ) ) {
 			if ( !ParsePBRImage( src, pbrInfo.legacyBump, TD_BUMP, trpDefault ) ) return false;
 			continue;
@@ -3293,6 +3298,56 @@ bool idMaterial::ParsePBRBlock( idLexer &src, const textureRepeat_t trpDefault )
 			src.Warning( "PBR material '%s' could not pack its separate material-data maps into one ORM image (%s); "
 				"Vulkan ambient lights use its scalar roughness", GetName(),
 				program.Length() >= MAX_IMAGE_NAME ? "image names too long" : "image load failed" );
+		}
+	}
+
+	if ( !pbrInfo.height.present
+			&& ( pbrInfo.heightScaleRegister >= 0 || pbrInfo.heightReferenceRegister >= 0 ) ) {
+		src.Warning( "PBR material '%s' sets heightScale or heightReference without a heightMap", GetName() );
+	}
+	if ( pbrInfo.height.present && pbrInfo.height.image != NULL ) {
+		// Parallax occlusion mapping (REN-11): the height rides in the ORM
+		// alpha, because no backend's per-light layout has a free slot. With
+		// no ORM the generated image carries white material data, which
+		// shades exactly as the scalar-only path it replaces.
+		if ( pbrInfo.heightScaleRegister < 0 ) {
+			pbrInfo.heightScaleRegister = GetExpressionConstant( 0.04f );
+		}
+		if ( pbrInfo.heightReferenceRegister < 0 ) {
+			pbrInfo.heightReferenceRegister = GetExpressionConstant( 1.0f );
+		}
+		const bool separateData = pbrInfo.metallic.present || pbrInfo.roughness.present || pbrInfo.ao.present;
+		const bool hadORM = pbrInfo.orm.present && pbrInfo.orm.image != NULL;
+		idStr program = "packORMH( ";
+		program += hadORM ? pbrInfo.orm.image->GetName() : "_white";
+		program += ", ";
+		program += pbrInfo.height.image->GetName();
+		program += " )";
+		if ( separateData ) {
+			src.Warning( "PBR material '%s' has a heightMap but its separate material-data maps could not be packed; "
+				"it draws without parallax", GetName() );
+		} else if ( program.Length() >= MAX_IMAGE_NAME ) {
+			src.Warning( "PBR material '%s' has a heightMap but the packed image name is too long; it draws without parallax",
+				GetName() );
+		} else {
+			const pbrMaterialTexture_t &reference = hadORM ? pbrInfo.orm : pbrInfo.height;
+			if ( hadORM && ( pbrInfo.height.filter != reference.filter || pbrInfo.height.repeat != reference.repeat
+					|| pbrInfo.height.noMips != reference.noMips ) ) {
+				src.Warning( "PBR material '%s' packs its heightMap with differing sampling; the ORM map's sampling serves both", GetName() );
+			}
+			const unsigned int flags = reference.noMips ? R_ResolveMaterialNoMipFlags( pd->qualityInputs, 0 ) : 0;
+			idImage *packed = R_LoadMaterialImage( program.c_str(), static_cast<textureFilter_t>( reference.filter ),
+				static_cast<textureRepeat_t>( reference.repeat ), TD_MATERIAL_DATA, CF_2D, reference.allowPicmip, flags );
+			if ( packed != NULL && packed != globalImages->defaultImage ) {
+				const pbrMaterialTexture_t sampling = reference;
+				pbrInfo.orm = sampling;
+				pbrInfo.orm.image = packed;
+				pbrInfo.orm.present = true;
+				pbrInfo.parallax = true;
+				pbrInfo.parallaxAddedORM = !hadORM;
+			} else {
+				src.Warning( "PBR material '%s' could not pack its heightMap into the ORM image; it draws without parallax", GetName() );
+			}
 		}
 	}
 
@@ -4859,7 +4914,7 @@ void idMaterial::ResolveUse() {
 					stage->newStage->fragmentProgramImages[j]->AddUseCount( useCount );
 				}
 			}
-			for ( int j = 0; j < MAX_FRAGMENT_IMAGES; j++ ) {
+			for ( int j = 0; j < MAX_SHADER_TEXTURES; j++ ) {
 				if ( stage->newStage->shaderTextureImages[j] != NULL ) {
 					stage->newStage->shaderTextureImages[j]->AddUseCount( useCount );
 				}

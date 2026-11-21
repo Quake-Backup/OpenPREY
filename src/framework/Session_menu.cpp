@@ -87,6 +87,10 @@ extern glconfig_t glConfig;
 
 idCVar	idSessionLocal::gui_configServerRate( "gui_configServerRate", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_ROM | CVAR_INTEGER, "" );
 idCVar gui_set_sys_scroll( "gui_set_sys_scroll", "0", CVAR_GUI | CVAR_INTEGER, "display menu scroll step", 0, 28 );
+// The stock Display page's Ambient Occlusion choice: 0 off, else r_ssaoMethod + 1
+// (SSAO, HBAO, GTAO). SyncMainMenuAmbientOcclusionChoice keeps it in step with
+// r_ssao and r_ssaoMethod, which the presets and the console also change.
+idCVar gui_set_sys_ao( "gui_set_sys_ao", "0", CVAR_GUI | CVAR_INTEGER, "display menu ambient occlusion choice: 0 off, 1 SSAO, 2 HBAO, 3 GTAO", 0, 3 );
 idCVar gui_set_audio_scroll( "gui_set_audio_scroll", "0", CVAR_GUI | CVAR_INTEGER, "audio menu scroll step", 0, 7 );
 idCVar gui_set_game_scroll( "gui_set_game_scroll", "0", CVAR_GUI | CVAR_INTEGER, "game menu scroll step", 0, 83 );
 // The opt-ins are unarchived, so each lasts until the player quits, and
@@ -195,7 +199,10 @@ static const int RETAINED_MP_TEAM_SLOTS = 3;
 // against its field's rules.
 static const char *const RETAINED_MP_VOTE_FIELDS[] = {
 	"mpVoteMap", "mpVoteGameType", "mpVoteTimeLimit", "mpVoteFragLimit", "mpVoteCaptureLimit", "mpVoteTourneyLimit",
-	"mpVoteControlTime", "mpVoteBalance", "mpVoteShuffle", "mpVoteRestart", "mpVoteBuying", "mpVoteKick"
+	"mpVoteControlTime", "mpVoteBalance", "mpVoteShuffle", "mpVoteRestart", "mpVoteBuying", "mpVoteKick",
+	// The casual callvote fields (MP-12), after the kick as the game orders them.
+	"mpVoteNextMap", "mpVoteRandomMap", "mpVoteRoundLimit", "mpVoteOvertime", "mpVoteRuleset", "mpVoteInstagib",
+	"mpVoteReadyAll", "mpVoteCoinToss"
 };
 // The Admin page's drafted server settings, whose controls request "<verb>
 // <value>", in the order of the game's retainedVoteField_t without the kick;
@@ -544,6 +551,9 @@ static const float MAINMENU_CORPSE_TIME_PRESET_VALUES[] = {
 static bool ApplyMainMenuSettingsScrollPage( idUserInterface *gui, const char *pageName, bool requireVisiblePage );
 static void SyncMainMenuSettingsScrollPages( idUserInterface *gui );
 static void Session_ScanControlProfiles( idUserInterface *gui );
+// The stock Display page's last synced Ambient Occlusion choice; -1 before a sync.
+static int mainMenuAmbientOcclusionChoice = -1;
+static void SyncMainMenuAmbientOcclusionChoice( void );
 
 static int MenuControllerAbs( int value ) {
 	return value < 0 ? -value : value;
@@ -4223,6 +4233,9 @@ idSessionLocal::SetMainMenuGuiVars
 ===============
 */
 void idSessionLocal::SetMainMenuGuiVars( bool refreshCatalogs ) {
+	// Show the renderer's ambient occlusion state, not a pick from an earlier menu.
+	mainMenuAmbientOcclusionChoice = -1;
+	SyncMainMenuAmbientOcclusionChoice();
 	guiMainMenu->SetStateBool( "retainedSystem", RetainedSystemAvailable() );
 	guiMainMenu->SetStateBool( "retainedAudio", RetainedAudioAvailable() );
 	guiMainMenu->SetStateBool( "retainedGame", RetainedGameAvailable() );
@@ -5181,6 +5194,17 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 
 		if ( !idStr::Icmp( cmd, "openRetainedAudio" ) ) {
 			OpenRetainedAudioRoute();
+			return;
+		}
+
+		// The multiplayer menu's AUDIO route: the retained page over the main
+		// menu as it comes up, else the stock AUDIO page.
+		if ( !idStr::Icmp( cmd, "openRetainedAudioFromMp" ) ) {
+			if ( !OpenRetainedAudio() && guiMainMenu != NULL ) {
+				guiMainMenu->SetStateBool( "retainedAudio", false );
+				guiMainMenu->StateChanged( common->GetPresentationTime() );
+				guiMainMenu->HandleNamedEvent( "fromMp_toAudioStock" );
+			}
 			return;
 		}
 
@@ -6778,7 +6802,37 @@ static void ScrollMainMenuSettingsFocusIntoView( idUserInterface *gui ) {
 	lastFocus.Clear();
 }
 
+/*
+==================
+SyncMainMenuAmbientOcclusionChoice
+
+One choice on the stock Display page stands for two renderer settings: Off is
+r_ssao 0, and SSAO, HBAO and GTAO are r_ssao 1 with r_ssaoMethod 0, 1 or 2. A
+pick the menu wrote since the last sync is applied (Off keeps the method, so
+turning it back on restores it); otherwise the choice follows the renderer
+settings, which a preset, the retained page or the console may have changed.
+The console-only reference (r_ssaoMethod 3) reads as GTAO.
+==================
+*/
+static void SyncMainMenuAmbientOcclusionChoice( void ) {
+	const int live = cvarSystem->GetCVarBool( "r_ssao" ) ? idMath::ClampInt( 0, 2, cvarSystem->GetCVarInteger( "r_ssaoMethod" ) ) + 1 : 0;
+	const int shown = gui_set_sys_ao.GetInteger();
+	if ( mainMenuAmbientOcclusionChoice >= 0 && shown != mainMenuAmbientOcclusionChoice ) {
+		cvarSystem->SetCVarBool( "r_ssao", shown > 0 );
+		if ( shown > 0 ) {
+			cvarSystem->SetCVarInteger( "r_ssaoMethod", shown - 1 );
+		}
+		mainMenuAmbientOcclusionChoice = shown;
+		return;
+	}
+	if ( shown != live ) {
+		gui_set_sys_ao.SetInteger( live );
+	}
+	mainMenuAmbientOcclusionChoice = live;
+}
+
 static void SyncMainMenuSettingsScrollPages( idUserInterface *gui ) {
+	SyncMainMenuAmbientOcclusionChoice();
 	if ( gui == NULL ) {
 		return;
 	}
@@ -7681,7 +7735,25 @@ static const retainedCreateSetting_t RETAINED_CREATE_SETTINGS[] = {
 	{ "createFallDamage",	"falldamage",	"si_fallDamage",			0, 999,	false },
 	{ "createWeaponRespawn",	"weaponrespawn",	"si_weaponRespawn",		0, 999,	false },
 	{ "createPreset",		"preset",		"si_preset",				0, 11,	false },	// Session_RetainedCreateValue
+	// The host settings the multiplayer menu tree audit (20 November 2026)
+	// brought onto the page from the console: the map database's rotation and
+	// map requests, who sees item timers, casual team timeouts, the spectator
+	// lock and moving idle players to spectators (seconds: the page offers
+	// off, one, two, five and ten minutes).
+	{ "createMapRotation",	"maprotation",	"g_mapRotation",			0, 3,	false },
+	{ "createMapQueue",		"mapqueue",		"g_mapQueue",				0, 1,	true },
+	{ "createItemTimers",	"itemtimers",	"si_itemTimers",			0, 2,	false },
+	{ "createTimeouts",		"timeouts",		"si_timeouts",				0, 10,	false },
+	{ "createSpectatorLock",	"spectatorlock",	"si_spectatorLock",		0, 2,	false },
+	{ "createInactivity",	"inactivity",	"g_inactivity",				0, 600,	false },
+	// What players may show each other (MP-15): the strongest brightskin,
+	// rimlight and outline (si_maxBrightskin, Off, Low, Medium or no limit:
+	// Session_RetainedCreateValue) and forced models.
+	{ "createMaxBrightskin",	"maxbrightskin",	"si_maxBrightskin",		0, 3,	false },	// Session_RetainedCreateValue
+	{ "createForcedModels",	"forcedmodels",	"si_forcedModels",			0, 1,	true },
 };
+// si_maxBrightskin's levels, the appearance rows' Off, Low, Medium and High.
+static const float RETAINED_CREATE_BRIGHTSKIN_LEVELS[] = { 0.0f, 0.35f, 0.7f, 1.0f };
 static const int RETAINED_CREATE_SETTING_COUNT = static_cast<int>( sizeof( RETAINED_CREATE_SETTINGS ) / sizeof( RETAINED_CREATE_SETTINGS[0] ) );
 // The page's text fields: the verb a field asks with once its text is in its
 // page state, that state, the CVar the session writes and the most bytes it
@@ -10346,6 +10418,139 @@ the page and returns to it; BACK returns the title, from the page dock as from
 a stock page. A page or a change of level under way takes no further request.
 ===============
 */
+#ifndef ID_DEDICATED
+// The weapon order dialog (WEAPON ORDER, on Player Setup and the multiplayer
+// card's Settings page): the weapons ui_weaponOrder ranks, by the game's
+// weapon names and their stock labels, in the default order Use Weapon Order
+// starts from (the strongest first). The game reads the setting itself
+// (src/mpgame/mp/WeaponOrder.h); a name or alias it lists that the dialog
+// does not know keeps its place no longer once the dialog moves a weapon.
+// RETAINED_WEAPON_ORDER is WEAPON_ORDER_ROWS in tools/ui/retained_player_setup.py.
+typedef struct retainedWeaponOrder_s {
+	const char *	name;
+	const char *	alias;
+	const char *	label;
+} retainedWeaponOrder_t;
+static const retainedWeaponOrder_t RETAINED_WEAPON_ORDER[] = {
+	{ "dmg",				"bfg",	"#str_200113" },
+	{ "railgun",			"rg",	"#str_200111" },
+	{ "rocketlauncher",		"rl",	"#str_200110" },
+	{ "lightninggun",		"lg",	"#str_200112" },
+	{ "napalmgun",			"nap",	"#str_222001" },
+	{ "hyperblaster",		"hb",	"#str_200107" },
+	{ "nailgun",			"ng",	"#str_200109" },
+	{ "grenadelauncher",	"gl",	"#str_200108" },
+	{ "shotgun",			"sg",	"#str_200105" },
+	{ "machinegun",			"mg",	"#str_200106" },
+};
+static const int RETAINED_WEAPON_ORDER_COUNT = static_cast<int>( sizeof( RETAINED_WEAPON_ORDER ) / sizeof( RETAINED_WEAPON_ORDER[0] ) );
+static int retainedWeaponOrderPicked = -1;
+
+// The order ui_weaponOrder gives, as rows of RETAINED_WEAPON_ORDER: the
+// weapons it names in its order (by name, "weapon_" name, "_mp" name or
+// alias), then the others in the default order. False when it is blank.
+static bool Session_WeaponOrder( int order[ RETAINED_WEAPON_ORDER_COUNT ] ) {
+	const idCmdArgs args( cvarSystem->GetCVarString( "ui_weaponOrder" ), false );
+	bool listed[ RETAINED_WEAPON_ORDER_COUNT ] = {};
+	int count = 0;
+	for ( int token = 0; token < args.Argc(); token++ ) {
+		idStr name = args.Argv( token );
+		name.ToLower();
+		name.StripLeadingOnce( "weapon_" );
+		name.StripTrailingOnce( "_mp" );
+		for ( int i = 0; i < RETAINED_WEAPON_ORDER_COUNT; i++ ) {
+			if ( !listed[ i ] && ( name == RETAINED_WEAPON_ORDER[ i ].name || name == RETAINED_WEAPON_ORDER[ i ].alias ) ) {
+				listed[ i ] = true;
+				order[ count++ ] = i;
+				break;
+			}
+		}
+	}
+	const bool any = args.Argc() > 0;
+	for ( int i = 0; i < RETAINED_WEAPON_ORDER_COUNT; i++ ) {
+		if ( !listed[ i ] ) {
+			order[ count++ ] = i;
+		}
+	}
+	return any;
+}
+
+static void Session_SetWeaponOrder( const int order[ RETAINED_WEAPON_ORDER_COUNT ] ) {
+	idStr text;
+	for ( int i = 0; i < RETAINED_WEAPON_ORDER_COUNT; i++ ) {
+		if ( i > 0 ) {
+			text += " ";
+		}
+		text += RETAINED_WEAPON_ORDER[ order[ i ] ].name;
+	}
+	cvarSystem->SetCVarString( "ui_weaponOrder", text.c_str() );
+}
+
+// The dialog's state: whether an order is set, the weapons by rank and the
+// one picked to move.
+static void Session_PublishWeaponOrder( idUserInterface *gui ) {
+	int order[ RETAINED_WEAPON_ORDER_COUNT ];
+	const bool on = Session_WeaponOrder( order );
+	gui->SetStateBool( "order.on", on );
+	for ( int i = 0; i < RETAINED_WEAPON_ORDER_COUNT; i++ ) {
+		gui->SetStateString( va( "order.row%d", i ), common->GetLocalizedString( RETAINED_WEAPON_ORDER[ order[ i ] ].label ) );
+	}
+	gui->SetStateInt( "order.picked", on ? retainedWeaponOrderPicked : -1 );
+	gui->StateChanged( common->GetPresentationTime() );
+}
+
+// The dialog's requests, on whichever page shows it: weaponOrderOpen
+// publishes it with nothing picked; weaponOrderPick takes the row in
+// order.pick: the first picks it, a second row moves the picked weapon there
+// and the picked row again puts it back; weaponOrderEnable sets an order (the
+// one shown) or clears the setting; weaponOrderReset sets the default order.
+static bool Session_WeaponOrderRequest( idUserInterface *gui, const char *request ) {
+	if ( gui == NULL || request == NULL || idStr::Icmpn( request, "weaponOrder", 11 ) != 0 ) {
+		return false;
+	}
+	int order[ RETAINED_WEAPON_ORDER_COUNT ];
+	const bool on = Session_WeaponOrder( order );
+	if ( !idStr::Icmp( request, "weaponOrderOpen" ) ) {
+		retainedWeaponOrderPicked = -1;
+	} else if ( !idStr::Icmp( request, "weaponOrderPick" ) ) {
+		const int row = gui->State().GetInt( "order.pick", "-1" );
+		if ( on && row >= 0 && row < RETAINED_WEAPON_ORDER_COUNT ) {
+			if ( retainedWeaponOrderPicked < 0 || retainedWeaponOrderPicked >= RETAINED_WEAPON_ORDER_COUNT ) {
+				retainedWeaponOrderPicked = row;
+			} else if ( retainedWeaponOrderPicked == row ) {
+				retainedWeaponOrderPicked = -1;
+			} else {
+				const int moved = order[ retainedWeaponOrderPicked ];
+				const int step = row > retainedWeaponOrderPicked ? 1 : -1;
+				for ( int i = retainedWeaponOrderPicked; i != row; i += step ) {
+					order[ i ] = order[ i + step ];
+				}
+				order[ row ] = moved;
+				retainedWeaponOrderPicked = -1;
+				Session_SetWeaponOrder( order );
+			}
+		}
+	} else if ( !idStr::Icmpn( request, "weaponOrderEnable ", 18 ) ) {
+		retainedWeaponOrderPicked = -1;
+		if ( atoi( request + 18 ) != 0 ) {
+			Session_SetWeaponOrder( order );
+		} else {
+			cvarSystem->SetCVarString( "ui_weaponOrder", "" );
+		}
+	} else if ( !idStr::Icmp( request, "weaponOrderReset" ) ) {
+		retainedWeaponOrderPicked = -1;
+		for ( int i = 0; i < RETAINED_WEAPON_ORDER_COUNT; i++ ) {
+			order[ i ] = i;
+		}
+		Session_SetWeaponOrder( order );
+	} else {
+		return false;
+	}
+	Session_PublishWeaponOrder( gui );
+	return true;
+}
+#endif
+
 void idSessionLocal::HandleRetainedMultiplayerPageRequest( idUserInterface *gui, const char *request ) {
 #ifndef ID_DEDICATED
 	if ( retainedMpPageDest != 0 || retainedSubpageFrom != NULL || guiMainMenu == NULL ) {
@@ -10353,6 +10558,10 @@ void idSessionLocal::HandleRetainedMultiplayerPageRequest( idUserInterface *gui,
 	}
 	// openPR06: Prey's MultiPrey page holds the stock page's three tabs.
 	if ( HandleRetainedMultiPreyRequest( gui, request ) ) {
+		return;
+	}
+	// Player Setup's WEAPON ORDER dialog.
+	if ( Session_WeaponOrderRequest( gui, request ) ) {
 		return;
 	}
 	if ( !idStr::Icmpn(request,openq4::ui::PlayerSetupRequestPrefix,sizeof(openq4::ui::PlayerSetupRequestPrefix)-1) ) {
@@ -10998,6 +11207,17 @@ static int Session_RetainedCreateValue( const retainedCreateSetting_t &setting )
 	if ( !idStr::Icmp( setting.verb, "createPreset" ) ) {
 		return Session_RetainedCreatePreset();
 	}
+	if ( !idStr::Icmp( setting.verb, "createMaxBrightskin" ) ) {
+		// The nearest level: a console value between two shows the nearer.
+		const float limit = cvarSystem->GetCVarFloat( "si_maxBrightskin" );
+		int nearest = 0;
+		for ( int i = 1; i < 4; ++i ) {
+			if ( idMath::Fabs( limit - RETAINED_CREATE_BRIGHTSKIN_LEVELS[ i ] ) < idMath::Fabs( limit - RETAINED_CREATE_BRIGHTSKIN_LEVELS[ nearest ] ) ) {
+				nearest = i;
+			}
+		}
+		return nearest;
+	}
 	return idMath::ClampInt( setting.minimum, setting.maximum, cvarSystem->GetCVarInteger( setting.cvar ) );
 }
 
@@ -11016,6 +11236,10 @@ static void Session_SetRetainedCreateValue( const retainedCreateSetting_t &setti
 	}
 	if ( !idStr::Icmp( setting.verb, "createPreset" ) ) {
 		Session_SetRetainedCreatePreset( value );
+		return;
+	}
+	if ( !idStr::Icmp( setting.verb, "createMaxBrightskin" ) ) {
+		cvarSystem->SetCVarFloat( "si_maxBrightskin", RETAINED_CREATE_BRIGHTSKIN_LEVELS[ idMath::ClampInt( 0, 3, value ) ] );
 		return;
 	}
 	cvarSystem->SetCVarInteger( setting.cvar, value );
@@ -13527,6 +13751,10 @@ void idSessionLocal::HandleRetainedMultiplayerRequest( idUserInterface *gui, con
 	if ( gui == NULL || request == NULL || gui != guiRetainedMultiplayer || !RetainedMultiplayerCovers() || game == NULL ) {
 		return;
 	}
+	// The Settings page's WEAPON ORDER dialog.
+	if ( Session_WeaponOrderRequest( gui, request ) ) {
+		return;
+	}
 	if ( !idStr::Icmp( request, "mpSummaryChat" ) ) {
 		// The summary's chat field starts typing, which the session owns.
 		if ( RetainedSummaryCovers() ) {
@@ -13896,6 +14124,8 @@ void idSessionLocal::HandleRetainedMultiplayerRequest( idUserInterface *gui, con
 		command = "mainMenu fromMp_toGameoptions";
 	} else if ( !idStr::Icmp( request, "mpSettingsSystem" ) ) {
 		command = "mainMenu fromMp_toSystem";
+	} else if ( !idStr::Icmp( request, "mpSettingsAudio" ) ) {
+		command = "mainMenu fromMp_toAudio";
 	} else if ( !idStr::Icmp( request, "mpClose" ) ) {
 		command = "close";
 	} else if ( !idStr::Icmp( request, "mpMainMenu" ) ) {

@@ -807,12 +807,24 @@ bool R_SubmittedTakingScreenshot( void );
 // this allows a global override of all materials
 bool R_GlobalShaderOverride( const idMaterial **shader );
 bool R_ValidateGLSLProgram( newShaderStage_t *stage );
+void R_FreeGLSLProgram( newShaderStage_t *stage );
+// Uniform uploads for a material stage's GLSL program, skipped when the program
+// already holds the value (draw_common.cpp, shared GLSL programs). Every write to
+// a material stage's program goes through these: a value set any other way would
+// leave the record stale.
+void RB_GLSLStageUniform( const newShaderStage_t *stage, int location, int numComponents, const float *value );
+void RB_GLSLStageSampler( const newShaderStage_t *stage, int location, int unit );
+void RB_GLSLStageForgetUniform( const newShaderStage_t *stage, int location );
 bool R_FindGLSLSourcePair( const char *programName, idStr &vertexPath, idStr &fragmentPath,
     std::string &vertexSource, std::string &fragmentSource, int *vertexBytes = NULL, int *fragmentBytes = NULL,
     bool *foundAnySource = NULL );
 void R_ReloadGLSLPrograms_f( const idCmdArgs &args );
+void R_ListGLSLPrograms_f( const idCmdArgs &args );
 bool RB_BindGLSLShaderParm( glslShaderParmBinding_t binding, int location, const shaderStage_t *stage, const drawInteraction_t *din );
 idImage *RB_ResolveGLSLShaderTextureImage( const newShaderStage_t *stage, int slot, const drawInteraction_t *din );
+int RB_GLSLShaderTextureBindOrder( int numShaderTextures, int index );
+void RB_BindGLSLShaderTexture( const newShaderStage_t *stage, int slot, idImage *image, bool selectClient );
+void RB_UnbindGLSLShaderTexture( int slot, bool selectClient );
 
 // this does various checks before calling the idDeclSkin
 const idMaterial *R_RemapShaderBySkin( const idMaterial *shader, const idDeclSkin *customSkin, const idMaterial *customShader );
@@ -1396,6 +1408,10 @@ extern idCVar r_multiSamples;			// number of antialiasing samples
 extern idCVar r_postAA;					// post AA mode: 0 = off, 1/2/3 = SMAA medium/high/ultra, 4 = colour-edge prototype
 extern idCVar r_postAAStatePoisonTest;	// intentionally dirty GL texture/client state before SMAA draws
 extern idCVar r_pbrMaterials;			// allow explicitly PBR-authored materials on modern paths
+extern idCVar r_parallaxOcclusion;		// REN-11 parallax occlusion mapping
+extern idCVar r_parallaxSamples;		// most height samples per parallax ray
+extern idCVar r_parallaxDistance;		// distance where parallax has faded flat
+extern idCVar r_parallaxShadows;		// parallax self-shadow rays
 extern idCVar r_pbrLinearScene;		// laboratory linear PBR scene instead of display-referred composition
 extern idCVar r_pbrGeneratedLegacyFallback;	// allow development-only generated classic fallbacks
 extern idCVar r_pbrDebug;				// PBR attachment/fallback debug view
@@ -1427,6 +1443,20 @@ extern idCVar r_ssaoSamples;			// SSAO spiral sample count
 extern idCVar r_ssaoDebug;				// visualize SSAO only
 extern idCVar r_ssaoResolution;			// 0 automatic, 1 full, 2 half resolution
 bool R_SSAOHalfResolution();			// r_ssaoResolution resolved against r_ssaoSamples
+// r_ssaoMethod: the kernel of the occlusion pass (REN-10). The r_ssao* names
+// cover all of them: each is screen-space ambient occlusion.
+enum ssaoMethod_t {
+	SSAO_METHOD_SSAO = 0,		// the shipped obscurance estimate
+	SSAO_METHOD_HBAO = 1,		// horizon-based ambient occlusion
+	SSAO_METHOD_GTAO = 2,		// ground-truth ambient occlusion
+	SSAO_METHOD_REFERENCE = 3,	// brute-force reference, developer comparison only
+	SSAO_METHOD_COUNT
+};
+extern idCVar r_ssaoMethod;				// ssaoMethod_t
+extern idCVar r_ssaoMultiBounceAlbedo;	// GTAO: grey albedo classic surfaces bounce trapped light with, 0 off
+int R_SSAOMethod();						// r_ssaoMethod clamped to ssaoMethod_t
+bool R_SSAOFiltered();					// the occlusion target takes the separable filter (not the reference)
+void R_SSAOMethodInfo( const struct viewDef_s *viewDef, float info[4] );	// ssao.fs aoInfo / post_ssao.frag methodInfo
 extern idCVar r_motionBlur;				// enable camera motion blur post-process
 extern idCVar r_motionBlurStrength;		// motion blur strength multiplier
 extern idCVar r_motionBlurMaxPixels;	// maximum motion blur radius in pixels
@@ -2042,6 +2072,7 @@ bool R_CheckExtension( const char *name );
 // uploads, sampler-state changes) or a later filtered Bind() can silently
 // leave the wrong texture bound
 void R_BindTextureForDirectAccess( unsigned int target, int texnum );
+void R_BindUntrackedTextureUnit( int texUnit, unsigned int target, unsigned int texture );
 
 const int RENDERER_SHADOW_TEXTURE_MOMENT_COUNT = 3;
 

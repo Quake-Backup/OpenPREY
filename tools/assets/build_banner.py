@@ -2,7 +2,7 @@
 """Render openPR06's logo banner and its social preview.
 
     assets/docs/img/banner.png          the logo on a transparent ground (README)
-    assets/docs/img/social-preview.png  1280x640, the logo over space (GitHub)
+    assets/docs/img/social-preview.jpg  1280x640, the logo over space (GitHub)
 
 The logo is a variant of openQ4's and openD3's: the "open" lettering is
 openQ4's own pixels, kept as a layer in assets/docs/img/src/banner-open.png,
@@ -43,7 +43,7 @@ OPEN_LAYER = IMG / "src" / "banner-open.png"
 INSIGNIA_LAYER = IMG / "src" / "talon-insignia.png"
 ICON = REPO / "assets" / "icons" / "prey_1024.png"
 BANNER = IMG / "banner.png"
-SOCIAL = IMG / "social-preview.png"
+SOCIAL = IMG / "social-preview.jpg"   # GitHub takes up to 1 MB
 
 WIDTH, HEIGHT = 1024, 386
 LAYER_WIDTH = 1024  # openQ4's banner, and so the "open" layer
@@ -381,6 +381,8 @@ def main() -> None:
     parser.add_argument("--extract-insignia", action="store_true",
                         help="rebuild the insignia layer from the application icon and exit")
     parser.add_argument("--only", choices=("banner", "social"))
+    parser.add_argument("--earth-maps", nargs=2, type=Path, metavar=("DAY", "NIGHT"),
+                        help="rebuild the social preview's Earth from NASA's day and night maps")
     args = parser.parse_args()
     if args.extract_open:
         extract_open(args.extract_open)
@@ -394,7 +396,7 @@ def main() -> None:
         print(f"wrote {BANNER.relative_to(REPO)}")
     if args.only in (None, "social"):
         import build_social_preview  # noqa: PLC0415  (sibling module)
-        build_social_preview.render(logo).save(SOCIAL, optimize=True)
+        build_social_preview.render(logo, args.earth_maps).save(SOCIAL, quality=93, subsampling=0, optimize=True)
         print(f"wrote {SOCIAL.relative_to(REPO)}")
 
 

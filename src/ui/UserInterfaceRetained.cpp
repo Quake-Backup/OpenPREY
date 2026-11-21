@@ -441,7 +441,7 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		{"vr_moveDirection",{0,0,1,true,{},{0,1}}},{"vr_roomScale",{1}},{"vr_aimLaser",{0,0,2,true,{},{0,1,2}}},
 		{"vr_hapticStrength",{2,0,0,false,{"0","0.5","1"}}},{"vr_twoHanded",{1}},
 		{"vr_comfortVignette",{2,0,0,false,{"0","0.5","1"}}},{"vr_physicalCrouch",{1}},
-		{"vr_playSpace",{0,0,2,true,{},{0,1,2}}},{"vr_body",{0,0,2,true,{},{0,1,2}}}},
+		{"vr_playSpace",{0,0,2,true,{},{0,1,2}}},{"vr_body",{0,0,2,true,{},{0,1,2}}},
 		// openPR06: Prey's Options page, Game Options tab (guis/menu/settings.rui),
 		// beside the settings above that it shares with Quake 4's.
 		{"g_showHud",{1}},{"g_subtitles",{1}},{"com_profanity",{1}},{"g_useDDA",{1}},

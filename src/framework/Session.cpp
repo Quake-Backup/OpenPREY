@@ -8410,8 +8410,8 @@ void idSessionLocal::ExecuteMapChange( bool noFadeWipe ) {
 
 	// cause prints to force screen updates as a pacifier,
 	// and draw the loading gui instead of game draws
-	openq4::NativeInputBeforeSessionChange();
 	startupLoadingHandoff = false;
+	openq4::NativeInputBeforeSessionChange();
 	insideExecuteMapChange = true;
 	LoadingPresentation_Begin( "map" );
 

@@ -2394,7 +2394,8 @@ openPR06's own marks live in `assets/`:
 | --- | --- | --- |
 | Application icon | `assets/icons/prey.*` | The hawk Talon in red and orange flame with a cyan electric edge; executables, desktop entries, installers |
 | Splash | `assets/splash/prey_rt_bitmap_4001.bmp` | Windows startup splash: the stone hawk with the dark extended wordmark |
-| README banner | `assets/docs/img/banner.png` | "open" in a white geometric sans beside "PR06" in dark navy extended capitals, over the Sphere and the glowing spirit hawk |
+| Logo and README banner | `assets/docs/img/banner.png`, 1024x386 on a transparent ground; built by `tools/assets/build_banner.py` | The openQ4 and openD3 logo with Prey's lettering: openQ4's white "open", then "PR" in very wide extended capitals (the wordmark's dark navy fill `#16304C` to `#010204`, a thin `prey.wordmark.edge` rim, a `prey.wordmark.streak` lens streak), extruded and black-keylined as openD3's "D3", with a small superscript "06" set at cap height. They stand on openQ4's plate lit teal (black at its dissolving left edge to `#AFFCFF` at its right rim), with the hawk Talon's insignia, the icon's line work widened 1.75 times, drawn across it a little hotter than the glow |
+| Social preview | `assets/docs/img/social-preview.png`, 1280x640; built by `tools/assets/build_social_preview.py` through `build_banner.py` | The logo centred over space: a blue and teal nebula and star field, Earth in night with a lit limb at the upper left, the Sphere's horizon across the foot (dark shell, steel-blue plates, green patches, faint teal veins) with light rising behind it, and Talon's insignia outline faint across the back, receding from the right edge. Under the logo, "The modern way to play PREY" in a geometric italic between teal bracket marks, the game's name in `#1BDDEF`. Upload it as the repository's social preview on GitHub (Settings, General, Social preview) |
 | Release package home | `assets/release/README.html` | The `README.html` at the root of every package: the portal rim, Sphere and Earth's limb behind the hawk and wordmark, the arc of hooks as its section menu, the home bottom bar for its documentation links, and claw-cornered frames with setting-row plates and 3-slice buttons for its content |
 | Project overview and documentation portal | `assets/docs/README.html`; `SITE_CSS` in `tools/build/generate_release_docs.py` | The same vocabulary for the repository overview page and every packaged documentation page; side columns are tab containers whose links are side tabs |
 | Web faces | `assets/docs/fonts/openpr06-menu.woff`, `talon-ui-condensed.woff` | The display tracing and Talon UI Condensed, subset for the pages above by `tools/assets/fonts/embed_atlas_fonts.py`; the release home embeds them so it works offline from an unpacked archive |
@@ -2402,10 +2403,12 @@ openPR06's own marks live in `assets/`:
 
 Rules for project material:
 
-- Write the project name `openPR06`: lower-case "open", upper-case "PREY".
-  The game is "Prey" in running text and `PREY` only in the wordmark.
-- Set "PREY" in a wide extended face with generous tracking, never condensed.
-  Pair it with a plain geometric sans for "open" and for taglines.
+- Write the project name `openPR06`: lower-case "open", upper-case "PR", then
+  "06". In the logo the "06" is small and superscripted; in text it is plain.
+  The game is "Prey" in running text, and `PREY` in the game's own wordmark and
+  where a tagline names the game ("The modern way to play PREY").
+- Set "PR" in a wide extended face, never condensed. Pair it with a plain
+  geometric sans for "open" and for taglines.
 - Use the hawk as the project emblem. Draw it in cyan light (`#1BDDEF` to
   `#AFFCFF`) on dark grounds or in the icon's flame colours; do not recolour it
   steel or olive.

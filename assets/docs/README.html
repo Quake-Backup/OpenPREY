@@ -534,6 +534,10 @@
 
     .picture img { display: block; width: 100%; height: auto; border-radius: 6px; }
 
+    /* The logo stands on the page itself, on its transparent ground. */
+    .logo { margin: 0 0 6px; }
+    .logo img { display: block; width: 100%; height: auto; }
+
     h1.tagline { margin: 6px 0 0; font-weight: 400; font-size: clamp(17px, 2.8vw, 24px); }
 
     /* Group boxes: a horizontal fade with a rim and rounded ends. */
@@ -580,8 +584,8 @@
     </svg>
 
     <div class="masthead">
-      <figure class="picture">
-        <img src="img/banner.png" alt="openPR06: the Sphere and the spirit hawk behind the openPR06 wordmark" width="1280" height="320">
+      <figure class="logo">
+        <img src="img/banner.png" alt="openPR06" width="1024" height="386">
       </figure>
       <h1 class="tagline">The Modern Way to Play Prey</h1>
       <p class="lede">An open-source engine and game-code replacement that runs the original 2006 game on today's Windows and Linux PCs, with modern display handling, a choice of OpenGL or Vulkan rendering and one game module for single-player and multiplayer.</p>

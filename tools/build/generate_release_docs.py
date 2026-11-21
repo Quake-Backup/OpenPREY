@@ -393,13 +393,9 @@ samp {
 /* Picture frame: an outline only, rounded, in prey.frame.picture. */
 .hero-banner {
   width: 100%;
+  height: auto;
   display: block;
   margin-bottom: 18px;
-  padding: 4px;
-  border: 2px solid #A7C4E8;
-  border-radius: 10px;
-  background: #000;
-  box-shadow: 0 0 24px rgba(47, 100, 220, 0.22);
 }
 
 .hero h1,

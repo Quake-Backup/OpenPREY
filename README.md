@@ -27,21 +27,19 @@ openPR06 replaces PREY's engine and game binaries with its own: a GPL engine bui
 > openPR06 does **not** include any PREY game data. You need your own copy of PREY (2006), from the original discs or another legitimate source.
 
 > [!IMPORTANT]
-> openPR06 is in **early development** and has no release yet. Representative campaign maps, save/load and a two-client multiplayer session have been played on it, but full campaign completion and multiplayer parity aren't claimed. See [release status](docs/user/release-status.md).
+> openPR06 is in **early development**. Its first release is [0.15.0, the First Contact Edition](https://github.com/themuffinator/openPR06/releases/tag/v0.15.0). Representative campaign maps, save/load and a two-client multiplayer session have been played on it, but full campaign completion and multiplayer parity aren't claimed. See [release status](docs/user/release-status.md).
 
 ## Quick start
 
-Until the first release, you build openPR06 yourself:
-
 1. Install **PREY (2006)**. Leave it where it is; openPR06 keeps to its own folder.
-2. Build and stage openPR06 with [BUILDING.md](BUILDING.md). The staged package lands in `.install/`.
-3. Launch `openPR06-client_x64` (`.exe` on Windows) from `.install/`.
+2. Download the [latest release](https://github.com/themuffinator/openPR06/releases/latest): the Windows x64 installer or zip, or the Linux x64 `.tar.xz`. Install or extract it into a folder of its own.
+3. Launch `openPR06-client_x64` (`.exe` on Windows).
 4. openPR06 finds your PREY install on its own. If it doesn't, launch with `+set r_fullscreen 0 +set fs_basepath "C:\path\to\Prey"`, pointing at the folder that contains `base`, not at `base` itself. See [If auto-detection fails](docs/user/getting-started.md#if-auto-detection-fails).
 
 > [!TIP]
 > Don't copy retail `.pk4` files into `basepr/`. That folder is for openPR06's own files.
 
-The [Releases page](https://github.com/themuffinator/openPR06/releases) still lists nightly builds from April 2026. They predate openPR06's move onto the current openQ4 engine and don't match this README.
+To build it yourself instead, follow [BUILDING.md](BUILDING.md); the staged package lands in `.install/`. The nightly builds from April 2026 further down the [Releases page](https://github.com/themuffinator/openPR06/releases) predate openPR06's move onto the openQ4 engine; use 0.15.0 or later.
 
 ## Features
 
@@ -60,14 +58,14 @@ The [rebase status ledger](docs/dev/prey-rebase/status-ledger.md) records what h
 
 ## Platforms and requirements
 
-Active CI builds Windows x64 and Linux x64 on every push. No packages are published yet: the Windows installer, Linux AppImage, ARM64 and macOS lanes inherited from openQ4 are switched off until they're rebuilt around `basepr/` and the unified game module. See [release status](docs/user/release-status.md).
+Active CI builds Windows x64 and Linux x64 on every push, and releases publish a Windows x64 installer and zip and a Linux x64 `.tar.xz`. The Linux AppImage, ARM64 and macOS lanes inherited from openQ4 are switched off until they're rebuilt around `basepr/` and the unified game module. See [release status](docs/user/release-status.md).
 
 | Platform | State | Notes |
 |---|---|---|
-| **Windows x64** | Built in CI; most runtime testing happens here | Windows 10/11 recommended |
-| **Linux x64** | Built in CI | A modern 64-bit desktop, comparable to Ubuntu 24.04 or newer. SDL3 picks Wayland or X11; set `OPENPR06_FORCE_X11=1` to force XWayland |
+| **Windows x64** | Released: installer and zip; most runtime testing happens here | Windows 10/11 recommended |
+| **Linux x64** | Released: `.tar.xz` | A modern 64-bit desktop, comparable to Ubuntu 24.04 or newer. SDL3 picks Wayland or X11; set `OPENPR06_FORCE_X11=1` to force XWayland |
 | **Steam Deck / SteamOS** | Launcher in Linux builds | Run `openPR06-steamdeck`; inherited from openQ4, not yet checked with PREY. See the [Steam Deck guide](docs/user/steam-deck.md) |
-| **Linux AppImage** | Not produced yet | `tools/build/package_linux_appimage.py` is rebranded for openPR06 (`x86_64` and `aarch64` names), but nothing runs it until the release lane is rebuilt |
+| **Linux AppImage** | Not produced yet | `tools/build/package_linux_appimage.py` is rebranded for openPR06 (`x86_64` and `aarch64` names), but the release workflow doesn't run it yet: its artifact verifier still expects openQ4's layout |
 | **Linux ARM64** | Not supported yet | openQ4's ARM64 lanes are switched off until they're rebuilt for openPR06 |
 | **macOS** | Not supported yet | The build files cover macOS hosts, but CI doesn't build or test it and there's no package |
 | **Windows ARM64** | Not supported yet | Switched off, as for Linux ARM64 |

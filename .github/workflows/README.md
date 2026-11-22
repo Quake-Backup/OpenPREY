@@ -7,7 +7,16 @@ canonical unified `game_<arch>` module from the in-tree `src/game/`, `src/Prey/`
 table, the `basepr/` runtime layout, the high-risk rebase source contracts, and
 openPR06 desktop/icon payloads.
 
-The inherited OpenQ4 commit, push, ARM64, macOS, Universal2, and manual-release
+`manual-release.yml` publishes openPR06 releases. It is adapted from openQ4's for
+Windows x64 and Linux x64: run it by hand from `main` or a `release/*` branch with
+`version_override` (for example `0.15.0`), and it builds, verifies and packages both
+platforms (Windows zip, installer and PDB symbols; Linux `.tar.xz` and detached debug
+symbols), generates the changelog from `docs/dev/releases/<tag>.md`, and creates the
+GitHub release as a draft. Set `draft` to false to publish. openQ4's Discord, Android,
+macOS, ARM64, AppImage, standalone content-pack and signed update-manifest steps are
+left out; the file's header says why.
+
+The inherited OpenQ4 commit, push, ARM64, macOS and Universal2
 workflows are retained only as static-test/reference fixtures. They are manual-only,
 clearly named `DISABLED`, and every job has an unconditional false gate because they
 still assume openQ4's split `game-sp`/`game-mp` modules and Quake 4 content. Remove those

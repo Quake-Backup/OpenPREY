@@ -3,13 +3,13 @@
 This guide gets openPR06 running against your copy of PREY (2006).
 
 > [!IMPORTANT]
-> openPR06 has no release yet, so for now you build it yourself from this repository. The [Releases page](https://github.com/themuffinator/openPR06/releases) still lists nightly builds from April 2026. They predate openPR06's move onto the current openQ4 engine and don't match these guides. [Release status](release-status.md) lists what works today on each platform.
+> openPR06's first release is [0.15.0](https://github.com/themuffinator/openPR06/releases/tag/v0.15.0): a Windows x64 installer and zip, and a Linux x64 `.tar.xz`. You can also build it yourself from this repository. The nightly builds from April 2026 further down the Releases page predate openPR06's move onto the openQ4 engine and don't match these guides. [Release status](release-status.md) lists what works today on each platform.
 
 ## What You Need
 
 - **PREY (2006)**, installed from the original discs or another legitimate source. openPR06 reads the retail `base/` files from your install and ships none of them.
 - A **Windows x64** or **Linux x64** PC that meets the [system requirements](#system-requirements).
-- The compiler and tools listed in [BUILDING.md](../../BUILDING.md).
+- To build it yourself instead of using a release: the compiler and tools listed in [BUILDING.md](../../BUILDING.md).
 
 ## System Requirements
 

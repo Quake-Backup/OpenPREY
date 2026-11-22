@@ -29,7 +29,8 @@ The active workflow is `.github/workflows/openpr06-validation.yml`. It validates
 deterministic `pak0.pk4`/`pak1.pk4` inputs, one staged `game_<arch>` module,
 `basepr/`, and openPR06 desktop/icon payloads on the enabled x64 lanes.
 
-Inherited OpenQ4 ARM64, macOS, Universal2, signing, and manual-release workflows are
+`manual-release.yml` is rebuilt for openPR06 and publishes the Windows x64 and Linux
+x64 packages. Inherited OpenQ4 ARM64, macOS, Universal2 and signing workflows are
 retained only as manual static-test/reference fixtures. Every job is unconditionally
 false-gated because it asserts upstream OpenQ4's split `game-sp`/`game-mp` modules
 and package contracts. Those gates must not be removed until the lanes are rebuilt around the

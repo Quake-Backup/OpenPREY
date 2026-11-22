@@ -8,20 +8,25 @@ curated as **0.15.0, the First Contact Edition**, numbered alongside openQ4
 [releases/v0.15.0.md](releases/v0.15.0.md); it draws on
 [releases/unreleased.md](releases/unreleased.md) and supersedes the
 [0.0.1 draft](releases/v0.0.1.md). Keep it in step with any entry added
-before the release is cut. Nothing is published yet. Before cutting it:
+before the release is cut. To cut it:
 
-- openPR06 has no release workflow yet (see Carry Forward): the publication
-  lane must be rebuilt, and must package exactly the Windows x64 and Linux x64
-  archives the notes name.
-- Pass the version explicitly (`openq4_release_version.py --version-override
-  0.15.0`). The automatic bump gives `0.15.000`.
+- `.github/workflows/manual-release.yml`, adapted from openQ4's on 22 November
+  2026, builds and publishes the Windows x64 and Linux x64 packages the notes
+  name. Merge `release/0.15.0` into `main`, run the workflow from `main` with
+  `version_override=0.15.0` and `draft=true`, check the draft's assets, then
+  publish it.
+- Pass the version explicitly (`version_override=0.15.0`). The automatic bump
+  gives `0.15.000`.
 - A local clone that fetched the `openq4-upstream` remote carries openQ4's
   release tags (`v0.13.0` to `v0.14.1`), and the release tooling then takes
   `v0.14.1` as the previous openPR06 release. `origin` has no such tags, so a
   CI checkout is unaffected; check before running the tooling locally.
 - [LICENSING.md](../../LICENSING.md) leaves the distribution of the linked
-  GPL engine and SDK-EULA game module as an open question; settle it before
-  publishing binaries.
+  GPL engine and SDK-EULA game module as an open question, and asserts no
+  answer to it. The maintainer accepted publishing the binaries on that basis
+  on 22 November 2026, as openQ4 does with its SDK-derived game code.
+- The release is not announced on Discord: `discord-release.yml` stays off
+  until the repository opts in.
 
 Process:
 1. Add completed work under "Ready For Changelog".
@@ -54,5 +59,5 @@ Process:
 - [ ] Complete gameplay/runtime verification of the in-tree `src/Prey` and `src/preyengine` trees.
 - [ ] Complete retail parity checks for the restored Doom 3/Prey particle, FX, and beam paths.
 - [ ] Extend CI/runtime checks for openPR06-specific smoke tests.
-- [ ] Rebuild and enable manual/nightly/AppImage publication lanes only after unified-module runtime signoff.
+- [ ] Rebuild the nightly and AppImage publication lanes (the manual Windows x64 and Linux x64 release lane was rebuilt for 0.15.0); the AppImage needs `verify_linux_release_artifacts.py` adapted to openPR06's layout.
 - [ ] Before any macOS package ships: macOS floor-version evidence is recorded for the documented `macOS 11` floor under the inherited `docs/dev/macos-support-matrix-policy.md`, and its notes do not imply native Metal or native Cocoa/OpenGL backend support (`docs/dev/macos-renderer-backend-policy.md`).

@@ -7710,7 +7710,12 @@ hhArtificialPlayer::hhArtificialPlayer(void) {
 	effectiveBotSkill = 3.0f;
 	botLastSeenPosition = vec3_origin;
 	botBelievedTarget = vec3_origin;
-	botLastTargetPosition = vec3_origin;
+	botBelievedVelocity = vec3_origin;
+	botLastDesiredAngles = ang_zero;
+	botLastDesiredValid = false;
+	botLeadErrorScale = 1.0f;
+	botLeadWeapon = -1;
+	botLeadSpeed = 0.0f;
 	botTargetAcquiredTime = 0;
 	botLastSeenTime = 0;
 	botNextTargetScanTime = 0;
@@ -7989,8 +7994,10 @@ hhPlayer *hhArtificialPlayer::FindBotEnemy( bool &visible, float &distance ) {
 			}
 			botTargetAcquiredTime = gameLocal.time + idMath::Ftoi( Max( 0.0f, reaction ) );
 			botAimSettledTime = 0;
-			botBelievedTarget = botLastSeenPosition;
-			botLastTargetPosition = botLastSeenPosition;
+			// The aim model starts again from the target's real body point.
+			botBelievedTarget = vec3_origin;
+			botBelievedVelocity = vec3_origin;
+			botLastDesiredValid = false;
 		}
 		return best;
 	}
@@ -8030,6 +8037,32 @@ float hhArtificialPlayer::BotWeaponRangeScore( const char *weaponName, float dis
 	}
 	const float difference = idMath::Fabs( distance - idealRange );
 	return 1.0f / ( 1.0f + difference / Max( 100.0f, idealRange ) );
+}
+
+/*
+================
+hhArtificialPlayer::BotProjectileSpeed
+
+openPR06: the launch speed of the current weapon's primary projectile, read
+from its fire info (the multiplayer variant on a server), or 0 for a weapon
+that hits at once: the wrench and the Leech Gun's beam have no projectile.
+================
+*/
+float hhArtificialPlayer::BotProjectileSpeed( void ) {
+	const int weaponNum = GetCurrentWeapon();
+	if ( weaponNum == botLeadWeapon ) {
+		return botLeadSpeed;
+	}
+	botLeadWeapon = weaponNum;
+	botLeadSpeed = 0.0f;
+	const char *weaponName = GetWeaponName( weaponNum );
+	const idDict *fireInfo = ( weaponName && weaponName[0] ) ? hhWeapon::GetFireInfoDict( weaponName ) : NULL;
+	const char *projectileName = fireInfo ? fireInfo->GetString( "def_projectile" ) : "";
+	const idDict *projectile = projectileName[0] ? gameLocal.FindEntityDefDict( projectileName, false ) : NULL;
+	if ( projectile ) {
+		botLeadSpeed = projectile->GetVector( "velocity" ).Length();
+	}
+	return botLeadSpeed;
 }
 
 void hhArtificialPlayer::UpdateBotWeapon( float enemyDistance ) {
@@ -8583,34 +8616,63 @@ void hhArtificialPlayer::UpdateBotAimAndFire( usercmd_t &cmd, const hhPlayer *en
 	bool haveAimPoint = false;
 
 	if ( enemy ) {
-		idVec3 target = enemyVisible ? enemy->GetEyePosition() : botLastSeenPosition;
+		idVec3 target = botBelievedTarget != vec3_origin ? botBelievedTarget : botLastSeenPosition;
 		if ( enemyVisible ) {
-			const idBounds &targetBounds = enemy->GetPhysics()->GetAbsBounds();
+			// Aim at the middle of the body along the target's own up axis.  The
+			// eye is the top of the head, where most of a near miss goes over.
+			const idPhysics *targetPhysics = enemy->GetPhysics();
+			const idVec3 targetUp = -targetPhysics->GetGravityNormal();
+			const idBounds &targetBounds = targetPhysics->GetAbsBounds();
 			float targetMin = 0.0f;
 			float targetMax = 0.0f;
-			targetBounds.AxisProjection( -enemy->GetPhysics()->GetGravityNormal(),
-				targetMin, targetMax );
+			targetBounds.AxisProjection( targetUp, targetMin, targetMax );
 			const float targetHeight = targetMax - targetMin;
-			target -= enemy->GetPhysics()->GetGravityNormal() * ( targetHeight * botTraits.aimHeight );
-			const float flightTime = idMath::ClampFloat( 0.0f, 1.2f, enemyDistance / 1200.0f );
-			idVec3 lead = enemy->GetPhysics()->GetLinearVelocity() * flightTime * botTraits.aimLead;
-			lead *= 1.0f + gameLocal.random.CRandomFloat() * botTraits.aimLeadError;
-			target += lead;
+			idVec3 aimPoint = targetBounds.GetCenter();
+			aimPoint += targetUp * ( targetHeight * botTraits.aimHeight );
+			// Sight is checked eye to eye, so a target behind a rail or a ledge
+			// can be visible with its body hidden.  Shoot at the head then.
+			trace_t cover;
+			gameLocal.clip.TracePoint( cover, GetEyePosition(), aimPoint, MASK_SOLID, this );
+			if ( cover.fraction < 1.0f && cover.c.entityNum != enemy->entityNumber ) {
+				aimPoint = enemy->GetEyePosition() - targetUp * 6.0f;
+			}
 
+			// The bot sees where the target is, but has to estimate where it is
+			// going: the believed velocity follows the real one with the tracking
+			// time constant, and the believed point moves with that estimate
+			// while closing on the real point at the same rate.  A steady runner
+			// is tracked exactly; a change of direction opens an error that
+			// peaks about one time constant later and then closes.
 			const float dt = Max( 0.001f, MS2SEC( gameLocal.msec ) );
 			const float timeConstant = Max( 0.001f, botTraits.aimTrackTimeConst );
 			const float alpha = idMath::ClampFloat( 0.0f, 1.0f, dt / ( timeConstant + dt ) );
+			const idVec3 targetVelocity = targetPhysics->GetLinearVelocity();
 			if ( botBelievedTarget == vec3_origin ) {
-				botBelievedTarget = target;
+				botBelievedTarget = aimPoint;
+				botBelievedVelocity = vec3_origin;
 			}
-			botBelievedTarget += ( target - botBelievedTarget ) * alpha;
-			if ( botLastTargetPosition != vec3_origin ) {
-				const idVec3 frameMotion = target - botLastTargetPosition;
-				botBelievedTarget -= frameMotion *
-					idMath::ClampFloat( 0.0f, 1.0f, botTraits.aimTrackError / 8.0f );
-			}
-			botLastTargetPosition = target;
+			botBelievedVelocity += ( targetVelocity - botBelievedVelocity ) * alpha;
+			botBelievedTarget += botBelievedVelocity * dt;
+			botBelievedTarget += ( aimPoint - botBelievedTarget ) * alpha;
 			target = botBelievedTarget;
+
+			// Cross-view lag: aimTrackError degrees behind per 100 degrees a
+			// second of line-of-sight rate, which works out to a time lag of
+			// aimTrackError / 100 seconds on the sideways relative velocity.
+			// The bot's own movement counts; tracking while strafing is harder.
+			idVec3 lineOfSight = target - GetEyePosition();
+			const float sightDistance = lineOfSight.Normalize();
+			idVec3 relativeVelocity = botBelievedVelocity - GetPhysics()->GetLinearVelocity();
+			relativeVelocity -= lineOfSight * ( relativeVelocity * lineOfSight );
+			target -= relativeVelocity * ( botTraits.aimTrackError * 0.01f );
+
+			// Lead with the projectile the current weapon really fires.  An
+			// instant weapon (no projectile, or a beam) needs none.
+			const float projectileSpeed = BotProjectileSpeed();
+			if ( projectileSpeed > 0.0f ) {
+				const float flightTime = idMath::ClampFloat( 0.0f, 1.5f, sightDistance / projectileSpeed );
+				target += botBelievedVelocity * ( flightTime * botTraits.aimLead * botLeadErrorScale );
+			}
 		}
 
 		idVec3 worldDirection = target - GetEyePosition();
@@ -8624,7 +8686,9 @@ void hhArtificialPlayer::UpdateBotAimAndFire( usercmd_t &cmd, const hhPlayer *en
 		desiredAngles.pitch = 0.0f;
 	}
 
-	const float timeSeconds = MS2SEC( gameLocal.time );
+	// The tremor is a slow wander of the hand.  Each bot has its own phase, so
+	// a room of bots does not sway in step.
+	const float timeSeconds = MS2SEC( gameLocal.time ) + entityNumber * 0.37f;
 	desiredAngles.yaw += idMath::Sin( timeSeconds * idMath::TWO_PI * botTraits.aimTremorRateHz ) * botTraits.aimTremorDeg;
 	desiredAngles.pitch += idMath::Sin( timeSeconds * idMath::TWO_PI * botTraits.aimTremorRateHz * 0.73f + 1.7f ) * botTraits.aimTremorDeg;
 
@@ -8635,17 +8699,32 @@ void hhArtificialPlayer::UpdateBotAimAndFire( usercmd_t &cmd, const hhPlayer *en
 	const float maxStep = Max( 1.0f, botCurrentTurnSpeed ) * frameSeconds * dampingFactor;
 	idAngles remaining = desiredAngles - currentAngles;
 	remaining.Normalize180();
+	const float pitchStep = idMath::ClampFloat( -maxStep, maxStep, remaining.pitch );
+	const float yawStep = idMath::ClampFloat( -maxStep, maxStep, remaining.yaw );
 	idAngles newAngles = currentAngles;
-	newAngles.pitch += idMath::ClampFloat( -maxStep, maxStep, remaining.pitch );
-	newAngles.yaw += idMath::ClampFloat( -maxStep, maxStep, remaining.yaw );
+	newAngles.pitch += pitchStep;
+	newAngles.yaw += yawStep;
 	newAngles.roll = 0.0f;
 	newAngles.Normalize180();
 
 	UpdateDeltaViewAngles( newAngles );
 	UpdateOrientation( newAngles );
 
-	const float angularError = Max( idMath::Fabs( remaining.pitch ), idMath::Fabs( remaining.yaw ) );
-	const float actualTurnRate = angularError / frameSeconds;
+	// The cone is measured from where the view ends up this frame, not from
+	// where it started: a bot that has just turned onto its aim point is on it.
+	const float angularError = Max( idMath::Fabs( remaining.pitch - pitchStep ),
+		idMath::Fabs( remaining.yaw - yawStep ) );
+	// Following a moving target is not slewing.  Hold fire only for the part
+	// of the turn beyond what the aim point itself moved this frame.
+	float actualTurnRate = Max( idMath::Fabs( pitchStep ), idMath::Fabs( yawStep ) ) / frameSeconds;
+	if ( haveAimPoint && botLastDesiredValid ) {
+		idAngles aimMotion = desiredAngles - botLastDesiredAngles;
+		aimMotion.Normalize180();
+		actualTurnRate = Max( idMath::Fabs( pitchStep - aimMotion.pitch ),
+			idMath::Fabs( yawStep - aimMotion.yaw ) ) / frameSeconds;
+	}
+	botLastDesiredAngles = desiredAngles;
+	botLastDesiredValid = haveAimPoint;
 	if ( haveAimPoint && angularError <= botTraits.fireConeDeg ) {
 		if ( botAimSettledTime == 0 ) {
 			botAimSettledTime = gameLocal.time;
@@ -8678,6 +8757,9 @@ void hhArtificialPlayer::UpdateBotAimAndFire( usercmd_t &cmd, const hhPlayer *en
 				idMath::Ftoi( botTraits.burstMaxMsec - botTraits.burstMinMsec ) );
 			botBurstEndTime = gameLocal.time + burstMin +
 				( burstRange ? gameLocal.random.RandomInt( burstRange + 1 ) : 0 );
+			// A burst is one judgement of the target's speed, not a new guess
+			// every frame.
+			botLeadErrorScale = 1.0f + gameLocal.random.CRandomFloat() * botTraits.aimLeadError;
 			botNextBurstTime = botBurstEndTime + idMath::Ftoi( botTraits.burstPauseMsec );
 		}
 		if ( gameLocal.time < botBurstEndTime ) {
@@ -8827,7 +8909,12 @@ void hhArtificialPlayer::OnBotMatchStart( void ) {
 	botIgnoredItem = NULL;
 	botLastSeenPosition = vec3_origin;
 	botBelievedTarget = vec3_origin;
-	botLastTargetPosition = vec3_origin;
+	botBelievedVelocity = vec3_origin;
+	botLastDesiredAngles = ang_zero;
+	botLastDesiredValid = false;
+	botLeadErrorScale = 1.0f;
+	botLeadWeapon = -1;
+	botLeadSpeed = 0.0f;
 	botTargetAcquiredTime = 0;
 	botLastSeenTime = 0;
 	botNextTargetScanTime = 0;

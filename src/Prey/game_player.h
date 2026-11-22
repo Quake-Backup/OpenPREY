@@ -814,6 +814,7 @@ protected:
 	void				UpdateBotChat( void );
 	const char *		BotDisplayName( const idPlayer *player ) const;
 	float				BotWeaponRangeScore( const char *weaponName, float distance ) const;
+	float				BotProjectileSpeed( void );
 
 	const rvBotCharacter *botCharacter;
 	idStr				botCharacterName;
@@ -826,7 +827,12 @@ protected:
 	idEntityPtr<idEntity>	botIgnoredItem;
 	idVec3				botLastSeenPosition;
 	idVec3				botBelievedTarget;
-	idVec3				botLastTargetPosition;
+	idVec3				botBelievedVelocity;
+	idAngles			botLastDesiredAngles;
+	bool				botLastDesiredValid;
+	float				botLeadErrorScale;
+	int					botLeadWeapon;
+	float				botLeadSpeed;
 	int					botTargetAcquiredTime;
 	int					botLastSeenTime;
 	int					botNextTargetScanTime;

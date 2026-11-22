@@ -2420,6 +2420,33 @@ def validate_bot_runtime_regressions() -> None:
             "hhArtificialPlayer::UpdateBotAimAndFire mixes world view angles with a "
             "gravity-local desired direction"
         )
+    # The aim point is the body, not the top of the head, and the lead comes
+    # from the projectile the weapon really fires.  The November 2026 model
+    # aimed at the eye, led every weapon as a 1200 u/s projectile (the rifle
+    # and autocannon fly at 7000-7500) and subtracted a share of the target's
+    # frame motion from its belief, so skill-3 bots hit 7-19% of firing frames.
+    require(aim, "targetBounds.GetCenter()", "artificial-player body aim point")
+    require(aim, "BotProjectileSpeed()", "artificial-player per-weapon lead")
+    require(aim, "botBelievedVelocity", "artificial-player velocity-estimate tracking")
+    for stale in ("enemyDistance / 1200.0f", "frameMotion", "enemy->GetEyePosition() : botLastSeenPosition"):
+        if stale in aim:
+            raise AssertionError(
+                f"hhArtificialPlayer::UpdateBotAimAndFire still uses the old aim model ({stale})"
+            )
+    speed_at = player.index("float hhArtificialPlayer::BotProjectileSpeed")
+    speed = braced_body(player, speed_at, "hhArtificialPlayer::BotProjectileSpeed")
+    require(speed, "GetFireInfoDict(", "artificial-player projectile speed from fire info")
+    require(speed, '"def_projectile"', "artificial-player projectile speed from fire info")
+
+    # A dedicated server never creates GL programs.  Prey's multiplayer skins
+    # (jen_mp, human2_body_mp) keep only a skin.vfp interaction stage at shader
+    # level 3, and without the scanned interaction role they parsed translucent,
+    # which idRenderWorld::ModelTrace skips: no shot hit Jen or the Abducted.
+    material = read(ROOT / "src" / "renderer" / "Material.cpp")
+    require(material, "pd->unloadedInteractionProgram = true;", "material interaction stage without a GL program")
+    require(material, "numStages != numAmbientStages || pd->unloadedInteractionProgram",
+        "material coverage of an interaction stage without a GL program")
+
     bad_double_transform = re.compile(
         r"GetViewAngles\s*\(\s*\)\s*\.ToMat3\s*\(\s*\)\s*\*\s*"
         r"(?:physicsObj\.)?GetGravityAxis\s*\("

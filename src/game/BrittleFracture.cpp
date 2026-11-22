@@ -868,7 +868,18 @@ void idBrittleFracture::DropShard( shard_t *shard, const idVec3 &point, const id
 
 	dir2 = origin - point;
 	dist = dir2.Normalize();
-	f = dist > maxShatterRadius ? 1.0f : idMath::Sqrt( dist - minShatterRadius ) * ( 1.0f / idMath::Sqrt( maxShatterRadius - minShatterRadius ) );
+	// openPR06: shards inside minShatterRadius (and every shard when the
+	// radii are equal or inverted) gave Sqrt a negative or zero argument,
+	// which asserts in debug and feeds NaN angular velocity into the shard
+	// physics in release. Clamp as Quake 4 does: no spin inside the inner
+	// radius, full spin outside the outer one.
+	if ( dist >= maxShatterRadius || maxShatterRadius <= minShatterRadius ) {
+		f = dist > minShatterRadius ? 1.0f : 0.0f;
+	} else if ( dist <= minShatterRadius ) {
+		f = 0.0f;
+	} else {
+		f = idMath::Sqrt( ( dist - minShatterRadius ) / ( maxShatterRadius - minShatterRadius ) );
+	}
 
 	//HUMANHEAD rww - randomly create shards with no real physics
 	shard->isCheap = false;

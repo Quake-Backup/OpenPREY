@@ -375,7 +375,7 @@ meson install -C builddir --no-rebuild --skip-subprojects
 > [!NOTE]
 > Linux defaults to the SDL3 backend, which uses native Wayland in a Wayland session, including through `openPR06-steamdeck`. XWayland is selected only when `OPENPR06_FORCE_X11=1` or an SDL X11 video-driver override is set. `-Dplatform_backend=native` remains available as a transitional comparison path on Linux.
 >
-> macOS is not supported. The Meson files keep upstream openQ4's macOS paths (the `platform_backend`, `macos_graphics_bridge` and `macos_openal_provider` options and the MoltenVK-backed Vulkan module), but no openPR06 job builds or runs them. In that code SDL3 is the default platform path and does not link Carbon, `-Dmacos_graphics_bridge=metal` is a Metal bridge that keeps the OpenGL renderer and is not a native Metal renderer, and `-Dplatform_backend=native` on macOS is comparison-only and not a supported release backend. The upstream policies behind those paths are kept for reference and describe openQ4's releases, not openPR06's: [support matrix](docs/dev/macos-support-matrix-policy.md), [renderer and backend](docs/dev/macos-renderer-backend-policy.md), [native backend containment](docs/dev/macos-native-backend-containment-policy.md) and [OpenAL Soft provider](docs/dev/macos-openal-provider-policy.md).
+> macOS on Apple silicon is a preview. The release workflow builds it on `macos-15` with `-Dplatform_backend=sdl3 -Dmacos_openal_provider=system` and `-Dmacos_graphics_bridge=opengl` or `metal`, after `tools/build/prepare_macos_openal_soft.sh` and with MoltenVK staged by `tools/build/prepare_macos_moltenvk.sh`; nobody has played PREY on it yet. In that code SDL3 is the default platform path and does not link Carbon, `-Dmacos_graphics_bridge=metal` is a Metal bridge that keeps the OpenGL renderer and is not a native Metal renderer, and `-Dplatform_backend=native` on macOS is comparison-only and not a supported release backend. The upstream policies behind those paths are kept for reference and describe openQ4's releases, not openPR06's: [support matrix](docs/dev/macos-support-matrix-policy.md), [renderer and backend](docs/dev/macos-renderer-backend-policy.md), [native backend containment](docs/dev/macos-native-backend-containment-policy.md) and [OpenAL Soft provider](docs/dev/macos-openal-provider-policy.md).
 
 ### Debug Build
 
@@ -394,7 +394,7 @@ Use `-Dplatform_backend=native` during setup if you need to compare against the 
 
 ### Linux Packager Notes
 
-openPR06 has no Linux release. For a local or downstream package, the tested target is the Ubuntu 24.04 userspace the CI lane uses, with Meson 1.6.0 or newer, SDL3 3.4.4 or newer (the bundled wrap is 3.4.18) and the [system packages](#linux-system-packages) above.
+openPR06 releases Linux x64 and an ARM64 preview, as `.tar.xz` archives and AppImages. For a local or downstream package, the tested target is the Ubuntu 24.04 userspace the CI lane uses, with Meson 1.6.0 or newer, SDL3 3.4.4 or newer (the bundled wrap is 3.4.18) and the [system packages](#linux-system-packages) above.
 
 Package the default SDL3 backend with OpenGL plus Wayland/EGL support, and keep X11 available where practical for fallback and diagnostics. Document both SDL spellings for explicit driver selection, because users and SDL documentation may use either form:
 
@@ -408,7 +408,7 @@ Legacy `OPENQ4_*` spellings of these variables are still read as temporary migra
 
 The game sources compile directly from `src/game/`, `src/Prey/` and `src/preyengine/`. `builddir/openq4_game_sources.json` records their hashes and the Git identity of the checkout; keep it with build evidence rather than copying source trees into runtime packages. The install step stages `openPR06-steamdeck`, the `openpr06.desktop` and `openpr06-steamdeck.desktop` entries under `share/applications/`, and the icons under `share/icons/`.
 
-`tools/build/package_linux_appimage.py` turns a packaged Linux release directory and its matching detached-symbol directory into an `openpr06-<version-tag>-x86_64.AppImage`, using pinned `linuxdeploy` and `appimagetool` binaries and a fixed type-2 runtime. The steps that produce those inputs live in the disabled release workflow, and no openPR06 AppImage has been built or checked yet. On hosts where FUSE mounting is unavailable, `APPIMAGE_EXTRACT_AND_RUN=1` runs an AppImage by extracting it first.
+`tools/build/package_linux_appimage.py` turns a packaged Linux release directory and its matching detached-symbol directory into an `openpr06-<version-tag>-x86_64.AppImage` (or `-preview-aarch64` for the ARM64 preview) with a `.zsync` beside it, using pinned `linuxdeploy` and `appimagetool` binaries and a fixed type-2 runtime. `.github/workflows/manual-release.yml` produces those inputs (the debug-symbol split and `tools/build/verify_linux_release_artifacts.py`) and builds the AppImages for each release. On hosts where FUSE mounting is unavailable, `APPIMAGE_EXTRACT_AND_RUN=1` runs an AppImage by extracting it first.
 
 Before shipping a downstream package, run at least:
 
@@ -495,19 +495,19 @@ bash tools/linux/install_desktop_launcher.sh --basepath "/path/to/Prey"
 
 ## Packaging a Distributable
 
-openPR06 has no published release yet. The `meson install` step (via the wrapper) stages everything into `.install/`, which is the input for packaging.
+openPR06's releases come from `.github/workflows/manual-release.yml`; this section is for building the same packages by hand. The `meson install` step (via the wrapper) stages everything into `.install/`, which is the input for packaging.
 
 `tools/build/package_release.py` (a compatibility entry point for `tools/build/package_nightly.py`) copies `.install/` into a package directory, writes `VERSION.txt` and an offline HTML documentation site under `docs/`, and archives the result as `openpr06-<version-tag>-<platform>-<arch>`, for example `openpr06-<version-tag>-windows-x64.zip` or `openpr06-<version-tag>-linux-x64.tar.xz`. The documentation step needs the `markdown` module (`python -m pip install markdown`). Package contents:
 
 - `basepr/game_<arch>.(dll|so|dylib)` stays a loose runtime module beside `basepr/pak0.pk4`, `basepr/pak1.pk4` and `basepr/mod.json`
 - Linux packages include the `share/applications` and `share/icons` payloads
-- The packager still has upstream's macOS path, in which macOS packages include an `openPR06.app` launcher bundle; none has been built for openPR06
+- macOS packages include an `openPR06.app` launcher bundle that carries `basepr/`, the game module and MoltenVK inside it, with dSYMs in a separate `-symbols.tar.xz`
 
 ```powershell
 python tools/build/package_release.py --platform windows --arch x64 --version 0.0.1 --version-tag 0.0.1 --output-dir .tmp\release-artifacts
 ```
 
-A Windows x64 archive built this way from `.install/` has been produced, inspected and launched in isolation. The other formats, including the Linux archive, the [AppImage](#linux-packager-notes) and the Windows installer, haven't been checked for openPR06.
+A Windows x64 archive built this way from `.install/` has been produced, inspected and launched in isolation. The release workflow builds and checks every other format (the Windows installer, the Linux archive and [AppImage](#linux-packager-notes), and the macOS app bundle) but doesn't launch them, because CI has no PREY install.
 
 To build the Windows installer from an already-packaged Windows directory, install [Inno Setup](https://jrsoftware.org/isinfo.php) and run:
 
@@ -515,7 +515,7 @@ To build the Windows installer from an already-packaged Windows directory, insta
 python tools/build/build_windows_installer.py --package-dir .tmp\release-artifacts\openpr06-0.0.1-windows-x64 --version 0.0.1 --version-tag 0.0.1 --arch x64 --output-dir .tmp\release-artifacts
 ```
 
-The inherited nightly/manual publishing workflows are disabled. They were written for openQ4's split game modules and Quake 4 content, and have not been adapted to the `OpenPrey-game`, `basepr`, and the unified module changes, nor to the game library's later move in-tree. Active CI (`openpr06-validation.yml`) builds and stages Windows x64 and Linux x64 on every push and pull request, and uploads no packages.
+`manual-release.yml` is rebuilt for openPR06; the inherited nightly publishing workflow is still disabled, as it was written for openQ4's split game modules and Quake 4 content and not adapted to the `OpenPrey-game`, `basepr`, and the unified module changes. Active CI (`openpr06-validation.yml`) builds and stages Windows x64 and Linux x64 on every push and pull request, and uploads no packages.
 
 Builds that do not pin `version_base_override` resolve their version through `tools/build/openq4_version.py`. It starts from the `meson.build` floor (`0.0.1`) and raises it to the newest non-withdrawn `v*` tag when Git history is available, so a checkout that has fetched upstream openQ4's tags reports a higher version than the floor. An exported tarball without Git history uses the floor as-is.
 

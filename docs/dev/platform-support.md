@@ -22,15 +22,23 @@ It is a roadmap, not a release-support claim.
 |---|---|---|---|
 | Windows x64 | Active | Deepest local validation target | Primary bring-up target; retail matrix still pending |
 | Linux x64 | Active CI GameLib lane and packaging tooling | Retail gameplay validation pending | Build target, not yet a fully signed-off release |
-| Windows/Linux ARM64 | Inherited build support exists | Prey runtime evidence pending | Gated |
-| macOS arm64/x64/universal2 | Inherited backend/tooling support exists | Prey runtime and package evidence pending | Experimental and gated |
+| Windows ARM64 | Release lane (`windows-11-arm`): installer, zip and PDBs | Prey runtime evidence pending | Released package, not play-tested |
+| Linux ARM64 | Release lane (`ubuntu-24.04-arm`): `-preview` archive, AppImage and debug symbols | Real-hardware Prey runtime evidence pending | Preview |
+| macOS arm64 (OpenGL, Metal bridge) | Release lane (`macos-15`): unsigned `-unsigned.tar.gz` and dSYMs, or signed DMGs when the Apple secrets exist | Prey runtime and package evidence pending | Preview; experimental and gated for first-class |
+| macOS x64/universal2 | Inherited tooling only | None | Not a release target |
+| Android | Native build fails: the GLES renderer lacks PREY's ARB-program hooks; the host app is still openQ4's | None | Not supported |
 
 The active workflow is `.github/workflows/openpr06-validation.yml`. It validates
 deterministic `pak0.pk4`/`pak1.pk4` inputs, one staged `game_<arch>` module,
 `basepr/`, and openPR06 desktop/icon payloads on the enabled x64 lanes.
 
-`manual-release.yml` is rebuilt for openPR06 and publishes the Windows x64 and Linux
-x64 packages. Inherited OpenQ4 ARM64, macOS, Universal2 and signing workflows are
+`manual-release.yml` is rebuilt for openPR06 on openQ4's desktop release set:
+Windows x64 and ARM64, Linux x64 and ARM64 (preview) with AppImages, and macOS
+ARM64 OpenGL and Metal-bridge variants (preview). Each lane builds, stages and
+validates the unified `game_<arch>` module and `basepr/`, and the release job checks
+the exact asset set and every archive's contents. CI has no retail PREY install, so
+none of these lanes run the game: that evidence has to come from real hardware.
+The separate inherited OpenQ4 ARM64, macOS, Universal2 and signing workflows are
 retained only as manual static-test/reference fixtures. Every job is unconditionally
 false-gated because it asserts upstream OpenQ4's split `game-sp`/`game-mp` modules
 and package contracts. Those gates must not be removed until the lanes are rebuilt around the

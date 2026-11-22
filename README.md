@@ -5,7 +5,7 @@
 <img src="assets/docs/img/banner.png" alt="openPR06">
 
 **The modern way to play PREY.**<br>
-An open-source engine and game-code replacement that runs the original 2006 game on today's Windows and Linux PCs.
+An open-source engine and game-code replacement that runs the original 2006 game on today's Windows, Linux and Mac computers.
 
 [![Status](https://img.shields.io/badge/status-early%20development-d97a1f.svg)](docs/user/release-status.md)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux-lightgrey.svg)](#platforms-and-requirements)
@@ -32,8 +32,8 @@ openPR06 replaces PREY's engine and game binaries with its own: a GPL engine bui
 ## Quick start
 
 1. Install **PREY (2006)**. Leave it where it is; openPR06 keeps to its own folder.
-2. Download the [latest release](https://github.com/themuffinator/openPR06/releases/latest): the Windows x64 installer or zip, or the Linux x64 `.tar.xz`. Install or extract it into a folder of its own.
-3. Launch `openPR06-client_x64` (`.exe` on Windows).
+2. Download the [latest release](https://github.com/themuffinator/openPR06/releases/latest) for your platform: the Windows installer or zip (x64 or ARM64), the Linux `.tar.xz` or AppImage (x64, or the ARM64 preview), or the macOS `.app` (Apple silicon, preview). Install or extract it into a folder of its own.
+3. Launch `openPR06-client_x64` (`.exe` on Windows; `_arm64` on ARM64), the AppImage, or `openPR06.app`.
 4. openPR06 finds your PREY install on its own. If it doesn't, launch with `+set r_fullscreen 0 +set fs_basepath "C:\path\to\Prey"`, pointing at the folder that contains `base`, not at `base` itself. See [If auto-detection fails](docs/user/getting-started.md#if-auto-detection-fails).
 
 > [!TIP]
@@ -58,17 +58,17 @@ The [rebase status ledger](docs/dev/prey-rebase/status-ledger.md) records what h
 
 ## Platforms and requirements
 
-Active CI builds Windows x64 and Linux x64 on every push, and releases publish a Windows x64 installer and zip and a Linux x64 `.tar.xz`. The Linux AppImage, ARM64 and macOS lanes inherited from openQ4 are switched off until they're rebuilt around `basepr/` and the unified game module. See [release status](docs/user/release-status.md).
+Active CI builds Windows x64 and Linux x64 on every push. Releases are built on openQ4's platform set: Windows x64 and ARM64, Linux x64 and ARM64 with AppImages, and macOS on Apple silicon in OpenGL and Metal-bridge variants. Only Windows x64 has had real PREY play-testing; the others are built, packaged and checked in CI but not yet played on. See [release status](docs/user/release-status.md).
 
 | Platform | State | Notes |
 |---|---|---|
 | **Windows x64** | Released: installer and zip; most runtime testing happens here | Windows 10/11 recommended |
-| **Linux x64** | Released: `.tar.xz` | A modern 64-bit desktop, comparable to Ubuntu 24.04 or newer. SDL3 picks Wayland or X11; set `OPENPR06_FORCE_X11=1` to force XWayland |
+| **Windows ARM64** | Released: installer and zip | Native ARM64 build for Windows 11 on Arm; not yet play-tested with PREY |
+| **Linux x64** | Released: `.tar.xz` and `x86_64` AppImage | A modern 64-bit desktop, comparable to Ubuntu 24.04 or newer. SDL3 picks Wayland or X11; set `OPENPR06_FORCE_X11=1` to force XWayland |
+| **Linux ARM64** | Preview: `-preview` `.tar.xz` and `aarch64` AppImage | Built and checked on ARM64 runners; no real-hardware PREY play-testing yet |
 | **Steam Deck / SteamOS** | Launcher in Linux builds | Run `openPR06-steamdeck`; inherited from openQ4, not yet checked with PREY. See the [Steam Deck guide](docs/user/steam-deck.md) |
-| **Linux AppImage** | Not produced yet | `tools/build/package_linux_appimage.py` is rebranded for openPR06 (`x86_64` and `aarch64` names), but the release workflow doesn't run it yet: its artifact verifier still expects openQ4's layout |
-| **Linux ARM64** | Not supported yet | openQ4's ARM64 lanes are switched off until they're rebuilt for openPR06 |
-| **macOS** | Not supported yet | The build files cover macOS hosts, but CI doesn't build or test it and there's no package |
-| **Windows ARM64** | Not supported yet | Switched off, as for Linux ARM64 |
+| **macOS (Apple silicon)** | Preview: unsigned `openPR06.app`, OpenGL and Metal-bridge variants | macOS 11 or newer. Not signed or notarized, so Gatekeeper asks first; see [Getting Started](docs/user/getting-started.md#macos). Not yet play-tested with PREY |
+| **Android** | Not supported yet | The Android host inherited from openQ4 isn't ported to PREY |
 
 You'll need a 64-bit CPU, a graphics driver with OpenGL ARB2-era vertex and fragment program support, and PREY (2006)'s retail `base/` files. Details are in [Getting Started](docs/user/getting-started.md#system-requirements).
 

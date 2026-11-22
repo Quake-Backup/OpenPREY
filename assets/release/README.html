@@ -704,7 +704,7 @@
       <h2>Requirements</h2>
       <div class="rows">
         <div class="row"><span class="key">Game Data</span><span class="val">A legitimate <strong>Prey (2006)</strong> installation from the original discs or another legitimate source, with its retail <code>base/</code> packs left unmodified so startup validation can recognise them.</span></div>
-        <div class="row"><span class="key">System</span><span class="val">Windows 10 or 11 (x64), or a 64-bit Linux desktop comparable to Ubuntu 24.04 or newer running Wayland or X11. The package architecture must match your CPU.</span></div>
+        <div class="row"><span class="key">System</span><span class="val">Windows 10 or 11 (x64 or ARM64), a 64-bit Linux desktop comparable to Ubuntu 24.04 or newer running Wayland or X11 (x64, or ARM64 as a preview), or macOS 11 or newer on Apple silicon (preview). The package architecture must match your CPU.</span></div>
         <div class="row"><span class="key">Graphics</span><span class="val">An OpenGL driver with the ARB2-era vertex and fragment program support Prey's renderer path relies on. The optional Vulkan renderer needs a working Vulkan driver.</span></div>
         <div class="row"><span class="key">Input and Audio</span><span class="val">Keyboard and mouse and a working audio device. Controllers are optional.</span></div>
       </div>
@@ -715,9 +715,9 @@
       <h2>Getting Started</h2>
       <ol>
         <li>Install Prey (2006) and leave its retail <code>base/</code> folder where it is. openPR06 ships none of Prey's game data.</li>
-        <li>Extract openPR06 into its own folder. On Windows, run the installer executable instead when the release provides one. On Linux, a release may also provide an AppImage: mark it executable with <code>chmod +x openpr06-*.AppImage</code> and run it. The AppImage bundles openPR06's runtime libraries but still finds your separately installed Prey (2006) assets; it never contains them.</li>
+        <li>Extract openPR06 into its own folder. On Windows, run the installer executable instead when the release provides one. On Linux, a release may also provide an AppImage: mark it executable with <code>chmod +x openpr06-*.AppImage</code> and run it. The AppImage bundles openPR06's runtime libraries but still finds your separately installed Prey (2006) assets; it never contains them. On macOS, move <code>openPR06.app</code> wherever you like; the preview packages are unsigned, so right-click it and choose <strong>Open</strong> the first time.</li>
         <li>Keep a clean layout. Preferably leave Prey in its own install folder and let openPR06 find it. For a portable setup, copy Prey's <code>base/</code> beside openPR06's <code>basepr/</code>. Never copy retail <code>.pk4</code> files into <code>basepr/</code>; that folder holds only openPR06's own files.</li>
-        <li>Run <code>openPR06-client_x64.exe</code> on Windows or <code>openPR06-client_x64</code> on Linux. On a Steam Deck, use <code>openPR06-steamdeck</code>.</li>
+        <li>Run <code>openPR06-client_x64.exe</code> on Windows or <code>openPR06-client_x64</code> on Linux (<code>_arm64</code> on ARM64 packages), or open <code>openPR06.app</code> on macOS. On a Steam Deck, use <code>openPR06-steamdeck</code>.</li>
         <li>Open <code>docs/index.html</code> for the full offline documentation, starting with the <a href="docs/docs/user/getting-started.html">getting-started guide</a>.</li>
         <li>If openPR06 cannot find Prey, launch it with <code>+set fs_basepath "C:\path\to\Prey"</code>, pointing at the Prey root folder that contains <code>base/</code>, not at <code>base/</code> itself.</li>
       </ol>

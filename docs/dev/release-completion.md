@@ -11,10 +11,15 @@ curated as **0.15.0, the First Contact Edition**, numbered alongside openQ4
 before the release is cut. To cut it:
 
 - `.github/workflows/manual-release.yml`, adapted from openQ4's on 22 November
-  2026, builds and publishes the Windows x64 and Linux x64 packages the notes
-  name. Merge `release/0.15.0` into `main`, run the workflow from `main` with
-  `version_override=0.15.0` and `draft=true`, check the draft's assets, then
-  publish it.
+  2026, builds and publishes openQ4's desktop platform set: Windows x64 and
+  ARM64, Linux x64 and ARM64 (preview) with AppImages, and macOS ARM64 OpenGL
+  and Metal-bridge variants (unsigned preview). Merge `release/0.15.0` into
+  `main`, run the workflow from `main` with `version_override=0.15.0` and
+  `draft=true`, check the draft's assets, then publish it.
+- Android is not part of 0.15.0: the native build fails to link the GLES
+  renderer (`R_LoadARBProgramsForStartup`, `R_PrecacheLevelMaterialPrograms`
+  and `R_ARBProgramUsesInteractionInputs` are missing there), the Android host
+  is still openQ4's, and the repository has no Android release-signing secrets.
 - Pass the version explicitly (`version_override=0.15.0`). The automatic bump
   gives `0.15.000`.
 - A local clone that fetched the `openq4-upstream` remote carries openQ4's
@@ -59,5 +64,5 @@ Process:
 - [ ] Complete gameplay/runtime verification of the in-tree `src/Prey` and `src/preyengine` trees.
 - [ ] Complete retail parity checks for the restored Doom 3/Prey particle, FX, and beam paths.
 - [ ] Extend CI/runtime checks for openPR06-specific smoke tests.
-- [ ] Rebuild the nightly and AppImage publication lanes (the manual Windows x64 and Linux x64 release lane was rebuilt for 0.15.0); the AppImage needs `verify_linux_release_artifacts.py` adapted to openPR06's layout.
+- [ ] Rebuild the nightly publication lane (the manual release lane, AppImages included, was rebuilt for 0.15.0 on openQ4's desktop platform set). The AppImage still has no Wayland/X11 runtime smoke: it needs an assetless startup PREY's game module does not offer.
 - [ ] Before any macOS package ships: macOS floor-version evidence is recorded for the documented `macOS 11` floor under the inherited `docs/dev/macos-support-matrix-policy.md`, and its notes do not imply native Metal or native Cocoa/OpenGL backend support (`docs/dev/macos-renderer-backend-policy.md`).

@@ -3,36 +3,41 @@
 This guide gets openPR06 running against your copy of PREY (2006).
 
 > [!IMPORTANT]
-> openPR06's first release is [0.15.0](https://github.com/themuffinator/openPR06/releases/tag/v0.15.0): a Windows x64 installer and zip, and a Linux x64 `.tar.xz`. You can also build it yourself from this repository. The nightly builds from April 2026 further down the Releases page predate openPR06's move onto the openQ4 engine and don't match these guides. [Release status](release-status.md) lists what works today on each platform.
+> openPR06's first release is [0.15.0](https://github.com/themuffinator/openPR06/releases/tag/v0.15.0): Windows installers and zips (x64 and ARM64), Linux `.tar.xz` archives and AppImages (x64, and an ARM64 preview), and a macOS preview for Apple silicon. You can also build it yourself from this repository. The nightly builds from April 2026 further down the Releases page predate openPR06's move onto the openQ4 engine and don't match these guides. [Release status](release-status.md) lists what works today on each platform.
 
 ## What You Need
 
 - **PREY (2006)**, installed from the original discs or another legitimate source. openPR06 reads the retail `base/` files from your install and ships none of them.
-- A **Windows x64** or **Linux x64** PC that meets the [system requirements](#system-requirements).
+- A **Windows**, **Linux** or **macOS** computer that meets the [system requirements](#system-requirements).
 - To build it yourself instead of using a release: the compiler and tools listed in [BUILDING.md](../../BUILDING.md).
 
 ## System Requirements
 
 | Component | Requirement |
 |---|---|
-| Operating system | Windows 10 or 11 (x64), or a 64-bit Linux desktop comparable to Ubuntu 24.04 or newer, running Wayland or X11 |
-| CPU | 64-bit x86 (x64) |
+| Operating system | Windows 10 or 11, a 64-bit Linux desktop comparable to Ubuntu 24.04 or newer running Wayland or X11, or macOS 11 or newer on Apple silicon |
+| CPU | 64-bit x86 (x64) or 64-bit Arm (ARM64). Download the package that matches your CPU |
 | Graphics | An OpenGL driver with the ARB2-era vertex and fragment program support PREY's renderer path relies on. The optional Vulkan renderer needs a working Vulkan driver |
 | Game files | The official retail PREY (2006) `base/` packs, left unmodified so startup validation can recognise them |
 | Input and audio | Keyboard and mouse and a working audio device. Controllers are optional |
 
 Windows x64 gets most of the runtime testing. Linux x64 is built in CI on every push.
 
-macOS, Windows on Arm and Linux ARM64 aren't supported yet. Parts of the build files still cover them, but nothing builds or tests them for openPR06.
+Windows on Arm, Linux ARM64 and macOS packages are built, staged and checked by the release workflow, but nobody has played PREY on them yet. Linux ARM64 and macOS are previews; please report how they run.
 
 If the game runs slowly, the console command `autoDetectPerformancePreset` picks one of the inherited performance presets for your hardware. The presets come from openQ4 and haven't been checked against PREY yet.
 
-## Build and Launch
+## Install and Launch
 
 1. Install PREY (2006). Leave it where it is; openPR06 keeps to its own folder.
-2. Build and stage openPR06 by following [BUILDING.md](../../BUILDING.md). The staged package lands in `.install/`: the client, the dedicated server, the renderer modules, and `basepr/` with the game module and openPR06's own packs.
-3. Launch `openPR06-client_x64` from `.install/` (`openPR06-client_x64.exe` on Windows).
+2. Download the [latest release](https://github.com/themuffinator/openPR06/releases/latest) for your platform and CPU:
+   - **Windows:** `openpr06-<version>-windows-x64-setup.exe` (or `-arm64-setup.exe`), or the matching `.zip` extracted into a folder of its own.
+   - **Linux:** the `.AppImage` (`x86_64`, or the `-preview-aarch64` one on ARM64), or the matching `.tar.xz` extracted into a folder of its own. Mark an AppImage executable with `chmod +x openpr06-*.AppImage` first. It bundles openPR06's runtime libraries but still reads your separately installed Prey (2006) assets; it never contains them.
+   - **macOS:** `openpr06-<version>-macos-arm64-opengl-unsigned.tar.gz` (or the `-metal-` variant). Extract it and move `openPR06.app` wherever you like. See [macOS](#macos) before the first launch.
+3. Launch `openPR06-client_x64` (`.exe` on Windows, `_arm64` on ARM64), the AppImage, or `openPR06.app`.
 4. openPR06 looks for your PREY install by itself. If it can't find it, see [If Auto-Detection Fails](#if-auto-detection-fails).
+
+To build it yourself instead, follow [BUILDING.md](../../BUILDING.md). The staged package lands in `.install/`: the client, the dedicated server, the renderer modules, and `basepr/` with the game module and openPR06's own packs.
 
 On a Steam Deck or another SteamOS device, a Linux build also stages an `openPR06-steamdeck` launcher. See the [Steam Deck guide](steam-deck.md).
 
@@ -72,6 +77,7 @@ Configs, saves and logs go to a per-user folder, not to the PREY install:
 |---|---|
 | Windows | `%LOCALAPPDATA%\openPR06` |
 | Linux | `$XDG_DATA_HOME/openpr06`, or `~/.local/share/openpr06` when `XDG_DATA_HOME` isn't set |
+| macOS | `~/Library/Application Support/openPR06` |
 
 openPR06's files sit in the `basepr/` folder inside it. To keep a separate set, for example while testing, launch with `+set fs_savepath "<folder>"`.
 
@@ -87,7 +93,13 @@ openPR06's files sit in the `basepr/` folder inside it. To keep a separate set, 
 - SDL3 picks native Wayland or X11 automatically. Set `OPENPR06_FORCE_X11=1` to force the XWayland fallback.
 - If a Wayland compositor has trouble with window decorations at startup, set `OPENPR06_WAYLAND_DISABLE_LIBDECOR=1` for that launch.
 - Install the system development packages listed in [BUILDING.md](../../BUILDING.md) before you build.
-- There's no openPR06 `.AppImage` yet. Run the client staged in `.install/`.
+- The AppImage and the `.tar.xz` hold the same files. Use the `.tar.xz` if your system can't run AppImages (they need FUSE, or `--appimage-extract-and-run`).
+
+### macOS
+
+- The macOS packages are previews for Apple silicon on macOS 11 or newer. The OpenGL variant uses Apple's OpenGL; the Metal variant draws the same OpenGL renderer through a Metal bridge. It is not a native Metal renderer. Vulkan runs through the bundled MoltenVK.
+- They are not signed or notarized, so Gatekeeper blocks the first launch. Right-click `openPR06.app`, choose **Open**, then confirm; or run `xattr -dr com.apple.quarantine openPR06.app`.
+- If openPR06 doesn't find your PREY folder, pass it at launch: `open openPR06.app --args +set fs_basepath "/path/to/Prey"`, pointing at the folder that contains `base`. [macOS Support Data](macos-support-data.md) explains how to send a report.
 
 ## If Auto-Detection Fails
 

@@ -12,13 +12,15 @@ they don't match these guides. Please don't report bugs against them.
 
 1. Keep your legitimate copy of **PREY (2006)** where it is installed. openPR06
    ships no PREY game data.
-2. Download the [latest release](https://github.com/themuffinator/openPR06/releases/latest):
-   the Windows x64 installer (`-setup.exe`) or zip, or the Linux x64 `.tar.xz`.
-   Install or extract it into a folder of its own: the client, the dedicated
-   server, the renderer modules, and `basepr/` with the unified `game_x64`
-   module and openPR06's own packs. To build it yourself instead, follow
+2. Download the [latest release](https://github.com/themuffinator/openPR06/releases/latest)
+   for your platform: the Windows installer (`-setup.exe`) or zip, the Linux
+   `.tar.xz` or AppImage, or the macOS `openPR06.app` archive (see the table
+   below). Install or extract it into a folder of its own: the client, the
+   dedicated server, the renderer modules, and `basepr/` with the unified
+   `game_<arch>` module and openPR06's own packs. To build it yourself instead, follow
    [BUILDING.md](../../BUILDING.md); the staged package lands in `.install/`.
-3. Launch `openPR06-client_x64` (`.exe` on Windows). openPR06
+3. Launch `openPR06-client_x64` (`.exe` on Windows, `_arm64` on ARM64), the
+   AppImage, or `openPR06.app`. openPR06
    finds a CD-era or other retail install through the registry, App Paths and
    uninstall entries and the usual install folders. If it doesn't, point it at
    the folder that contains `base`:
@@ -34,20 +36,21 @@ they don't match these guides. Please don't report bugs against them.
 Active CI (`.github/workflows/openpr06-validation.yml`) builds the engine,
 dedicated server, OpenGL and Vulkan renderers and the unified game module on
 Windows x64 and Linux x64 on every push. Releases come from
-`.github/workflows/manual-release.yml`, adapted from openQ4's for these two
-platforms. The inherited ARM64, macOS, AppImage and update-signing lanes stay
-switched off until they are rebuilt around `basepr/` and one `game_<arch>`
-module.
+`.github/workflows/manual-release.yml`, adapted from openQ4's, on openQ4's
+platform set. Every release lane builds, stages, validates and packages the
+unified `game_<arch>` module and `basepr/`, but only Windows x64 has had real
+PREY play-testing. openQ4's Android APK and signed update channel are not part
+of openPR06 releases.
 
 | Platform | Build | Runtime testing | Package |
 |---|---|---|---|
 | Windows x64 | Built in CI | Deepest testing: representative campaign maps, save/load and a two-client listen server | Installer (`-setup.exe`) and zip, with PDB symbols |
-| Linux x64 | Built in CI | Retail gameplay validation still pending | `.tar.xz`, with detached debug symbols |
+| Windows ARM64 | Release lane (`windows-11-arm`) | None yet | Installer and zip, with PDB symbols |
+| Linux x64 | Built in CI | Retail gameplay validation still pending | `.tar.xz` and `x86_64` AppImage, with detached debug symbols |
+| Linux ARM64 (preview) | Release lane (`ubuntu-24.04-arm`) | None yet on real hardware | `-preview` `.tar.xz` and `aarch64` AppImage, with detached debug symbols |
 | Steam Deck / SteamOS | `openPR06-steamdeck` launcher staged by Linux builds | Inherited from openQ4, not yet checked with PREY | In the Linux x64 package |
-| Linux AppImage | `tools/build/package_linux_appimage.py` is rebranded for openPR06 | Not run | Not produced: the release workflow's AppImage step is off until its verifier knows openPR06's layout |
-| Linux ARM64, Windows ARM64 | Build files inherited from openQ4; nothing builds them | None | Not supported |
-| macOS | Build files and packaging helpers inherited from openQ4; nothing builds them | None | Not supported. See [macOS Support Data](macos-support-data.md) if you build it anyway |
-| Android | Inherited openQ4 sources only | None | openPR06 doesn't target Android |
+| macOS, Apple silicon (preview) | Release lane (`macos-15`), OpenGL and Metal-bridge variants | None yet | Unsigned, unnotarized `openPR06.app` in `-unsigned.tar.gz`, with dSYM symbols. See [macOS Support Data](macos-support-data.md) to report a run |
+| Android | Inherited openQ4 sources; the GLES renderer and Android host aren't ported to PREY | None | Not supported |
 
 The [platform support roadmap](../dev/platform-support.md) lists the evidence a
 platform needs before openPR06 claims it.

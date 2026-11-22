@@ -164,9 +164,18 @@ captures box-filtered to the window differ from a one-pass shot by 2.99
 (2560x1440), 3.05 (3840x2160) and 3.15 (1300x760) display levels, against
 2.87, 2.86 and 3.25 on OpenGL; with post-processing off, 2.66 against 2.57.
 `levelshotProbe` lines of 2560x1440 and 3840x2160 differ by 2.08 and 2.24,
-against 1.98 and 2.08. Per-tile differences match OpenGL's; what remains is
-resampling and the HUD, which both renderers draw at window size into the
-top-left tile.
+against 1.98 and 2.08. Per-tile differences match OpenGL's.
+
+**The HUD at the capture's size (22 November 2026, both renderers).** The 2D
+view took the window's UI viewport (`glConfig.uiViewport*`), and only the
+first tile knew the window's size: the session passes `glConfig`'s size to
+`BeginFrame`, which is the capture's from the second tile on, so `tiledWindow`
+became the capture's. `R_ReadTiledPixels` now sets `tiledWindow` for the whole
+capture, and `BeginFrame` scales the window's UI viewport to the capture while
+a capture larger than the window draws, putting the window's back afterwards.
+Screenshots with the HUD now match a one-pass shot as closely as the HUD-less
+probes: 2.09 (2560x1440) and 2.25 (3840x2160) display levels on Vulkan, 1.99
+and 2.08 on OpenGL.
 
 ## Nested, cropped and offset views (6 November 2026)
 

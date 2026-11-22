@@ -80,6 +80,11 @@ const char *idGameLocal::sufaceTypeNames[ MAX_SURFACE_TYPES ] = {
 GetGameAPI
 ============
 */
+// openPR06: the module builds with hidden visibility, so the entry point must
+// be made visible for tools/build/linux_game_module.map to export it.
+#if __GNUC__ >= 4
+#pragma GCC visibility push(default)
+#endif
 #if __MWERKS__
 #pragma export on
 #endif
@@ -125,6 +130,9 @@ extern "C" gameExport_t *GetGameAPI( gameImport_t *import ) {
 
 	return &gameExport;
 }
+#if __GNUC__ >= 4
+#pragma GCC visibility pop
+#endif
 
 /*
 ===========

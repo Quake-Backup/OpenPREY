@@ -160,42 +160,44 @@ def validate_environment_safety_policy() -> None:
 
 def validate_release_workflow_policy() -> None:
     workflow = read(".github/workflows/manual-release.yml")
+    # OPENPR06: no post-build Wayland/X11 smoke of the AppImage. It needs the
+    # client to start without game files (g_allowAssetlessStartup), which
+    # PREY's game module does not define, and CI has no retail PREY install.
     for token in (
         "Build and validate Linux AppImage",
-        "Validate Linux AppImage under Wayland and X11",
         "Upload Linux AppImage",
         "tools/build/package_linux_appimage.py",
-        "APPIMAGE_EXTRACT_AND_RUN=1",
         "SOURCE_DATE_EPOCH",
         "desktop-file-utils",
+        "zsync",
         "https://github.com/AppImage/appimagetool/releases/download/1.9.1/",
         "https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/",
         "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0",
         "f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158",
         "c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d",
         "620095110d693282b8ebeb244a95b5e911cf8f65f76c88b4b47d16ae6346fcff",
-        "openq4-${{ needs.metadata.outputs.version_tag }}-x86_64.AppImage",
-        "openq4-${{ needs.metadata.outputs.version_tag }}-preview-aarch64.AppImage",
-        "openq4-${{ needs.metadata.outputs.version_tag }}-aarch64.AppImage",
-        "--executable \"${{ steps.appimage.outputs.appimage_path }}\"",
+        'appimage_name="openpr06-${{ needs.metadata.outputs.version_tag }}${{ matrix.package_suffix }}-${appimage_arch}.AppImage"',
+        'appimage_arches = {"x64": "x86_64", "arm64": "aarch64"}',
+        'expected += [f"{stem}-debugsymbols.tar.xz", appimage, appimage + ".zsync"]',
+        '"-preview"',
     ):
         require(workflow, token, "manual release AppImage policy")
 
+    archive_offset = workflow.index("- name: Validate extracted Linux runtime archive")
     build_offset = workflow.index("- name: Build and validate Linux AppImage")
-    smoke_offset = workflow.index("- name: Validate Linux AppImage under Wayland and X11")
     upload_offset = workflow.index("- name: Upload Linux AppImage")
     release_offset = workflow.index("  release:")
-    if not build_offset < smoke_offset < upload_offset < release_offset:
-        raise AssertionError("AppImage must be built, runtime-tested, and uploaded before publication")
+    if not archive_offset < build_offset < upload_offset < release_offset:
+        raise AssertionError("AppImage must be built from a verified archive and uploaded before publication")
 
-    build_step = workflow[build_offset:smoke_offset]
+    build_step = workflow[build_offset:workflow.index("- name: Install Inno Setup", build_offset)]
     for token in (
         "sha256sum --check",
         'runtime_offset="$("${appimagetool}" --appimage-offset)"',
         "--runtime-file",
         "--symbols-dir",
         "--source-date-epoch",
-        "inputs.generate_linux_arm64_evidence_candidate == false",
+        "--update-information",
     ):
         require(build_step, token, "AppImage build step")
     if 'APPIMAGE_EXTRACT_AND_RUN=1 "${appimagetool}" --appimage-offset' in build_step:

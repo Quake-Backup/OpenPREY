@@ -21,7 +21,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.validation import openq4_validate as staged_validator  # noqa: E402
-from tools.build.game_layer import PACKAGED_LAYER_GAME_DIRS, LayerError, read_layer_mod_json  # noqa: E402
 
 
 SUPPORTED_ARCHES = {
@@ -89,56 +88,32 @@ def require_native_arch(expected_arch: str) -> None:
         )
 
 
-def packaged_layer_dirs(runtime_root: Path) -> list[str]:
-    """The game-library layers (q4xbase) this payload carries beside baseoq4."""
-    return [
-        name
-        for name in PACKAGED_LAYER_GAME_DIRS
-        if (runtime_root / name).exists() or (runtime_root / name).is_symlink()
-    ]
+PRODUCT_NAME = "openPR06"
+GAME_DIR_NAME = "basepr"
 
 
 def expected_runtime_binaries(runtime_root: Path, arch: str) -> list[tuple[Path, str, bool]]:
-    expected = [
-        (runtime_root / f"openQ4-client_{arch}", "openQ4-client", False),
-        (runtime_root / f"openQ4-ded_{arch}", "openQ4-ded", False),
-        (runtime_root / "baseoq4" / f"game-sp_{arch}.so", "game-sp", True),
-        (runtime_root / "baseoq4" / f"game-mp_{arch}.so", "game-mp", True),
+    """openPR06 ships one engine pair and one unified game_<arch> module in basepr/."""
+    return [
+        (runtime_root / f"{PRODUCT_NAME}-client_{arch}", f"{PRODUCT_NAME}-client", False),
+        (runtime_root / f"{PRODUCT_NAME}-ded_{arch}", f"{PRODUCT_NAME}-ded", False),
+        (runtime_root / GAME_DIR_NAME / f"game_{arch}.so", "game", True),
+        # the in-game updater's file-swapping helper ships hardened like the engine
+        (runtime_root / f"{PRODUCT_NAME}-updater_{arch}", f"{PRODUCT_NAME}-updater", False),
     ]
-    # a layer's modules come after baseoq4's, so expected[2] and expected[3] stay baseoq4's
-    for name in packaged_layer_dirs(runtime_root):
-        expected.append((runtime_root / name / f"game-sp_{arch}.so", "game-sp", True))
-        expected.append((runtime_root / name / f"game-mp_{arch}.so", "game-mp", True))
-    # the in-game updater's file-swapping helper ships hardened like the engine
-    expected.append((runtime_root / f"openQ4-updater_{arch}", "openQ4-updater", False))
-    return expected
-
-
-def validate_layer_game_dir(runtime_root: Path, name: str, arch: str) -> None:
-    """A layer game directory holds exactly its two modules and its layer mod.json."""
-    layer_dir = require_directory(runtime_root / name, f"Linux runtime {name} directory")
-    expected = {f"game-sp_{arch}.so", f"game-mp_{arch}.so", "mod.json"}
-    actual = {path.relative_to(layer_dir).as_posix() for path in layer_dir.rglob("*")}
-    if actual != expected:
-        raise ReleaseArtifactError(
-            f"Linux {name}/ must hold exactly {sorted(expected)}; "
-            f"missing {sorted(expected - actual)}, unexpected {sorted(actual - expected)}"
-        )
-    try:
-        read_layer_mod_json(layer_dir / "mod.json")
-    except LayerError as exc:
-        raise ReleaseArtifactError(str(exc)) from exc
 
 
 def reject_unexpected_binary_variants(
     runtime_root: Path, expected: list[tuple[Path, str, bool]]
 ) -> None:
-    game_dir = runtime_root / "baseoq4"
-    candidates = set(runtime_root.glob("openQ4-client_*"))
-    candidates.update(runtime_root.glob("openQ4-ded_*"))
-    for module_dir in (game_dir, *(runtime_root / name for name in packaged_layer_dirs(runtime_root))):
-        candidates.update(module_dir.glob("game-sp_*"))
-        candidates.update(module_dir.glob("game-mp_*"))
+    game_dir = runtime_root / GAME_DIR_NAME
+    candidates = set(runtime_root.glob(f"{PRODUCT_NAME}-client_*"))
+    candidates.update(runtime_root.glob(f"{PRODUCT_NAME}-ded_*"))
+    candidates.update(runtime_root.glob(f"{PRODUCT_NAME}-updater_*"))
+    candidates.update(game_dir.glob("game_*"))
+    # Split SP/MP modules are not an openPR06 layout; any that appear are unexpected.
+    for pattern in ("game-sp_*", "game-mp_*"):
+        candidates.update(game_dir.glob(pattern))
     actual = {path.resolve(strict=False) for path in candidates}
     expected_paths = {path.resolve(strict=False) for path, _, _ in expected}
     if actual != expected_paths:
@@ -243,7 +218,7 @@ def validate_linux_runtime_payload(runtime_root: Path, arch: str) -> list[tuple[
         runtime_root / "assets" / "splash" / "prey_rt_bitmap_4001.bmp",
         "Linux startup splash bitmap",
     )
-    game_dir = require_directory(runtime_root / "baseoq4", "Linux runtime game directory")
+    game_dir = require_directory(runtime_root / GAME_DIR_NAME, "Linux runtime game directory")
     expected = expected_runtime_binaries(runtime_root, arch)
     for binary_path, stem, _ in expected:
         require_regular_file(binary_path, f"Linux {stem} binary")
@@ -262,8 +237,7 @@ def validate_linux_runtime_payload(runtime_root: Path, arch: str) -> list[tuple[
 
     clients = [expected[0][0]]
     dedicated = [expected[1][0]]
-    sp_modules = [expected[2][0]]
-    mp_modules = [expected[3][0]]
+    game_module = expected[2][0]
     staged_arches = staged_validator.validate_staged_architecture_set(
         runtime_root, game_dir, clients, dedicated
     )
@@ -271,28 +245,16 @@ def validate_linux_runtime_payload(runtime_root: Path, arch: str) -> list[tuple[
         raise ReleaseArtifactError(
             f"Linux runtime architecture set is {sorted(staged_arches)}, expected only {arch}"
         )
-    staged_validator.validate_distinct_game_modules(runtime_root, sp_modules, mp_modules)
     binary_specs = [
         (path, arch, is_game_module) for path, _, is_game_module in expected
     ]
     staged_validator.validate_linux_binary_hardening(runtime_root, binary_specs)
     staged_validator.validate_linux_client_runtime_dependencies(runtime_root, clients)
+    # The unified module serves the dedicated server too, so it must load there.
     staged_validator.validate_linux_dedicated_runtime_dependencies(
         runtime_root,
-        [(dedicated[0], arch), (mp_modules[0], arch)],
+        [(dedicated[0], arch), (game_module, arch)],
     )
-    for name in packaged_layer_dirs(runtime_root):
-        validate_layer_game_dir(runtime_root, name, arch)
-        layer_dir = runtime_root / name
-        layer_sp = [layer_dir / f"game-sp_{arch}.so"]
-        layer_mp = [layer_dir / f"game-mp_{arch}.so"]
-        layer_arches = staged_validator.validate_staged_architecture_set(runtime_root, layer_dir, clients, dedicated)
-        if layer_arches != {arch}:
-            raise ReleaseArtifactError(
-                f"Linux {name} architecture set is {sorted(layer_arches)}, expected only {arch}"
-            )
-        staged_validator.validate_distinct_game_modules(runtime_root, layer_sp, layer_mp)
-        staged_validator.validate_linux_dedicated_runtime_dependencies(runtime_root, [(layer_mp[0], arch)])
     validate_linux_dependency_contract(runtime_root, binary_specs)
     return expected
 
@@ -313,7 +275,7 @@ def dump_elf_section(path: Path, section_name: str) -> bytes:
     objcopy = shutil.which("objcopy")
     if objcopy is None:
         raise ReleaseArtifactError("Linux ELF section validation requires objcopy")
-    with tempfile.TemporaryDirectory(prefix="openq4-elf-section-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="openpr06-elf-section-") as temp_dir:
         section_path = Path(temp_dir) / "section.bin"
         copied_elf_path = Path(temp_dir) / "validated-elf-copy"
         completed = subprocess.run(
@@ -483,7 +445,7 @@ def expected_archive_root_name(archive_path: Path) -> str:
             f"Linux runtime archive must use the expected {suffix} suffix: {archive_path.name}"
         )
     name = archive_path.name[: -len(suffix)]
-    if re.fullmatch(r"openq4-[A-Za-z0-9._-]+-linux-(?:x64|arm64)(?:-preview)?", name) is None:
+    if re.fullmatch(r"openpr06-[A-Za-z0-9._-]+-linux-(?:x64|arm64)(?:-preview)?", name) is None:
         raise ReleaseArtifactError(f"Linux runtime archive has an unsafe package stem: {name!r}")
     return name
 
@@ -594,7 +556,7 @@ def verify_archive(args: argparse.Namespace) -> None:
     require_native_arch(args.arch)
     work_root = require_directory(args.work_root, "Linux archive verification work root")
     with tempfile.TemporaryDirectory(
-        prefix=f"openq4-linux-{args.arch}-archive-", dir=work_root
+        prefix=f"openpr06-linux-{args.arch}-archive-", dir=work_root
     ) as temp_dir:
         extraction_root = Path(temp_dir) / "extract"
         runtime_root = extract_linux_runtime_archive(args.archive, extraction_root)

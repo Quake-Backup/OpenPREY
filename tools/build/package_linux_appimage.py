@@ -52,13 +52,8 @@ RUNPATH_RE = re.compile(r"\((?:RPATH|RUNPATH)\).*?\[([^\]]*)\]")
 
 
 def core_runtime_relative_paths(package_root: Path, arch: str) -> tuple[Path, ...]:
-    """The engine binaries and game modules linuxdeploy prepares, followed by the modules of
-    any game-library layer (q4xbase) the package carries beside baseoq4."""
-    return CORE_RUNTIME_RELATIVE_PATHS[arch] + tuple(
-        Path(name) / f"game-{kind}_{arch}.so"
-        for name in linux_release.packaged_layer_dirs(package_root)
-        for kind in ("sp", "mp")
-    )
+    """The engine binaries and the unified game module linuxdeploy prepares."""
+    return CORE_RUNTIME_RELATIVE_PATHS[arch]
 
 
 class AppImageError(RuntimeError):
@@ -381,21 +376,6 @@ def validate_appdir(
         [expected[0][0]],
         [expected[1][0]],
     )
-    staged_validator.validate_distinct_game_modules(
-        package_root,
-        [expected[2][0]],
-        [expected[3][0]],
-    )
-    for name in linux_release.packaged_layer_dirs(package_root):
-        linux_release.validate_layer_game_dir(package_root, name, arch)
-        staged_validator.validate_staged_architecture_set(
-            package_root, package_root / name, [expected[0][0]], [expected[1][0]]
-        )
-        staged_validator.validate_distinct_game_modules(
-            package_root,
-            [package_root / name / f"game-sp_{arch}.so"],
-            [package_root / name / f"game-mp_{arch}.so"],
-        )
     staged_validator.validate_linux_binary_hardening(
         package_root,
         [(path, arch, is_module) for path, _, is_module in expected],

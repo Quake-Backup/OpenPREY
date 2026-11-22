@@ -1244,6 +1244,28 @@ Doom 3's 32 and 64 (`idUserInterfaceLocal::DrawCursor` in `PREY.exe` 1.4). The
 hotspot is the box's top-left corner. With aspect correction the box stays
 square and scales with the canvas height, as the menu does.
 
+The retained menus and the console draw the arrow from vector art instead of
+the bitmap (`src/ui/retained/PointerArt.cpp`). It keeps the stock
+arrowhead's shape: a vertical left edge, a 45-degree right edge to a blunt
+corner, a shallow return to the notch and a 45-degree edge down to a rounded
+foot, with no tail. Its bevel rises to a peak low on the body and is lit from
+above as the stock art is: the upper right face near white (`#FFFFFF` to
+`#D5DCE5`), the left face silver (`#E8EBF0` to `#C0C8D3`), the lower right
+face in half shade (`#DCE1E8` to `#A4B0C0`) and the face over the notch dark
+(`#A3AEBE` to `#6A7585`). Light ridges run from the peak to the tip and to
+the corner. Two things are added for legibility on bright backdrops: a dark
+slate rim (`#29303A`, at least one pixel) and a soft shadow cast 0.8 texels
+right and 1.2 down. Over a number or text field the pointer is an I-beam in
+the same finish, its right half lit and its left half shaded, about nine
+tenths of the arrow's height.
+
+The hotspot is the arrow's tip, not the box's corner, so the pointer clicks
+where it points. The size is retail's: 32 texels in 16 units of the 480-unit
+menu, which is 0.75 dp a texel of the 720-dp retained canvas and a pointer
+about 31 pixels tall at 1080p. Each shape and size is rasterized once, with
+8x8 samples a pixel along its edges, and drawn texel for pixel as one quad
+(`_retainedPointer/<n>`). The classic GUIs keep the stock bitmaps.
+
 ### 11.7 Rules for device changes
 
 - Keep each family's palette and shape language; never mix families on one

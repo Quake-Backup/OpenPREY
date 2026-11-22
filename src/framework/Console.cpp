@@ -4925,7 +4925,8 @@ void idConsoleLocal::DrawMouseCursor( void ) {
 	EnsureMouseInitialized();
 
 	// The menus' pointer, its hotspot at the point clicks use, in the UI
-	// viewport the console's mouse maps to and at the console text's scale.
+	// viewport the console's mouse maps to and at the menus' size: retail's
+	// 32-texel box in 16 units of the 480-unit screen.
 	// Over the edit line, where a click places the caret, or while a selection
 	// that started there is under way, it is the I-beam.
 	float inputX, inputY, inputW, inputH;
@@ -4941,7 +4942,7 @@ void idConsoleLocal::DrawMouseCursor( void ) {
 	renderSystem->SetUseUIViewportFor2D( true );
 	UI_DrawPointerCursor( overInput ? POINTER_TEXT : POINTER_ARROW,
 		mouseX * width / SCREEN_WIDTH, mouseY * height / SCREEN_HEIGHT,
-		width, height, height / SCREEN_HEIGHT );
+		width, height, 0.5f * height / SCREEN_HEIGHT );
 	renderSystem->FlushGui();
 	renderSystem->SetUseUIViewportFor2D( oldViewport );
 }

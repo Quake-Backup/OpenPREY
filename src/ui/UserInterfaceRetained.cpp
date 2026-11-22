@@ -1914,8 +1914,9 @@ void idUserInterfaceRetained::DrawCursor() {
 	const float px = impl->cursorX*transform.sx+transform.ox, py = impl->cursorY*transform.sy+transform.oy;
 	if (impl->document.Model().canvasHeight > 0) viewport.canvasHeight = static_cast<float>(impl->document.Model().canvasHeight);
 	viewport.canvasMinWidth = static_cast<float>(impl->document.Model().canvasMinWidth);
-	// A texel of the stock cursor's 32-texel box is 1.5 dp. Over a number or
-	// text field, which a click would edit, the pointer is the I-beam; over
+	// Retail Prey's pointer box, 32 texels in 16 units of the 480-unit menu
+	// (section 11.6): a texel is 0.75 dp of the 720-dp canvas. Over a number
+	// or text field, which a click would edit, the pointer is the I-beam; over
 	// anything else, a control a press would reach included, it is the arrow.
 	auto* runtime = impl->RuntimeView();
 	const auto hovered = runtime ? runtime->HoveredControl() : std::string();
@@ -1923,7 +1924,7 @@ void idUserInterfaceRetained::DrawCursor() {
 	const bool oldViewport = renderSystem->GetUseUIViewportFor2D();
 	renderSystem->SetUseUIViewportFor2D(true);
 	UI_DrawPointerCursor(widget && widget->role == ControlRole::Number ? POINTER_TEXT : POINTER_ARROW,px,py,
-		viewport.width,viewport.height,1.5f*viewport.DpRatio());
+		viewport.width,viewport.height,.75f*viewport.DpRatio());
 	renderSystem->FlushGui(); renderSystem->SetUseUIViewportFor2D(oldViewport); renderSystem->SetColor4(1,1,1,1);
 }
 

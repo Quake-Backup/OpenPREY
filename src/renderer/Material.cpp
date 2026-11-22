@@ -5524,6 +5524,15 @@ bool idMaterial::SetDefaultText( void ) {
 			GetName(),GetName()[20] ? "_retainedBackdrop" : "_retainedBlurScratch"));
 		return true;
 	}
+	if (idStr::Icmpn(GetName(),"_retainedPointer/",17) == 0) {
+		const char* slot = GetName()+17;
+		if (!*slot) return false;
+		for (const char* p = slot; *p; ++p) if (*p < '0' || *p > '9') return false;
+		// The menus' pointer (src/ui/PointerCursor.cpp): a premultiplied RGBA8
+		// picture drawn texel for pixel at whole pixels.
+		SetText(va("material %s { sort gui twoSided { blend gl_one, gl_one_minus_src_alpha vertexColor nopicmip linear clamp map _retainedPointerImage%s } }",GetName(),slot));
+		return true;
+	}
 	if ( idStr::Icmp(GetName(),"_retainedSolid") == 0 ) {
 		// RmlUi's native winding differs from legacy GUI quads; UI planes
 		// also remain visible under mirrored document transforms.

@@ -63,6 +63,7 @@ Engine changes merged from openQ4 are listed in openQ4's own release notes. They
 - Mirrors and direct portals clip at their surface again, as retail PREY's do: a wall or a body behind a portal's exit no longer draws across the view as the viewer steps back. The clip plane is the projection's near plane, so every pass of both renderers honours it.
 - On OpenGL, alpha-tested surfaces draw in mirrors and portals again. The depth fill also applied Doom 3's alpha-notch clip, which failed every alpha-tested surface in such a view, so the player (whose model is alpha-tested throughout) was missing from the roadhouse bathroom mirror and from the self-facing portals at the end of `feedingtowerc`, and alpha-tested posters and decals vanished with him. Vulkan never had the notch and drew them.
 - `setviewpos` takes an optional pitch after the yaw, so a test configuration can aim at a world GUI.
+- The retained menus' pointer is PREY's own arrow again: the stock silver-blue bevelled arrowhead (`guicursor_arrow`), redrawn as vector art with a dark slate rim and a soft shadow, its tip on the click point, at retail's size (a 32-texel box in 16 units of the menu). The I-beam over text fields takes the same finish. It replaces a grey, black-outlined arrow with a tail, which was twice retail's size and resubmitted about 7,600 vertices in eleven overlapping layers every frame at 1080p. Each shape and size is now rasterized once (under a millisecond at 1080p) and drawn as one textured quad; the console's pointer is the same picture.
 
 ## Build and CI
 

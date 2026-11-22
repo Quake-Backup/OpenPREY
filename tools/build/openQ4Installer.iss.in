@@ -12,7 +12,11 @@
 #define PackageSource "@@PACKAGE_SOURCE@@"
 
 [Setup]
-AppId={{8FD95F4F-3E38-4E18-8DB6-584E6D97C7E4}
+; openPR06's own installer identity. Packages up to 0.15.0 reused openQ4's AppId
+; {8FD95F4F-3E38-4E18-8DB6-584E6D97C7E4}, so Windows treated the two as one
+; program and each installer reused the other's folder (see [Code] for the
+; migration). Never share this value with another product.
+AppId={{2A1958BE-D077-4AAB-B0CE-DF261CACD8F4}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
@@ -99,15 +103,79 @@ const
   openQ4InstallRegKey = '{#MyAppInstallRegKey}';
   openQ4ProtocolRegKey = '{#MyAppProtocolRegKey}';
   openQ4DefaultInstallDir = '{localappdata}\Programs\openPR06';
+  // Uninstall entry written by packages that shared openQ4's AppId. openQ4 and
+  // old openPR06 packages both own it: only the openPR06 one may be removed.
+  LegacySharedUninstallKey = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{8FD95F4F-3E38-4E18-8DB6-584E6D97C7E4}_is1';
+
+// True when Dir holds an openQ4 installation. openPR06 must never be installed
+// over one: the two ship different packs under the same baseoq4 names.
+function IsOpenQ4Folder(Dir: String): Boolean;
+var
+  FindRec: TFindRec;
+begin
+  Result := False;
+  if Dir = '' then
+    Exit;
+  if FindFirst(AddBackslash(Dir) + 'openQ4-client_*.exe', FindRec) then
+  begin
+    Result := True;
+    FindClose(FindRec);
+  end;
+end;
 
 function GetDefaultInstallDir(Param: String): String;
 var
   InstallDir: String;
 begin
-  if RegQueryStringValue(HKEY_AUTO, openQ4InstallRegKey, 'InstallDir', InstallDir) and (InstallDir <> '') then
+  if RegQueryStringValue(HKEY_AUTO, openQ4InstallRegKey, 'InstallDir', InstallDir) and
+     (InstallDir <> '') and not IsOpenQ4Folder(InstallDir) then
     Result := InstallDir
   else
     Result := ExpandConstant(openQ4DefaultInstallDir);
+end;
+
+// Removes the shared-AppId uninstall entry when it is an old openPR06 install
+// in the folder being installed, together with its uninstaller, so this
+// install replaces it and openQ4's installer stops treating that folder as an
+// earlier openQ4. Entries owned by openQ4, or by an openPR06 copy elsewhere,
+// are left alone.
+procedure RemoveLegacySharedUninstallEntry;
+var
+  AppDir: String;
+  DisplayName: String;
+  InstallLocation: String;
+  UninstallString: String;
+  UninstallExe: String;
+begin
+  if not RegQueryStringValue(HKEY_AUTO, LegacySharedUninstallKey, 'DisplayName', DisplayName) then
+    Exit;
+  if Pos('{#MyAppName}', DisplayName) <> 1 then
+    Exit;
+  if not RegQueryStringValue(HKEY_AUTO, LegacySharedUninstallKey, 'InstallLocation', InstallLocation) then
+    Exit;
+  AppDir := RemoveBackslashUnlessRoot(ExpandConstant('{app}'));
+  if CompareText(RemoveBackslashUnlessRoot(InstallLocation), AppDir) <> 0 then
+    Exit;
+
+  if RegQueryStringValue(HKEY_AUTO, LegacySharedUninstallKey, 'UninstallString', UninstallString) then
+  begin
+    UninstallExe := RemoveQuotes(UninstallString);
+    if CompareText(ExtractFileDir(UninstallExe), AppDir) = 0 then
+    begin
+      DeleteFile(UninstallExe);
+      DeleteFile(ChangeFileExt(UninstallExe, '.dat'));
+      DeleteFile(ChangeFileExt(UninstallExe, '.msg'));
+    end;
+  end;
+  RegDeleteKeyIncludingSubkeys(HKEY_AUTO, LegacySharedUninstallKey);
+end;
+
+function RejectOpenQ4Folder: Boolean;
+begin
+  Result := IsOpenQ4Folder(WizardDirValue);
+  if Result then
+    SuppressibleMsgBox('openQ4 is installed in this folder:' + #13#10 + WizardDirValue + #13#10#13#10 +
+      'openPR06 needs a folder of its own. Choose a different folder.', mbError, MB_OK, IDOK);
 end;
 
 function FormatExistingInstallSummary: String;
@@ -130,8 +198,11 @@ begin
     Result := Result + ': version ' + InstallVersion;
   if InstallArch <> '' then
     Result := Result + ' (' + Uppercase(InstallArch) + ')';
-  Result := Result + '.' + #13#10 + InstallDir + #13#10 +
-    'Setup will reuse that install location unless you choose a different folder.';
+  Result := Result + '.' + #13#10 + InstallDir + #13#10;
+  if IsOpenQ4Folder(InstallDir) then
+    Result := Result + 'openQ4 now occupies that folder, so setup will install openPR06 in a folder of its own.'
+  else
+    Result := Result + 'Setup will reuse that install location unless you choose a different folder.';
 end;
 
 @@CONTENT_PACK_CODE@@
@@ -150,12 +221,22 @@ end;
 function NextButtonClick(CurPageID: Integer): Boolean;
 begin
   Result := True;
+  // Checked again on the Ready page, which silent installs and a skipped
+  // folder page still pass, before any content pack is downloaded.
+  if (CurPageID = wpSelectDir) or (CurPageID = wpReady) then
+    if RejectOpenQ4Folder then
+    begin
+      Result := False;
+      Exit;
+    end;
   if CurPageID = wpReady then
     Result := FetchContentPacks;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
+  if CurStep = ssInstall then
+    RemoveLegacySharedUninstallEntry;
   if (CurStep = ssInstall) and (not WizardIsTaskSelected('protocol')) then
     RegDeleteKeyIncludingSubkeys(HKEY_AUTO, openQ4ProtocolRegKey);
   if CurStep = ssPostInstall then

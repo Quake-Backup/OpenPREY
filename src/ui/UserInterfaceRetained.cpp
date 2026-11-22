@@ -2803,7 +2803,14 @@ void UI_RetainedSettleGameplayDocuments( bool multiplayer ) {
 	for (const char* document : GameplayDocuments(false)) DropPrefetched(document);
 }
 
+int RetainedUI_KeyGlyph( int key, idStr &label ) {
+	const KeyGlyph glyph = PromptGlyph(key);
+	label = glyph.label.c_str();
+	return glyph.kind;
+}
+
 #else
+int RetainedUI_KeyGlyph( int, idStr &label ) { label.Clear(); return 0; }
 void UI_RetainedPrefetchDocuments( const char *const *, int ) {}
 bool UI_RetainedPrefetchReady( const char * ) { return false; }
 void UI_RetainedPrefetchClear() {}

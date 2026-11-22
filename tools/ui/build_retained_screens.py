@@ -2197,15 +2197,15 @@ PROFILE_ROWS = 32                         # RETAINED_PROFILE_ROWS in the session
 PROFILE_ROW_H = 19                        # u: a row of the stock list at textscale 0.30
 
 
-KEY_CHIP = 20                             # dp: a bound key's chip height (retained_key_glyphs: 1 em of the strip)
+KEY_CHIP = 17                             # dp: a bound key's chip height (retained_key_glyphs: 1 em of the strip)
 WAITING_KEY = "#str_07000"                # Press any key...
 VERB_CHANGE, VERB_SELECT, VERB_CLEAR, VERB_BACK = "#str_122207", "#str_122208", "#str_122210", "#str_122209"
 
 
 def bind_row(doc: Document, row: dict, origin) -> dict:
     """A binding row: the setting row's plate, the action's caption and its
-    keys as glyphs (retained_key_glyphs): up to two keyboard or mouse keys,
-    then up to two controller buttons a little apart, "+N" for any more, and
+    keys as glyphs (retained_key_glyphs): up to three keyboard or mouse keys,
+    then up to three controller buttons a little apart, "+N" for any more, and
     a dim dash for none. The engine fills the slots from the action's
     binding (idUserInterfaceRetained::SetKeyBindingNames). Accept asks the
     session to wait for a key (controlsBind); while it waits the glyphs give
@@ -2521,7 +2521,7 @@ def compact_row(row: dict, x: float, y: float, w: float) -> dict:
     """A tree row (retained_options_tree) as the row builders take it: its
     plate at x,y in the frame, its label at the leading edge, its value or
     keys in the trailing part, every text centred on the row's height."""
-    split = round(w * {"bind": 0.5, "choice": 0.57}.get(row["kind"], 0.53))
+    split = round(w * {"bind": 0.43, "choice": 0.57}.get(row["kind"], 0.53))
     out = dict(row)
     out.update(rect=(x, y, w, OPT_ROW_H), label_rect=(8, 0, split - 12, OPT_ROW_H), label_ty=0, label_align="left",
                label_scale=OPT_SCALE, value_scale=OPT_SCALE, centre=True, section=row.get("section"))

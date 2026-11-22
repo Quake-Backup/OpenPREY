@@ -906,6 +906,16 @@ void idTarget_Tip::Event_CheckPlayerPos( void ) {
 		if ( v.Length() > spawnArgs.GetFloat( "tip_distance" ) || !g_tips.GetBool() ) {
 			player->HideTip();
 		} else {
+			// OPENPR06: the plate follows the device the player picked up.
+			const char *keyBinding = spawnArgs.GetString( "tip_key", NULL );
+			if ( keyBinding != NULL && !spawnArgs.FindKey( "mtr_override" ) ) {
+				idStr keyMaterial, key;
+				bool keyWide = false;
+				gameLocal.GetTip( keyBinding, keyMaterial, key, keyWide );
+				if ( keyMaterial.Length() ) {
+					player->UpdateTipKey( spawnArgs.GetString( "text_tip" ), keyMaterial.c_str(), key.c_str(), keyWide );
+				}
+			}
 			PostEventMS( &EV_CheckPos, 1000 );
 		}
 	}

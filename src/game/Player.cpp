@@ -7307,8 +7307,29 @@ void idPlayer::ShowTip( const char *keyMaterial, const char *tip, const char *ke
 	hud->SetStateString( "topMaterial", topMaterial ? topMaterial : "" );
 	hud->SetStateInt( "tipOffsetX", xOffset);
 	hud->SetStateInt( "tipOffsetY", yOffset);
-	hud->HandleNamedEvent( "tipWindowUp" ); 
+	hud->HandleNamedEvent( "tipWindowUp" );
 	tipUp = true;
+}
+
+/*
+===============
+idPlayer::UpdateTipKey
+	OPENPR06: a tip on screen swaps its key plate when the player changes
+	between the keyboard and a controller.
+===============
+*/
+void idPlayer::UpdateTipKey( const char *tip, const char *keyMaterial, const char *key, bool keywide ) {
+	// Only the tip on screen: another target's tip may have replaced it.
+	if ( !tipUp || hud == NULL || idStr::Cmp( hud->GetStateString( "tip" ), tip ? tip : "" ) != 0 ) {
+		return;
+	}
+	if ( idStr::Cmp( hud->GetStateString( "keyMaterial" ), keyMaterial ? keyMaterial : "" ) == 0 &&
+		idStr::Cmp( hud->GetStateString( "key" ), key ? key : "" ) == 0 && hud->GetStateBool( "keywide" ) == keywide ) {
+		return;
+	}
+	hud->SetStateBool( "keywide", keywide );
+	hud->SetStateString( "key", key ? key : "" );
+	hud->SetStateString( "keyMaterial", keyMaterial ? keyMaterial : "" );
 }
 
 /*

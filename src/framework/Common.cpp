@@ -3046,23 +3046,66 @@ void idCommonLocal::WriteConfiguration( void ) {
 namespace {
 static const int PREY_TIP_BIND_BUFFER_SIZE = 256;
 
-static const char *Common_GetFirstKeyForBinding( const char *binding, bool localized ) {
-	if ( binding == NULL || binding[0] == '\0' ) {
-		return "";
+// The key a tip plate names: the first bound key of the device family the
+// player used last, else the first of the other family, so a tip never reads
+// "unbound" while either device can do it.
+static int Common_TipKeyForBinding( const char *binding ) {
+	const bool controller = idKeyInput::LastInputWasController();
+	int keyNum = idKeyInput::FirstBoundKey( binding, controller );
+	if ( keyNum < 0 ) {
+		keyNum = idKeyInput::FirstBoundKey( binding, !controller );
 	}
-
-	for ( int keyNum = 0; keyNum < 256; keyNum++ ) {
-		const char *boundCommand = idKeyInput::GetBinding( keyNum );
-		if ( boundCommand != NULL && idStr::Icmp( boundCommand, binding ) == 0 ) {
-			return idKeyInput::KeyNumToString( keyNum, localized );
-		}
-	}
-
-	return "";
+	return keyNum;
 }
 
 static bool Common_KeyMatches( const char *keyName, const char *comparison ) {
 	return idStr::Icmp( keyName, comparison ) == 0;
+}
+
+/*
+===============
+Common_ControllerTipPlate
+
+A controller button's tip plate (tools/ui/pad_tip_plates.py), in the hand of
+Prey's keycap and mouse plates, from the glyph the retained prompts draw for
+it in the family of the controller in use. Plates whose button carries a
+name (a face button's letter, a bumper, trigger, stick or paddle) take the
+label the GUI writes over a keycap's top face; the rest carry their mark.
+===============
+*/
+static bool Common_ControllerTipPlate( int keyNum, char *keyMaterial, char *key, bool &isWide ) {
+	if ( !idKeyInput::IsControllerKey( keyNum ) ) {
+		return false;
+	}
+	idStr label;
+#ifndef ID_DEDICATED
+	const int kind = RetainedUI_KeyGlyph( keyNum, label );
+#else
+	const int kind = 22;
+	label = idKeyInput::KeyNumToString( keyNum, true );
+#endif
+	static const char *const plates[] = {
+		NULL, "pad_button", "pad_cross", "pad_circle", "pad_square", "pad_triangle",
+		"pad_south", "pad_east", "pad_west", "pad_north", "pad_bumper", "pad_trigger",
+		"pad_dpadup", "pad_dpaddown", "pad_dpadleft", "pad_dpadright", "pad_stick",
+		"pad_menu", "pad_view", "pad_home", "pad_touchpad", "pad_paddle"
+	};
+	const char *plate = kind > 0 && kind < static_cast<int>( sizeof( plates ) / sizeof( plates[0] ) ) ? plates[kind] : NULL;
+	bool labelled = kind == 1 || kind == 10 || kind == 11 || kind == 16 || kind == 21;
+	isWide = false;
+	if ( plate == NULL ) {
+		// Another labelled button (OPTIONS, CREATE, +, -, MISC): a round
+		// button for a short name, the stock wide keycap for a long one.
+		if ( label.IsEmpty() ) {
+			label = idKeyInput::KeyNumToString( keyNum, true );
+		}
+		isWide = label.Length() > 2;
+		plate = isWide ? "keywide" : "pad_button";
+		labelled = true;
+	}
+	idStr::Copynz( keyMaterial, va( "textures/interface/tips/%s", plate ), PREY_TIP_BIND_BUFFER_SIZE );
+	idStr::Copynz( key, labelled ? label.c_str() : "", PREY_TIP_BIND_BUFFER_SIZE );
+	return true;
 }
 }
 
@@ -3114,9 +3157,13 @@ void idCommonLocal::MaterialKeyForBinding( const char *binding, char *keyMateria
 		return;
 	}
 
-	const char *keyName = Common_GetFirstKeyForBinding( binding, false );
-	const char *localizedKeyName = Common_GetFirstKeyForBinding( binding, true );
-	const int localizedKeyLen = idStr::Length( localizedKeyName );
+	const int keyNum = Common_TipKeyForBinding( binding );
+	if ( keyNum >= 0 && Common_ControllerTipPlate( keyNum, keyMaterial, key, isWide ) ) {
+		return;
+	}
+	const char *keyName = keyNum >= 0 ? idKeyInput::KeyNumToString( keyNum, false ) : "";
+	idStr localizedKeyName = keyNum >= 0 ? idKeyInput::KeyNumToString( keyNum, true ) : "";
+	const int localizedKeyLen = localizedKeyName.Length();
 
 	if ( keyName[0] == '\0' ) {
 		idStr::Copynz( keyMaterial, "textures/interface/tips/keywide", PREY_TIP_BIND_BUFFER_SIZE );
@@ -3171,7 +3218,7 @@ void idCommonLocal::MaterialKeyForBinding( const char *binding, char *keyMateria
 		keyMaterial,
 		shouldUseWideKey ? "textures/interface/tips/keywide" : "textures/interface/tips/key",
 		PREY_TIP_BIND_BUFFER_SIZE );
-	idStr::Copynz( key, localizedKeyName, PREY_TIP_BIND_BUFFER_SIZE );
+	idStr::Copynz( key, localizedKeyName.c_str(), PREY_TIP_BIND_BUFFER_SIZE );
 	isWide = shouldUseWideKey;
 }
 

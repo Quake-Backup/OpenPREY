@@ -230,9 +230,14 @@ public:
 	static const char *	KeysFromBindingForMenu( const char *bind );
 	static const char *	BindingFromKey( const char *key );
 	static bool			KeyIsBoundTo( int keyNum, const char *binding );
-	// The settings menus keep at most two keys of each device family on an
-	// action: two keyboard or mouse keys and two controller buttons. A third
-	// of a family replaces that family's two and leaves the other family's.
+	// The lowest-numbered key bound to an action within one device family
+	// (a controller's buttons, or the keyboard's and the mouse's keys), or -1.
+	static int			FirstBoundKey( const char *binding, bool controller );
+	// The settings menus keep at most MAX_MENU_BINDS keys of each device
+	// family on an action: three keyboard or mouse keys and three controller
+	// buttons. One more of a family replaces that family's keys and leaves
+	// the other family's.
+	static const int	MAX_MENU_BINDS = 3;
 	static bool			IsControllerKey( int keyNum );
 	static void			BindForMenu( int keyNum, const char *binding );
 	static void			WriteBindings( idFile *f );

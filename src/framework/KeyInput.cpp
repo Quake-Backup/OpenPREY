@@ -946,14 +946,34 @@ bool idKeyInput::IsControllerKey( int keynum ) {
 
 /*
 ============
+idKeyInput::FirstBoundKey
+
+Prey's tip plates name one key: the first in key order, as retail chose,
+from the device family the player is using.
+============
+*/
+int idKeyInput::FirstBoundKey( const char *binding, bool controller ) {
+	if ( keys == NULL || binding == NULL || !*binding ) {
+		return -1;
+	}
+	for ( int i = 0; i < MAX_KEYS; i++ ) {
+		if ( Key_IsControllerKey( i ) == controller && BindingsEquivalent( keys[i].binding.c_str(), binding ) ) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+/*
+============
 idKeyInput::BindForMenu
 
-A settings menu's bind: the key joins the action's keys. An action keeps two
-keys of each device family, so a third keyboard or mouse key replaces the two
-it has and leaves its controller buttons, and a third controller button
-replaces those and leaves the keyboard's. The stock bindunbindtwo counted both
-families together, so binding a key to an action that came with a key and a
-button of each cleared the controller.
+A settings menu's bind: the key joins the action's keys. An action keeps
+MAX_MENU_BINDS keys of each device family, so one more keyboard or mouse key
+replaces the ones it has and leaves its controller buttons, and one more
+controller button replaces those and leaves the keyboard's. The stock
+bindunbindtwo counted both families together, so binding a key to an action
+that came with a key and a button of each cleared the controller.
 ============
 */
 void idKeyInput::BindForMenu( int keynum, const char *binding ) {
@@ -968,7 +988,7 @@ void idKeyInput::BindForMenu( int keynum, const char *binding ) {
 				family++;
 			}
 		}
-		if ( family >= 2 ) {
+		if ( family >= MAX_MENU_BINDS ) {
 			for ( int i = 0; i < MAX_KEYS; i++ ) {
 				if ( Key_IsControllerKey( i ) == controller && BindingsEquivalent( keys[i].binding.c_str(), binding ) ) {
 					SetBinding( i, "" );

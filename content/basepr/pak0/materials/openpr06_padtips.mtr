@@ -1,0 +1,234 @@
+// The campaign tips' controller plates (guis/hud/hud_tips.guifragment's TipKey),
+// written by tools/ui/pad_tip_plates.py; idCommonLocal::MaterialKeyForBinding picks one.
+// Shaped as Prey's own textures/interface/tips/key.
+
+textures/interface/tips/pad_button {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_button.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_cross {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_cross.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_circle {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_circle.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_square {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_square.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_triangle {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_triangle.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_south {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_south.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_east {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_east.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_west {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_west.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_north {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_north.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_bumper {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_bumper.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_trigger {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_trigger.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_dpadup {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_dpadup.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_dpaddown {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_dpaddown.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_dpadleft {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_dpadleft.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_dpadright {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_dpadright.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_stick {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_stick.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_menu {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_menu.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_view {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_view.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_home {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_home.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_touchpad {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_touchpad.tga
+		linear
+		colored
+	}
+}
+
+textures/interface/tips/pad_paddle {
+	noshadows
+	sort gui
+	{
+		blend blend
+		map textures/interface/tips/pad_paddle.tga
+		linear
+		colored
+	}
+}

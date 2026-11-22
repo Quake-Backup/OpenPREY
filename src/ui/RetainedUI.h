@@ -96,6 +96,13 @@ bool RetainedUI_IsOpen();
 // controller family's face buttons (Xbox, PlayStation, Nintendo, Steam Deck,
 // generic). Documents read it as the adapter-owned state prompt.glyphs.
 int RetainedUI_PromptGlyphs();
+// The glyph a prompt draws for a bound key, in the family of the controller
+// in use: its kind (the documents' GLYPH_* contract, 0 a keycap, 1 a face
+// button's letter, 2-5 the PlayStation symbols, 6-9 the face buttons by
+// position, 10 bumper, 11 trigger, 12-15 the d-pad, 16 stick, 17 menu,
+// 18 view, 19 home, 20 touchpad, 21 paddle, 22 another labelled button,
+// 23-28 the mouse) and the label it carries. Prey's tip plates follow it.
+int RetainedUI_KeyGlyph( int key, class idStr &label );
 // Whether menus confirm on the east face button (section 13.5's Swap Confirm
 // and Back); documents read it as the adapter-owned state prompt.swapped.
 bool RetainedUI_PromptSwapped();

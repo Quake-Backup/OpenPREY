@@ -3412,7 +3412,7 @@ idSessionLocal::RetainedControlsKey
 
 While the CONTROLS page waits for a key it takes the next key pressed, as
 the stock binding field does: Escape, Start or Back cancel, Backspace or
-Delete clear the row, any other key joins its keys (at most two of each device
+Delete clear the row, any other key joins its keys (at most three of each device
 family, idKeyInput::BindForMenu). The key's release and characters are its own. Out of
 a wait, Delete or Backspace on a binding row clears it; on the device tabs'
 rows they reach the page. openPR06's Options page takes keys the same way

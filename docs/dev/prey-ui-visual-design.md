@@ -1,6 +1,6 @@
 # openPR06 UI Visual Design
 
-Specification version 1.29, 22 November 2026.
+Specification version 1.30, 22 November 2026.
 
 Status: reference survey and design contract. openPR06 presents the retained
 interface by default (`ui_retained 1`, since 0.15.0); `ui_retained 0` renders
@@ -782,7 +782,7 @@ in `guis/hud/`, `guis/mphud.gui`, `guis/scoreboard.gui` and `guis/cursor.gui`
 | Crosshair | 32x32 at 304,224 | Eight styles; red `#FF3C00` locked variant over damageable targets | `cursor.gui:7-104` |
 | Damage arcs | three 128x64 arcs on 480x480 rotators centred on the screen | Thin red crescents about 92 u wide at radius 134–150 u, turned toward the attacker | `hud/hud_damageindictor.guifragment:7-53` |
 | Boss and progress bar | 230x36 capsule at 210,70 when shown | Mirrored halves of `bossbarbg` around a 210x20 blood-red fill; caption in the alien face | `hud/hud_progressbar.guifragment:46-79` |
-| Tips | 420x164 window from 220,200 | A keycap image (96x48) with its key label, the tip text starting at the screen centre | `hud/hud_tips.guifragment:51-97` |
+| Tips | 420x164 window from 220,200 | A keycap image (96x48) with its key label, the tip text starting at the screen centre; a controller's plate while one is in use (section 12.1) | `hud/hud_tips.guifragment:51-97` |
 | Subtitles | 640x50 line at y 400, centred | Body face 0.5, white with shadow | `hud/hud_subtitles.guifragment:5-36` |
 | Letterbox | 50 u black bars | Hides everything except tips and subtitles during scripted scenes | `hud.gui:36-52`; `src/Prey/game_playerview.cpp:7-8` |
 
@@ -1336,6 +1336,28 @@ vocabulary rather than replace it:
   the six Video tabs are 55 u tall (`textaligny 21`), where the stock three
   were 110 u (`textaligny 30`). A change that needs a video restart lights
   Apply Changes on every page, as in the stock.
+- **Controller tip plates.** The tutorial tips (section 10.1's Tips row,
+  `hud_tips.guifragment`), the shuttle's and the rifle scope's tips and the
+  multiplayer ready and vote tips name the key of the device in use: the
+  first bound key of the family the player touched last, or of the other
+  family when that one has none, so a tip never reads "unbound" while either
+  device can act. A controller button gets a plate in the hand of Prey's
+  `tips/key` and `tips/mouse*`: the keycap's thick `#BACFEB` edge, dark
+  extruded sides that lighten to the right, a steel top face with a darker
+  rim, 87.5% opacity, and the mouse's orange for a lit part. Twenty-one
+  plates (`textures/interface/tips/pad_*`, written by
+  `tools/ui/pad_tip_plates.py` into `pak1` with their materials in
+  `pak0/materials/openpr06_padtips.mtr`) follow the retained prompts' glyph
+  for the controller family (`RetainedUI_KeyGlyph`): a round face cap the
+  GUI writes the family's letter on, the PlayStation symbols, the four face
+  buttons as a diamond with one lit for a generic controller, a bumper and a
+  trigger cap labelled LB/L1/L or LT/L2/ZL, the d-pad with the lit arm, a
+  stick labelled LS or L3, menu, view, home, touchpad, and a paddle labelled
+  P1 or R4. A long label (`OPTIONS`, `CREATE`) takes the stock wide keycap.
+  The plates share the keycap's 256x128 frame and placement, so the GUI's
+  key text lands on a plate's top face as it does on a key's. A tip already
+  on screen swaps its plate within a second when the player changes device
+  (`idTarget_Tip`'s distance check).
 
 New pages and settings follow that precedent: build them from the stock plates,
 rows, tabs and faces, at stock sizes and colours, inside the claw frame.
@@ -1988,10 +2010,10 @@ purpose as well: settings nothing in Prey reads (the weapon-wheel settings,
 remastered-HUD settings, which no Prey HUD document reads yet, and HRTF
 (`s_openALHRTF`), which needs the sound device reopened and has no verb yet.
 
-- **Controls.** A binding row's action takes the leading half and its keys
-  the trailing half, drawn as glyphs (`tools/ui/retained_key_glyphs.py`,
-  ported from openQ4 and recoloured): up to two keyboard or mouse keys, then up
-  to two controller buttons a little apart, `+N` for any more and a dim dash
+- **Controls.** A binding row's action takes the leading 43% and its keys
+  the rest, drawn as glyphs (`tools/ui/retained_key_glyphs.py`, ported from
+  openQ4 and recoloured): up to three keyboard or mouse keys, then up to
+  three controller buttons a little apart, `+N` for any more and a dim dash
   for none.
   - *Glyphs.* A keyboard key is a keycap with a 45-degree cut at its lower
     leading corner: a dark `#111A25` plate at 0.88 under a 1.2 dp
@@ -2003,11 +2025,12 @@ remastered-HUD settings, which no Prey HUD document reads yet, and HRTF
     generic controller's four positions as a diamond with one lit, bumpers,
     triggers, the d-pad's lit arm, sticks, paddles and the menu buttons) in
     the same plate, edge and ink. No glyph adds a hue: every mark is the
-    rail's pale blue-white. A chip is 20 dp tall and drawn in em of its
-    strip; every glyph's art is a shared symbol of the document.
+    rail's pale blue-white. A chip is 17 dp tall, 0.22 em from the next,
+    and drawn in em of its strip; every glyph's art is a shared symbol of
+    the document.
   - *Binding.* Accept or a click waits for a key, and the glyphs give way to
     "Press any key..." in white. The next key pressed joins the action's
-    keys, two of each device family, and plays `guisounds_menu_tick`.
+    keys, three of each device family, and plays `guisounds_menu_tick`.
     Escape, Start or Back cancel; Backspace or Delete clear the row. Out of
     a wait, Delete, Backspace or the west face button clears the focused
     row. The session takes the key (`idSessionLocal::RetainedControlsKey`)
@@ -2028,8 +2051,12 @@ remastered-HUD settings, which no Prey HUD document reads yet, and HRTF
     attack, south and east jump and crouch, west the lighter, north spirit
     walk, the bumpers and the d-pad's sides step the weapons, the d-pad's up
     and down throw a crawler grenade and zoom, the sticks walk and centre the
-    view, the touchpad shows the scoreboard and the paddles repeat the face
-    buttons. Start and Back open the menu and stay unbound.
+    view, the touchpad shows the scoreboard, the share or capture button
+    takes a screenshot and the paddles repeat the face buttons. Start and
+    Back open the menu and stay unbound; Quick Save, Quick Load and the
+    multiplayer actions are in the pause menu they open. The same file gives
+    the keyboard the two Controls actions Prey leaves unbound: Caps Lock
+    walks or runs and Z zooms.
 - **Choices.** The value shows the current option, named from its language
   list. Left and Right cycle it, as a click cycles the stock control; Accept
   or a click unfolds a list across the row, black with the `prey.separator`
@@ -3029,6 +3056,16 @@ carries their summaries.
   (`def/consoles.def:497,534`), which are not in the archives.
 
 ## Appendix D. Change record
+
+### Version 1.30, 22 November 2026
+
+- Section 12.1: controller tip plates. The campaign's tips, and the shuttle,
+  rifle and multiplayer ones, show the button of the controller in use on a
+  plate drawn as Prey's keycap is.
+- Section 12.5, Options: a binding row shows up to three keys of each
+  device family, and keeps three; its action takes 43% of the row and its
+  17 dp chips the rest. The defaults add the share button's screenshot and
+  the keyboard's Caps Lock walk and Z zoom.
 
 ### Version 1.29, 22 November 2026
 

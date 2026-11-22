@@ -297,6 +297,9 @@ if get_option('build_native_tests')
   # The loading screen's name notch textures (stock screen), from their construction.
   test('openpr06-loading-notch', py,
     args: [files('tools/ui/loading_notch.py'), '--check'], timeout: 120)
+  # The campaign tips' controller plates and their materials, from their construction.
+  test('openpr06-pad-tip-plates', py,
+    args: [files('tools/ui/pad_tip_plates.py'), '--check'], timeout: 120)
   # Repaints the initializing screen's textures from their seeds: about a minute.
   test('openpr06-retained-initialization', py,
     args: [files('tools/ui/build_retained_initialization.py'), '--check'], timeout: 300)

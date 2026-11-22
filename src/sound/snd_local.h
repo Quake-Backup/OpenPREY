@@ -385,6 +385,7 @@ public:
 
 	virtual void			SetSlowmoSpeed( float speed );
 	virtual void			SetEnviroSuit( bool active );
+	virtual void			SetVoiceDucker( bool active );
 	virtual void			SetUnderwater( bool active );
 	virtual void			SetLiquidTest( liquidTest_t test );
 

@@ -167,7 +167,8 @@ idCVar com_profanity( "com_profanity", "0", CVAR_ARCHIVE | CVAR_SYSTEM | CVAR_BO
 // r_correctspecular and r_normalizebumpmap drive the renderer's stock
 // interaction and are registered there (ClassicInteractionDomain.cpp).
 idCVar r_lowParticleDetail( "r_lowParticleDetail", "0", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_BOOL, "reduce particle quality when non-zero" );
-idCVar s_musicvolume_dB( "s_musicvolume_dB", "-6", CVAR_ARCHIVE | CVAR_SOUND | CVAR_FLOAT, "music volume in decibels", -60.0f, 0.0f );
+// retail PREY.exe 1.4 defaults this to 0 dB
+idCVar s_musicvolume_dB( "s_musicvolume_dB", "0", CVAR_ARCHIVE | CVAR_SOUND | CVAR_FLOAT, "music volume in dB", -60.0f, 0.0f );
 idCVar s_reverse( "s_reverse", "0", CVAR_ARCHIVE | CVAR_SOUND | CVAR_BOOL, "reverse stereo channels" );
 idCVar g_levelloadmusic( "g_levelloadmusic", "1", CVAR_ARCHIVE | CVAR_GAME | CVAR_BOOL, "play map-defined music while levels are loading" );
 
@@ -371,7 +372,6 @@ Step 1:
   it on headphones and OpenAL Soft's automatic HRTF never engaged. The device
   layout (0) gives a 5.1 system the same 5.1, so 6 is moved to it. 2 is left
   alone: it was retail's default and may be a deliberate choice.
-- s_radioChatterFraction 0.5 was a guess; Quake 4 1.4.2 ships 0.9.
 - s_quadraticFalloff 1 was Doom 3's value; Quake 4 1.4.2 ships 0 (linear) and
   does not archive it.
 
@@ -392,10 +392,6 @@ static void Common_MigrateLegacyAudioDefaults( void ) {
 		if ( cvarSystem->GetCVarInteger( "s_numberOfSpeakers" ) == 6 ) {
 			common->Printf( "Migrating legacy audio config: s_numberOfSpeakers 6 -> 0 (the output device's own layout)\n" );
 			cvarSystem->SetCVarInteger( "s_numberOfSpeakers", 0, CVAR_ARCHIVE );
-		}
-		if ( cvarSystem->GetCVarFloat( "s_radioChatterFraction" ) == 0.5f ) {
-			common->Printf( "Migrating legacy audio config: s_radioChatterFraction 0.5 -> 0.9\n" );
-			cvarSystem->SetCVarFloat( "s_radioChatterFraction", 0.9f, CVAR_ARCHIVE );
 		}
 		if ( cvarSystem->GetCVarBool( "s_quadraticFalloff" ) ) {
 			common->Printf( "Migrating legacy audio config: s_quadraticFalloff 1 -> 0 (linear, as retail)\n" );

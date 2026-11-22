@@ -234,9 +234,26 @@ its large packs hard-linked, and pass it with `--runtime-dir`.
   alt-tab with `s_muteUnfocused 1`, and through a door that had just closed. Such channels now
   update at zero gain.
 - **Inferred VO.** The BFG rule that marks `sound/vo/` and `sound/guis/` shaders as voice-over
-  also set retail's `SSF_IS_VO`, which retail reserves for lip-synced speech and which skips
-  `s_speakerFraction`. Map speakers playing VO were 3.7 dB louder than retail. Only openQ4's own
+  also set retail's `SSF_IS_VO`, which retail reserves for lip-synced speech. Only openQ4's own
   `SSF_VO` is inferred now.
+- **Prey's music and master volumes (November 22).** Read from retail `PREY.exe` 1.4. Its
+  channel mix scales an `SC_MUSIC` sound by `s_musicVolume_dB` *in place of* `s_volume_dB`. Every
+  other sound gets `s_volume_dB` alone, including sounds under `sound/music/` such as the jukebox
+  and the `mapload_*` music. Both cvars default to 0 dB. openPR06 had multiplied the two volumes
+  for music, with both at -6 dB, and gave `sound/music/` samples the music volume. It also kept
+  Quake 4's `s_speakerFraction` (0.65, archived as 0.5 by older configs), which retail Prey
+  does not have. That put every positioned sound but the score 3.7-6 dB under retail, so the
+  score stood out. `idSoundChannel::UpdateVolume` and `LoadingMusicGain` now follow retail, and
+  the Quake 4 fractions are gone. The path rule (`SSF_MUSIC`) still keeps music's tempo through
+  slow motion and keeps it out of dialogue routing.
+- **Voice ducking (November 22).** Retail's `SetVoiceDucker` fades the normal and spirit-walk
+  classes to `s_voiceDuckVolume` (-4.5 dB) over `s_voiceDuckFadeTimeOut` (0.2 s), and back to
+  0 dB over `s_voiceDuckFadeTimeIn` (0.5 s). Voice and music keep their level. It runs from
+  `hhPlayer::DialogStart( ..., voiceDucking, ... )` and `DialogStop`. It also runs as an
+  `SC_VOICEDUCKER` line starts, and again as the line completes; `StopSound` leaves the duck in
+  place, as in retail. openPR06 had it as a no-op, so the Roadhouse jukebox did not dip under
+  Tommy's lines. A roadhouse run now reads the jukebox at -10.5 dB during his line and -6.0 dB
+  after `dialogStop`.
 - **no_dups.** Retail's fixed channel slots kept a finished sound's sample, so `no_dups` also
   skipped the variant that had just ended. Each emitter now remembers its last eight starts.
 - **Cushion fade.** `s_cushionFadeRate` is applied per second of sound time instead of per
@@ -697,7 +714,7 @@ OV_HOLE pages. Four 8192-frame buffers are topped up every 5 ms. Nothing is
 shared with the sound worlds or the voice pool, and the thread makes no call
 that can raise an AL error, so it never consumes an error the main thread's
 `CheckALErrors` expects. The gain matches what the menu-world channel had
-(shader volume, `s_volume`, and `s_musicVolume` for music-class shaders) and
+(shader volume times `s_musicVolume` for music-class shaders, `s_volume` for the rest) and
 updates from `Render()`. Mute and focus-mute act through the listener gain. A
 looping shader keeps retail's random start position. Shaders with a leadin, and
 samples that are not streamed, still play in the menu world, where a resident
@@ -735,8 +752,9 @@ load aborts, and hardware shutdown stops it before the context goes away. With
   gameplay pass, and explicitly centred positional sounds now take a mod reverb's
   room rolloff on their sends (loopback-qualified). Physical devices still need
   qualification; stock content uses no `center` shader or `s_center` speaker.
-- **HDR audio, ducking, geometric obstruction.** These change the authored mix or need new
-  per-sound data; they are not defaults for stock content.
+- **HDR audio, geometric obstruction.** These change the authored mix or need new per-sound
+  data; they are not defaults for stock content. Retail's dialogue ducking is in (see Mixing
+  and timing).
 - **Voice budget.** 48 voices stay (retail mixed 24 channels).
 
 ## Verifying

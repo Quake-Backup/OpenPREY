@@ -326,7 +326,12 @@ idCVar s_doorDistanceAdd( "s_doorDistanceAdd", "150", CVAR_FLOAT, "reduce sound 
 idCVar s_quadraticFalloff( "s_quadraticFalloff", "0", CVAR_BOOL, "use quadratic sound distance falloff" );
 idCVar s_drawSounds( "s_drawSounds", "0", CVAR_INTEGER, "", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 idCVar s_showVoices( "s_showVoices", "0", CVAR_BOOL, "show active voices" );
-idCVar s_volume_dB( "s_volume_dB", "-6", CVAR_ARCHIVE | CVAR_SOUND | CVAR_FLOAT, "volume in dB", DB_SILENCE, 0.0f );
+// Retail PREY.exe 1.4 defaults, flags and descriptions.
+idCVar s_volume_dB( "s_volume_dB", "0", CVAR_ARCHIVE | CVAR_SOUND | CVAR_FLOAT, "volume in dB", DB_SILENCE, 0.0f );
+idCVar s_voiceDucking( "s_voiceDucking", "1", CVAR_SOUND | CVAR_BOOL, "Whether voice ducking is enabled" );
+idCVar s_voiceDuckVolume( "s_voiceDuckVolume", "-4.5", CVAR_SOUND | CVAR_FLOAT, "Volume, in dB, to lower non-voice during voice playback" );
+idCVar s_voiceDuckFadeTimeOut( "s_voiceDuckFadeTimeOut", "0.2", CVAR_SOUND | CVAR_FLOAT, "Fade out transition time" );
+idCVar s_voiceDuckFadeTimeIn( "s_voiceDuckFadeTimeIn", "0.5", CVAR_SOUND | CVAR_FLOAT, "Fade in transition time" );
 extern idCVar s_noSound;
 
 extern void WriteDeclCache( idDemoFile* f, int demoCategory, int demoCode, declType_t  declType );
@@ -2194,6 +2199,29 @@ idSoundWorldLocal::SetEnviroSuit
 void idSoundWorldLocal::SetEnviroSuit( bool active )
 {
 	enviroSuitActive = active;
+}
+
+/*
+=================
+idSoundWorldLocal::SetVoiceDucker
+
+Retail PREY.exe 1.4: while a ducking line or a ducked dialog (hhPlayer::DialogStart) plays,
+the normal and spirit-walk classes fade to s_voiceDuckVolume; voice and music keep their level.
+The duck is a class fade, so it is saved with the world, and the spirit walk's own fade of the
+normal class replaces it as in retail.
+=================
+*/
+void idSoundWorldLocal::SetVoiceDucker( bool active )
+{
+	float to = 0.0f;
+	float over = s_voiceDuckFadeTimeIn.GetFloat();
+	if( active && s_voiceDucking.GetBool() )
+	{
+		to = s_voiceDuckVolume.GetFloat();
+		over = s_voiceDuckFadeTimeOut.GetFloat();
+	}
+	FadeSoundClasses( SOUNDCLASS_NORMAL, to, over );
+	FadeSoundClasses( SOUNDCLASS_SPIRITWALK, to, over );
 }
 
 /*

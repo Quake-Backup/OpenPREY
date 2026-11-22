@@ -880,6 +880,7 @@ def run_python_tests(args: argparse.Namespace, root: Path, env: dict[str, str]) 
         (root / "tools" / "tests" / 'sound_settings.py', []),
         (root / "tools" / "tests" / 'sound_recovery.py', []),
         (root / "tools" / "tests" / 'sound_retail_reverb_contract.py', []),
+        (root / "tools" / "tests" / 'sound_retail_volume_contract.py', []),
         (root / "tools" / "tests" / 'sound_screen_shake.py', []),
         (root / "tools" / "tests" / 'audio_decode_budget.py', []),
         (root / "tools" / "tests" / 'audio_memory.py', []),

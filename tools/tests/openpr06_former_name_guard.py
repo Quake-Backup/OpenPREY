@@ -23,6 +23,7 @@ FORMER_NAME = re.compile(r"openPREY|OPENPREY|openprey")
 HISTORY_FILES = {
     "docs/dev/prey-rebase/report-narrative.md",
     "docs/dev/releases/unreleased.md",
+    "docs/dev/releases/v0.15.0.md",
 }
 
 # Allowed anywhere: the local checkout path, and the save stamp of game

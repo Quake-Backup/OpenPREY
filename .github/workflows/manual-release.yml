@@ -1,0 +1,1041 @@
+name: openPR06 Manual Release
+
+# Builds, packages and publishes an openPR06 release for Windows x64 and
+# Linux x64. Adapted from upstream openQ4's manual-release workflow for
+# openPR06's in-tree Prey game library, its unified game_<arch> module and its
+# basepr/ runtime layout.
+#
+# Not carried over from openQ4:
+# - No Discord step. discord-release.yml reacts to published releases on its
+#   own, and a release created with GITHUB_TOKEN does not trigger it anyway.
+# - No standalone content-pack job or assets. pak0, pak1 and pak2
+#   (tools/build/content_packs.json) are built from source by every platform
+#   build and ship inside each archive and the installer.
+# - No in-game update manifest (openpr06-update.json) or signing. openPR06 has
+#   no update signing key; its updater only links players to the releases page.
+# - No Android, macOS, Linux ARM64 or Windows ARM64 lanes or evidence gates.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_mode:
+        description: Release bump policy
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - major (x..)
+          - minor (.x.)
+          - patch (..x)
+      version_override:
+        description: Optional explicit release version (for example 0.15.0)
+        required: false
+        default: ""
+        type: string
+      draft:
+        description: Leave the release as an unpublished draft
+        required: false
+        default: true
+        type: boolean
+      prerelease:
+        description: Publish as a prerelease without replacing the latest stable release
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: openpr06-manual-releases
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  metadata:
+    name: Release Metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      current_version: ${{ steps.version.outputs.current_version }}
+      latest_release_tag: ${{ steps.version.outputs.latest_release_tag }}
+      latest_release_version: ${{ steps.version.outputs.latest_release_version }}
+      version: ${{ steps.version.outputs.version }}
+      version_tag: ${{ steps.version.outputs.version_tag }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
+      release_name: ${{ steps.version.outputs.release_name }}
+      release_scale: ${{ steps.version.outputs.release_scale }}
+      release_reason: ${{ steps.version.outputs.release_reason }}
+      bump_mode: ${{ steps.version.outputs.bump_mode }}
+      openpr06_source_sha: ${{ steps.source_revisions.outputs.openpr06_source_sha }}
+      source_date_epoch: ${{ steps.source_revisions.outputs.source_date_epoch }}
+      release_matrix: ${{ steps.release_matrix.outputs.release_matrix }}
+
+    steps:
+      - name: Checkout openPR06
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Fetch tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --tags origin
+
+      # The Prey game library (src/game, src/Prey, src/preyengine) is in-tree,
+      # so the triggering openPR06 commit is the only source revision.
+      - name: Resolve immutable source revision
+        id: source_revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Releases are cut from main or from a release/<version> branch; the
+          # branch version is checked against the computed version below.
+          case "${GITHUB_REF}" in
+            refs/heads/main) source_branch=main ;;
+            refs/heads/release/*) source_branch="${GITHUB_REF#refs/heads/}" ;;
+            *)
+              echo "openPR06 releases must be dispatched from refs/heads/main or refs/heads/release/<version>; got ${GITHUB_REF}."
+              exit 1
+              ;;
+          esac
+
+          openpr06_source_sha="$(git rev-parse --verify "${GITHUB_SHA}^{commit}")"
+          checkout_sha="$(git rev-parse --verify 'HEAD^{commit}')"
+          if [[ ! "${openpr06_source_sha}" =~ ^[0-9a-f]{40}$ ]] || [ "${checkout_sha}" != "${openpr06_source_sha}" ]; then
+            echo "The checked-out openPR06 release candidate does not match triggering GITHUB_SHA=${GITHUB_SHA}."
+            exit 1
+          fi
+          source_date_epoch="$(git show -s --format=%ct "${openpr06_source_sha}")"
+          if [[ ! "${source_date_epoch}" =~ ^[0-9]{1,12}$ ]]; then
+            echo "Triggering openPR06 commit has an invalid source timestamp: ${source_date_epoch}"
+            exit 1
+          fi
+
+          git fetch --force origin "refs/heads/${source_branch}:refs/remotes/origin/${source_branch}"
+          if ! git merge-base --is-ancestor "${openpr06_source_sha}" "refs/remotes/origin/${source_branch}"; then
+            echo "Triggering openPR06 commit ${openpr06_source_sha} is not reachable from origin/${source_branch}."
+            exit 1
+          fi
+
+          {
+            echo "openpr06_source_sha=${openpr06_source_sha}"
+            echo "source_date_epoch=${source_date_epoch}"
+          } >> "${GITHUB_OUTPUT}"
+          {
+            echo "### Release source revision"
+            echo "- openPR06: \`${openpr06_source_sha}\` (${GITHUB_REF}, in-tree Prey game library)"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      # With no earlier v* tag on origin, the helper reports an empty
+      # latest_release_tag and starts from the configured or overridden version.
+      - name: Compute release version
+        id: version
+        env:
+          INPUT_BUMP_MODE: ${{ inputs.bump_mode }}
+          INPUT_VERSION_OVERRIDE: ${{ inputs.version_override }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          args=(
+            --source-root .
+            --bump-mode "${INPUT_BUMP_MODE}"
+          )
+
+          if [ -n "${INPUT_VERSION_OVERRIDE}" ]; then
+            args+=(--version-override "${INPUT_VERSION_OVERRIDE}")
+          fi
+
+          python tools/build/openq4_release_version.py "${args[@]}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate release-tag candidate
+        env:
+          OPENPR06_SOURCE_SHA: ${{ steps.source_revisions.outputs.openpr06_source_sha }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_TAG: ${{ steps.version.outputs.release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Computed release tag is not a vMAJOR.MINOR.PATCH tag: ${RELEASE_TAG@Q}"
+            exit 1
+          fi
+          if [[ "${GITHUB_REF}" == refs/heads/release/* ]] && [ "${GITHUB_REF#refs/heads/release/}" != "${RELEASE_VERSION}" ]; then
+            echo "Branch ${GITHUB_REF#refs/heads/} cannot publish version ${RELEASE_VERSION}; pass version_override=${GITHUB_REF#refs/heads/release/} or dispatch from the matching branch."
+            exit 1
+          fi
+          if git show-ref --verify --quiet "refs/tags/${RELEASE_TAG}"; then
+            existing_tag_sha="$(git rev-parse --verify "refs/tags/${RELEASE_TAG}^{commit}")"
+            if [ "${existing_tag_sha}" != "${OPENPR06_SOURCE_SHA}" ]; then
+              echo "Existing release tag ${RELEASE_TAG} targets ${existing_tag_sha}, not triggering candidate ${OPENPR06_SOURCE_SHA}."
+              exit 1
+            fi
+          fi
+          {
+            echo "### Release version"
+            echo "- Version: \`${RELEASE_VERSION}\`, tag \`${RELEASE_TAG}\`"
+            echo "- Previous release: \`${{ steps.version.outputs.latest_release_tag || 'none' }}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Build release matrix
+        id: release_matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python - <<'PY' >> "${GITHUB_OUTPUT}"
+          import json
+
+          # Same runner images as openpr06-validation.yml.
+          matrix = [
+              {
+                  "os": "windows-2025",
+                  "platform": "windows",
+                  "label": "Windows x64",
+                  "binary_arch": "x64",
+                  "archive_format": "zip",
+                  "archive_ext": ".zip",
+                  "module": "game_x64.dll",
+                  "client": "openPR06-client_x64.exe",
+                  "dedicated": "openPR06-ded_x64.exe",
+                  "renderer_gl": "renderer-gl_x64.dll",
+                  "renderer_vk": "renderer-vk_x64.dll",
+              },
+              {
+                  "os": "ubuntu-24.04",
+                  "platform": "linux",
+                  "label": "Linux x64",
+                  "binary_arch": "x64",
+                  "archive_format": "tar.xz",
+                  "archive_ext": ".tar.xz",
+                  "module": "game_x64.so",
+                  "client": "openPR06-client_x64",
+                  "dedicated": "openPR06-ded_x64",
+                  "renderer_gl": "renderer-gl_x64.so",
+                  "renderer_vk": "renderer-vk_x64.so",
+              },
+          ]
+          print("release_matrix=" + json.dumps({"include": matrix}, separators=(",", ":")))
+          PY
+
+  builds:
+    name: ${{ matrix.label }}
+    needs: metadata
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.metadata.outputs.release_matrix) }}
+
+    steps:
+      - name: Checkout openPR06
+        uses: actions/checkout@v6
+        with:
+          # Save payloads use the engine commit count as their build number.
+          # A shallow checkout makes every release build 1 and rejects its saves.
+          fetch-depth: 0
+          ref: ${{ needs.metadata.outputs.openpr06_source_sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install Meson and Ninja
+        shell: bash
+        run: python -m pip install meson ninja
+
+      - name: Show release metadata
+        env:
+          RELEASE_REASON: ${{ needs.metadata.outputs.release_reason }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Configured repo version: ${{ needs.metadata.outputs.current_version }}"
+          echo "Latest release tag: ${{ needs.metadata.outputs.latest_release_tag || 'none' }}"
+          echo "Release version: ${{ needs.metadata.outputs.version }}"
+          echo "Release tag: ${{ needs.metadata.outputs.release_tag }}"
+          echo "Release scale: ${{ needs.metadata.outputs.release_scale }}"
+          echo "Release reason: ${RELEASE_REASON}"
+          echo "openPR06 source SHA: ${{ needs.metadata.outputs.openpr06_source_sha }}"
+
+      # Same list as openpr06-validation.yml.
+      - name: Install Linux native dependencies
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if sudo apt-get update && sudo apt-get install -y \
+              binutils \
+              libasound2-dev \
+              libdbus-1-dev \
+              libdecor-0-dev \
+              libdrm-dev \
+              libegl1-mesa-dev \
+              libfribidi-dev \
+              libgbm-dev \
+              libgl1-mesa-dri \
+              libgl1-mesa-dev \
+              libglx-mesa0 \
+              libibus-1.0-dev \
+              libjack-dev \
+              libopenal-dev \
+              libpipewire-0.3-dev \
+              libpulse-dev \
+              libsndio-dev \
+              libthai-dev \
+              libudev-dev \
+              libwayland-dev \
+              libx11-dev \
+              libxcursor-dev \
+              libxext-dev \
+              libxfixes-dev \
+              libxi-dev \
+              libxkbcommon-dev \
+              libxrandr-dev \
+              libxss-dev \
+              libxtst-dev \
+              libxxf86dga-dev \
+              libxxf86vm-dev; then
+              exit 0
+            fi
+
+            if [ "${attempt}" -eq 3 ]; then
+              echo "Failed to install Linux native dependencies after ${attempt} attempts."
+              exit 1
+            fi
+
+            echo "Linux dependency installation attempt ${attempt} failed; retrying in 10 seconds..."
+            sleep 10
+          done
+
+      # Staging and packaging bundle OpenAL32.dll beside the client; the
+      # runner has no local src/external/openal-soft runtime.
+      - name: Prepare OpenAL Soft (Windows)
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $outputRoot = Join-Path $env:GITHUB_WORKSPACE ".tmp/openal-soft-${{ matrix.binary_arch }}"
+          $env:OPENPR06_VS_TARGET_ARCH = "${{ matrix.binary_arch }}"
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/build/prepare_windows_openal.ps1 -Architecture "${{ matrix.binary_arch }}" -OutputRoot $outputRoot
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "OPENPR06_OPENAL_ROOT=$outputRoot" >> $env:GITHUB_ENV
+
+      # debugoptimized with assertions off is the release configuration: it
+      # keeps the PDBs and DWARF that the symbol archives are cut from.
+      - name: Configure, build, and stage (Windows)
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:OPENPR06_VS_TARGET_ARCH = "${{ matrix.binary_arch }}"
+
+          $setupArgs = @(
+            "setup",
+            "--wipe",
+            "builddir",
+            ".",
+            "--backend",
+            "ninja",
+            "--buildtype=debugoptimized",
+            "-Db_ndebug=true",
+            "--wrap-mode=forcefallback",
+            "-Dbuild_engine=true",
+            "-Dbuild_games=true",
+            "-Dbuild_renderer_gl=true",
+            "-Dbuild_renderer_vk=true",
+            "-Dversion_track=stable",
+            "-Dversion_base_override=${{ needs.metadata.outputs.version }}"
+          )
+
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/build/meson_setup.ps1 @setupArgs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/build/meson_setup.ps1 compile -C builddir
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/build/meson_setup.ps1 install -C builddir --no-rebuild --skip-subprojects
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Configure, build, and stage (Linux)
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export SOURCE_DATE_EPOCH="${{ needs.metadata.outputs.source_date_epoch }}"
+
+          setup_args=(
+            setup
+            --wipe
+            builddir
+            .
+            --backend
+            ninja
+            --buildtype=debugoptimized
+            -Db_ndebug=true
+            --wrap-mode=forcefallback
+            -Dbuild_engine=true
+            -Dbuild_games=true
+            -Dbuild_renderer_gl=true
+            -Dbuild_renderer_vk=true
+            -Dlinux_x11=enabled
+            -Dversion_track=stable
+            "-Dversion_base_override=${{ needs.metadata.outputs.version }}"
+          )
+
+          bash tools/build/meson_setup.sh "${setup_args[@]}"
+          bash tools/build/meson_setup.sh compile -C builddir
+          bash tools/build/meson_setup.sh install -C builddir --no-rebuild --skip-subprojects
+
+      - name: Verify checked-out and configured source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/build/verify_release_source_provenance.py \
+            --project-root "${GITHUB_WORKSPACE}" \
+            --expected-project-commit "${{ needs.metadata.outputs.openpr06_source_sha }}" \
+            --build-dir builddir
+
+      - name: Verify unified staged payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ".install/${{ matrix.client }}"
+          test -f ".install/${{ matrix.dedicated }}"
+          test -f ".install/${{ matrix.renderer_gl }}"
+          test -f ".install/${{ matrix.renderer_vk }}"
+          test -f ".install/basepr/${{ matrix.module }}"
+          test -f ".install/basepr/mod.json"
+          while IFS='|' read -r pack _; do
+            test -f ".install/basepr/${pack}"
+          done < <(python tools/build/content_packs.py meson-list)
+          test -f ".install/openPR06.ico"
+          test -f ".install/openPR06.icns"
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            test -f ".install/share/applications/openpr06.desktop"
+            test -f ".install/share/applications/openpr06-steamdeck.desktop"
+            test -f ".install/share/icons/hicolor/256x256/apps/openpr06.png"
+          fi
+          if find .install/basepr -maxdepth 1 -type f \( \
+              -name 'game-sp_*' -o -name 'game-mp_*' -o \
+              -name 'game_sp_*' -o -name 'game_mp_*' \) | grep -q .; then
+            echo "Split GameLib artifacts must not be staged; openPR06 ships one game_<arch> module."
+            exit 1
+          fi
+
+      # Checks the arch-suffixed binaries, Linux hardening and runtime
+      # dependencies, the staged OpenAL32.dll and the Windows PDB set. With
+      # --skip-build, --install only validates the already-staged tree; it does
+      # not re-run meson install.
+      - name: Validate staged binaries and package layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/validation/openq4_validate.py push \
+            --skip-build \
+            --install \
+            --skip-python-tests
+
+      - name: Prepare Linux debug symbols
+        if: matrix.platform == 'linux'
+        id: linux_symbols
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          arch="${{ matrix.binary_arch }}"
+          symbols_stem="openpr06-${{ needs.metadata.outputs.version_tag }}-linux-${arch}-debugsymbols"
+          symbols_dir="${RUNNER_TEMP}/${symbols_stem}"
+          symbols_archive="${RUNNER_TEMP}/${symbols_stem}.tar.xz"
+          split_list="${RUNNER_TEMP}/openpr06-linux-split-binaries.txt"
+          rm -rf "${symbols_dir}" "${symbols_archive}" "${split_list}"
+          mkdir -p "${symbols_dir}/basepr"
+
+          binaries=(
+            ".install/openPR06-client_${arch}"
+            ".install/openPR06-ded_${arch}"
+            ".install/openPR06-updater_${arch}"
+            ".install/renderer-gl_${arch}.so"
+            ".install/renderer-vk_${arch}.so"
+            ".install/basepr/game_${arch}.so"
+          )
+
+          for binary in "${binaries[@]}"; do
+            if [ ! -f "${binary}" ]; then
+              echo "Required Linux binary for debug-symbol split is missing: ${binary}"
+              exit 1
+            fi
+
+            relative_path="${binary#.install/}"
+            debug_file="${symbols_dir}/${relative_path}.debug"
+            mkdir -p "$(dirname "${debug_file}")"
+
+            binary_abs="$(pwd -P)/${binary#./}"
+            debug_basename="$(basename "${debug_file}")"
+
+            objcopy --only-keep-debug "${binary_abs}" "${debug_file}"
+            objcopy --strip-debug "${binary_abs}"
+            (
+              cd "$(dirname "${debug_file}")"
+              objcopy --add-gnu-debuglink="${debug_basename}" "${binary_abs}"
+            )
+            printf '%s\n' "${binary}" >> "${split_list}"
+          done
+
+          tar -C "${symbols_dir}" -cJf "${symbols_archive}" .
+          echo "debug_symbols_dir=${symbols_dir}" >> "${GITHUB_OUTPUT}"
+          echo "debug_symbols_path=${symbols_archive}" >> "${GITHUB_OUTPUT}"
+          echo "split_list=${split_list}" >> "${GITHUB_OUTPUT}"
+
+      # openQ4's verify_linux_release_artifacts.py still expects openQ4-client,
+      # baseoq4/ and split game-sp/game-mp modules, so the contract is checked
+      # here directly: stripped runtime ELFs, a matching .gnu_debuglink and
+      # build ID, and DWARF only in the detached files.
+      - name: Validate stripped Linux ELFs and detached symbols
+        if: matrix.platform == 'linux'
+        env:
+          SYMBOLS_DIR: ${{ steps.linux_symbols.outputs.debug_symbols_dir }}
+          SPLIT_LIST: ${{ steps.linux_symbols.outputs.split_list }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          build_id() {
+            readelf -n "$1" | awk '/Build ID:/ { print $3; exit }'
+          }
+
+          expected_debug=0
+          while IFS= read -r binary; do
+            relative_path="${binary#.install/}"
+            debug_file="${SYMBOLS_DIR}/${relative_path}.debug"
+            if [ -L "${debug_file}" ] || [ ! -f "${debug_file}" ]; then
+              echo "Detached debug file is missing: ${debug_file}"
+              exit 1
+            fi
+            if readelf -S -W "${binary}" | grep -Fq '.debug_info'; then
+              echo "Runtime ELF still carries DWARF after stripping: ${binary}"
+              exit 1
+            fi
+            if ! readelf -S -W "${debug_file}" | grep -Fq '.debug_info'; then
+              echo "Detached debug file carries no DWARF: ${debug_file}"
+              exit 1
+            fi
+            debuglink="$(readelf --string-dump=.gnu_debuglink "${binary}" | sed -n 's/^ *\[ *0\] *//p' | head -n 1)"
+            if [ "${debuglink}" != "$(basename "${debug_file}")" ]; then
+              echo "Runtime ELF ${binary} links ${debuglink@Q}, expected $(basename "${debug_file}")."
+              exit 1
+            fi
+            runtime_id="$(build_id "${binary}")"
+            debug_id="$(build_id "${debug_file}")"
+            if [ -z "${runtime_id}" ] || [ "${runtime_id}" != "${debug_id}" ]; then
+              echo "Build ID mismatch for ${binary}: runtime=${runtime_id:-<none>} debug=${debug_id:-<none>}"
+              exit 1
+            fi
+            expected_debug=$((expected_debug + 1))
+          done < "${SPLIT_LIST}"
+
+          actual_debug="$(find "${SYMBOLS_DIR}" -type f -name '*.debug' | wc -l)"
+          if [ "${actual_debug}" -ne "${expected_debug}" ]; then
+            echo "Detached symbol set has ${actual_debug} files, expected ${expected_debug}."
+            exit 1
+          fi
+          if find .install -name '*.debug' -print -quit | grep -q .; then
+            echo "Detached debug files must not remain in the runtime payload."
+            exit 1
+          fi
+
+      # package_release.py also writes a rootless -update archive without the
+      # bulk packs; it is not published, because openPR06 has no in-game
+      # update channel and no earlier release to update from.
+      - name: Prepare package
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python tools/build/package_release.py \
+            --platform "${{ matrix.platform }}" \
+            --arch "${{ matrix.binary_arch }}" \
+            --version "${{ needs.metadata.outputs.version }}" \
+            --version-tag "${{ needs.metadata.outputs.version_tag }}" \
+            --archive-format "${{ matrix.archive_format }}" \
+            --source-root "${GITHUB_WORKSPACE}" \
+            --output-dir "${RUNNER_TEMP}"
+
+          package_stem="openpr06-${{ needs.metadata.outputs.version_tag }}-${{ matrix.platform }}-${{ matrix.binary_arch }}"
+          archive_path="${RUNNER_TEMP}/${package_stem}${{ matrix.archive_ext }}"
+          package_dir="${RUNNER_TEMP}/${package_stem}"
+          if [ ! -f "${archive_path}" ]; then
+            echo "Expected package archive not found: ${archive_path}"
+            exit 1
+          fi
+          if [ ! -d "${package_dir}" ]; then
+            echo "Expected package directory not found: ${package_dir}"
+            exit 1
+          fi
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            windows_symbols_path="${RUNNER_TEMP}/${package_stem}-symbols.zip"
+            if [ ! -f "${windows_symbols_path}" ]; then
+              echo "Expected Windows symbol archive not found: ${windows_symbols_path}"
+              exit 1
+            fi
+            echo "windows_symbols_path=${windows_symbols_path}" >> "${GITHUB_OUTPUT}"
+          fi
+          echo "archive_path=${archive_path}" >> "${GITHUB_OUTPUT}"
+          echo "package_dir=${package_dir}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install Inno Setup
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+            throw "Chocolatey is not available on this Windows runner, so Inno Setup could not be installed."
+          }
+          choco install innosetup --no-progress -y
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # Without --content-packs-manifest the installer embeds every pack the
+      # package carries, so it installs offline like the zip.
+      - name: Build Windows installer
+        if: matrix.platform == 'windows'
+        id: windows_installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          python tools/build/build_windows_installer.py `
+            --package-dir "${{ steps.package.outputs.package_dir }}" `
+            --version "${{ needs.metadata.outputs.version }}" `
+            --version-tag "${{ needs.metadata.outputs.version_tag }}" `
+            --arch "${{ matrix.binary_arch }}" `
+            --source-root "${env:GITHUB_WORKSPACE}" `
+            --output-dir "${env:RUNNER_TEMP}"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $installerPath = Join-Path $env:RUNNER_TEMP "openpr06-${{ needs.metadata.outputs.version_tag }}-windows-${{ matrix.binary_arch }}-setup.exe"
+          if (-not (Test-Path -LiteralPath $installerPath)) {
+            throw "Expected Windows installer not found: $installerPath"
+          }
+
+          "installer_path=$installerPath" >> $env:GITHUB_OUTPUT
+
+      - name: Upload package archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-${{ matrix.platform }}-${{ matrix.binary_arch }}
+          path: ${{ steps.package.outputs.archive_path }}
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload Windows symbols
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v7
+        with:
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-windows-${{ matrix.binary_arch }}-symbols
+          path: ${{ steps.package.outputs.windows_symbols_path }}
+          if-no-files-found: error
+
+      - name: Upload Linux debug symbols
+        if: matrix.platform == 'linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-linux-${{ matrix.binary_arch }}-debugsymbols
+          path: ${{ steps.linux_symbols.outputs.debug_symbols_path }}
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload Windows installer
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v7
+        with:
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-windows-${{ matrix.binary_arch }}-installer
+          path: ${{ steps.windows_installer.outputs.installer_path }}
+          if-no-files-found: error
+          compression-level: 0
+
+  release:
+    name: Publish Release
+    needs: [metadata, builds]
+    if: ${{ needs.builds.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout openPR06
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.metadata.outputs.openpr06_source_sha }}
+
+      - name: Fetch tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --tags origin
+
+      - name: Validate release candidate source and tag target
+        env:
+          OPENPR06_SOURCE_SHA: ${{ needs.metadata.outputs.openpr06_source_sha }}
+          RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "${GITHUB_REF}" in
+            refs/heads/main) source_branch=main ;;
+            refs/heads/release/*) source_branch="${GITHUB_REF#refs/heads/}" ;;
+            *)
+              echo "Release publication is bound to refs/heads/main or refs/heads/release/<version>; got ${GITHUB_REF}."
+              exit 1
+              ;;
+          esac
+          if [ "${GITHUB_SHA}" != "${OPENPR06_SOURCE_SHA}" ]; then
+            echo "Release publication is bound to the triggering commit ${OPENPR06_SOURCE_SHA}; got ${GITHUB_SHA}."
+            exit 1
+          fi
+          checkout_sha="$(git rev-parse --verify 'HEAD^{commit}')"
+          if [ "${checkout_sha}" != "${OPENPR06_SOURCE_SHA}" ]; then
+            echo "Release checkout ${checkout_sha} does not match triggering candidate ${OPENPR06_SOURCE_SHA}."
+            exit 1
+          fi
+          git fetch --force origin "refs/heads/${source_branch}:refs/remotes/origin/${source_branch}"
+          if ! git merge-base --is-ancestor "${OPENPR06_SOURCE_SHA}" "refs/remotes/origin/${source_branch}"; then
+            echo "Release candidate ${OPENPR06_SOURCE_SHA} is no longer reachable from origin/${source_branch}."
+            exit 1
+          fi
+          if git show-ref --verify --quiet "refs/tags/${RELEASE_TAG}"; then
+            existing_tag_sha="$(git rev-parse --verify "refs/tags/${RELEASE_TAG}^{commit}")"
+            if [ "${existing_tag_sha}" != "${OPENPR06_SOURCE_SHA}" ]; then
+              echo "Existing tag ${RELEASE_TAG} targets ${existing_tag_sha}, not candidate ${OPENPR06_SOURCE_SHA}."
+              exit 1
+            fi
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Download packaged artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: openpr06-release-${{ needs.metadata.outputs.version_tag }}-*
+          path: ${{ runner.temp }}/release-artifacts
+          merge-multiple: true
+
+      - name: Verify release asset set
+        id: release_assets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          artifact_dir="${RUNNER_TEMP}/release-artifacts"
+          if [ ! -d "${artifact_dir}" ]; then
+            echo "Artifact directory is missing: ${artifact_dir}"
+            exit 1
+          fi
+
+          tag="${{ needs.metadata.outputs.version_tag }}"
+          expected=(
+            "openpr06-${tag}-windows-x64.zip"
+            "openpr06-${tag}-windows-x64-symbols.zip"
+            "openpr06-${tag}-windows-x64-setup.exe"
+            "openpr06-${tag}-linux-x64.tar.xz"
+            "openpr06-${tag}-linux-x64-debugsymbols.tar.xz"
+          )
+
+          asset_manifest="${RUNNER_TEMP}/openpr06-release-assets.txt"
+          expected_args=()
+          for package_file in "${expected[@]}"; do
+            expected_args+=(--expected "${package_file}")
+          done
+          python tools/build/verify_release_asset_set.py \
+            --artifact-dir "${artifact_dir}" \
+            --manifest "${asset_manifest}" \
+            "${expected_args[@]}"
+          echo "asset_manifest=${asset_manifest}" >> "${GITHUB_OUTPUT}"
+
+      # Replaces openQ4's content-pack identity proof (which needs the dropped
+      # content_packs job): every runtime archive must carry the engine, the
+      # unified game module and every pack in tools/build/content_packs.json.
+      - name: Verify runtime archive contents
+        env:
+          VERSION_TAG: ${{ needs.metadata.outputs.version_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/build/content_packs.py meson-list | cut -d '|' -f 1 > "${RUNNER_TEMP}/openpr06-content-packs.txt"
+          python - "${RUNNER_TEMP}/release-artifacts" "${RUNNER_TEMP}/openpr06-content-packs.txt" <<'PY'
+          import os
+          import sys
+          import tarfile
+          import zipfile
+          from pathlib import Path
+
+          artifact_dir = Path(sys.argv[1])
+          packs = [line.strip() for line in Path(sys.argv[2]).read_text(encoding="utf-8").splitlines() if line.strip()]
+          if not packs:
+              raise SystemExit("content_packs.py listed no packs")
+          tag = os.environ["VERSION_TAG"]
+          archives = {
+              f"openpr06-{tag}-windows-x64.zip": (".exe", ".dll"),
+              f"openpr06-{tag}-linux-x64.tar.xz": ("", ".so"),
+          }
+          for name, (exe_ext, module_ext) in archives.items():
+              path = artifact_dir / name
+              root = name.removesuffix(".zip").removesuffix(".tar.xz")
+              if name.endswith(".zip"):
+                  with zipfile.ZipFile(path) as archive:
+                      members = {member.rstrip("/") for member in archive.namelist()}
+              else:
+                  with tarfile.open(path, "r:xz") as archive:
+                      members = {member.name.rstrip("/") for member in archive.getmembers()}
+              required = [
+                  f"openPR06-client_x64{exe_ext}",
+                  f"openPR06-ded_x64{exe_ext}",
+                  f"basepr/game_x64{module_ext}",
+                  "basepr/mod.json",
+                  *(f"basepr/{pack}" for pack in packs),
+              ]
+              missing = [item for item in required if f"{root}/{item}" not in members]
+              if missing:
+                  raise SystemExit(f"{name} is missing: {', '.join(missing)}")
+              debug = sorted(m for m in members if m.endswith((".pdb", ".debug")))
+              if debug:
+                  raise SystemExit(f"{name} carries symbol files: {', '.join(debug[:10])}")
+              print(f"{name}: {len(members)} entries; packs {', '.join(packs)} present")
+          PY
+
+      - name: Generate changelog
+        env:
+          RELEASE_REASON: ${{ needs.metadata.outputs.release_reason }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Uses docs/dev/releases/<tag>.md when it exists. With no earlier v*
+          # tag on origin the notes carry no "Since" link.
+          python tools/build/generate_release_changelog.py \
+            --version "${{ needs.metadata.outputs.version }}" \
+            --version-tag "${{ needs.metadata.outputs.version_tag }}" \
+            --release-tag "${{ needs.metadata.outputs.release_tag }}" \
+            --release-scale "${{ needs.metadata.outputs.release_scale }}" \
+            --release-reason "${RELEASE_REASON}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --source-root "${GITHUB_WORKSPACE}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --run-url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            --output "${RUNNER_TEMP}/release-changelog.md"
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENPR06_SOURCE_SHA: ${{ needs.metadata.outputs.openpr06_source_sha }}
+          RELEASE_ASSET_MANIFEST: ${{ steps.release_assets.outputs.asset_manifest }}
+          RELEASE_DRAFT: ${{ inputs.draft }}
+          RELEASE_PRERELEASE: ${{ inputs.prerelease }}
+          RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
+          RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${RELEASE_DRAFT}" != "true" ] && [ "${RELEASE_DRAFT}" != "false" ]; then
+            echo "Invalid draft selector: ${RELEASE_DRAFT@Q}"
+            exit 1
+          fi
+          if [ "${RELEASE_PRERELEASE}" != "true" ] && [ "${RELEASE_PRERELEASE}" != "false" ]; then
+            echo "Invalid prerelease selector: ${RELEASE_PRERELEASE@Q}"
+            exit 1
+          fi
+          latest_policy=legacy
+          if [ "${RELEASE_PRERELEASE}" = "true" ]; then
+            latest_policy=false
+          fi
+
+          tag="${RELEASE_TAG}"
+          name="${RELEASE_NAME}"
+          target="${OPENPR06_SOURCE_SHA}"
+          notes="${RUNNER_TEMP}/release-changelog.md"
+          assets_dir="${RUNNER_TEMP}/release-artifacts"
+
+          if [ -L "${RELEASE_ASSET_MANIFEST}" ] || [ ! -f "${RELEASE_ASSET_MANIFEST}" ]; then
+            echo "Verified release asset manifest is missing or not a regular file: ${RELEASE_ASSET_MANIFEST}"
+            exit 1
+          fi
+          mapfile -t asset_names < "${RELEASE_ASSET_MANIFEST}"
+          assets=()
+          for asset_name in "${asset_names[@]}"; do
+            if [[ ! "${asset_name}" =~ ^openpr06-[A-Za-z0-9._+-]+$ ]] || [[ "${asset_name}" == *..* ]]; then
+              echo "Verified release asset manifest contains an unsafe filename: ${asset_name@Q}"
+              exit 1
+            fi
+            asset_path="${assets_dir}/${asset_name}"
+            if [ -L "${asset_path}" ] || [ ! -f "${asset_path}" ]; then
+              echo "Verified release asset disappeared or is not a regular file: ${asset_path}"
+              exit 1
+            fi
+            assets+=("${asset_path}")
+          done
+
+          if [ "${#assets[@]}" -eq 0 ]; then
+            echo "Verified release asset whitelist is empty."
+            exit 1
+          fi
+
+          if git show-ref --verify --quiet "refs/tags/${tag}"; then
+            existing_tag_sha="$(git rev-parse --verify "refs/tags/${tag}^{commit}")"
+            if [ "${existing_tag_sha}" != "${target}" ]; then
+              echo "Refusing to update release ${tag}: tag target ${existing_tag_sha} differs from ${target}."
+              exit 1
+            fi
+          fi
+
+          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            mapfile -t existing_release_assets < <(
+              gh release view "${tag}" \
+                --repo "${GITHUB_REPOSITORY}" \
+                --json assets \
+                --jq '.assets[].name'
+            )
+            for existing_asset in "${existing_release_assets[@]}"; do
+              approved=0
+              for asset_name in "${asset_names[@]}"; do
+                if [ "${existing_asset}" = "${asset_name}" ]; then
+                  approved=1
+                  break
+                fi
+              done
+              if [ "${approved}" -ne 1 ]; then
+                printf 'Existing release contains an unapproved asset: %q\n' "${existing_asset}"
+                exit 1
+              fi
+            done
+
+            gh release edit "${tag}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --target "${target}" \
+              --title "${name}" \
+              --notes-file "${notes}"
+            gh release upload "${tag}" "${assets[@]}" --repo "${GITHUB_REPOSITORY}" --clobber
+          else
+            # Keep new downloads unpublished until their stored bytes have
+            # been compared with the archives that passed validation.
+            gh release create "${tag}" "${assets[@]}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --target "${target}" \
+              --title "${name}" \
+              --notes-file "${notes}" \
+              --draft \
+              --prerelease="${RELEASE_PRERELEASE}"
+          fi
+
+          mapfile -t published_release_assets < <(
+            gh release view "${tag}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --json assets \
+              --jq '.assets[].name'
+          )
+          if [ "${#published_release_assets[@]}" -ne "${#asset_names[@]}" ]; then
+            echo "Published release asset count does not match the approved whitelist."
+            exit 1
+          fi
+          for asset_name in "${asset_names[@]}"; do
+            if ! printf '%s\n' "${published_release_assets[@]}" | grep -Fxq -- "${asset_name}"; then
+              echo "Published release is missing approved asset: ${asset_name}"
+              exit 1
+            fi
+          done
+
+          release_id="$(gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" --json databaseId --jq .databaseId)"
+          published_assets_json="${RUNNER_TEMP}/openpr06-published-assets.json"
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?per_page=100" \
+            > "${published_assets_json}"
+          expected_args=()
+          for asset_name in "${asset_names[@]}"; do
+            expected_args+=(--expected "${asset_name}")
+          done
+          python tools/build/verify_release_asset_set.py \
+            --artifact-dir "${assets_dir}" \
+            --published-assets "${published_assets_json}" \
+            "${expected_args[@]}"
+
+          if [ "${RELEASE_DRAFT}" = "true" ]; then
+            # A draft is not a release: GitHub creates no git tag for it, fires no
+            # release event, and the release-by-tag REST endpoint never returns it.
+            # Read it back through gh, which falls back to the draft listing.
+            gh release edit "${tag}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --draft \
+              --prerelease="${RELEASE_PRERELEASE}"
+            draft_state="$(
+              gh release view "${tag}" \
+                --repo "${GITHUB_REPOSITORY}" \
+                --json isDraft,targetCommitish \
+                --jq '[(.isDraft | tostring), .targetCommitish] | join(" ")'
+            )"
+            draft_is_draft="${draft_state%% *}"
+            draft_release_target="${draft_state##* }"
+            if [ "${draft_is_draft}" != "true" ]; then
+              echo "Release ${tag} was requested as a draft but reports isDraft=${draft_is_draft}."
+              exit 1
+            fi
+            if [ "${draft_release_target}" != "${target}" ]; then
+              echo "Draft release ${tag} records target ${draft_release_target}, expected ${target}."
+              exit 1
+            fi
+            {
+              echo "### Draft release staged"
+              echo "- Tag: \`${tag}\` (unpublished; no git tag exists until the draft is published)"
+              echo "- Target: \`${target}\`"
+              echo "- Assets: ${#asset_names[@]}"
+            } >> "${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+
+          # Resolve through gh so an existing unpublished draft can be promoted.
+          # The release-by-tag REST endpoint only returns published releases.
+          gh api \
+            --method PATCH \
+            "repos/${GITHUB_REPOSITORY}/releases/${release_id}" \
+            -F prerelease="${RELEASE_PRERELEASE}" \
+            -f make_latest="${latest_policy}" \
+            -F draft=false >/dev/null
+
+          published_state="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq '[.draft, .prerelease] | map(tostring) | join(" ")')"
+          if [ "${published_state}" != "false ${RELEASE_PRERELEASE}" ]; then
+            echo "Published release ${tag} has unexpected draft/prerelease state: ${published_state}"
+            exit 1
+          fi
+
+          git fetch --force origin "refs/tags/${tag}:refs/tags/${tag}"
+          published_tag_sha="$(git rev-parse --verify "refs/tags/${tag}^{commit}")"
+          if [ "${published_tag_sha}" != "${target}" ]; then
+            echo "Published tag ${tag} targets ${published_tag_sha}, expected ${target}."
+            exit 1
+          fi
+          published_release_target="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" --jq .target_commitish)"
+          if [ "${published_release_target}" != "${target}" ]; then
+            echo "Published release ${tag} records target ${published_release_target}, expected ${target}."
+            exit 1
+          fi
+          {
+            echo "### Release published"
+            echo "- Tag: \`${tag}\` -> \`${target}\`"
+            echo "- Prerelease: ${RELEASE_PRERELEASE}"
+          } >> "${GITHUB_STEP_SUMMARY}"

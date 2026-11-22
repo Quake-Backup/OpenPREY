@@ -147,6 +147,10 @@ LEGACY_RETAIL_GAME_MODULE_NAMES = frozenset(
 # openPR06 push/PR checks until rebuilt around basepr and game_<arch>.
 DEFERRED_RELEASE_LANE_TESTS = frozenset(
     (
+        # OPENPR06: manual-release.yml has no AppImage lane yet (the packager
+        # still calls openQ4's Linux artifact verifier), and the user docs
+        # carry no AppImage instructions.
+        "linux_appimage_packaging.py",
         "linux_arm64_cross_compile.py",
         "linux_arm64_ci_coverage.py",
         "linux_arm64_release_evidence.py",

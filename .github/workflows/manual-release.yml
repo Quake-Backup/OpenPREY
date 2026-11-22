@@ -1,23 +1,32 @@
 name: openPR06 Manual Release
 
-# Builds, packages and publishes an openPR06 release for Windows x64 and
-# Linux x64. Adapted from upstream openQ4's manual-release workflow for
-# openPR06's in-tree Prey game library, its unified game_<arch> module and its
-# basepr/ runtime layout.
+# Builds, packages and publishes an openPR06 release on openQ4's desktop
+# platform set: Windows x64 and ARM64, Linux x64 and ARM64 (with AppImages),
+# and macOS ARM64 in its OpenGL and Metal-bridge variants. Adapted from
+# upstream openQ4's manual-release workflow for openPR06's in-tree Prey game
+# library, its unified game_<arch> module and its basepr/ runtime layout.
+#
+# Support tiers follow openQ4's defaults. Linux ARM64 ships as a preview
+# (-preview names). macOS ships unsigned and unnotarized (-unsigned.tar.gz)
+# unless the Apple Developer ID and notary secrets are configured, in which
+# case it ships signed, notarized DMGs. openPR06 has no first-class evidence
+# gates for either yet, so there is no first-class selector.
 #
 # Not carried over from openQ4:
+# - No Android APK. openPR06's Android host is still openQ4's (baseoq4,
+#   com.darkmatter.openq4, the quake4 bridge) and the repository has no
+#   Android release-signing secrets.
 # - No Discord step. discord-release.yml reacts to published releases on its
 #   own, and a release created with GITHUB_TOKEN does not trigger it anyway.
 # - No standalone content-pack job or assets. pak0, pak1 and pak2
 #   (tools/build/content_packs.json) are built from source by every platform
-#   build and ship inside each archive and the installer.
-# - No in-game update manifest (openpr06-update.json) or signing. openPR06 has
-#   no update signing key; its updater only links players to the releases page.
-# - No Android, macOS, Linux ARM64 or Windows ARM64 lanes or evidence gates.
-# - No AppImage and no post-strip Wayland/X11 runtime smoke yet: the AppImage
-#   packager calls verify_linux_release_artifacts.py, which still expects
-#   openQ4's layout, and the smoke starts the client without game files
-#   (g_allowAssetlessStartup), which openPR06 does not define.
+#   build and ship inside each archive, AppImage, app bundle and installer.
+# - No in-game update manifest (openpr06-update.json), signing or -update
+#   archives. openPR06 has no update signing key; its updater only links
+#   players to the releases page.
+# - No assetless runtime smoke under Wayland/X11 or from the macOS app bundle:
+#   PREY's game module does not define g_allowAssetlessStartup, so the client
+#   cannot start without a retail PREY install, which CI does not have.
 
 on:
   workflow_dispatch:
@@ -74,6 +83,11 @@ jobs:
       openpr06_source_sha: ${{ steps.source_revisions.outputs.openpr06_source_sha }}
       source_date_epoch: ${{ steps.source_revisions.outputs.source_date_epoch }}
       release_matrix: ${{ steps.release_matrix.outputs.release_matrix }}
+      expected_assets: ${{ steps.release_matrix.outputs.expected_assets }}
+      runtime_archives: ${{ steps.release_matrix.outputs.runtime_archives }}
+      macos_signed_release_enabled: ${{ steps.release_matrix.outputs.macos_signed_release_enabled }}
+      macos_release_reason: ${{ steps.release_matrix.outputs.macos_release_reason }}
+      linux_arm64_release_reason: ${{ steps.release_matrix.outputs.linux_arm64_release_reason }}
 
     steps:
       - name: Checkout openPR06
@@ -191,45 +205,117 @@ jobs:
             echo "- Previous release: \`${{ steps.version.outputs.latest_release_tag || 'none' }}\`"
           } >> "${GITHUB_STEP_SUMMARY}"
 
+      # One matrix entry per published package. The same script lists the
+      # exact asset set the release job must find, so a lane cannot be added
+      # or dropped without its assets following.
       - name: Build release matrix
         id: release_matrix
+        env:
+          MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64 }}
+          MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD }}
+          MACOS_DEVELOPER_ID_APPLICATION_IDENTITY: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_IDENTITY }}
+          MACOS_NOTARY_APPLE_ID: ${{ secrets.MACOS_NOTARY_APPLE_ID }}
+          MACOS_NOTARY_TEAM_ID: ${{ secrets.MACOS_NOTARY_TEAM_ID }}
+          MACOS_NOTARY_APP_PASSWORD: ${{ secrets.MACOS_NOTARY_APP_PASSWORD }}
+          OPENPR06_RELEASE_VERSION_TAG: ${{ steps.version.outputs.version_tag }}
         shell: bash
         run: |
           set -euo pipefail
 
           python - <<'PY' >> "${GITHUB_OUTPUT}"
           import json
+          import os
+          import re
 
-          # Same runner images as openpr06-validation.yml.
+          tag = os.environ["OPENPR06_RELEASE_VERSION_TAG"].strip()
+          if re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", tag) is None:
+              raise SystemExit(f"Unsafe release version tag: {tag!r}")
+
+          required_macos_secrets = (
+              "MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64",
+              "MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD",
+              "MACOS_DEVELOPER_ID_APPLICATION_IDENTITY",
+              "MACOS_NOTARY_APPLE_ID",
+              "MACOS_NOTARY_TEAM_ID",
+              "MACOS_NOTARY_APP_PASSWORD",
+          )
+          missing_macos_secrets = [name for name in required_macos_secrets if not os.environ.get(name)]
+          macos_signed = not missing_macos_secrets
+          macos_release_mode = "signed" if macos_signed else "unsigned"
+          macos_archive_format = "dmg" if macos_signed else "tar.gz"
+          macos_unsigned_suffix = "" if macos_signed else "-unsigned"
+          macos_unsigned_label = "" if macos_signed else " (unsigned)"
+
+          def entry(os_image, platform, label, arch, archive_format, *, suffix="", bridge="opengl"):
+              return {
+                  "os": os_image,
+                  "platform": platform,
+                  "label": label,
+                  "binary_arch": arch,
+                  "package_suffix": suffix,
+                  "archive_format": archive_format,
+                  "archive_ext": "." + archive_format,
+                  "macos_graphics_bridge": bridge,
+                  "macos_release_mode": macos_release_mode if platform == "macos" else "",
+              }
+
+          # Same runner images as openQ4's release lanes.
           matrix = [
-              {
-                  "os": "windows-2025",
-                  "platform": "windows",
-                  "label": "Windows x64",
-                  "binary_arch": "x64",
-                  "archive_format": "zip",
-                  "archive_ext": ".zip",
-                  "module": "game_x64.dll",
-                  "client": "openPR06-client_x64.exe",
-                  "dedicated": "openPR06-ded_x64.exe",
-                  "renderer_gl": "renderer-gl_x64.dll",
-                  "renderer_vk": "renderer-vk_x64.dll",
-              },
-              {
-                  "os": "ubuntu-24.04",
-                  "platform": "linux",
-                  "label": "Linux x64",
-                  "binary_arch": "x64",
-                  "archive_format": "tar.xz",
-                  "archive_ext": ".tar.xz",
-                  "module": "game_x64.so",
-                  "client": "openPR06-client_x64",
-                  "dedicated": "openPR06-ded_x64",
-                  "renderer_gl": "renderer-gl_x64.so",
-                  "renderer_vk": "renderer-vk_x64.so",
-              },
+              entry("windows-2025", "windows", "Windows x64", "x64", "zip"),
+              entry("windows-11-arm", "windows", "Windows ARM64", "arm64", "zip"),
+              entry("ubuntu-24.04", "linux", "Linux x64", "x64", "tar.xz"),
+              entry("ubuntu-24.04-arm", "linux", "Linux ARM64 (preview)", "arm64", "tar.xz", suffix="-preview"),
+              entry("macos-15", "macos", f"macOS ARM64 OpenGL{macos_unsigned_label}", "arm64",
+                    macos_archive_format, suffix=f"-opengl{macos_unsigned_suffix}", bridge="opengl"),
+              entry("macos-15", "macos", f"macOS ARM64 Metal{macos_unsigned_label}", "arm64",
+                    macos_archive_format, suffix=f"-metal{macos_unsigned_suffix}", bridge="metal"),
           ]
+
+          appimage_arches = {"x64": "x86_64", "arm64": "aarch64"}
+          expected = []
+          runtime_archives = []
+          for item in matrix:
+              stem = f"openpr06-{tag}-{item['platform']}-{item['binary_arch']}{item['package_suffix']}"
+              archive = stem + item["archive_ext"]
+              expected.append(archive)
+              if item["platform"] == "windows":
+                  expected += [f"{stem}-symbols.zip", f"openpr06-{tag}-windows-{item['binary_arch']}-setup.exe"]
+              elif item["platform"] == "linux":
+                  appimage = f"openpr06-{tag}{item['package_suffix']}-{appimage_arches[item['binary_arch']]}.AppImage"
+                  expected += [f"{stem}-debugsymbols.tar.xz", appimage, appimage + ".zsync"]
+              else:
+                  expected.append(f"{stem}-symbols.tar.xz")
+              if item["archive_format"] != "dmg":
+                  runtime_archives.append({
+                      "name": archive,
+                      "root": stem,
+                      "platform": item["platform"],
+                      "arch": item["binary_arch"],
+                  })
+
+          if macos_signed:
+              macos_release_reason = "macOS preview signed/notarized DMG release artifacts enabled."
+          else:
+              macos_release_reason = (
+                  "Preview macOS unsigned/unnotarized tar.gz release artifacts enabled as fallback output "
+                  "because Apple signing/notary repository secrets are not configured: "
+                  + ", ".join(missing_macos_secrets)
+              )
+          linux_arm64_release_reason = (
+              "Linux ARM64 preview artifacts enabled. First-class publication needs real-hardware "
+              "PREY SP/MP, dedicated-server, audio, input, display and package evidence."
+          )
+
+          print("macos_signed_release_enabled=" + ("true" if macos_signed else "false"))
+          print(f"macos_release_reason={macos_release_reason}")
+          print(f"linux_arm64_release_reason={linux_arm64_release_reason}")
           print("release_matrix=" + json.dumps({"include": matrix}, separators=(",", ":")))
+          print("expected_assets=" + json.dumps(expected, separators=(",", ":")))
+          print("runtime_archives=" + json.dumps(runtime_archives, separators=(",", ":")))
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write("### Release lanes\n")
+              summary.writelines(f"- {item['label']}\n" for item in matrix)
           PY
 
   builds:
@@ -257,11 +343,13 @@ jobs:
 
       - name: Install Meson and Ninja
         shell: bash
-        run: python -m pip install meson ninja
+        run: python -m pip install meson ninja markdown
 
       - name: Show release metadata
         env:
           RELEASE_REASON: ${{ needs.metadata.outputs.release_reason }}
+          MACOS_RELEASE_REASON: ${{ needs.metadata.outputs.macos_release_reason }}
+          LINUX_ARM64_RELEASE_REASON: ${{ needs.metadata.outputs.linux_arm64_release_reason }}
         shell: bash
         run: |
           set -euo pipefail
@@ -272,8 +360,10 @@ jobs:
           echo "Release scale: ${{ needs.metadata.outputs.release_scale }}"
           echo "Release reason: ${RELEASE_REASON}"
           echo "openPR06 source SHA: ${{ needs.metadata.outputs.openpr06_source_sha }}"
+          echo "${MACOS_RELEASE_REASON}"
+          echo "${LINUX_ARM64_RELEASE_REASON}"
 
-      # Same list as openpr06-validation.yml.
+      # Same list as openpr06-validation.yml, plus what the AppImage lane needs.
       - name: Install Linux native dependencies
         if: matrix.platform == 'linux'
         shell: bash
@@ -282,6 +372,7 @@ jobs:
           for attempt in 1 2 3; do
             if sudo apt-get update && sudo apt-get install -y \
               binutils \
+              desktop-file-utils \
               libasound2-dev \
               libdbus-1-dev \
               libdecor-0-dev \
@@ -311,7 +402,8 @@ jobs:
               libxss-dev \
               libxtst-dev \
               libxxf86dga-dev \
-              libxxf86vm-dev; then
+              libxxf86vm-dev \
+              zsync; then
               exit 0
             fi
 
@@ -323,6 +415,19 @@ jobs:
             echo "Linux dependency installation attempt ${attempt} failed; retrying in 10 seconds..."
             sleep 10
           done
+
+      - name: Install macOS native dependencies and prepare pinned OpenAL Soft
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          prepared_root="${GITHUB_WORKSPACE}/.tmp/openal-soft-macos-${{ matrix.binary_arch }}"
+          bash tools/build/prepare_macos_openal_soft.sh \
+            --architecture "${{ matrix.binary_arch }}" \
+            --deployment-target 11.0 \
+            --output-root "${prepared_root}"
+          echo "OPENPR06_MACOS_OPENAL_ROOT=${prepared_root}" >> "${GITHUB_ENV}"
+          echo "PKG_CONFIG_PATH=${prepared_root}/lib/pkgconfig" >> "${GITHUB_ENV}"
 
       # Staging and packaging bundle OpenAL32.dll beside the client; the
       # runner has no local src/external/openal-soft runtime.
@@ -338,7 +443,7 @@ jobs:
           "OPENPR06_OPENAL_ROOT=$outputRoot" >> $env:GITHUB_ENV
 
       # debugoptimized with assertions off is the release configuration: it
-      # keeps the PDBs and DWARF that the symbol archives are cut from.
+      # keeps the PDBs, DWARF and dSYMs that the symbol archives are cut from.
       - name: Configure, build, and stage (Windows)
         if: matrix.platform == 'windows'
         shell: pwsh
@@ -360,9 +465,15 @@ jobs:
             "-Dbuild_games=true",
             "-Dbuild_renderer_gl=true",
             "-Dbuild_renderer_vk=true",
+            "-Dplatform_backend=sdl3",
             "-Dversion_track=stable",
             "-Dversion_base_override=${{ needs.metadata.outputs.version }}"
           )
+          # The bundled OpenAL import library is x64-only; every lane links the
+          # OpenAL Soft that the previous step built for its architecture.
+          if (-not [string]::IsNullOrWhiteSpace($env:OPENPR06_OPENAL_ROOT)) {
+            $setupArgs += "-Dopenal_root_override=$env:OPENPR06_OPENAL_ROOT"
+          }
 
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/build/meson_setup.ps1 @setupArgs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -373,13 +484,23 @@ jobs:
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/build/meson_setup.ps1 install -C builddir --no-rebuild --skip-subprojects
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Configure, build, and stage (Linux)
-        if: matrix.platform == 'linux'
+      - name: Configure, build, and stage (Linux/macOS)
+        if: matrix.platform != 'windows'
         shell: bash
         run: |
           set -euo pipefail
-          export SOURCE_DATE_EPOCH="${{ needs.metadata.outputs.source_date_epoch }}"
 
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            export SOURCE_DATE_EPOCH="${{ needs.metadata.outputs.source_date_epoch }}"
+          fi
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            # Keep Meson subprojects (SDL3, GLEW, stb_vorbis) on the same macOS 11.0
+            # floor as the main project's -mmacosx-version-min=11.0 flags.
+            export MACOSX_DEPLOYMENT_TARGET=11.0
+          fi
+
+          # build_renderer_gl stays off on darwin by itself: the macOS client
+          # links its OpenGL renderer statically.
           setup_args=(
             setup
             --wipe
@@ -394,14 +515,31 @@ jobs:
             -Dbuild_games=true
             -Dbuild_renderer_gl=true
             -Dbuild_renderer_vk=true
-            -Dlinux_x11=enabled
+            -Dplatform_backend=sdl3
             -Dversion_track=stable
             "-Dversion_base_override=${{ needs.metadata.outputs.version }}"
           )
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            setup_args+=(-Dlinux_x11=enabled)
+          fi
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            setup_args+=(
+              "-Dmacos_graphics_bridge=${{ matrix.macos_graphics_bridge }}"
+              -Dmacos_openal_provider=system
+            )
+          fi
 
           bash tools/build/meson_setup.sh "${setup_args[@]}"
           bash tools/build/meson_setup.sh compile -C builddir
           bash tools/build/meson_setup.sh install -C builddir --no-rebuild --skip-subprojects
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            bash tools/build/prepare_macos_openal_soft.sh \
+              --verify-only \
+              --architecture "${{ matrix.binary_arch }}" \
+              --deployment-target 11.0 \
+              --output-root "${OPENPR06_MACOS_OPENAL_ROOT}" \
+              --stage-install-dir .install
+          fi
 
       - name: Verify checked-out and configured source provenance
         shell: bash
@@ -416,22 +554,45 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f ".install/${{ matrix.client }}"
-          test -f ".install/${{ matrix.dedicated }}"
-          test -f ".install/${{ matrix.renderer_gl }}"
-          test -f ".install/${{ matrix.renderer_vk }}"
-          test -f ".install/basepr/${{ matrix.module }}"
-          test -f ".install/basepr/mod.json"
-          while IFS='|' read -r pack _; do
-            test -f ".install/basepr/${pack}"
-          done < <(python tools/build/content_packs.py meson-list)
-          test -f ".install/openPR06.ico"
-          test -f ".install/openPR06.icns"
-          if [ "${{ runner.os }}" = "Linux" ]; then
-            test -f ".install/share/applications/openpr06.desktop"
-            test -f ".install/share/applications/openpr06-steamdeck.desktop"
-            test -f ".install/share/icons/hicolor/256x256/apps/openpr06.png"
+          arch="${{ matrix.binary_arch }}"
+          case "${{ matrix.platform }}" in
+            windows) exe_ext=".exe"; module_ext=".dll" ;;
+            linux) exe_ext=""; module_ext=".so" ;;
+            macos) exe_ext=""; module_ext=".dylib" ;;
+          esac
+          required=(
+            "openPR06-client_${arch}${exe_ext}"
+            "openPR06-ded_${arch}${exe_ext}"
+            "renderer-vk_${arch}${module_ext}"
+            "basepr/game_${arch}${module_ext}"
+            "basepr/mod.json"
+            "openPR06.ico"
+            "openPR06.icns"
+          )
+          # macOS links the OpenGL renderer into the client, and app bundles are
+          # replaced whole, so neither the GL module nor the updater is staged there.
+          if [ "${{ matrix.platform }}" != "macos" ]; then
+            required+=(
+              "renderer-gl_${arch}${module_ext}"
+              "openPR06-updater_${arch}${exe_ext}"
+            )
           fi
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            required+=(
+              "share/applications/openpr06.desktop"
+              "share/applications/openpr06-steamdeck.desktop"
+              "share/icons/hicolor/256x256/apps/openpr06.png"
+            )
+          fi
+          while IFS='|' read -r pack _; do
+            required+=("basepr/${pack}")
+          done < <(python tools/build/content_packs.py meson-list)
+          for item in "${required[@]}"; do
+            if [ ! -f ".install/${item}" ]; then
+              echo "Staged release payload is missing .install/${item}"
+              exit 1
+            fi
+          done
           if find .install/basepr -maxdepth 1 -type f \( \
               -name 'game-sp_*' -o -name 'game-mp_*' -o \
               -name 'game_sp_*' -o -name 'game_mp_*' \) | grep -q .; then
@@ -440,9 +601,9 @@ jobs:
           fi
 
       # Checks the arch-suffixed binaries, Linux hardening and runtime
-      # dependencies, the staged OpenAL32.dll and the Windows PDB set. With
-      # --skip-build, --install only validates the already-staged tree; it does
-      # not re-run meson install.
+      # dependencies, the staged OpenAL runtime, the Windows PDB set and the
+      # macOS install names. With --skip-build, --install only validates the
+      # already-staged tree; it does not re-run meson install.
       - name: Validate staged binaries and package layout
         shell: bash
         run: |
@@ -460,11 +621,10 @@ jobs:
           set -euo pipefail
 
           arch="${{ matrix.binary_arch }}"
-          symbols_stem="openpr06-${{ needs.metadata.outputs.version_tag }}-linux-${arch}-debugsymbols"
+          symbols_stem="openpr06-${{ needs.metadata.outputs.version_tag }}-linux-${arch}${{ matrix.package_suffix }}-debugsymbols"
           symbols_dir="${RUNNER_TEMP}/${symbols_stem}"
           symbols_archive="${RUNNER_TEMP}/${symbols_stem}.tar.xz"
-          split_list="${RUNNER_TEMP}/openpr06-linux-split-binaries.txt"
-          rm -rf "${symbols_dir}" "${symbols_archive}" "${split_list}"
+          rm -rf "${symbols_dir}" "${symbols_archive}"
           mkdir -p "${symbols_dir}/basepr"
 
           binaries=(
@@ -495,90 +655,137 @@ jobs:
               cd "$(dirname "${debug_file}")"
               objcopy --add-gnu-debuglink="${debug_basename}" "${binary_abs}"
             )
-            printf '%s\n' "${binary}" >> "${split_list}"
           done
 
           tar -C "${symbols_dir}" -cJf "${symbols_archive}" .
           echo "debug_symbols_dir=${symbols_dir}" >> "${GITHUB_OUTPUT}"
           echo "debug_symbols_path=${symbols_archive}" >> "${GITHUB_OUTPUT}"
-          echo "split_list=${split_list}" >> "${GITHUB_OUTPUT}"
 
-      # openQ4's verify_linux_release_artifacts.py still expects openQ4-client,
-      # baseoq4/ and split game-sp/game-mp modules, so the contract is checked
-      # here directly: stripped runtime ELFs, a matching .gnu_debuglink and
-      # build ID, and DWARF only in the detached files.
+      # Stripped runtime ELFs, matching .gnu_debuglink names, CRCs and build
+      # IDs, DWARF only in the detached files, hardening and resolvable
+      # dependencies, re-checked after the strip mutated the staged binaries.
       - name: Validate stripped Linux ELFs and detached symbols
         if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/build/verify_linux_release_artifacts.py split \
+            --runtime-root "${GITHUB_WORKSPACE}/.install" \
+            --symbols-root "${{ steps.linux_symbols.outputs.debug_symbols_dir }}" \
+            --arch "${{ matrix.binary_arch }}"
+
+      - name: Import macOS Developer ID certificate
+        if: matrix.platform == 'macos' && matrix.macos_release_mode == 'signed'
+        id: macos_signing
         env:
-          SYMBOLS_DIR: ${{ steps.linux_symbols.outputs.debug_symbols_dir }}
-          SPLIT_LIST: ${{ steps.linux_symbols.outputs.split_list }}
+          MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64 }}
+          MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD }}
+          MACOS_DEVELOPER_ID_APPLICATION_IDENTITY: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_IDENTITY }}
+          MACOS_NOTARY_APPLE_ID: ${{ secrets.MACOS_NOTARY_APPLE_ID }}
+          MACOS_NOTARY_TEAM_ID: ${{ secrets.MACOS_NOTARY_TEAM_ID }}
+          MACOS_NOTARY_APP_PASSWORD: ${{ secrets.MACOS_NOTARY_APP_PASSWORD }}
         shell: bash
         run: |
           set -euo pipefail
 
-          build_id() {
-            readelf -n "$1" | awk '/Build ID:/ { print $3; exit }'
-          }
+          required_vars=(
+            MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64
+            MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD
+            MACOS_DEVELOPER_ID_APPLICATION_IDENTITY
+            MACOS_NOTARY_APPLE_ID
+            MACOS_NOTARY_TEAM_ID
+            MACOS_NOTARY_APP_PASSWORD
+          )
+          for var_name in "${required_vars[@]}"; do
+            if [ -z "${!var_name}" ]; then
+              echo "${var_name} must be configured before publishing signed macOS release packages."
+              exit 1
+            fi
+          done
 
-          expected_debug=0
-          while IFS= read -r binary; do
-            relative_path="${binary#.install/}"
-            debug_file="${SYMBOLS_DIR}/${relative_path}.debug"
-            if [ -L "${debug_file}" ] || [ ! -f "${debug_file}" ]; then
-              echo "Detached debug file is missing: ${debug_file}"
-              exit 1
-            fi
-            if readelf -S -W "${binary}" | grep -Fq '.debug_info'; then
-              echo "Runtime ELF still carries DWARF after stripping: ${binary}"
-              exit 1
-            fi
-            if ! readelf -S -W "${debug_file}" | grep -Fq '.debug_info'; then
-              echo "Detached debug file carries no DWARF: ${debug_file}"
-              exit 1
-            fi
-            debuglink="$(readelf --string-dump=.gnu_debuglink "${binary}" | sed -n 's/^ *\[ *0\] *//p' | head -n 1)"
-            if [ "${debuglink}" != "$(basename "${debug_file}")" ]; then
-              echo "Runtime ELF ${binary} links ${debuglink@Q}, expected $(basename "${debug_file}")."
-              exit 1
-            fi
-            runtime_id="$(build_id "${binary}")"
-            debug_id="$(build_id "${debug_file}")"
-            if [ -z "${runtime_id}" ] || [ "${runtime_id}" != "${debug_id}" ]; then
-              echo "Build ID mismatch for ${binary}: runtime=${runtime_id:-<none>} debug=${debug_id:-<none>}"
-              exit 1
-            fi
-            expected_debug=$((expected_debug + 1))
-          done < "${SPLIT_LIST}"
+          keychain_path="${RUNNER_TEMP}/openpr06-release-signing.keychain-db"
+          certificate_path="${RUNNER_TEMP}/developer-id-application.p12"
+          keychain_password="$(openssl rand -hex 24)"
+          notary_profile="openpr06-release-notary"
 
-          actual_debug="$(find "${SYMBOLS_DIR}" -type f -name '*.debug' | wc -l)"
-          if [ "${actual_debug}" -ne "${expected_debug}" ]; then
-            echo "Detached symbol set has ${actual_debug} files, expected ${expected_debug}."
-            exit 1
-          fi
-          if find .install -name '*.debug' -print -quit | grep -q .; then
-            echo "Detached debug files must not remain in the runtime payload."
-            exit 1
-          fi
+          printf '%s' "${MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64}" | base64 -D > "${certificate_path}"
+          security create-keychain -p "${keychain_password}" "${keychain_path}"
+          security set-keychain-settings -lut 21600 "${keychain_path}"
+          security unlock-keychain -p "${keychain_password}" "${keychain_path}"
+          security import "${certificate_path}" \
+            -k "${keychain_path}" \
+            -P "${MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD}" \
+            -T /usr/bin/codesign
+          rm -f "${certificate_path}"
+          # macOS runners ship bash 3.2, so use a while-read loop instead of mapfile.
+          existing_keychains=()
+          while IFS= read -r keychain_line; do
+            if [ -n "${keychain_line}" ]; then
+              existing_keychains+=("${keychain_line}")
+            fi
+          done < <(security list-keychains -d user | sed -e 's/^[[:space:]]*"//' -e 's/"[[:space:]]*$//')
+          security list-keychains -d user -s "${keychain_path}" "${existing_keychains[@]}"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${keychain_password}" "${keychain_path}"
 
-      # package_release.py also writes a rootless -update archive without the
-      # bulk packs; it is not published, because openPR06 has no in-game
-      # update channel and no earlier release to update from.
+          xcrun notarytool store-credentials "${notary_profile}" \
+            --apple-id "${MACOS_NOTARY_APPLE_ID}" \
+            --team-id "${MACOS_NOTARY_TEAM_ID}" \
+            --password "${MACOS_NOTARY_APP_PASSWORD}" \
+            --keychain "${keychain_path}"
+
+          security find-identity -v -p codesigning "${keychain_path}" | grep -F "${MACOS_DEVELOPER_ID_APPLICATION_IDENTITY}" >/dev/null
+          echo "identity=${MACOS_DEVELOPER_ID_APPLICATION_IDENTITY}" >> "$GITHUB_OUTPUT"
+          echo "keychain_path=${keychain_path}" >> "$GITHUB_OUTPUT"
+          echo "notary_profile=${notary_profile}" >> "$GITHUB_OUTPUT"
+
+      # macOS has no native Vulkan driver: the renderer module reaches the GPU
+      # through MoltenVK, which openPR06 does not build, so Meson never
+      # installs it and package_nightly.py refuses to package without it.
+      # Pinned and checksum-verified by the helper.
+      - name: Stage macOS MoltenVK runtime
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tools/build/prepare_macos_moltenvk.sh --output-dir .install
+          bash tools/build/prepare_macos_moltenvk.sh --verify-only --output-dir .install
+
+      # package_release.py also writes a rootless -update archive for Windows
+      # and Linux; it is not published, because openPR06 has no in-game update
+      # channel.
       - name: Prepare package
         id: package
         shell: bash
         run: |
           set -euo pipefail
 
-          python tools/build/package_release.py \
-            --platform "${{ matrix.platform }}" \
-            --arch "${{ matrix.binary_arch }}" \
-            --version "${{ needs.metadata.outputs.version }}" \
-            --version-tag "${{ needs.metadata.outputs.version_tag }}" \
-            --archive-format "${{ matrix.archive_format }}" \
-            --source-root "${GITHUB_WORKSPACE}" \
+          package_args=(
+            --platform "${{ matrix.platform }}"
+            --arch "${{ matrix.binary_arch }}"
+            --version "${{ needs.metadata.outputs.version }}"
+            --version-tag "${{ needs.metadata.outputs.version_tag }}"
+            --archive-format "${{ matrix.archive_format }}"
+            --package-suffix="${{ matrix.package_suffix }}"
+            --source-root "${GITHUB_WORKSPACE}"
             --output-dir "${RUNNER_TEMP}"
+          )
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            if [ "${{ matrix.macos_release_mode }}" = "signed" ]; then
+              package_args+=(
+                --macos-signing-mode developer-id
+                --macos-code-sign-identity "${{ steps.macos_signing.outputs.identity }}"
+                --macos-notarize
+                --macos-notary-keychain-profile "${{ steps.macos_signing.outputs.notary_profile }}"
+                --macos-notary-keychain "${{ steps.macos_signing.outputs.keychain_path }}"
+              )
+            else
+              package_args+=(--macos-signing-mode ad-hoc)
+            fi
+          fi
 
-          package_stem="openpr06-${{ needs.metadata.outputs.version_tag }}-${{ matrix.platform }}-${{ matrix.binary_arch }}"
+          python tools/build/package_release.py "${package_args[@]}"
+
+          package_stem="openpr06-${{ needs.metadata.outputs.version_tag }}-${{ matrix.platform }}-${{ matrix.binary_arch }}${{ matrix.package_suffix }}"
           archive_path="${RUNNER_TEMP}/${package_stem}${{ matrix.archive_ext }}"
           package_dir="${RUNNER_TEMP}/${package_stem}"
           if [ ! -f "${archive_path}" ]; then
@@ -597,8 +804,116 @@ jobs:
             fi
             echo "windows_symbols_path=${windows_symbols_path}" >> "${GITHUB_OUTPUT}"
           fi
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            symbols_archive_path="${RUNNER_TEMP}/${package_stem}-symbols.tar.xz"
+            if [ ! -f "${symbols_archive_path}" ]; then
+              echo "Expected macOS dSYM symbol archive not found: ${symbols_archive_path}"
+              exit 1
+            fi
+            echo "symbols_archive_path=${symbols_archive_path}" >> "${GITHUB_OUTPUT}"
+          fi
           echo "archive_path=${archive_path}" >> "${GITHUB_OUTPUT}"
           echo "package_dir=${package_dir}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate extracted Linux runtime archive
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/build/verify_linux_release_artifacts.py archive \
+            --archive "${{ steps.package.outputs.archive_path }}" \
+            --arch "${{ matrix.binary_arch }}" \
+            --symbols-root "${{ steps.linux_symbols.outputs.debug_symbols_dir }}" \
+            --work-root "${RUNNER_TEMP}"
+
+      # Pinned linuxdeploy and appimagetool, the same releases and checksums
+      # as openQ4's release lane.
+      - name: Build and validate Linux AppImage
+        if: matrix.platform == 'linux'
+        id: appimage
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tools_dir="${RUNNER_TEMP}/openpr06-appimage-tools/${{ matrix.binary_arch }}"
+          mkdir -p "${tools_dir}"
+
+          case "${{ matrix.binary_arch }}" in
+            x64)
+              appimage_arch="x86_64"
+              linuxdeploy_sha256="c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d"
+              appimagetool_sha256="ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0"
+              ;;
+            arm64)
+              appimage_arch="aarch64"
+              linuxdeploy_sha256="620095110d693282b8ebeb244a95b5e911cf8f65f76c88b4b47d16ae6346fcff"
+              appimagetool_sha256="f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158"
+              ;;
+            *)
+              echo "Unsupported AppImage release architecture: ${{ matrix.binary_arch }}"
+              exit 1
+              ;;
+          esac
+
+          linuxdeploy="${tools_dir}/linuxdeploy-${appimage_arch}.AppImage"
+          appimagetool="${tools_dir}/appimagetool-${appimage_arch}.AppImage"
+          runtime_file="${tools_dir}/runtime-${appimage_arch}"
+
+          curl --fail --location --retry 3 --retry-all-errors --proto '=https' --tlsv1.2 \
+            --output "${linuxdeploy}" \
+            "https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-${appimage_arch}.AppImage"
+          curl --fail --location --retry 3 --retry-all-errors --proto '=https' --tlsv1.2 \
+            --output "${appimagetool}" \
+            "https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-${appimage_arch}.AppImage"
+          printf '%s  %s\n%s  %s\n' \
+            "${linuxdeploy_sha256}" "${linuxdeploy}" \
+            "${appimagetool_sha256}" "${appimagetool}" \
+            | sha256sum --check --strict
+          chmod 0755 "${linuxdeploy}" "${appimagetool}"
+
+          # Runtime control options are handled before mounting, so this must invoke the
+          # outer AppImage directly rather than the extracted appimagetool payload.
+          runtime_offset="$("${appimagetool}" --appimage-offset)"
+          python - "${appimagetool}" "${runtime_file}" "${runtime_offset}" <<'PY'
+          import os
+          import pathlib
+          import sys
+
+          source = pathlib.Path(sys.argv[1])
+          destination = pathlib.Path(sys.argv[2])
+          try:
+              offset = int(sys.argv[3], 10)
+          except ValueError as exc:
+              raise SystemExit(f"appimagetool returned an invalid runtime offset: {sys.argv[3]!r}") from exc
+          data = source.read_bytes()
+          if offset < 11 or offset >= len(data):
+              raise SystemExit(f"appimagetool runtime offset {offset} is outside the {len(data)}-byte tool")
+          runtime = data[:offset]
+          if runtime[:4] != b"\x7fELF" or runtime[8:11] != b"AI\x02":
+              raise SystemExit("appimagetool does not contain the expected type-2 runtime prefix")
+          destination.write_bytes(runtime)
+          os.chmod(destination, 0o755)
+          PY
+
+          appimage_name="openpr06-${{ needs.metadata.outputs.version_tag }}${{ matrix.package_suffix }}-${appimage_arch}.AppImage"
+          appimage_path="${RUNNER_TEMP}/${appimage_name}"
+          python tools/build/package_linux_appimage.py \
+            --package-dir "${{ steps.package.outputs.package_dir }}" \
+            --symbols-dir "${{ steps.linux_symbols.outputs.debug_symbols_dir }}" \
+            --arch "${{ matrix.binary_arch }}" \
+            --version "${{ needs.metadata.outputs.version }}" \
+            --version-tag "${{ needs.metadata.outputs.version_tag }}" \
+            --package-suffix="${{ matrix.package_suffix }}" \
+            --source-date-epoch "${{ needs.metadata.outputs.source_date_epoch }}" \
+            --linuxdeploy "${linuxdeploy}" \
+            --appimagetool "${appimagetool}" \
+            --runtime-file "${runtime_file}" \
+            --work-root "${RUNNER_TEMP}" \
+            --update-information "gh-releases-zsync|${GITHUB_REPOSITORY%%/*}|${GITHUB_REPOSITORY##*/}|latest|openpr06-*${{ matrix.package_suffix }}-${appimage_arch}.AppImage.zsync" \
+            --output "${appimage_path}"
+
+          echo "appimage_path=${appimage_path}" >> "${GITHUB_OUTPUT}"
+          echo "appimage_zsync_path=${appimage_path}.zsync" >> "${GITHUB_OUTPUT}"
 
       - name: Install Inno Setup
         if: matrix.platform == 'windows'
@@ -639,7 +954,7 @@ jobs:
       - name: Upload package archive
         uses: actions/upload-artifact@v7
         with:
-          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-${{ matrix.platform }}-${{ matrix.binary_arch }}
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-${{ matrix.platform }}-${{ matrix.binary_arch }}${{ matrix.package_suffix }}
           path: ${{ steps.package.outputs.archive_path }}
           if-no-files-found: error
           compression-level: 0
@@ -648,16 +963,36 @@ jobs:
         if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v7
         with:
-          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-windows-${{ matrix.binary_arch }}-symbols
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-windows-${{ matrix.binary_arch }}${{ matrix.package_suffix }}-symbols
           path: ${{ steps.package.outputs.windows_symbols_path }}
           if-no-files-found: error
+
+      - name: Upload macOS dSYM symbols
+        if: matrix.platform == 'macos'
+        uses: actions/upload-artifact@v7
+        with:
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-macos-${{ matrix.binary_arch }}${{ matrix.package_suffix }}-symbols
+          path: ${{ steps.package.outputs.symbols_archive_path }}
+          if-no-files-found: error
+          compression-level: 0
 
       - name: Upload Linux debug symbols
         if: matrix.platform == 'linux'
         uses: actions/upload-artifact@v7
         with:
-          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-linux-${{ matrix.binary_arch }}-debugsymbols
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-linux-${{ matrix.binary_arch }}${{ matrix.package_suffix }}-debugsymbols
           path: ${{ steps.linux_symbols.outputs.debug_symbols_path }}
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload Linux AppImage
+        if: matrix.platform == 'linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: openpr06-release-${{ needs.metadata.outputs.version_tag }}-linux-${{ matrix.binary_arch }}${{ matrix.package_suffix }}-appimage
+          path: |
+            ${{ steps.appimage.outputs.appimage_path }}
+            ${{ steps.appimage.outputs.appimage_zsync_path }}
           if-no-files-found: error
           compression-level: 0
 
@@ -744,6 +1079,8 @@ jobs:
 
       - name: Verify release asset set
         id: release_assets
+        env:
+          EXPECTED_ASSETS: ${{ needs.metadata.outputs.expected_assets }}
         shell: bash
         run: |
           set -euo pipefail
@@ -754,15 +1091,7 @@ jobs:
             exit 1
           fi
 
-          tag="${{ needs.metadata.outputs.version_tag }}"
-          expected=(
-            "openpr06-${tag}-windows-x64.zip"
-            "openpr06-${tag}-windows-x64-symbols.zip"
-            "openpr06-${tag}-windows-x64-setup.exe"
-            "openpr06-${tag}-linux-x64.tar.xz"
-            "openpr06-${tag}-linux-x64-debugsymbols.tar.xz"
-          )
-
+          mapfile -t expected < <(python -c 'import json,os; print("\n".join(json.loads(os.environ["EXPECTED_ASSETS"])))')
           asset_manifest="${RUNNER_TEMP}/openpr06-release-assets.txt"
           expected_args=()
           for package_file in "${expected[@]}"; do
@@ -776,15 +1105,17 @@ jobs:
 
       # Replaces openQ4's content-pack identity proof (which needs the dropped
       # content_packs job): every runtime archive must carry the engine, the
-      # unified game module and every pack in tools/build/content_packs.json.
+      # unified game module and every pack in tools/build/content_packs.json,
+      # and no symbol files. macOS archives carry them inside openPR06.app.
       - name: Verify runtime archive contents
         env:
-          VERSION_TAG: ${{ needs.metadata.outputs.version_tag }}
+          RUNTIME_ARCHIVES: ${{ needs.metadata.outputs.runtime_archives }}
         shell: bash
         run: |
           set -euo pipefail
           python tools/build/content_packs.py meson-list | cut -d '|' -f 1 > "${RUNNER_TEMP}/openpr06-content-packs.txt"
           python - "${RUNNER_TEMP}/release-artifacts" "${RUNNER_TEMP}/openpr06-content-packs.txt" <<'PY'
+          import json
           import os
           import sys
           import tarfile
@@ -795,31 +1126,33 @@ jobs:
           packs = [line.strip() for line in Path(sys.argv[2]).read_text(encoding="utf-8").splitlines() if line.strip()]
           if not packs:
               raise SystemExit("content_packs.py listed no packs")
-          tag = os.environ["VERSION_TAG"]
-          archives = {
-              f"openpr06-{tag}-windows-x64.zip": (".exe", ".dll"),
-              f"openpr06-{tag}-linux-x64.tar.xz": ("", ".so"),
-          }
-          for name, (exe_ext, module_ext) in archives.items():
+          archives = json.loads(os.environ["RUNTIME_ARCHIVES"])
+          if not archives:
+              raise SystemExit("no runtime archives to verify")
+          for item in archives:
+              name, root, platform, arch = item["name"], item["root"], item["platform"], item["arch"]
               path = artifact_dir / name
-              root = name.removesuffix(".zip").removesuffix(".tar.xz")
               if name.endswith(".zip"):
                   with zipfile.ZipFile(path) as archive:
                       members = {member.rstrip("/") for member in archive.namelist()}
               else:
-                  with tarfile.open(path, "r:xz") as archive:
+                  mode = "r:gz" if name.endswith(".tar.gz") else "r:xz"
+                  with tarfile.open(path, mode) as archive:
                       members = {member.name.rstrip("/") for member in archive.getmembers()}
-              required = [
-                  f"openPR06-client_x64{exe_ext}",
-                  f"openPR06-ded_x64{exe_ext}",
-                  f"basepr/game_x64{module_ext}",
-                  "basepr/mod.json",
-                  *(f"basepr/{pack}" for pack in packs),
-              ]
-              missing = [item for item in required if f"{root}/{item}" not in members]
+              if platform == "windows":
+                  required = [f"openPR06-client_{arch}.exe", f"openPR06-ded_{arch}.exe", f"basepr/game_{arch}.dll", "basepr/mod.json"]
+                  required += [f"basepr/{pack}" for pack in packs]
+              elif platform == "linux":
+                  required = [f"openPR06-client_{arch}", f"openPR06-ded_{arch}", f"basepr/game_{arch}.so", "basepr/mod.json"]
+                  required += [f"basepr/{pack}" for pack in packs]
+              else:
+                  app = "openPR06.app/Contents"
+                  required = [f"{app}/MacOS/openPR06", f"{app}/Frameworks/game_{arch}.dylib", f"{app}/Resources/basepr/mod.json"]
+                  required += [f"{app}/Resources/basepr/{pack}" for pack in packs]
+              missing = [entry for entry in required if f"{root}/{entry}" not in members]
               if missing:
                   raise SystemExit(f"{name} is missing: {', '.join(missing)}")
-              debug = sorted(m for m in members if m.endswith((".pdb", ".debug")))
+              debug = sorted(m for m in members if m.endswith((".pdb", ".debug")) or ".dSYM/" in m)
               if debug:
                   raise SystemExit(f"{name} carries symbol files: {', '.join(debug[:10])}")
               print(f"{name}: {len(members)} entries; packs {', '.join(packs)} present")

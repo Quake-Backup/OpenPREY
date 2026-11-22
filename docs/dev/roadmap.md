@@ -3515,6 +3515,17 @@ Completion must advance through the existing dependencies:
   HUD's events about 0.01 ms. A motion now holds only the values written
   over its authored ones, so an animated page no longer keeps a second copy
   of them (the Escape card 15 MB less). Open: the view build's spread-out cost.
+  Progress, 22 November: [menu transitions](ui/menu-transitions.md) were
+  measured with a new `--transition` benchmark mode. A full page's frame
+  animated its size, so RmlUi laid Options out on every frame of its 700 ms
+  opening, every closed list repainted, the focus was revealed and moving
+  artwork recompiled whenever the clip's edge crossed it (9 to 18 ms a
+  frame). The frame now moves fixed clip boxes, lists repaint only when a
+  pass can undo their paint, the focus reflow check stops at the outermost
+  scrolling ancestor and artwork inside the visible region keys its
+  compilation on its own extent: Options opens at 1.5 ms a frame, the other
+  pages under 1 ms, and the title prefetches MultiPrey. Open: the click
+  frame's page setup (MultiPrey's network port and models, 40 ms).
   Progress, 4 November: [moving weapon scopes](ui/runtime-performance.md#moving-weapon-scopes-4-november-2026)
   retain local meshes for their faint animated furniture. At 1080p the isolated
   rail/nail scope CPU medians fall from 6.99/8.80 ms to 0.018/0.037 ms; continuous

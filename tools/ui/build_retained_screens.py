@@ -946,6 +946,10 @@ def home_document(ident: str, in_game: bool) -> dict:
 
 FULL_FRAME = (10, 10, 620, 460)      # a full-screen page
 WIDEN_MS = 200                       # bottom bar to full-width bar, linear; then GROW_MS up
+PAGE_CLIP = 1000                     # u: the full page's clip boxes, larger than the frame they reveal (full_page)
+# A box that clips every edge whatever has moved in it since its last layout (RmlUi otherwise clips only
+# what that layout found past its far edges): the full page's frame moves its content by offsets alone.
+CLIP_ALL = {"overflow": keyword("hidden"), "clip": keyword("always")}
 PLACEHOLDER = "#str_20128"           # a bound label's text before its first binding
 TEXT_LIST = rgb("#A6BAD4")           # prey.text.list
 TEXT_VALUE = rgb("#B8C9E6", 0.9)     # prey.text.value
@@ -1028,25 +1032,51 @@ def full_page(doc: Document, title_key: str, contents: list[dict], back: str, fo
     takes the screen when it is in the bar (idSessionLocal::LeaveRetainedPage).
     Its contents keep their places in the frame and are uncovered as it
     grows. `back` is the session verb that leaves the page and `focus` the
-    event program that places the focus on arrival."""
+    event program that places the focus on arrival.
+
+    The frame's box never changes size: a width or height change lays the
+    whole document out again (RmlUi formats from its root), and the Options
+    page is large enough that its growth then cost several times a frame's
+    budget. Two fixed PAGE_CLIP-sized boxes that hide their overflow clip the
+    page instead: "page" stands at the frame's top-left corner and
+    "page-clip" inside it puts its own bottom-right corner on the frame's.
+    The frame's parts and its contents hang from the corner they follow,
+    and its body and rails are fixed-length strips revealed by a clip of
+    their own; the timelines move these boxes, which places them without a
+    layout pass. At rest "page-contents" covers the frame exactly."""
     bx, by, bw, bh = BOTTOM_BAR
     fx, fy, fw, fh = FULL_FRAME
     total = WIDEN_MS + GROW_MS
-    # A play starts from where the property stands, so each arrival states
-    # its start again at 1 ms: the page may have been left at full size.
+    big = PAGE_CLIP
+    # The frame's box (left, top, width, height) at each key, with the easing
+    # of the interval that starts there. A play starts from where the
+    # property stands, so each arrival states its start again at 1 ms: the
+    # page may have been left at full size.
+    enter = [(0, (bx, by, bw, bh), None), (1, (bx, by, bw, bh), None),
+             (WIDEN_MS, (fx, by, fw, bh), EASE_IN_OUT), (total, (fx, fy, fw, fh), None)]
+    leave = [(0, (fx, fy, fw, fh), EASE_IN_OUT), (GROW_MS, (fx, by, fw, bh), None), (total, (bx, by, bw, bh), None)]
+    # What each moving box's offset is for a frame box: the two clips, the
+    # anchors of the parts that follow the frame's leading or upper edge,
+    # and the strips under their clips.
+    moves = [
+        ("page", "left", lambda l, t, w, h: l), ("page", "top", lambda l, t, w, h: t),
+        ("page-clip", "left", lambda l, t, w, h: w - big), ("page-clip", "top", lambda l, t, w, h: h - big),
+        *[(node, prop, (lambda l, t, w, h: big - w) if prop == "left" else (lambda l, t, w, h: big - h))
+          for node in ("page-frame-lead", "page-upper-lead", "page-contents") for prop in ("left", "top")],
+        ("page-frame-foot", "left", lambda l, t, w, h: big - w), ("page-upper-trail", "top", lambda l, t, w, h: big - h),
+        ("page-body", "left", lambda l, t, w, h: w - fw), ("page-body", "top", lambda l, t, w, h: h - fh),
+        ("page-rail-foot", "left", lambda l, t, w, h: w - fw), ("page-rail-top", "left", lambda l, t, w, h: w - fw),
+    ]
+
+    def frame_tracks(keys: list) -> list:
+        return [track(node, prop, [(ms, ul(value(*box)), easing) for ms, box, easing in keys]) for node, prop, value in moves]
     doc.timeline("pageEnter", total, [
-        track("page", "left", [(0, ul(bx)), (1, ul(bx)), (WIDEN_MS, ul(fx))]),
-        track("page", "width", [(0, ul(bw)), (1, ul(bw)), (WIDEN_MS, ul(fw))]),
-        track("page", "top", [(0, ul(by)), (1, ul(by)), (WIDEN_MS, ul(by), EASE_IN_OUT), (total, ul(fy))]),
-        track("page", "height", [(0, ul(bh)), (1, ul(bh)), (WIDEN_MS, ul(bh), EASE_IN_OUT), (total, ul(fh))]),
+        *frame_tracks(enter),
         *[track(node, "opacity", [(0, number(0)), (1, number(0)), (WIDEN_MS, number(0)), (WIDEN_MS + 60, number(1))])
           for node in ("page-upper", "page-head")],
     ])
     doc.timeline("pageLeave", total, [
-        track("page", "top", [(0, ul(fy), EASE_IN_OUT), (GROW_MS, ul(by))]),
-        track("page", "height", [(0, ul(fh), EASE_IN_OUT), (GROW_MS, ul(bh))]),
-        track("page", "left", [(0, ul(fx)), (GROW_MS, ul(fx)), (total, ul(bx))]),
-        track("page", "width", [(0, ul(fw)), (GROW_MS, ul(fw)), (total, ul(bw))]),
+        *frame_tracks(leave),
         *[track(node, "opacity", [(0, number(1)), (GROW_MS - 60, number(1)), (GROW_MS, number(0))])
           for node in ("page-upper", "page-head")],
     ])
@@ -1063,13 +1093,47 @@ def full_page(doc: Document, title_key: str, contents: list[dict], back: str, fo
     doc.events["onBack"] = [{"op": "action", "action": back}]
     # `alpha` is the body's (0.50 on the Options page), `back_scale` the bottom
     # action's textscale and `foot` further actions on the bottom title bar.
-    parts = frame_parts(doc, "page", alpha, 7)
-    for part in parts:
-        if part["id"] == "page-upper":
-            part["properties"]["opacity"] = number(0)
+    # frame_parts' frame for a box that keeps its size, drawn in its order:
+    # the body (`ends` 25 u in from each end, 7 u below the top), the foot
+    # rail, the lower claws, then the upper rail and claws. In page-clip the
+    # frame's bottom-right corner is (big, big) and its top-left corner is
+    # (big - width, big - height), where the "-lead" anchors stand.
+    ends, inset, rail = 25, 7, colour(RAIL)
+
+    def strip(ident: str, clip_box: tuple, size: tuple, paint: dict) -> dict:
+        """A fixed-length strip whose trailing end keeps its place in the
+        frame, under a clip that cuts its leading end where the frame's is."""
+        x, y = clip_box
+        return group(f"{ident}-clip", {**absolute(x, y, big, size[1]), **CLIP_ALL, **PASSIVE}, [
+            group(ident, {**absolute(bw - fw, bh - fh if ident == "page-body" else 0, *size), **paint, **PASSIVE})])
+    anchor = {"position": keyword("absolute"), **PASSIVE}
+    parts = [
+        group("page-frame-lead", {**absolute(big - bw, big - bh, fw, fh), **PASSIVE}, [
+            strip("page-body", (ends, inset), (fw - 2 * ends, fh - inset), {"background-color": colour([0, 0, 0, alpha])})]),
+        group("page-frame-foot", {**anchor, **absolute(big - bw, 0, fw, big)}, [
+            group("page-rail-foot-clip", {**absolute(left=CLAW_W, bottom=0, width=big, height=1.53),
+                                          **CLIP_ALL, **PASSIVE}, [
+                group("page-rail-foot", {**absolute(bw - fw, 0, fw - 2 * CLAW_W, 1.53), "background-color": rail, **PASSIVE})]),
+            claw(doc, "page-claw-ll", "ll")]),
+        claw(doc, "page-claw-lr", "lr"),
+        group("page-upper", {**FULL, "opacity": number(0), **PASSIVE}, [
+            group("page-upper-lead", {**absolute(big - bw, big - bh, fw, fh), **PASSIVE}, [
+                strip("page-rail-top", (CLAW_W, 0), (fw - 2 * CLAW_W, 1.53), {"background-color": rail}),
+                claw(doc, "page-claw-ul", "ul")]),
+            group("page-upper-trail", {**anchor, **absolute(0, big - bh, big, fh)}, [claw(doc, "page-claw-ur", "ur")])]),
+    ]
+    # A list unfolds within the page (setting rows place it in "page"); here
+    # "page" is a clip larger than the frame, and "page-contents" is the frame.
+    pending = list(contents) + list(foot)
+    while pending:
+        node = pending.pop()
+        control = node.get("control") or {}
+        if control.get("placementBounds") == "page":
+            control["placementBounds"] = "page-contents"
+        pending += node.get("children", [])
     # The title bar appears when the vertical growth starts, with the upper
     # claws: a frame no taller than its corners has neither.
-    inner = group("page-contents", absolute(0, 0, fw, fh), [
+    inner = group("page-contents", absolute(big - bw, big - bh, fw, fh), [
         group("page-head", {**FULL, "opacity": number(0), **PASSIVE}, [
             title_bar("page-title-bar", (32, 8, 556, 24)),
             *label("page-title", title_key, (32, 8, 556, 24), DISPLAY, 0.55, TEXT_NAV, shadow=True, ty=-8)]),
@@ -1079,7 +1143,8 @@ def full_page(doc: Document, title_key: str, contents: list[dict], back: str, fo
              **({"navigation": back_navigation} if back_navigation else {})),
         *foot,
     ])
-    return group("page", {**absolute(bx, by, bw, bh), "overflow": keyword("hidden")}, [*parts, inner])
+    return group("page", {**absolute(bx, by, big, big), **CLIP_ALL}, [
+        group("page-clip", {**absolute(bw - big, bh - big, big, big), **CLIP_ALL}, [*parts, inner])])
 
 
 def page_document(doc: Document, page: dict, dialogs: list[dict]) -> dict:

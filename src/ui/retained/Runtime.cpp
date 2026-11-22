@@ -2603,13 +2603,23 @@ struct Runtime::Impl {
 		if (!document || interaction.Focused().empty()) return result;
 		auto* target = CanonicalElement(interaction.Focused());
 		if (auto* viewport = NumberViewport(target)) target = viewport;
+		// openPR06: only the path up to the outermost scrolling ancestor counts.
+		// RevealFocus scrolls only those, measuring the control in each one's
+		// own plane, so a page that moves or grows around them (a frame
+		// opening) changes nothing a reveal would do.
+		size_t scrolled = 0;
 		for (auto* element = target; element && element != document; element = element->GetParentNode()) {
 			// Relative layout and client extents exclude scroll offsets. A user
 			// can deliberately scroll away without an unchanged focus undoing it.
 			result.push_back(element->GetRelativeOffset(Rml::BoxArea::Border));
 			result.push_back(element->GetBox().GetSize(Rml::BoxArea::Border));
 			result.push_back({element->GetClientWidth(),element->GetClientHeight()});
+			using Rml::Style::Overflow;
+			const auto& style = element->GetComputedValues();
+			if (element != target && ((style.overflow_x() != Overflow::Visible && style.overflow_x() != Overflow::Hidden) ||
+					(style.overflow_y() != Overflow::Visible && style.overflow_y() != Overflow::Hidden))) scrolled = result.size();
 		}
+		result.resize(scrolled);
 		return result;
 	}
 	bool FocusVisible() const {
@@ -3064,7 +3074,13 @@ struct Runtime::Impl {
 			changedKeys.insert(changedKeys.end(),deferredInputs.begin(),deferredInputs.end());
 			deferredInputs.clear();
 		}
-		appliedMotionRevision = 0; ++presentationPass;
+		appliedMotionRevision = 0;
+		// openPR06: a settled closed list is reasserted only when this pass can
+		// undo its paint: a complete pass, or one that writes its value text,
+		// its popup or an opacity its popup reads. A page frame growing or a
+		// decoration moving no longer repaints every list on the page.
+		if (!incremental || std::any_of(changedKeys.begin(),changedKeys.end(),
+				[&](const PropertyKey& key) { return valueView.PaintsNode(key.first,key.second); })) ++presentationPass;
 		bool complete = true;
 		const auto sameValue = [](const Value& a, const Value& b) {
 			return a.type == b.type && std::memcmp(a.data.data(),b.data.data(),sizeof(a.data)) == 0 && a.unit == b.unit && a.text == b.text;

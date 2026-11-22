@@ -94,6 +94,11 @@ The property registry in `Document.cpp` currently supports:
   whitespace policy, plus localized text content. `text-overflow` (`clip` or
   `ellipsis`) on a node whose `overflow` cuts its text ends a cut line in an
   ellipsis rather than mid-letter.
+- `clip` (`auto`, `none` or `always`), RmlUi's clip. A hidden `overflow`
+  clips only when the last layout found content past the box's far (right or
+  bottom) edge; `always` clips every edge whatever moved since, which a box
+  whose content moves by offsets alone, without a layout, needs (openPR06's
+  full-page frames, `tools/ui/build_retained_screens.py`).
 - Background and border colors, opacity, a composed transform and backdrop
   soft focus.
 

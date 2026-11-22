@@ -36,6 +36,11 @@ bool ValidProperty(const std::string& name, const Value& value) {
 			{"word-break",{"normal","break-all","break-word"}},
 			// Text cut by its node's overflow ends in an ellipsis rather than mid-letter.
 			{"text-overflow",{"clip","ellipsis"}},
+			// openPR06: RmlUi's clip. An overflow that is not visible clips
+			// only content overflowing to the far edges, as measured by the
+			// last layout; "always" clips every edge, as a box that moves
+			// its content without a layout needs.
+			{"clip",{"auto","none","always"}},
 			{"flex-direction",{"row","row-reverse","column","column-reverse"}},
 			{"flex-wrap",{"nowrap","wrap","wrap-reverse"}},
 			{"justify-content",{"flex-start","flex-end","center","space-between","space-around","space-evenly"}},

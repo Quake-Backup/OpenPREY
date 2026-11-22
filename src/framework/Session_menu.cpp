@@ -12807,8 +12807,8 @@ idSessionLocal::PrefetchRetainedNextPages
 The pages that load when first opened, parsed on the job workers while the
 page that leads to them shows. Most of a load is the document's parse and
 validation (about 180 of CONTROLS' 270 ms), so the page chosen then waits
-for its view alone: the title leads to the Single Player and SETTINGS
-pages, Single Player to Campaign, Campaign to its difficulty and CHAPTERS
+for its view alone: the title leads to the Single Player, SETTINGS and
+(openPR06) MULTIPREY pages, Single Player to Campaign, Campaign to its difficulty and CHAPTERS
 pages, the pauses to SETTINGS, and SETTINGS to CONTROLS, GAME OPTIONS,
 DISPLAY and AUDIO. Nothing parses for a page that is loaded, that the stock
 screen stands in for, or whose parse is already under way, and a parse no
@@ -12818,7 +12818,9 @@ page takes goes with the next level's unload (UI_RetainedPrefetchClear).
 void idSessionLocal::PrefetchRetainedNextPages() {
 #ifndef ID_DEDICATED
 	static const char *const leads[][5] = {
-		{ RETAINED_TITLE_GUI, RETAINED_SINGLEPLAYER_GUI, RETAINED_SETTINGSPAGE_GUI, NULL, NULL },
+		// openPR06: and to MULTIPREY, whose 3.5 MB document otherwise parsed on
+		// the main thread in the frame that opened it.
+		{ RETAINED_TITLE_GUI, RETAINED_SINGLEPLAYER_GUI, RETAINED_SETTINGSPAGE_GUI, RETAINED_MPPAGE_GUI, NULL },
 		{ RETAINED_PAUSE_GUI, RETAINED_SETTINGSPAGE_GUI, NULL, NULL, NULL },
 		{ RETAINED_PAUSE_STROGG_GUI, RETAINED_SETTINGSPAGE_GUI, NULL, NULL, NULL },
 		{ RETAINED_SINGLEPLAYER_GUI, RETAINED_CAMPAIGNS_GUI, NULL, NULL, NULL },

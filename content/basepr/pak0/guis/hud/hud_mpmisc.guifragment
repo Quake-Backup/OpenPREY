@@ -26,6 +26,7 @@
 // Misc multiplayer components
 	windowDef MultiplayerElements {
 		rect		0, 0, 640, 480
+		noclip		1		// openPR06: lets the top-right groups below stand outside the 4:3 area under aspect expansion
 		visible		"gui::ismultiplayer"
 
 		windowDef VoteWin {
@@ -38,10 +39,13 @@
 
 		windowDef TopFourArea {
 			rect		0, 0, 640, 480
+			noclip		1
 			visible		"gui::gameon"
 			
 			windowDef TopFourBG_team {
 				rect		505, 5, 146, 64
+				screenalignx	right		// openPR06: the top-right standings hug the screen's right edge under aspect expansion
+				screenaligny	top
 				visible		"gui::teamdm"
 				
 				windowDef TopFourDividerA_team {
@@ -118,6 +122,8 @@
 			
 			windowDef TopFourBG {
 				rect		505, 5, 146, 64
+				screenalignx	right
+				screenaligny	top
 				visible		("gui::teamdm" == 0)
 				
 				windowDef TopFourDividerD {
@@ -239,15 +245,20 @@
 
 			windowDef FragStuff {
 				rect		0, 0, 640, 480
+				noclip		1
 				visible		("gui::fraglimit" && "gui::gameon")
 
 				windowDef FragIcon {
 					rect		565, 70, 28, 28
+					screenalignx	right
+					screenaligny	top
 					background	"guis/assets/hud/frag.tga"
 				}
 
 				windowDef FragWin {
 					rect		560, 96, 35, 20
+					screenalignx	right
+					screenaligny	top
 					text		"gui::frags"
 					shadow		1
 					forecolor	0.7, 0.8, 0.9, 0.7
@@ -260,15 +271,20 @@
 
 			windowDef TimerStuff {
 				rect		0, 0, 640, 480
+				noclip		1
 				visible		("gui::timelimit" && "gui::gameon")
 				
 				windowDef TimerIcon {
 					rect		608, 70, 26, 26
+					screenalignx	right
+					screenaligny	top
 					background	"guis/assets/hud/timer.tga"
 				}
 
 				windowDef TimerWin {
 					rect		594, 96, 40, 20
+					screenalignx	right
+					screenaligny	top
 					text		"gui::timer"
 					shadow		1
 					forecolor	0.7, 0.8, 0.9, 0.7

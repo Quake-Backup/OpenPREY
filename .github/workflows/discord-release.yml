@@ -13,6 +13,10 @@ permissions:
 jobs:
   announce:
     name: Announce On Discord
+    # Off until the repository opts in: set the DISCORD_RELEASE_ENABLED
+    # variable to "true" and the DISCORD_RELEASE_WEBHOOK secret. openPR06
+    # 0.15.0 is published without a Discord announcement.
+    if: ${{ vars.DISCORD_RELEASE_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

@@ -17,4 +17,5 @@ smoke tests around the in-tree game library, `game_<arch>`, and `basepr/`.
 Android, so it is likewise not part of active validation.
 
 `discord-release.yml` only reacts to an already-published release. It does not build or
-publish artifacts.
+publish artifacts. It is off unless the repository variable `DISCORD_RELEASE_ENABLED` is
+`true` (with the `DISCORD_RELEASE_WEBHOOK` secret set); 0.15.0 was published without it.

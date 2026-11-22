@@ -16484,7 +16484,7 @@
           "id": "player-model",
           "type": "image",
           "properties": {
-           "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+           "image": {"type": "image", "value": "guis/assets/loading/loading"},
            "image-fit": {"type": "keyword", "value": "fill"},
            "position": {"type": "keyword", "value": "absolute"},
            "left": {"type": "length", "value": 150.0, "unit": "dp"},
@@ -16661,7 +16661,7 @@
               "id": "model0-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -16732,7 +16732,7 @@
               "id": "model1-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -16803,7 +16803,7 @@
               "id": "model2-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -16874,7 +16874,7 @@
               "id": "model3-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -16945,7 +16945,7 @@
               "id": "model4-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17016,7 +17016,7 @@
               "id": "model5-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17087,7 +17087,7 @@
               "id": "model6-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17158,7 +17158,7 @@
               "id": "model7-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17229,7 +17229,7 @@
               "id": "model8-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17300,7 +17300,7 @@
               "id": "model9-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17371,7 +17371,7 @@
               "id": "model10-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17442,7 +17442,7 @@
               "id": "model11-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17513,7 +17513,7 @@
               "id": "model12-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17584,7 +17584,7 @@
               "id": "model13-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17655,7 +17655,7 @@
               "id": "model14-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17740,7 +17740,7 @@
               "id": "model15-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17811,7 +17811,7 @@
               "id": "model16-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17882,7 +17882,7 @@
               "id": "model17-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -17953,7 +17953,7 @@
               "id": "model18-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18024,7 +18024,7 @@
               "id": "model19-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18095,7 +18095,7 @@
               "id": "model20-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18166,7 +18166,7 @@
               "id": "model21-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18237,7 +18237,7 @@
               "id": "model22-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18308,7 +18308,7 @@
               "id": "model23-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18379,7 +18379,7 @@
               "id": "model24-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18450,7 +18450,7 @@
               "id": "model25-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18521,7 +18521,7 @@
               "id": "model26-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18592,7 +18592,7 @@
               "id": "model27-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18663,7 +18663,7 @@
               "id": "model28-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},
@@ -18734,7 +18734,7 @@
               "id": "model29-image",
               "type": "image",
               "properties": {
-               "image": {"type": "image", "value": "guis/assets/menu/questionmark"},
+               "image": {"type": "image", "value": "guis/assets/loading/loading"},
                "image-fit": {"type": "keyword", "value": "fill"},
                "position": {"type": "keyword", "value": "absolute"},
                "left": {"type": "length", "value": 0.0, "unit": "dp"},

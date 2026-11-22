@@ -479,10 +479,12 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		// Its MultiPrey page: Player Settings' data rate, Create Server's
 		// advanced rows that are not Create Server verbs, and Find Servers'
 		// filters (the players filter as the browser reads it: 1 hides full
-		// servers, 3 full and empty ones).
-		{"net_clientMaxRate",{0,0,0,true,{},{24000,32000,16000}}},{"net_serverReloadEngine",{0,0,1,true,{},{0,1}}},
+		// servers, 3 full and empty ones), Data Rate's stock three and openPR06's
+		// default, and Create Server's bot rows.
+		{"net_clientMaxRate",{0,0,0,true,{},{16000,24000,32000,128000}}},{"net_serverReloadEngine",{0,0,1,true,{},{0,1}}},
 		{"g_runMapCycle",{1}},{"gui_filter_gameType",{0,0,2,true,{},{0,1,2}}},{"gui_filter_password",{0,0,2,true,{},{0,1,2}}},
-		{"gui_filter_players",{0,0,3,true,{},{0,1,3}}},{"gui_filter_idle",{0,0,1,true,{},{0,1}}}};
+		{"gui_filter_players",{0,0,3,true,{},{0,1,3}}},{"gui_filter_idle",{0,0,1,true,{},{0,1}}},
+		{"bot_skillVariance",{0,0,2,false,{},{0,1,2}}},{"bot_chat",{0,0,2,true,{},{0,1,2}}},{"bot_characters",{1}}};
 	const auto found = settings.find(cvar);
 	return found == settings.end() ? nullptr : &found->second;
 }

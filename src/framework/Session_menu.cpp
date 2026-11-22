@@ -119,6 +119,10 @@ idCVar ui_retainedCaptureLoadFade( "ui_retainedCaptureLoadFade", "0", CVAR_GUI |
 // retained MultiPrey page (createLan, createDedicated).
 idCVar net_menulanserver( "net_menulanserver", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "Create Server's server type: 0 Internet, 1 LAN" );
 idCVar net_serverMenuDedicated( "net_serverMenuDedicated", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "Create Server starts a dedicated server" );
+// openPR06: Create Server's Bots. StartMenuServer hands it to the game's
+// g_artificialPlayerCount, which only a running server reads and the bot
+// commands rewrite, so the page keeps its own archived count.
+idCVar net_serverMenuBots( "net_serverMenuBots", "0", CVAR_GUI | CVAR_INTEGER | CVAR_ARCHIVE, "Create Server's bots: the artificial players a server the menu starts fills free player slots with", 0, 31 );
 
 static bool Session_RetainedScreensEnabled( void ) {
 #ifdef ID_DEDICATED
@@ -6143,6 +6147,10 @@ bool idSessionLocal::StartMenuServer() {
 		}
 	}
 
+	// openPR06: the bots the page asked for; the game fills free player
+	// slots with them once the map runs (idGameLocal::ReconcileArtificialPlayers).
+	cvarSystem->SetCVarInteger( "g_artificialPlayerCount", net_serverMenuBots.GetInteger() );
+
 	if ( dedicated ) {
 		cvarSystem->SetCVarInteger( "net_serverDedicated", 1 );
 	} else {
@@ -7702,7 +7710,7 @@ typedef struct retainedCreateSetting_s {
 static const retainedCreateSetting_t RETAINED_CREATE_SETTINGS[] = {
 	{ "createLan",			"lan",			"net_menulanserver",		0, 1,	false },
 	{ "createDedicated",	"dedicated",	"net_serverMenuDedicated",	0, 1,	true },
-	{ "createAutoBalance",	"autobalance",	"si_autobalance",			0, 1,	true },
+	{ "createAutoBalance",	"autobalance",	"g_balanceTDM",				0, 1,	true },	// openPR06: Prey's team balance
 	{ "createFragLimit",	"fraglimit",	"si_fragLimit",				0, 999,	false },
 	{ "createCaptureLimit",	"capturelimit",	"si_captureLimit",			1, 999,	false },
 	{ "createControlTime",	"controltime",	"si_controlTime",			1, 999,	false },
@@ -7722,7 +7730,7 @@ static const retainedCreateSetting_t RETAINED_CREATE_SETTINGS[] = {
 	{ "createWarmup",		"warmup",		"si_warmup",				0, 1,	true },
 	{ "createVoice",		"voice",		"si_voiceChat",				0, 1,	true },
 	{ "createBuying",		"buying",		"si_isBuyingEnabled",		0, 2,	false },	// Session_RetainedCreateValue
-	{ "createBots",			"bots",			"bot_minPlayers",			0, 16,	false },
+	{ "createBots",			"bots",			"net_serverMenuBots",		0, 31,	false },	// openPR06: StartMenuServer passes it on
 	{ "createBotSkill",		"botskill",		"bot_skill",				1, 5,	false },
 	// openQ4's match rules, on the advanced dialog's MATCH and RULES tabs.
 	{ "createShuffle",		"shuffle",		"si_shuffle",				0, 1,	true },
@@ -11890,6 +11898,19 @@ void idSessionLocal::UpdateRetainedJoinGame() {
 		guiRetainedMpPage != NULL && guiActive == guiRetainedMpPage ? guiRetainedMpPage : NULL;
 	if ( join == NULL ) {
 		return;
+	}
+	// openPR06: MultiPrey's filter rows set their CVars directly; the list
+	// follows each change at once, as the stock page's Apply Filters did.
+	static idStr filtersApplied;
+	const idStr filters = va( "%d %d %d %d %s", cvarSystem->GetCVarInteger( "gui_filter_gameType" ),
+		cvarSystem->GetCVarInteger( "gui_filter_password" ), cvarSystem->GetCVarInteger( "gui_filter_players" ),
+		cvarSystem->GetCVarInteger( "gui_filter_idle" ), cvarSystem->GetCVarString( "gui_filter_mod" ) );
+	if ( filters != filtersApplied ) {
+		const bool first = filtersApplied.Length() == 0;
+		filtersApplied = filters;
+		if ( !first ) {
+			idAsyncNetwork::client.serverList.ApplyFilter();
+		}
 	}
 	// The list's view changed: the tiles' levelshots are published with the rows.
 	static int viewPublished = -1;

@@ -1,6 +1,6 @@
 # openPR06 UI Visual Design
 
-Specification version 1.28, 21 November 2026.
+Specification version 1.29, 22 November 2026.
 
 Status: reference survey and design contract. openPR06 presents the retained
 interface by default (`ui_retained 1`, since 0.15.0); `ui_retained 0` renders
@@ -870,7 +870,9 @@ The HUD plays no sound for weapon switches or pickups; the player entity plays
 - The multiplayer HUD keeps the health, spirit, ammo and pickup groups and
   adds a top-right standings box (110x64 u in deathmatch, 110x31 u in team
   games; black 0.5 with a `#66738C` rim),
-  frag and timer icons with `#B3CCE6` counts, a vote line, a game-state line,
+  frag and timer icons with `#B3CCE6` counts (the box and the counts pinned
+  to the top-right corner under aspect expansion, `hud_mpmisc.guifragment`'s
+  `screenalignx right`, `screenaligny top`), a vote line, a game-state line,
   the player's name under the figure and the aimed player's name above the
   crosshair. Its weapon bar uses 60x50 u tiles without enlargement.
 - Team colours: red `#FF0000`, blue `#3380CC`, deathmatch yellow `#FFCC1A`
@@ -2202,37 +2204,60 @@ the 570x370 u tab page as Options' do.
   frame) and name; and the 30 models' portraits on two numbered tabs, five
   across and three down (58 u on a 62 u pitch), drawn at 0.8 at rest and in
   full under the pointer or focus, the chosen one outlined. A portrait
-  chooses its model (`ui_modelNum`). A data rate the stock choices do not
-  offer (openPR06's default, 128000) shows as its number.
-- **Create Server.** The stock Create and Advanced side tabs (80 u wide,
-  sharing 310 u below a 40 u margin) beside the 440x350 u inner page. Create
-  names the server and shows the chosen map's picture (170x120 u) over Game
-  Map and the map list, beside Server Type, Game Type, Team Damage, Frag
-  Limit, Time Limit, Max Players, Do Warmup, Allow Spectators and Dedicated
-  (220x24 u rows, the values right-aligned as the stock choices are).
+  chooses its model (`ui_modelNum`). Data Rate offers the stock ISDN,
+  DSL/Cable and T1/LAN (16000, 24000 and 32000) and Broadband (128000,
+  openPR06's default), slowest first; another value shows as its number.
+- **Create Server.** The stock Create and Advanced side tabs and openPR06's
+  Bots (80 u wide, sharing 310 u below a 40 u margin) beside the 440x350 u
+  inner page. Create names the server and shows the chosen map's picture
+  (170x120 u) over Game Map and the map list, beside Server Type, Game Type,
+  Team Damage, Team Balance, Frag Limit, Time Limit, Max Players, Do Warmup,
+  Allow Spectators and Dedicated (220x24 u rows on a 27 u pitch, the values
+  right-aligned as the stock choices are). Team Damage and Team Balance
+  (`g_balanceTDM`) are drawn at 0.40 and take no input outside Team DM.
   Advanced has its heading bar and the password, remote console, reload,
-  server-side mods, map cycle, pure and rate rows. Create on either starts
-  the server as the stock button does (`StartMenuServer`, with its warnings).
+  server-side mods, map cycle, pure and rate rows; the password dims while
+  Use Password is No, the map cycle file while Run Map Cycle Script is No.
+  Bots has its heading bar, Number of Bots (0 to 31, `net_serverMenuBots`),
+  Bot Skill, Skill Spread, Bot Chat and Named Characters (`bot_skill`,
+  `bot_skillVariance`, `bot_chat`, `bot_characters`), the last four dimmed
+  while the count is 0, and a note at 0.26 in `#BFD1FF` at 0.72 on what bots
+  do. Typed values (the names, passwords, map cycle file and the numbers)
+  sit in a black well at 0.45 inset 3 u from the plate's top and foot and
+  clear of its slanted end, so an empty field still reads as one. Create on
+  each side tab (120x30 u, 284 u below the inner page's rows) starts the
+  server as the stock button does (`StartMenuServer`, with its warnings),
+  which hands the bot count to the game's `g_artificialPlayerCount`.
   The verbs are the Create Server page's (`HandleRetainedCreateServerRequest`),
-  which offer Prey's two game types and up to 32 players. Server Type and
+  which offer Prey's two game types, up to 32 players and a frag limit of
+  at most 100 (`MP_PLAYER_MAXFRAGS`). Server Type and
   Dedicated bind `net_menulanserver` and `net_serverMenuDedicated`, which the
   stock page now binds too: it kept them in GUI keys nothing read.
 - **Find Servers.** The server list with its column headings (each sorts its
-  column; the lock column sorts by password), the passworded servers' lock,
-  Quick Refresh, Refresh All and the Internet and LAN source; while the list
-  is empty the scan's notice stands in it. Under it the Selected Server tab
-  (Summary with the map's picture, Details with the address, map, game type,
-  password and players, and Players with the first eight names), the Filters
-  tab with the stock filter rows and Apply Filters, and IP Connect with its
+  column; the lock column, which leads, sorts by password, and Server takes
+  the 228 u the stock game and PunkBuster icon columns left), the passworded
+  servers' lock, Quick Refresh, Refresh All and the Internet and LAN source;
+  while the list is empty the scan's notice stands in it. Under it the
+  Selected Server tab (Summary with the map's picture, Details with the
+  address, map, game type, password and players, and Players with the first
+  eight names), the Filters tab with the stock filters as plated rows
+  (400x21 u on a 23 u pitch, at 0.29), which the list follows as each
+  changes (`idSessionLocal::UpdateRetainedJoinGame`), and IP Connect with its
   field and Connect to IP; a refused address says why in place of the
   instructions. A row chooses its server, and Accept on the chosen one, or
   Join Game, joins it. The verbs are the Join Game page's
   (`HandleRetainedJoinGameRequest`); a join that fails returns to the title.
 
 Differences from the stock page: PunkBuster, a discontinued service, has no
-row, column or filter; the game column's mod icons are not drawn; and the
-players filter's Hide both hides full and empty servers, as the browser reads
-the setting, where the stock choice wrote the value that hides empty ones only.
+row, column or filter; the game column is not drawn; the players filter's
+Hide both hides full and empty servers, as the browser reads the setting,
+where the stock choice wrote the value that hides empty ones only; the
+filters apply as they change, so Apply Filters has no button; Create Server
+has Team Balance and the Bots tab, and dims the rows that do not apply; Data
+Rate offers Broadband; and Run Map Cycle Script is in Title Case (the stock
+`#str_41025` is not). The page names `guis/loading/loading` until the
+session fills a portrait: the stock windows named
+`guis/assets/menu/questionmark`, which no retail archive holds.
 
 #### Message boxes
 
@@ -3004,6 +3029,17 @@ carries their summaries.
   (`def/consoles.def:497,534`), which are not in the archives.
 
 ## Appendix D. Change record
+
+### Version 1.29, 22 November 2026
+
+- Section 12.5, MultiPrey: an audit of the page's tree. Create Server gains
+  Team Balance and a Bots side tab (count, skill, skill spread, chat, named
+  characters); rows that do not apply (team rows outside Team DM, the
+  password, the map cycle file, the bot rows without bots) are drawn at 0.40;
+  typed values sit in visible wells; Frag Limit stops at 100. Data Rate
+  offers Broadband, and every three- and six-way choice offers all its
+  options. The server list drops its two empty icon columns, and the
+  filters are plated rows that apply as they change.
 
 ### Version 1.28, 21 November 2026
 

@@ -926,6 +926,10 @@ gameReturn_t hhGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		skipCinematic = false;		
 	}
 
+	// openPR06: the server's bots, outside the debug pass (see
+	// idGameLocal::ReconcileArtificialPlayers).
+	ReconcileArtificialPlayers();
+
 	// show any debug info for this frame
 	RunDebugInfo();
 	D_DrawDebugLines();

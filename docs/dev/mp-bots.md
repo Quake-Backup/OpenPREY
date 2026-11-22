@@ -50,7 +50,14 @@ metadata absent from Prey's v7 game contract. The character system adds no
 virtual to the engine/game boundary and keeps `GAME_API_VERSION` at 7.
 
 `g_artificialPlayerCount` remains the compatibility count control. The server
-reconciles toward it one bot per frame, adding or removing as needed. The
+reconciles toward it one bot per frame, adding or removing as needed
+(`idGameLocal::ReconcileArtificialPlayers`, every frame; it ran in the debug
+pass, which a retail-configured build skips without `developer 1`; a listen
+server waits for the host's own player, whose slot a bot would otherwise
+take). MultiPrey's
+Create Server sets it from its Bots tab as the server starts (the menu's own
+archived `net_serverMenuBots`), beside `bot_skill`, `bot_skillVariance`,
+`bot_chat` and `bot_characters`. The
 named commands below update that count after a manual change so the automatic
 reconciler does not immediately undo the command. It is explicitly non-cheat,
 so those count updates work on an ordinary multiplayer server without enabling

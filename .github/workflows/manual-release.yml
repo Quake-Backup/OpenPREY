@@ -14,6 +14,10 @@ name: openPR06 Manual Release
 # - No in-game update manifest (openpr06-update.json) or signing. openPR06 has
 #   no update signing key; its updater only links players to the releases page.
 # - No Android, macOS, Linux ARM64 or Windows ARM64 lanes or evidence gates.
+# - No AppImage and no post-strip Wayland/X11 runtime smoke yet: the AppImage
+#   packager calls verify_linux_release_artifacts.py, which still expects
+#   openQ4's layout, and the smoke starts the client without game files
+#   (g_allowAssetlessStartup), which openPR06 does not define.
 
 on:
   workflow_dispatch:

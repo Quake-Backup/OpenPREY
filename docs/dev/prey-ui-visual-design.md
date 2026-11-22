@@ -630,7 +630,7 @@ openPR06 also bends it into the loading screen's name notch (section 12.1).
 | Main navigation | Label `prey.text.nav`; bar 0.60 | Label `#CCE6FF`; bar to 1.0 and 5 u toward the arc (6 u on the fourth entry); label 6–9 u toward the arc; 150 ms | `guisounds_menu_clickin` on press; action on press (Resume on release) | Hidden (Resume Game without a recent save) |
 | Bottom-bar action | `prey.text.bottom` | `#CCE6FF` | Click sound | Hidden in game |
 | Button | Label `#CCDEFA`; graded plate | Label white; `rollover_*` plate | Click sound | Label 0.30; `noevents 1`; still drawn |
-| Setting row | Label white 0.9, value `#B8C9E6` 0.9 | Value white; plate unchanged | Choice advances; no script sound | Value at 0.40 |
+| Setting row | Label white 0.9, value `#B8C9E6` 0.9 | Value white; plate unchanged | Choice advances; no script sound (the retained interface adds its step cue, section 8) | Value at 0.40 |
 | Check box | Border `#B8C9E6` 0.9 | Border white | Toggles the cross | Hidden or 0.40 |
 | Radio segment | Border `#CCDEFA`; clear fill | Label white | Fills `#99ABC7` 0.7; `guisounds_menu_tick` | — |
 | Tab | Label `#B5C9E3` 0.7 | Label `#CCDEFA`; plate tinted | `guisounds_menu_tabflip`; becomes active (label white) | — |
@@ -725,6 +725,47 @@ after they appear, over 900 ms, to 0 or to white 0.7.
 Use counts are for the retail main menu and `mpmain`. In openPR06's copies
 the three added Video pages bring `clickin` to 128 and `tabflip` to 46, and
 `tick` falls to 18 with the three Texture Quality segments (section 12.1).
+
+The stock menu makes no sound on hover, and none when a setting row's value
+changes, a slider moves (other than the volume sliders) or a field is taken.
+
+### Feedback cues
+
+The retained interface (section 12.5) adds two quiet cues to fill those
+gaps. They are openPR06's, not retail's. Both are retail samples, declared
+in `sound/openpr06_menu.sndshd` (pak0), so no new audio ships:
+
+| Cue | Sound | Level | Plays when |
+| --- | --- | --- | --- |
+| Hover | `openpr06_menu_hover`: `sound/arcade/generic_mouse_over`, Prey's own console mouse-over | -20 (11 dB under a press) | The lit control changes because of a device: the pointer moves onto a control, or an arrow key, the D-pad or the stick steps to one |
+| Step | `openpr06_menu_step`: `new_menuclickin01`, the press, softened | -16 (7 dB under a press) | A choice cycles, a toggle flips, a list opens, picks or closes, a field is taken or committed, a slider moves, or a list pages, wherever the screen plays no sound of its own |
+
+How the cues behave:
+
+- **They never double a sound.** A cue waits until the session has answered
+  the input. If that answer plays a menu sound (a document's `clickin` or
+  `tabflip`, a page's slide, the volume sliders' sample), that sound stands
+  for the input and the cue is dropped.
+- **Program focus is silent.** A page opening, a dialog restoring focus or a
+  program moving focus makes no hover sound. A pointer resting on a control
+  the keys have already lit makes none either.
+- **No chatter.** Hovers closer together than 75 ms, and steps closer than
+  55 ms, are dropped. A sweep across the arc or a held arrow key patters
+  rather than buzzes, and dragging a slider ticks without piling up. Both
+  cues share local channel 4, so each one cuts the one before it. They never
+  cut a press (channel 1), a slide (2) or the music (3).
+- **They stay out of a press's way.** A hover within 180 ms of a menu sound
+  is dropped, so the pointer arriving over a page a press just opened makes
+  no sound.
+- They play in the world the session has playing, as the documents' sounds
+  do: over the match in the in-game multiplayer menus, and not at all while
+  sound is muted for an unfocused window.
+- `ui_retainedCueSounds 0` (archived) turns both off and leaves the stock
+  sounds. The stock menu (`ui_retained 0`) never plays them.
+- `ui_retainedTrace 1` logs each cue as
+  `RETAINED_GUI_CUE ... cue=hover|step node=... verdict=...`, where the
+  verdict is `played`, `answered`, `settling`, `spaced`, `stale`, `disabled`
+  or `silent`.
 
 ### Reduced motion
 
@@ -1856,7 +1897,9 @@ Tommy's three New Game portraits, which are pictures, not furniture.
   set; Casino appears once `g_roadhouseCompleted` is.
 - Sounds are the stock ones, named by the documents' events: `clickin` on a
   press, `cancel` on No, `slideinsmall` and `slideoutsmall` as a frame grows
-  and shrinks.
+  and shrinks. Beside them, the hover and step cues of section 8 ("Feedback
+  cues") sound what the stock leaves silent: the lit control moving, and a
+  value, toggle, list or field changing with no sound of its own.
 - With reduced motion (`ui_retainedReducedMotion`) the retained interface
   applies the end of each move at once.
 

@@ -4520,6 +4520,7 @@ void idSessionLocal::HandleRestartMenuCommands( const char *menuCommand ) {
 			if ( args.Argc() - icmd >= 1 ) {
 				idStr snd = args.Argv(icmd++);
 				sw->PlayShaderDirectly(snd);
+				UI_RetainedMenuSoundPlayed();
 			}
 			continue;
 		}
@@ -4553,6 +4554,7 @@ void idSessionLocal::HandleIntroMenuCommands( const char *menuCommand ) {
 			if ( args.Argc() - i >= 1 ) {
 				idStr snd = args.Argv(i++);
 				menuSoundWorld->PlayShaderDirectly(snd);
+				UI_RetainedMenuSoundPlayed();
 			}
 			continue;
 		}
@@ -5739,6 +5741,9 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 					snd = "guisounds_menu_clickin";
 				}
 				menuSoundWorld->PlayShaderDirectly( snd, channel );
+				// openPR06: a retained menu's quiet cue for the same input stays
+				// silent beside this sound (UserInterfaceRetained.cpp).
+				UI_RetainedMenuSoundPlayed();
 
 			}
 			continue;

@@ -112,6 +112,10 @@ bool UI_DispatchApplicationActions( idUserInterface *gui, const char *command, b
 bool UI_TakeSessionRequest( idUserInterface *gui, const char *command, idStr &request );
 // Validates a VFS image name for a retained image node (see ValidImageSource).
 bool UI_RetainedImageSource( const char *source );
+// The session played a menu sound (its play command): a retained menu's
+// pending hover or step cue then stays quiet, since that sound answers the
+// input (openPR06, Prey's menus only).
+void UI_RetainedMenuSoundPlayed();
 // Resolves a bound picture ahead of its first draw; call it at startup or
 // inside a level load (see RetainedUI_PrecacheImage).
 void UI_RetainedPrecacheImage( const char *source );

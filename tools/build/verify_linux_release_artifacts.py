@@ -103,6 +103,15 @@ def expected_runtime_binaries(runtime_root: Path, arch: str) -> list[tuple[Path,
     ]
 
 
+def detached_symbol_binaries(runtime_root: Path, arch: str) -> list[tuple[Path, str, bool]]:
+    """Every ELF the release lane splits debug info from: the runtime binaries
+    plus the OpenGL and Vulkan renderer modules, which load beside the client."""
+    return expected_runtime_binaries(runtime_root, arch) + [
+        (runtime_root / f"renderer-gl_{arch}.so", "renderer-gl", True),
+        (runtime_root / f"renderer-vk_{arch}.so", "renderer-vk", True),
+    ]
+
+
 def reject_unexpected_binary_variants(
     runtime_root: Path, expected: list[tuple[Path, str, bool]]
 ) -> None:
@@ -544,8 +553,10 @@ def extract_linux_runtime_archive(archive_path: Path, extraction_root: Path) -> 
 
 def verify_split(args: argparse.Namespace) -> None:
     runtime_root = require_directory(args.runtime_root, "Linux staged runtime root")
-    binaries = validate_linux_runtime_payload(runtime_root, args.arch)
-    validate_debuglink_pairs(runtime_root, args.symbols_root, binaries)
+    validate_linux_runtime_payload(runtime_root, args.arch)
+    validate_debuglink_pairs(
+        runtime_root, args.symbols_root, detached_symbol_binaries(runtime_root, args.arch)
+    )
     print(
         f"stripped Linux release ELFs and detached debug links verified: "
         f"arch={args.arch} root={runtime_root}"
@@ -560,8 +571,10 @@ def verify_archive(args: argparse.Namespace) -> None:
     ) as temp_dir:
         extraction_root = Path(temp_dir) / "extract"
         runtime_root = extract_linux_runtime_archive(args.archive, extraction_root)
-        binaries = validate_linux_runtime_payload(runtime_root, args.arch)
-        validate_debuglink_pairs(runtime_root, args.symbols_root, binaries)
+        validate_linux_runtime_payload(runtime_root, args.arch)
+        validate_debuglink_pairs(
+            runtime_root, args.symbols_root, detached_symbol_binaries(runtime_root, args.arch)
+        )
     print(f"extracted Linux runtime archive verified: arch={args.arch} archive={args.archive}")
 
 

@@ -380,7 +380,9 @@ def validate_appdir(
         package_root,
         [(path, arch, is_module) for path, _, is_module in expected],
     )
-    linux_release.validate_debuglink_pairs(package_root, symbols_root, expected)
+    linux_release.validate_debuglink_pairs(
+        package_root, symbols_root, linux_release.detached_symbol_binaries(package_root, arch)
+    )
     validate_appimage_rpaths(appdir, package_root, arch)
     validate_appimage_dependency_resolution(appdir, package_root, arch)
 
@@ -495,7 +497,9 @@ def validate_source_package(package_root: Path, symbols_root: Path, arch: str) -
         raise AppImageError("Linux release package has no scalable or 256x256 openpr06 icon")
 
     expected = linux_release.validate_linux_runtime_payload(package_root, arch)
-    linux_release.validate_debuglink_pairs(package_root, symbols_root, expected)
+    linux_release.validate_debuglink_pairs(
+        package_root, symbols_root, linux_release.detached_symbol_binaries(package_root, arch)
+    )
 
 
 def build_appimage(args: argparse.Namespace) -> Path:

@@ -1714,7 +1714,10 @@ def validate_macos_staged_metadata(
     *,
     openal_provider: str = "system",
 ) -> None:
-    icon_path = install_root / "prey.icns"
+    # meson installs assets/icons/prey.icns as openPR06.icns; the packager
+    # still accepts the source name for older stages.
+    icon_candidates = (install_root / "openPR06.icns", install_root / "prey.icns")
+    icon_path = next((path for path in icon_candidates if path.is_file()), icon_candidates[0])
     splash_path = install_root / "assets" / "splash" / "prey_rt_bitmap_4001.bmp"
 
     if not icon_path.is_file():

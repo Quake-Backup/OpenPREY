@@ -127,8 +127,7 @@ void Screen(const std::string& path, int frames, int width, int height, const st
 		"\"update_p50_ms\":%.6f,\"render_p50_ms\":%.6f,\"vector_compile_p50_ms\":%.6f,\"paths_compiled_p50\":%.0f,\"uploads_p50\":%.0f,"
 		"\"draw_calls_p50\":%.0f,\"submitted_vertices_p50\":%.0f,\"layer_pushes_p50\":%.0f,\"layer_elisions_p50\":%.0f,"
 		"\"sources_p50_ms\":%.6f,\"motion_p50_ms\":%.6f,\"apply_p50_ms\":%.6f,\"layout_p50_ms\":%.6f,"
-		"\"layout_updates_p50\":%.0f,\"interaction_updates_p50\":%.0f,\"motion_inputs_scanned_p50\":%.0f,\"replays_p50\":%.0f,\"layout_updates_mean\":%.3f}
-",
+		"\"layout_updates_p50\":%.0f,\"interaction_updates_p50\":%.0f,\"motion_inputs_scanned_p50\":%.0f,\"replays_p50\":%.0f,\"layout_updates_mean\":%.3f}\n",
 		static_cast<unsigned long long>(heldKb),path.c_str(),event.c_str(),width,height,frames,loadMs,cold,eventMs,
 		coldStats.updateMilliseconds,coldStats.vectorCompileMilliseconds,static_cast<unsigned long long>(coldStats.vectorPathsCompiled),
 		static_cast<unsigned long long>(coldStats.geometryCompiles),frame.front(),Percentile(frame,.5),Percentile(frame,.95),Percentile(frame,1),
@@ -240,6 +239,53 @@ void EventRepeats(const std::string& path, const std::string& event, int repeats
 	runtime.CloseDocument(); runtime.Shutdown();
 }
 
+// A page's arrival and departure as the session plays them: `enter` (the
+// page's opening, such as onActivate) and then `leave` (pageLeave), each
+// followed by `frames` 60 Hz frames, `cycles` times. The frames measured are
+// the ones that animate, the page growing out of the bottom bar and shrinking
+// back into it, where the menus stutter if they cost too much.
+void Transition(const std::string& path, const std::string& enter, const std::string& leave, int cycles, int frames) {
+	std::ifstream file(path,std::ios::binary);
+	if (!file) throw std::runtime_error("Cannot read transition document");
+	const std::string source{std::istreambuf_iterator<char>(file),{}};
+	Document model; std::vector<Diagnostic> diagnostics;
+	if (!model.Load(source,diagnostics)) throw std::runtime_error("Invalid transition document");
+	ScreenHost host; Runtime runtime(host);
+	if (!runtime.LoadDocument(source,path,diagnostics)) throw std::runtime_error("Cannot load transition runtime document");
+	Viewport viewport; viewport.width = 1280; viewport.height = 720;
+	viewport.canvasHeight = static_cast<float>(model.Model().canvasHeight);
+	Runtime::EventEffects effects; std::string error;
+	double now = 1;
+	if (runtime.HasEvent("onInit") && !runtime.RunEvent("onInit",now,effects,error)) throw std::runtime_error("onInit: "+error);
+	for (int i = 0; i <= 60; ++i) runtime.Frame(viewport,now += 1/60.0);
+	std::vector<double> enterMs, leaveMs, layout, render, compile, paths, layoutUpdates;
+	for (int cycle = 0; cycle < cycles; ++cycle) {
+		for (const auto* event : {&enter,&leave}) {
+			if (!runtime.RunEvent(*event,now,effects,error)) throw std::runtime_error(*event+": "+error);
+			for (int i = 0; i < frames; ++i) {
+				runtime.Frame(viewport,now += 1/60.0);
+				// The first cycle compiles the frame's artwork at each size.
+				if (cycle == 0) continue;
+				const auto stats = runtime.Statistics();
+				(event == &enter ? enterMs : leaveMs).push_back(stats.frameMilliseconds);
+				layout.push_back(stats.layoutMilliseconds); render.push_back(stats.renderMilliseconds);
+				compile.push_back(stats.vectorCompileMilliseconds); paths.push_back(static_cast<double>(stats.vectorPathsCompiled));
+				layoutUpdates.push_back(static_cast<double>(stats.layoutUpdates));
+			}
+		}
+	}
+	if (!host.error.empty()) throw std::runtime_error("Transition document logged an error: "+host.error);
+	if (enterMs.empty()) throw std::runtime_error("Transition needs at least two cycles");
+	double updates = 0; for (double value : layoutUpdates) updates += value;
+	std::printf("{\"scenario\":\"transition\",\"document\":\"%s\",\"enter\":\"%s\",\"leave\":\"%s\",\"cycles\":%d,\"frames\":%d,"
+		"\"enter_p50_ms\":%.6f,\"enter_p95_ms\":%.6f,\"enter_max_ms\":%.6f,\"leave_p50_ms\":%.6f,\"leave_p95_ms\":%.6f,\"leave_max_ms\":%.6f,"
+		"\"layout_p50_ms\":%.6f,\"render_p50_ms\":%.6f,\"vector_compile_p50_ms\":%.6f,\"paths_compiled_p50\":%.0f,\"layout_updates_mean\":%.3f}\n",
+		path.c_str(),enter.c_str(),leave.c_str(),cycles,frames,Percentile(enterMs,.5),Percentile(enterMs,.95),Percentile(enterMs,1),
+		Percentile(leaveMs,.5),Percentile(leaveMs,.95),Percentile(leaveMs,1),Percentile(layout,.5),Percentile(render,.5),
+		Percentile(compile,.5),Percentile(paths,.5),updates/layoutUpdates.size());
+	runtime.CloseDocument(); runtime.Shutdown();
+}
+
 // Private committed bytes of this process, for the memory a load retains.
 // Zero where the platform query is not implemented.
 std::uint64_t PrivateBytes() {
@@ -345,6 +391,13 @@ int main(int argc, char** argv) {
 			EventRepeats(argv[2],argv[3],repeats);
 			return 0;
 		}
+		if (argc >= 5 && std::string(argv[1]) == "--transition") {
+			if (argc > 7) throw std::runtime_error("usage: openq4-retained-ui-benchmark --transition <document.rui> <enter> <leave> [cycles=8] [frames=45]");
+			const int cycles = argc > 5 ? std::stoi(argv[5]) : 8, frames = argc > 6 ? std::stoi(argv[6]) : 45;
+			if (cycles < 2 || cycles > 10000 || frames < 1 || frames > 600) throw std::runtime_error("Invalid transition cycle or frame count");
+			Transition(argv[2],argv[3],argv[4],cycles,frames);
+			return 0;
+		}
 		if (argc >= 6 && std::string(argv[1]) == "--state") {
 			if (argc > 8) throw std::runtime_error("usage: openq4-retained-ui-benchmark --state <document.rui> <key> <a> <b> [frames=240] [event]");
 			const int frames = argc > 6 ? std::stoi(argv[6]) : 240;
@@ -352,7 +405,7 @@ int main(int argc, char** argv) {
 			StateChanges(argv[2],argv[3],argv[4],argv[5],frames,argc > 7 ? argv[7] : "");
 			return 0;
 		}
-		if (argc < 2 || argc > 4) throw std::runtime_error("usage: openq4-retained-ui-benchmark <vector-smoke.rui> [density=1.25] [frames=60] | --screen|--scope <document.rui> [frames] [width] [height] [event] | --state <document.rui> <key> <a> <b> [frames] [event] | --event <document.rui> <event> [repeats] | --load <document.rui> [repeats]");
+		if (argc < 2 || argc > 4) throw std::runtime_error("usage: openq4-retained-ui-benchmark <vector-smoke.rui> [density=1.25] [frames=60] | --screen|--scope <document.rui> [frames] [width] [height] [event] | --state <document.rui> <key> <a> <b> [frames] [event] | --event <document.rui> <event> [repeats] | --transition <document.rui> <enter> <leave> [cycles] [frames] | --load <document.rui> [repeats]");
 		Viewport viewport;
 		viewport.displayScale = argc > 2 ? std::stof(argv[2]) : 1.25f;
 		const int frames = argc > 3 ? std::stoi(argv[3]) : 60;

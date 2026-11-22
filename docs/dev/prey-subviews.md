@@ -87,6 +87,14 @@ follow from it:
 Unclipped, the glow portal in `game/shuttlea` showed a body standing behind its
 exit, and the spawned lotab portal below showed the player model at its target.
 
+OpenGL's depth fill no longer applies Doom 3's alpha-notch clip (a second
+texture unit with an object-plane texgen, `_alphaNotch`). Once mirrors and
+portals had a clip plane again it failed every alpha-tested surface in the
+view: the player's model is alpha-tested throughout, so Tommy vanished from the
+roadhouse mirror and from portals, along with alpha-tested posters and decals.
+The oblique near plane already clips those surfaces, and Vulkan never had the
+notch.
+
 ## Game portals
 
 Prey links the area of every entity with a remote camera to its target's area,
@@ -159,13 +167,14 @@ Captures come from the engine's `screenshot` command in a windowed run from
 `.install/`, once with `+set r_renderApi gl` and once with `vulkan`, and are
 compared side by side. Leave post-processing at its defaults: the scene-target
 and SSAO paths are where the two backends differ. Use `noclip` and
-`setviewpos <x> <y> <z> <yaw>`.
+`setviewpos <x> <y> <z> <yaw> [pitch]`.
 
 | Case | Map | How |
 |---|---|---|
 | Sky through many skybox portal faces | `game/lotab` | The spawn view; `setviewpos 400 800 560 0` above the canyon |
 | Sky scene gaps | `game/lotab` | `setviewpos 552 -912 -500 90`, looking below the sky's horizon: black on both backends |
-| Mirror | `game/roadhouse` | `setviewpos -282 -340 72 180` |
+| Mirror | `game/roadhouse` | `+set g_casino 1` (skips the intro camera), then `setviewpos -282 -340 72 180` without `noclip`. Tommy, alpha-tested throughout, stands in the reflection |
+| Player through a self-facing portal | `game/feedingtowerc` | `trigger object_glowportal_12`, then `setviewpos 4688 -380 70 270`. The level-end portal shows Tommy from behind |
 | Direct portal | `game/feedingtowera` | `setviewpos 3398 3044 -2576 0` and `3320 2990 -2502 270` |
 | Glow portal opened at runtime | `game/shuttlea` | `trigger object_glowportal_totower`, then `setviewpos -70640 14042 9554 0` |
 | Portal with world geometry behind it | `game/lotab` | `setviewpos -447 791 341 180`, then `spawn object_portal startActive 1 cameraTarget info_player_start_5 origin "-527 791 330"` |
@@ -179,7 +188,7 @@ sound's length, and a zero length turns the wait into a runaway loop that drops
 the map (`game/feedingtowera`) or a cinematic that never ends
 (`game/roadhouse`). Mute with `+set s_volume 0` instead.
 
-All seven cases matched between OpenGL and Vulkan on 11 November 2026. The last three were added on 21 November 2026 with the clip plane and game portals.
+All seven cases matched between OpenGL and Vulkan on 11 November 2026. The last three were added on 21 November 2026 with the clip plane and game portals. On 22 November 2026 the mirror, the self-facing portal and the glow portal matched again with the alpha-notch clip removed; before that, OpenGL drew neither Tommy nor alpha-tested decals in them.
 
 ## Known gaps
 

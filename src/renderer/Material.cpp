@@ -75,6 +75,7 @@ typedef struct mtrParsingData_s {
 	bool			forceOverlays;
 	materialQualityInputs_t qualityInputs;
 	bool			readsHighQualityHint;	// a stage asked for "highquality" or "uncompressed"
+	bool			unloadedInteractionProgram;	// a stage named an interaction program GL could not create
 } mtrParsingData_t;
 
 idCVar r_useFragmentProgramMaterials(
@@ -2812,6 +2813,11 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 		if ( ss->newStage->interactionProgram ) {
 			ss->lighting = SL_INTERACTION;
 		}
+	} else if ( newStage.interactionProgram ) {
+		// OPENPR06: the source was scanned but no GL program exists, as on a
+		// dedicated server, which never initializes GL.  The stage still means
+		// a lit surface, and coverage must say so (see below).
+		pd->unloadedInteractionProgram = true;
 	}
 
 	ss->mNumStageRegisters = numRegisters - ss->mStageRegisterStart;
@@ -4570,8 +4576,13 @@ bool idMaterial::Parse( const char *text, const int textLength ) {
 		if ( !numStages ) {
 			// non-visible
 			coverage = MC_TRANSLUCENT;
-		} else if ( numStages != numAmbientStages ) {
-			// we have an interaction draw
+		} else if ( numStages != numAmbientStages || pd->unloadedInteractionProgram ) {
+			// we have an interaction draw.  OPENPR06: that includes an interaction
+			// program GL could not create.  Prey's multiplayer skins (jen_mp,
+			// human2_body_mp) keep only a "blend shader" skin.vfp stage at
+			// shader level 3; on a dedicated server it fell through to the
+			// additive-blend test, the skin read as translucent, and
+			// idRenderWorld::ModelTrace skipped it, so no shot could hit them.
 			coverage = MC_OPAQUE;
 		} else if ( 
 			( pd->parseStages[0].drawStateBits & GLS_DSTBLEND_BITS ) != GLS_DSTBLEND_ZERO ||
@@ -5522,6 +5533,15 @@ bool idMaterial::SetDefaultText( void ) {
 		SetText(va("material %s { sort gui twoSided { blend gl_one, gl_zero glslProgram glsl/retained_glitch.glsl "
 			"shaderParm fault parm0, parm1, parm2, parm3 shaderTexture Source linear clamp nopicmip %s } }",
 			GetName(),GetName()[20] ? "_retainedBackdrop" : "_retainedBlurScratch"));
+		return true;
+	}
+	if (idStr::Icmpn(GetName(),"_retainedPointer/",17) == 0) {
+		const char* slot = GetName()+17;
+		if (!*slot) return false;
+		for (const char* p = slot; *p; ++p) if (*p < '0' || *p > '9') return false;
+		// The menus' pointer (src/ui/PointerCursor.cpp): a premultiplied RGBA8
+		// picture drawn texel for pixel at whole pixels.
+		SetText(va("material %s { sort gui twoSided { blend gl_one, gl_one_minus_src_alpha vertexColor nopicmip linear clamp map _retainedPointerImage%s } }",GetName(),slot));
 		return true;
 	}
 	if ( idStr::Icmp(GetName(),"_retainedSolid") == 0 ) {

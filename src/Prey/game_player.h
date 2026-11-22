@@ -747,6 +747,13 @@ ID_INLINE idVec3 hhPlayer::GetPortalPoint( void ) {
 */
 }
 
+// openPR06: what the bot's movement probe found along its next step.
+enum botMoveProbe_t {
+	BOT_MOVE_CLEAR,
+	BOT_MOVE_WALL,
+	BOT_MOVE_DROP
+};
+
 //HUMANHEAD rww
 class hhArtificialPlayer : public hhPlayer {
 	CLASS_PROTOTYPE(hhArtificialPlayer);
@@ -760,6 +767,7 @@ public:
 	virtual void		ClientPredictionThink( void );
 	virtual void		WriteToSnapshot( idBitMsgDelta &msg ) const;
 	virtual void		ReadFromSnapshot( const idBitMsgDelta &msg );
+	virtual void		Portalled( idEntity *portal );
 
 	// The artificial-player entity is Prey's network-compatible bot slot.
 	// Character state stays game-side so GAME_API_VERSION remains unchanged.
@@ -793,6 +801,12 @@ protected:
 	hhPlayer *			FindBotEnemy( bool &visible, float &distance );
 	bool				BotCanSee( const hhPlayer *player, float &distance, float &offAxis ) const;
 	void				UpdateBotWeapon( float enemyDistance );
+	botMoveProbe_t		BotMoveBlocked( idVec3 moveDirection );
+	botMoveProbe_t		BotProbeLanding( const idVec3 &ahead, const idVec3 &up, const idVec3 &moveDirection );
+	bool				BotFallIsHazardous( const idVec3 &top, const idVec3 &bottom ) const;
+	bool				BotJumpIsSafe( idVec3 moveDirection );
+	bool				BotJumpLandingIsLevel( const idVec3 &point, const idVec3 &up );
+	bool				BotPortalRecentlyUsed( const idEntity *portal ) const;
 	void				UpdateBotMovement( usercmd_t &cmd, const hhPlayer *enemy,
 							bool enemyVisible, float enemyDistance );
 	void				UpdateBotAimAndFire( usercmd_t &cmd, const hhPlayer *enemy,
@@ -800,6 +814,7 @@ protected:
 	void				UpdateBotChat( void );
 	const char *		BotDisplayName( const idPlayer *player ) const;
 	float				BotWeaponRangeScore( const char *weaponName, float distance ) const;
+	float				BotProjectileSpeed( void );
 
 	const rvBotCharacter *botCharacter;
 	idStr				botCharacterName;
@@ -812,7 +827,12 @@ protected:
 	idEntityPtr<idEntity>	botIgnoredItem;
 	idVec3				botLastSeenPosition;
 	idVec3				botBelievedTarget;
-	idVec3				botLastTargetPosition;
+	idVec3				botBelievedVelocity;
+	idAngles			botLastDesiredAngles;
+	bool				botLastDesiredValid;
+	float				botLeadErrorScale;
+	int					botLeadWeapon;
+	float				botLeadSpeed;
 	int					botTargetAcquiredTime;
 	int					botLastSeenTime;
 	int					botNextTargetScanTime;
@@ -831,6 +851,10 @@ protected:
 	int					botItemLastProgressTime;
 	float				botItemBestDistance;
 	float				botWanderYaw;
+	int					botNextBlockTurnTime;
+	idEntityPtr<idEntity>	botLastPortal;
+	idVec3				botPortalExit;
+	int					botPortalIgnoreUntil;
 
 	int					botNextWeaponTime;
 	int					botBurstEndTime;

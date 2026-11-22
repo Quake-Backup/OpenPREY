@@ -45,9 +45,8 @@ extern idCVar s_volume;
 extern idCVar s_musicVolume;
 extern idCVar s_dialogueVolume;
 extern idCVar s_constantAmplitude;
-extern idCVar s_speakerFraction;
-extern idCVar s_radioChatterFraction;
 extern idCVar s_quadraticFalloff;
+extern idCVar s_voiceDucking;
 extern idCVar s_frequencyShift;
 extern idCVar com_profanity;
 extern idCVar s_useEAXOcclusion;
@@ -57,8 +56,6 @@ static const float SOUND_SHADER_SCREEN_SHAKE_SCALE = 600.0f;
 static const float SOUND_SHADER_MATERIAL_SHAKE_SCALE = 2800.0f;
 static const float SOUND_SHADER_SHAKE_NORMALIZE = 1.0f / 32768.0f;
 static const float SOUND_WORLD_VOLUME_EPSILON = 1.0f / 1024.0f;
-static const int Q4_SOUND_CHANNEL_SPECIAL_ATTENUATION_EXEMPT_0 = 6;
-static const int Q4_SOUND_CHANNEL_SPECIAL_ATTENUATION_EXEMPT_1 = 7;
 static const int Q4_SOUND_CHANNEL_RADIO_CHATTER = 10;
 static const float SOUND_FREQUENCY_SHIFT_MIN = 0.25f;
 static const float SOUND_FREQUENCY_SHIFT_MAX = 4.0f;
@@ -367,13 +364,14 @@ static int SoundPriorityFromVolumeDB( float volumeDB )
 	return idMath::Ftoi( volumeDB * 100.0f );
 }
 
-static bool ReceivesQuake4ExtraAttenuation( const idSoundChannel* chan )
+// The sounds retail mixes under the music volume instead of the master volume.
+static bool SoundIsMusicClass( const soundShaderParms_t& parms )
 {
-	return chan->logicalChannel != Q4_SOUND_CHANNEL_SPECIAL_ATTENUATION_EXEMPT_0 &&
-		   chan->logicalChannel != Q4_SOUND_CHANNEL_SPECIAL_ATTENUATION_EXEMPT_1 &&
-		   chan->parms.soundClass != SOUND_CLASS_MUSICAL;
+	return parms.soundClass == SOUND_CLASS_MUSICAL;
 }
 
+// Music for tempo, dialogue routing and the player's-own-music mute: the music class, or a
+// sample under a music directory (see SND_IsMusicSamplePath).
 static bool SoundUsesMusicVolume( const soundShaderParms_t& parms )
 {
 	return ( parms.soundShaderFlags & SSF_MUSIC ) != 0 || parms.soundClass == SOUND_CLASS_MUSICAL;
@@ -1004,27 +1002,23 @@ void idSoundChannel::UpdateVolume( int currentTime )
 		const bool noOcclusion = ( parms.soundShaderFlags & SSF_NO_OCCLUSION ) != 0 || !s_useOcclusion.GetBool();
 		const float distance = noOcclusion ? emitter->directDistance : emitter->spatializedDistance;
 		SoundWorldApplyDistanceFalloff( volumeScale, distance, parms.minDistance, parms.maxDistance );
-
-		// OpenQ4 keeps the SDK's SSF_IS_VO name for bit 13; retail uses the same bit to bypass
-		// this extra speaker/radio attenuation pass.
-		if( ( parms.soundShaderFlags & SSF_IS_VO ) == 0 && ReceivesQuake4ExtraAttenuation( this ) )
-		{
-			if( IsRadioChatterChannel( this ) )
-			{
-				volumeScale *= SoundSanitizeUnitValue( s_radioChatterFraction.GetFloat(), 1.0f );
-			}
-			else
-			{
-				volumeScale *= SoundSanitizeUnitValue( s_speakerFraction.GetFloat(), 1.0f );
-			}
-		}
+		// OPENPR06: Quake 4's s_speakerFraction/s_radioChatterFraction pass (-3.7 dB on every
+		// positioned sound but music) is not in retail Prey, so it is not applied here.
 	}
 
-	if( SoundUsesMusicVolume( parms ) )
+	// Retail PREY.exe 1.4 scales an SC_MUSIC sound by s_musicVolume_dB in place of
+	// s_volume_dB, and every other sound (a jukebox song or the load music under
+	// sound/music/ included) by s_volume_dB alone.
+	if( SoundIsMusicClass( parms ) )
 	{
 		volumeScale *= SoundSanitizeUnitValue( s_musicVolume.GetFloat(), 1.0f );
 	}
 	else
+	{
+		volumeScale *= SoundSanitizeGainScale( s_volume.GetFloat(), 0.0f );
+	}
+
+	if( !SoundUsesMusicVolume( parms ) )
 	{
 		// Classify the sample actually playing, including a leadin/loop change.
 		// This also survives save/restore and localized fallback without storing
@@ -1047,7 +1041,6 @@ void idSoundChannel::UpdateVolume( int currentTime )
 	}
 
 	volumeScale = SoundSanitizeGainScale( volumeScale, 0.0f );
-	volumeScale = SoundSanitizeGainScale( volumeScale * SoundSanitizeGainScale( s_volume.GetFloat(), 0.0f ), 0.0f );
 
 	// store the new volume on the channel
 	volumeDB = volumeScale < SOUND_WORLD_VOLUME_EPSILON ? DB_SILENCE : VolumeScaleToDB( volumeScale );
@@ -1460,6 +1453,11 @@ bool idSoundEmitterLocal::CheckForCompletion( int currentTime )
 
 		if( chan->CheckForCompletion( currentTime ) )
 		{
+			// Retail lifts the duck only when a line runs out; StopSound leaves it.
+			if( chan->parms.soundClass == SOUNDCLASS_VOICEDUCKER && s_voiceDucking.GetBool() )
+			{
+				soundWorld->SetVoiceDucker( false );
+			}
 			soundWorld->RememberSubtitleTail( this, chan, currentTime );
 			channels.RemoveIndex( i );
 			soundWorld->FreeSoundChannel( chan );
@@ -1981,6 +1979,13 @@ int idSoundEmitterLocal::StartSound( const idSoundShader* shader, const s_channe
 	if( s_logSpeech.GetBool() )
 	{
 		SoundLogSpeechStart( chan );
+	}
+
+	// Retail PREY.exe 1.4: an SC_VOICEDUCKER line ducks the rest of the mix as it starts,
+	// and its completion lifts the duck again (idSoundEmitterLocal::CheckForCompletion).
+	if( chanParms.soundClass == SOUNDCLASS_VOICEDUCKER && s_voiceDucking.GetBool() )
+	{
+		soundWorld->SetVoiceDucker( true );
 	}
 
 	// Prey's authored bleep window mutes only the selected sample and restores

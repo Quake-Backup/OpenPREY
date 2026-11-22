@@ -1,0 +1,29 @@
+// The retained menus' quiet feedback cues, beside retail Prey's own menu
+// sounds (sound/consolemainmenu.sndshd). Both use retail samples, so nothing
+// here ships audio. See docs/dev/prey-ui-visual-design.md, section 8,
+// "Feedback cues"; src/ui/UserInterfaceRetained.cpp plays them.
+//
+// Retail's presses play at -9. The hover sits about 11 dB under a press and
+// the step about 7 dB under it, so neither competes with a press, a page's
+// slide or the music.
+
+// The lit control moved: the pointer reached another control, or an arrow key
+// or the controller stepped to one. Prey's own console mouse-over, softened.
+openpr06_menu_hover {
+	mindistance		1
+	maxdistance		15
+	volume			-20
+
+	sound/arcade/generic_mouse_over.wav
+}
+
+// A value stepped, a toggle flipped, a list opened or closed, or a field was
+// taken or committed, where the screen names no sound of its own. Retail's
+// press, softened.
+openpr06_menu_step {
+	mindistance		1
+	maxdistance		15
+	volume			-16
+
+	sound/guis/menus/new_menuclickin01.wav
+}

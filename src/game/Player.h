@@ -434,6 +434,7 @@ public:
 	virtual				// HUMANHEAD
 	void					UpdateHudAmmo( idUserInterface *hud );
 	void					ShowTip( const char *keyMaterial, const char *tip, const char *key, const char *topMaterial, bool keywide, int xOffset=0, int yOffset=0 );
+	void					UpdateTipKey( const char *tip, const char *keyMaterial, const char *key, bool keywide );	// OPENPR06: the tip's key follows the device in use
 	void					HideTip( void );
 	bool					IsTipVisible( void ) { return tipUp; };
 	virtual void			ClientPredictionThink( void );

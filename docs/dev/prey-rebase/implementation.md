@@ -1188,7 +1188,7 @@ The mirror clip-plane workaround remains active and tracked in
 | ui-02 spline text under TTF | Resolved: the effect draws with TTF glyphs and `r_useTrueTypeFonts=1` is the default (D10); awaiting a runtime capture, since no shipped GUI enables `splineIn` |
 | ModernGL / Vulkan Prey feature parity | D2; renderer-vk stubs from WP4.1 |
 | Nested BSE `SEG_EFFECT` spawning | D3; add a Prey-v7-compatible callback/spawn path and stock-FX runtime capture before enabling |
-| SetSpiritWalkEffect / SetVoiceDucker DSP | WP5.5 no-ops; TODO |
+| SetSpiritWalkEffect DSP | WP5.5 no-op; TODO (SetVoiceDucker follows retail since 2026-11-22) |
 | Classic-layout PK4 checksums | WP6.1; docs TODO |
 | Mirror clip plane retail math | `references/retail_mirror_clip_parity_plan.md` |
 | ARM64/macOS/signing/manual-publish release lanes | Rebuild false-gated inherited lanes around `OpenPrey-game`, `basepr`, the unified module, and openPR06 release identities |

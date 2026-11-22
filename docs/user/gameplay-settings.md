@@ -34,8 +34,10 @@ The same page also has mouse options (`m_pitch` for inverted mouse, `m_smooth`, 
 
 | Setting | Default | What it does |
 |---|---:|---|
-| `s_volume` / `s_volume_dB` | `0.5` / `-6` | Master volume, as a linear value or in decibels. The two stay in sync. |
-| `s_musicVolume` / `s_musicvolume_dB` | `0.5` / `-6` | Music volume, independently of the rest of the mix. The two stay in sync. |
+| `s_volume` / `s_volume_dB` | `1` / `0` | Volume of every sound except the score, as a linear value or in decibels. The two stay in sync. |
+| `s_musicVolume` / `s_musicvolume_dB` | `1` / `0` | Volume of the score, used instead of the master volume. The two stay in sync. |
+| `s_voiceDucking` | `1` | Lower the rest of the mix while a dialogue line plays that asks for it. Not saved. |
+| `s_voiceDuckVolume` | `-4.5` | How far, in decibels, voice ducking lowers the rest of the mix. Not saved. |
 | `s_dialogueVolume` | `1` | Spoken dialogue volume, from `0` (mute) to `1` (full), independently of effects and music. |
 | `g_levelloadmusic` | `1` | Play map-defined music while levels load. |
 | `s_useEAXReverb` | `1` | The map's per-area room reverb. See [Room Reverb](#room-reverb). |
@@ -47,13 +49,14 @@ The same page also has mouse options (`m_pitch` for inverted mouse, `m_smooth`, 
 
 ## Music Volume
 
-`s_musicVolume` scales music without changing the rest of the game mix. The stock menu's music slider sets the matching `s_musicvolume_dB`, and the two cvars follow each other.
+`s_musicVolume` sets the score's level. As in retail PREY, it replaces the master volume for the score, so the master volume does not change the score and the music volume changes nothing else. The stock menu's music slider sets the matching `s_musicvolume_dB`, and the two cvars follow each other.
 
-- `0`: mute music.
-- `0.5`: default music level.
-- `1`: full music level.
+- `0`: mute the score.
+- `1`: full level, the default (retail's 0 dB).
 
-It applies to sound shaders in PREY's music sound class and to samples under the `sound/musical/`, `sound/ambience/musical/` and `sound/music/` paths. The setting is live and can be adjusted while the game is running.
+It applies to sound shaders in PREY's music sound class (`soundClass SC_MUSIC`): the main menu's overture and the in-game score. Other sounds that are music in the story, such as the Roadhouse jukebox and the level-load music, use the master volume, as in retail. The setting is live and can be adjusted while the game is running.
+
+While a dialogue line plays that asks for it, the game lowers everything but speech and the score by `s_voiceDuckVolume` (4.5 dB), over 0.2 s, and brings it back over 0.5 s once the line ends. Retail PREY does the same. In the Roadhouse, for example, the jukebox dips while Tommy speaks.
 
 ```cfg
 seta s_musicVolume 0.2

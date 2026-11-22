@@ -44,8 +44,10 @@ extern idCVar s_musicvolume_dB;
 // cheats resets every other unarchived CVar, which switched a dedicated server's
 // silence (and a player's own s_noSound) back off.
 idCVar s_noSound( "s_noSound", "0", CVAR_SOUND | CVAR_BOOL | CVAR_NOCHEAT, "returns NULL for all sounds loaded and does not update the sound rendering" );
-idCVar s_volume( "s_volume", "0.5", CVAR_ARCHIVE | CVAR_FLOAT, "master volume (0-1)", 0.0f, 1.0f );
-idCVar s_musicVolume( "s_musicVolume", "0.5", CVAR_ARCHIVE | CVAR_FLOAT, "music volume (0-1)", 0.0f, 1.0f );
+// Linear views of s_volume_dB and s_musicvolume_dB, kept in step by SyncVolumeAliasCVars; both
+// default to retail's 0 dB. The music volume replaces the master volume for SC_MUSIC sounds.
+idCVar s_volume( "s_volume", "1", CVAR_ARCHIVE | CVAR_FLOAT, "master volume (0-1) for every sound but SC_MUSIC", 0.0f, 1.0f );
+idCVar s_musicVolume( "s_musicVolume", "1", CVAR_ARCHIVE | CVAR_FLOAT, "music volume (0-1) for SC_MUSIC sounds, in place of the master volume", 0.0f, 1.0f );
 idCVar s_dialogueVolume( "s_dialogueVolume", "1", CVAR_ARCHIVE | CVAR_FLOAT, "spoken dialogue volume (0-1), independent of music and multiplayer voice chat", 0.0f, 1.0f );
 idCVar ui_subtitles( "ui_subtitles", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_BOOL | CVAR_NOCHEAT, "show installed dialogue transcripts during playback" );
 idCVar ui_subtitleScale( "ui_subtitleScale", "1", CVAR_GUI | CVAR_ARCHIVE | CVAR_FLOAT | CVAR_NOCHEAT, "subtitle text size", 1.0f, 2.0f );
@@ -53,8 +55,6 @@ idCVar ui_subtitleBackground( "ui_subtitleBackground", "0.6", CVAR_GUI | CVAR_AR
 idCVar ui_subtitleSpeakers( "ui_subtitleSpeakers", "1", CVAR_GUI | CVAR_ARCHIVE | CVAR_BOOL | CVAR_NOCHEAT, "show available subtitle speaker names" );
 idCVar s_logSubtitles( "s_logSubtitles", "0", CVAR_SOUND | CVAR_BOOL, "print SOUND_SUBTITLE whenever the Prey sound-shader subtitle queue changes: sound time, shader, cue, channel start and whether a hardware voice is playing it" );
 idCVar ui_subtitleUntranscribed( "ui_subtitleUntranscribed", "1", CVAR_GUI | CVAR_ARCHIVE | CVAR_BOOL | CVAR_NOCHEAT, "mark spoken dialogue that has no transcript instead of leaving it blank" );
-idCVar s_speakerFraction( "s_speakerFraction", "0.65", CVAR_ARCHIVE | CVAR_FLOAT, "speaker attenuation fraction" );
-idCVar s_radioChatterFraction( "s_radioChatterFraction", "0.9", CVAR_ARCHIVE | CVAR_FLOAT, "radio chatter attenuation fraction" );
 idCVar s_frequencyShift( "s_frequencyShift", "1", CVAR_BOOL, "enable sound shader frequency shift playback" );
 idCVar s_useOpenAL( "s_useOpenAL", "1", CVAR_ARCHIVE | CVAR_BOOL, "use OpenAL audio backend" );
 idCVar s_deviceName( "s_deviceName", "", CVAR_ARCHIVE, "OpenAL device name override" );
@@ -1002,15 +1002,25 @@ idSoundChannel::UpdateVolume), so the load music keeps the level it had there.
 */
 float idSoundSystemLocal::LoadingMusicGain() const
 {
-	const float masterVolume = idMath::ClampFloat( 0.0f, 16.0f, FLOAT_IS_NAN( s_volume.GetFloat() ) ? 0.0f : s_volume.GetFloat() );
-	float gain = loadingMusicParms.volume;
-	const bool music = ( loadingMusicParms.soundShaderFlags & SSF_MUSIC ) != 0 || loadingMusicParms.soundClass == SOUND_CLASS_MUSICAL;
-	if( music )
+	// as retail: the music volume in place of the master volume for SC_MUSIC, the master
+	// volume alone for the rest (every stock mapload_* shader)
+	float volume;
+	if( loadingMusicParms.soundClass == SOUND_CLASS_MUSICAL )
 	{
-		gain *= musicMuted ? 0.0f : idMath::ClampFloat( 0.0f, 1.0f, s_musicVolume.GetFloat() );
+		volume = idMath::ClampFloat( 0.0f, 1.0f, FLOAT_IS_NAN( s_musicVolume.GetFloat() ) ? 0.0f : s_musicVolume.GetFloat() );
 	}
+	else
+	{
+		volume = idMath::ClampFloat( 0.0f, 16.0f, FLOAT_IS_NAN( s_volume.GetFloat() ) ? 0.0f : s_volume.GetFloat() );
+	}
+	const bool music = ( loadingMusicParms.soundShaderFlags & SSF_MUSIC ) != 0 || loadingMusicParms.soundClass == SOUND_CLASS_MUSICAL;
+	if( music && musicMuted )
+	{
+		volume = 0.0f;
+	}
+	float gain = loadingMusicParms.volume;
 	gain = FLOAT_IS_NAN( gain ) ? 0.0f : idMath::ClampFloat( 0.0f, 16.0f, gain );
-	return idMath::ClampFloat( 0.0f, 16.0f, gain * masterVolume );
+	return idMath::ClampFloat( 0.0f, 16.0f, gain * volume );
 }
 
 /*

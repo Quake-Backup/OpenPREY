@@ -3046,6 +3046,10 @@ bool R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 
 	tr.tiledViewport[0] = width;
 	tr.tiledViewport[1] = height;
+	// The window's size for BeginFrame (tiledWindow), which every tile after
+	// the first would otherwise take from glConfig, by then the capture's.
+	tr.tiledWindow[0] = oldWidth;
+	tr.tiledWindow[1] = oldHeight;
 
 	// Only tiled captures need to disregard unadjusted light scissors. A
 	// window-sized screenshot must preserve the frame's rendering semantics;
@@ -3146,6 +3150,8 @@ bool R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 	tr.viewportOffset[1] = 0;
 	tr.tiledViewport[0] = 0;
 	tr.tiledViewport[1] = 0;
+	tr.tiledWindow[0] = 0;
+	tr.tiledWindow[1] = 0;
 
 	R_StaticFree( temp );
 	R_StaticFree( rgbaTemp );
@@ -6698,6 +6704,8 @@ void idRenderSystemLocal::Clear( void ) {
 	tiledViewport[1] = 0;
 	tiledWindow[0] = 0;
 	tiledWindow[1] = 0;
+	tiledUIViewport[0] = tiledUIViewport[1] = tiledUIViewport[2] = tiledUIViewport[3] = 0;
+	tiledUIViewportSaved = false;
 	backEndRenderer = BE_BAD;
 	backEndRendererHasVertexPrograms = false;
 	backEndRendererMaxLight = 1.0f;

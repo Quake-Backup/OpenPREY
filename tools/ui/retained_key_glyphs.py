@@ -24,8 +24,8 @@ The module is self-contained: it takes the generator's Document (its
 from __future__ import annotations
 
 BOX = 22.0                    # dp: the box the art is drawn in
-GAP = 0.3                     # em between chips
-GROUP_GAP = 0.35              # em more between the last keyboard or mouse key and the first controller button
+GAP = 0.22                    # em between chips
+GROUP_GAP = 0.3               # em more between the last keyboard or mouse key and the first controller button
 BODY = "chain"                # the body face (build_retained_screens.BODY)
 PLACEHOLDER = "#str_20128"    # a bound text's key before its first binding
 
@@ -422,7 +422,10 @@ def pad_slot(doc, ident: str, state: str) -> dict:
 PAD_WIDTHS = {kind: (width, None) for kind, (width, _) in _pad_arts().items()}
 
 
-def bound_keys(doc, ident: str, state: str, keys: int = 2, pads: int = 2) -> list:
+MENU_BINDS = 3    # keys of each device family an action keeps (idKeyInput::MAX_MENU_BINDS)
+
+
+def bound_keys(doc, ident: str, state: str, keys: int = MENU_BINDS, pads: int = MENU_BINDS) -> list:
     """The chips of the action whose binding state is `state`: `keys`
     keyboard or mouse keys, then `pads` controller buttons, each shown while
     the action has that many (`state`.keyCount, `state`.padCount)."""

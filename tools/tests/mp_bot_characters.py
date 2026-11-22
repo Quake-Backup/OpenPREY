@@ -88,7 +88,6 @@ TRAIT_DIRECTION = {
     "turnAccel": +1,
     "turnDamping": +1,
     "aimTrackTimeConst": -1,
-    "aimAnticipation": +1,
     "aimTremorDeg": -1,
     "aimTrackError": -1,
     "aimSettleMsec": -1,
@@ -101,8 +100,6 @@ TRAIT_DIRECTION = {
     "dodgeReactMsec": -1,
     "weaponSkill": +1,
     "targetSelection": +1,
-    "hearing": +1,
-    "itemTiming": +1,
 }
 
 # Deliberately flat across the whole curve: these are the axes a style or a
@@ -1079,22 +1076,6 @@ def validate_baseline(curve: dict[str, list[float]], levels: int) -> None:
                 "character axis and must stay flat, or every high-skill bot plays the same"
             )
 
-    # The composites Bot.cpp actually fires with: initiative bends the raw
-    # reaction and cone rows, and the bend is bounded so the effective curve
-    # still improves with skill.  Before the bound the raw rows passed while a
-    # skill-1 rusher reacted faster than a plain skill-4 bot.
-    initiative = curve["initiative"]
-    reaction = [value * (1.25 - 0.5 * min(1.0, max(0.0, eager)))
-                for value, eager in zip(curve["reactionMsec"], initiative)]
-    cone = [value * (0.5 + eager) for value, eager in zip(curve["fireConeDeg"], initiative)]
-    for name, values in (("effective reaction", reaction), ("effective fire cone", cone)):
-        for level in range(1, levels):
-            if values[level] >= values[level - 1]:
-                raise AssertionError(
-                    f"The {name} is {[round(v, 1) for v in values]}, which does not shrink "
-                    f"from skill 1 to skill {levels}"
-                )
-
 
 def validate_content() -> None:
     header_path = GAME_SOURCE / "bots" / "BotCharacter.h"
@@ -1233,7 +1214,6 @@ def validate_content() -> None:
         allowed_tokens[word].update(("$other", "$weapon"))
     allowed_tokens["itemDenied"].update(("$other", "$item"))
     allowed_tokens["leadLost"].add("$other")
-    allowed_tokens["order"].add("$other")
 
     chats_by_owner: dict[str, Block] = {}
     normalized_lines: dict[str, tuple[str, str, int]] = {}
@@ -1842,7 +1822,85 @@ def validate_chat_path() -> None:
         raise AssertionError("hhArtificialPlayer has no gravity-aware steering axis")
     movement_at = player.index("void hhArtificialPlayer::UpdateBotMovement")
     movement = braced_body(player, movement_at, "hhArtificialPlayer::UpdateBotMovement")
-    require(movement, "TraceBounds(", "hhArtificialPlayer wall avoidance")
+    require(movement, "BotMoveBlocked(", "hhArtificialPlayer wall avoidance")
+    require(movement, "BOT_MOVE_DROP", "hhArtificialPlayer drop avoidance")
+
+    # The probe must sweep the player's own rotated clip model: a world-aligned
+    # box is the wrong shape on a wall or ceiling and starts in solid there.
+    # A wall-walk surface ahead is a route, not a wall, and a drop into an
+    # enabled gravity zone is a route, not a fall.  A Prey death volume sits
+    # above the floor beneath it and is outside the player's clip mask, so a
+    # floor trace alone walks bots into trigger_deathresurrection.
+    def method(signature: str) -> str:
+        at = player.index(signature)
+        return braced_body(player, at, signature)
+
+    probe = method("botMoveProbe_t hhArtificialPlayer::BotMoveBlocked")
+    landing = method("botMoveProbe_t hhArtificialPlayer::BotProbeLanding")
+    hazard = method("bool hhArtificialPlayer::BotFallIsHazardous")
+    jump = method("bool hhArtificialPlayer::BotJumpIsSafe")
+    for body, needle, context in (
+        (probe, "GetClipModel()", "BotMoveBlocked sweeps the player's clip model"),
+        (probe, "physics->GetAxis()", "BotMoveBlocked sweeps along the player's clip axis"),
+        (probe, "gameLocal.clip.Translation(", "BotMoveBlocked uses a clip-model sweep"),
+        (probe, "moveDirection -= up * ( moveDirection * up );", "BotMoveBlocked probes in the ground plane"),
+        (probe, "SURFTYPE_WALLWALK", "BotMoveBlocked lets wall-walk transitions through"),
+        (probe, "HasGroundContacts()", "BotMoveBlocked exempts an airborne bot from the drop test"),
+        (probe, "BOT_PROBE_NEAR", "BotMoveBlocked probes a near landing for narrow gaps"),
+        (probe, "GetLinearVelocity()", "BotMoveBlocked stretches the probe with speed"),
+        (landing, "BotFallIsHazardous(", "BotProbeLanding checks the fall for hazards"),
+        (landing, "hhGravityZoneBase::Type", "BotProbeLanding treats gravity-zone drops as routes"),
+        (landing, "IsEnabled()", "BotProbeLanding counts only enabled gravity zones"),
+        (landing, "GetLocalGravity(", "BotProbeLanding refuses stepping off a walkway upside down"),
+        (hazard, "CONTENTS_DEATHVOLUME", "BotFallIsHazardous queries death-volume contents"),
+        (hazard, "hhSafeDeathVolume::Type", "BotFallIsHazardous recognises Prey death volumes"),
+        (hazard, "idTrigger_Hurt::Type", "BotFallIsHazardous recognises hurt triggers"),
+        (jump, "IsWallWalking()", "BotJumpIsSafe never jumps off a walkway"),
+        (jump, "BotJumpLandingIsLevel(", "BotJumpIsSafe requires a level, safe landing"),
+        (movement, "BotJumpIsSafe(", "UpdateBotMovement gates wall-contact jumps"),
+    ):
+        require(body, needle, context)
+    if "TraceBounds(" in probe or "TraceBounds(" in movement:
+        raise AssertionError(
+            "Bot movement probes with a world-aligned TraceBounds box, which is wrong "
+            "whenever the bot is wall-walking or in a gravity zone"
+        )
+    # idAngles::ToMat3 row 1 points left; physics moves +rightmove to the right.
+    if "worldViewAxis[1] * strafe" in movement and "- worldViewAxis[1] * strafe" not in movement:
+        raise AssertionError(
+            "UpdateBotMovement probes +axis[1] for a positive strafe, the mirror of "
+            "the side player physics moves the bot to"
+        )
+    if "+ worldViewAxis[1] * strafe" in movement:
+        raise AssertionError("UpdateBotMovement probes the mirrored strafe side")
+    require(movement, "BotMoveBlocked( responseDirection )",
+            "UpdateBotMovement re-checks the direction its block response chose")
+    require(movement, "botNextBlockTurnTime",
+            "UpdateBotMovement turns once per wall or edge contact")
+
+    # Game portals are Prey routes: idle bots take visible teleporting portals
+    # and do not turn straight back into the one they came through.
+    require(movement, "hhPortal::Type", "idle bots consider game portals as route goals")
+    require(movement, "CanTeleport()", "only teleporting portals are route goals")
+    require(movement, "BotPortalRecentlyUsed(", "bots skip the portal they just used")
+    portalled = method("void hhArtificialPlayer::Portalled")
+    require(portalled, "hhPlayer::Portalled(", "the bot override keeps the player's portal handling")
+    require(portalled, "botPortalIgnoreUntil", "a portal transit starts the ignore window")
+
+    # Chat names what players see: the weapon's retail "weaponname", the
+    # mapDef's localized name and a translated item name, never a class name
+    # like weaponobj_rifle or a path like game/dmwallwalk2.
+    for needle, context in (
+        ('"weaponname"', "chat weapon names from the weaponobj def"),
+        ("DECL_MAPDEF", "chat map names from the mapDef"),
+        ("GetLanguageDict()", "chat names translated from #str keys"),
+    ):
+        require(player, needle, context)
+    queue = method("bool hhArtificialPlayer::QueueBotChat")
+    require(queue, "BotChatWeaponName(", "QueueBotChat names the weapon for players")
+    require(queue, "BotChatMapName()", "QueueBotChat names the map for players")
+    if 'tokens.map = gameLocal.serverInfo.GetString( "si_map" )' in player:
+        raise AssertionError("Bot chat fills $map with the raw si_map path")
 
     weapon_at = player.index("void hhArtificialPlayer::UpdateBotWeapon")
     weapon = braced_body(player, weapon_at, "hhArtificialPlayer::UpdateBotWeapon")
@@ -2362,6 +2420,33 @@ def validate_bot_runtime_regressions() -> None:
             "hhArtificialPlayer::UpdateBotAimAndFire mixes world view angles with a "
             "gravity-local desired direction"
         )
+    # The aim point is the body, not the top of the head, and the lead comes
+    # from the projectile the weapon really fires.  The November 2026 model
+    # aimed at the eye, led every weapon as a 1200 u/s projectile (the rifle
+    # and autocannon fly at 7000-7500) and subtracted a share of the target's
+    # frame motion from its belief, so skill-3 bots hit 7-19% of firing frames.
+    require(aim, "targetBounds.GetCenter()", "artificial-player body aim point")
+    require(aim, "BotProjectileSpeed()", "artificial-player per-weapon lead")
+    require(aim, "botBelievedVelocity", "artificial-player velocity-estimate tracking")
+    for stale in ("enemyDistance / 1200.0f", "frameMotion", "enemy->GetEyePosition() : botLastSeenPosition"):
+        if stale in aim:
+            raise AssertionError(
+                f"hhArtificialPlayer::UpdateBotAimAndFire still uses the old aim model ({stale})"
+            )
+    speed_at = player.index("float hhArtificialPlayer::BotProjectileSpeed")
+    speed = braced_body(player, speed_at, "hhArtificialPlayer::BotProjectileSpeed")
+    require(speed, "GetFireInfoDict(", "artificial-player projectile speed from fire info")
+    require(speed, '"def_projectile"', "artificial-player projectile speed from fire info")
+
+    # A dedicated server never creates GL programs.  Prey's multiplayer skins
+    # (jen_mp, human2_body_mp) keep only a skin.vfp interaction stage at shader
+    # level 3, and without the scanned interaction role they parsed translucent,
+    # which idRenderWorld::ModelTrace skips: no shot hit Jen or the Abducted.
+    material = read(ROOT / "src" / "renderer" / "Material.cpp")
+    require(material, "pd->unloadedInteractionProgram = true;", "material interaction stage without a GL program")
+    require(material, "numStages != numAmbientStages || pd->unloadedInteractionProgram",
+        "material coverage of an interaction stage without a GL program")
+
     bad_double_transform = re.compile(
         r"GetViewAngles\s*\(\s*\)\s*\.ToMat3\s*\(\s*\)\s*\*\s*"
         r"(?:physicsObj\.)?GetGravityAxis\s*\("

@@ -39,6 +39,36 @@ bool SameCompilation(const std::array<double,12>& current, const std::array<doub
 	}
 	return true;
 }
+// openPR06: the output pixels the paths' coverage can reach: their control
+// points (which bound the curves they shape), widened by a stroke's furthest
+// join or cap and a pixel of coverage on each side. False when there is no
+// finite point to bound.
+bool ArtworkExtent(const std::vector<VectorPath>& paths, const VectorOptions& options, double extent[4]) {
+	const double maximumScale = options.transform.MaximumScale();
+	const double determinant = std::abs(options.transform.a*options.transform.d-options.transform.b*options.transform.c);
+	if (!std::isfinite(maximumScale) || maximumScale <= 0 || !std::isfinite(determinant) || determinant <= 0) return false;
+	const double minimumScale = determinant/maximumScale;
+	extent[0] = extent[1] = std::numeric_limits<double>::infinity();
+	extent[2] = extent[3] = -std::numeric_limits<double>::infinity();
+	for (const auto& path : paths) {
+		double reach = 1;
+		if (path.stroke.paint.type != PaintType::None) {
+			const double half = .5*std::max(path.stroke.widthDp,path.stroke.minimumPixels/minimumScale);
+			reach += half*std::max(path.stroke.miterLimit,std::sqrt(2.0))*maximumScale;
+		}
+		for (const auto& command : path.commands) {
+			const unsigned count = command.op == PathOperation::Cubic ? 3 : command.op == PathOperation::Quadratic ? 2 :
+				command.op == PathOperation::Close ? 0 : 1;
+			for (unsigned i = 0; i < count; ++i) {
+				const auto p = options.transform.Apply(command.points[i].Resolve(options.widthDp,options.heightDp));
+				if (!std::isfinite(p.x) || !std::isfinite(p.y)) return false;
+				extent[0] = std::min(extent[0],p.x-reach); extent[1] = std::min(extent[1],p.y-reach);
+				extent[2] = std::max(extent[2],p.x+reach); extent[3] = std::max(extent[3],p.y+reach);
+			}
+		}
+	}
+	return extent[0] <= extent[2] && extent[1] <= extent[3];
+}
 }
 namespace {
 VectorCompileBatch* deferredCompilations = nullptr;
@@ -312,9 +342,19 @@ void VectorGeometry::Render(Rml::Element& element, bool inheritOpacity) {
 	auto lower = [](double value) { return static_cast<int>(std::clamp(std::floor(value/256)*256,-1000000.0,1000000.0)); };
 	auto upper = [](double value) { return static_cast<int>(std::clamp(std::ceil(value/256)*256,-1000000.0,1000000.0)); };
 	VectorPixelBounds cachedBounds{lower(bounds.left-offsetX),lower(bounds.top-offsetY),upper(bounds.right-offsetX),upper(bounds.bottom-offsetY)};
+	// openPR06: artwork wholly inside the visible region compiles the same
+	// mesh whatever region bounds it, so it keys on its own extent instead.
+	// A page growing from the bottom bar moves its clip and its rows together;
+	// keyed on the clip, each row recompiled whenever an edge crossed into
+	// another cache region, and that dropped its sub-pixel phases too.
+	double extent[4];
+	if (!localMesh && ArtworkExtent(paths,options,extent) && extent[0] >= bounds.left-offsetX && extent[1] >= bounds.top-offsetY &&
+			extent[2] <= bounds.right-offsetX && extent[3] <= bounds.bottom-offsetY) {
+		cachedBounds = {lower(extent[0]),lower(extent[1]),upper(extent[2]),upper(extent[3])};
+	}
 	// Only where the view alone clips it: a scissored element keeps the visible
 	// region, so its compilation still matches a fresh one vertex for vertex.
-	if (sliding && !state.scissor_region.Valid()) {
+	else if (sliding && !state.scissor_region.Valid()) {
 		// The view's region slides across a moving element, and each new block
 		// would recompile it (a scrolling data layer several views tall). Its
 		// own box does not move in this space: cover that as well, while the
@@ -364,7 +404,12 @@ void VectorGeometry::Render(Rml::Element& element, bool inheritOpacity) {
 	bool moving = false;
 	if (valid) {
 		moving = !SameCompilation(signature,previous);
-		for (size_t i = 0; moving && i < signature.size(); ++i) if (i != 6 && i != 7 && signature[i] != previous[i]) moving = false;
+		// openPR06: the region it compiles for (8 to 11) may change as it
+		// slides, under a clip that moves with it; it is still moving, and
+		// keeps the compilations it made where that region differed.
+		// An element that stays put under a changing clip compiles exactly.
+		moving = moving && sliding;
+		for (size_t i = 0; moving && i < 6; ++i) if (signature[i] != previous[i]) moving = false;
 	}
 	previous = signature; valid = true;
 	slidingRenders = moving ? std::min(slidingRenders+1,SlidingHalfPhaseRenders) : 0;

@@ -2900,6 +2900,8 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 		skipCinematic = false;		
 	}
 
+	ReconcileArtificialPlayers();
+
 	// show any debug info for this frame
 	RunDebugInfo();
 	D_DrawDebugLines();
@@ -3359,18 +3361,31 @@ void idGameLocal::RebindArtificialPlayers( void ) {
 
 /*
 ================
-idGameLocal::RunDebugInfo
+idGameLocal::ReconcileArtificialPlayers
+
+openPR06: a multiplayer server's artificial players, one added or removed
+each frame until they number g_artificialPlayerCount (at most the free
+player slots), once a listen server's own player is in. It ran inside
+RunDebugInfo, which a GOLD build leaves at once without developer 1, so the
+count (Create Server's Bots) did nothing in ordinary play; it runs every
+frame now.
 ================
 */
-void idGameLocal::RunDebugInfo( void ) {
-#if GOLD //HUMANHEAD rww
-	if (!developer.GetBool()) {
-		return;
-	}
-#endif //HUMANHEAD END
-
+void idGameLocal::ReconcileArtificialPlayers( void ) {
 	//HUMANHEAD rww
 	if (isMultiplayer && isServer) {
+		// openPR06: a listen server's own player begins after the map change's
+		// settling frames, in the first free slot. A bot reconciled in before it
+		// took that slot, and the host's arrival then removed the bot and
+		// lowered the count (ServerClientConnect), so a count set before the
+		// server started came to nothing. Wait for the host; a dedicated
+		// server's localClientNum is -1 once its map runs.
+		if ( localClientNum >= 0 && localClientNum < MAX_CLIENTS ) {
+			const idEntity *host = entities[ localClientNum ];
+			if ( host == NULL || !host->IsType( hhPlayer::Type ) || host->IsType( hhArtificialPlayer::Type ) ) {
+				return;
+			}
+		}
 		int numExistingAP = 0;
 		int numPlayerSlots = 0;
 		const int maxClients = serverInfo.GetInt( "si_maxPlayers" );
@@ -3401,6 +3416,19 @@ void idGameLocal::RunDebugInfo( void ) {
 		}
 	}
 	//HUMANHEAD END
+}
+
+/*
+================
+idGameLocal::RunDebugInfo
+================
+*/
+void idGameLocal::RunDebugInfo( void ) {
+#if GOLD //HUMANHEAD rww
+	if (!developer.GetBool()) {
+		return;
+	}
+#endif //HUMANHEAD END
 
 	idEntity *ent;
 	idPlayer *player;

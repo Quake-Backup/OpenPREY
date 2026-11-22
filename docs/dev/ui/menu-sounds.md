@@ -167,9 +167,24 @@ alone.
   click was in the game world's first mix. With `com_skipLoadingContinue 1`,
   neither started.
 
+## Prey (openPR06)
+
+Prey declares neither stock cue, and its documents name the sound each event
+plays (`soundClick`, `soundTick` and the rest, routed through the session's
+`play` command). Under `HUMANHEAD` the router does not play the stock
+vocabulary. Instead it holds each cue until the session has answered the
+input. If that answer played no menu sound (the session calls
+`UI_RetainedMenuSoundPlayed` for every one it plays), the router plays a
+quiet hover or step on channel 4, spaced so a sweep never piles up. A value
+slider's step also becomes a step cue there. The rules, sounds and levels
+are in
+[the Prey visual specification, section 8](../prey-ui-visual-design.md#feedback-cues);
+`ui_retainedCueSounds 0` turns them off.
+
 ## Limits
 
-- Documents cannot name their own sounds. World terminals (`guisound_beep2`)
+- Documents cannot name their own sounds in openQ4's Quake 4 screens; Prey's
+  documents name theirs through session verbs. World terminals (`guisound_beep2`)
   wait for retained world-surface output, which does not exist yet.
 - The weapon wheel (silent by design) and the HUD documents have no controls
   and make no cues.

@@ -160,11 +160,12 @@ static void ServerBrowserMatchLimit( const char *type, const char *&label, const
 }
 
 static const char *ServerBrowserGameType( const char *type ) {
+	// openPR06: Prey's Deathmatch reaches the browser as "deathmatch".
 	static const char *tokens[] = { "DM", "Tourney", "Team DM", "CTF", "Arena CTF", "DeadZone",
-		"Duel", "Clan Arena", "Freeze Tag", "Red Rover", "One Flag CTF", "Arena One Flag CTF" };
+		"Duel", "Clan Arena", "Freeze Tag", "Red Rover", "One Flag CTF", "Arena One Flag CTF", "deathmatch" };
 	static const char *labels[] = { "#str_107679", "#str_107676", "#str_107677", "#str_107678",
 		"#str_107681", "#str_122001", "#str_122046", "#str_122047", "#str_122048", "#str_122049",
-		"#str_107680", "#str_107682" };
+		"#str_107680", "#str_107682", "#str_107679" };
 	for ( int i = 0; i < static_cast<int>( sizeof( tokens ) / sizeof( tokens[0] ) ); ++i ) {
 		if ( !idStr::Icmp( type, tokens[i] ) ) {
 			return common->GetLanguageDict()->GetString( labels[i] );
@@ -282,19 +283,14 @@ static idStr ServerBrowserModifierLabels( const idDict &info ) {
 	return labels;
 }
 
+// openPR06: the game type filter's choices after Any, in its order: Prey's
+// si_gameType values (si_gameTypeArgs in src/game/gamesys/SysCvar.cpp, less
+// singleplayer) as MultiPrey's Game type filter offers them (#str_20194:
+// Any, Deathmatch, Team DM). openQ4's list held Quake 4's, so either Prey
+// filter hid every Prey server.
 const char* l_gameTypes[] = {
-	"DM",
-	"Tourney",
+	"deathmatch",
 	"Team DM",
-	"CTF",
-	"Arena CTF",
-	"DeadZone",
-	"Duel",
-	"Clan Arena",
-	"Freeze Tag",
-	"Red Rover",
-	"One Flag CTF",
-	"Arena One Flag CTF",
 	NULL
 };
 
@@ -391,6 +387,36 @@ void idServerScan::SetupLANScan( ) {
 idServerScan::InfoResponse
 ================
 */
+// openPR06: whether two LAN replies are one server heard over two links. The
+// LAN sweep reaches a dual-stack host over IPv4 and over every link's IPv6
+// link-local address (the multicast goes out on each), and the host answers
+// on each, so one server was listed once per network adapter. A reply on the
+// same port, at least one of the two from a link-local address, with the same
+// player count and server info (the listed one also carries si_mapName, which
+// InfoResponse adds) is the same server. Two hosts reached over IPv4 alone are
+// never merged.
+static bool ServerScan_IsLinkLocal6( const netadr_t &adr ) {
+	return adr.type == NA_IP6 && adr.ip6[ 0 ] == 0xfe && ( adr.ip6[ 1 ] & 0xc0 ) == 0x80;
+}
+
+static bool ServerScan_SameLanServer( const networkServer_t &listed, const networkServer_t &reply ) {
+	if ( listed.adr.port != reply.adr.port || listed.clients != reply.clients ||
+		( !ServerScan_IsLinkLocal6( listed.adr ) && !ServerScan_IsLinkLocal6( reply.adr ) ) ) {
+		return false;
+	}
+	int matched = 0;
+	for ( int i = 0; i < reply.serverInfo.GetNumKeyVals(); i++ ) {
+		const idKeyValue *kv = reply.serverInfo.GetKeyVal( i );
+		const idKeyValue *other = listed.serverInfo.FindKey( kv->GetKey() );
+		if ( other == NULL || other->GetValue().Cmp( kv->GetValue() ) != 0 ) {
+			return false;
+		}
+		matched++;
+	}
+	const int extra = listed.serverInfo.GetNumKeyVals() - matched;
+	return extra == 0 || ( extra == 1 && reply.serverInfo.FindKey( "si_mapName" ) == NULL && listed.serverInfo.FindKey( "si_mapName" ) != NULL );
+}
+
 int idServerScan::InfoResponse( networkServer_t &server ) {
 	if ( ( scan_state != LAN_SCAN && scan_state != NET_SCAN ) ||
 		server.clients < 0 || server.clients > MAX_ASYNC_CLIENTS || Num() >= MAX_BROWSER_SERVERS ) {
@@ -423,6 +449,18 @@ int idServerScan::InfoResponse( networkServer_t &server ) {
 		for ( int i = 0; i < Num() ; i++ ) {
 			if ( Sys_CompareNetAdrBase( (*this)[ i ].adr, server.adr ) && (*this)[ i ].adr.port == server.adr.port ) {
 				common->DPrintf( "idServerScan::InfoResponse LAN_SCAN: duplicate server %s\n", serv.c_str() );
+				return true;
+			}
+		}
+		for ( int i = 0; i < Num() ; i++ ) {
+			if ( ServerScan_SameLanServer( (*this)[ i ], server ) ) {
+				// The IPv4 address is the one to show and to join by.
+				if ( ServerScan_IsLinkLocal6( (*this)[ i ].adr ) && !ServerScan_IsLinkLocal6( server.adr ) ) {
+					(*this)[ i ].adr = server.adr;
+					(*this)[ i ].ping = server.ping;
+					++revision;
+				}
+				common->DPrintf( "idServerScan::InfoResponse LAN_SCAN: %s is a listed server on another link\n", serv.c_str() );
 				return true;
 			}
 		}

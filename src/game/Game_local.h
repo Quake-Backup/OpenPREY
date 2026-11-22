@@ -869,6 +869,7 @@ protected:	// HUMANHEAD
 	void					RegisterLocationsWithSoundWorld();
 	//HUMANHEAD END
 	void					ShowTargets( void );
+	void					ReconcileArtificialPlayers( void );	// openPR06
 	void					RunDebugInfo( void );
 
 	void					InitScriptForMap( void );

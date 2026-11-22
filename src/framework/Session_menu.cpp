@@ -119,6 +119,10 @@ idCVar ui_retainedCaptureLoadFade( "ui_retainedCaptureLoadFade", "0", CVAR_GUI |
 // retained MultiPrey page (createLan, createDedicated).
 idCVar net_menulanserver( "net_menulanserver", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "Create Server's server type: 0 Internet, 1 LAN" );
 idCVar net_serverMenuDedicated( "net_serverMenuDedicated", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "Create Server starts a dedicated server" );
+// openPR06: Create Server's Bots. StartMenuServer hands it to the game's
+// g_artificialPlayerCount, which only a running server reads and the bot
+// commands rewrite, so the page keeps its own archived count.
+idCVar net_serverMenuBots( "net_serverMenuBots", "0", CVAR_GUI | CVAR_INTEGER | CVAR_ARCHIVE, "Create Server's bots: the artificial players a server the menu starts fills free player slots with", 0, 31 );
 
 static bool Session_RetainedScreensEnabled( void ) {
 #ifdef ID_DEDICATED
@@ -3408,7 +3412,7 @@ idSessionLocal::RetainedControlsKey
 
 While the CONTROLS page waits for a key it takes the next key pressed, as
 the stock binding field does: Escape, Start or Back cancel, Backspace or
-Delete clear the row, any other key joins its keys (at most two of each device
+Delete clear the row, any other key joins its keys (at most three of each device
 family, idKeyInput::BindForMenu). The key's release and characters are its own. Out of
 a wait, Delete or Backspace on a binding row clears it; on the device tabs'
 rows they reach the page. openPR06's Options page takes keys the same way
@@ -4516,6 +4520,7 @@ void idSessionLocal::HandleRestartMenuCommands( const char *menuCommand ) {
 			if ( args.Argc() - icmd >= 1 ) {
 				idStr snd = args.Argv(icmd++);
 				sw->PlayShaderDirectly(snd);
+				UI_RetainedMenuSoundPlayed();
 			}
 			continue;
 		}
@@ -4549,6 +4554,7 @@ void idSessionLocal::HandleIntroMenuCommands( const char *menuCommand ) {
 			if ( args.Argc() - i >= 1 ) {
 				idStr snd = args.Argv(i++);
 				menuSoundWorld->PlayShaderDirectly(snd);
+				UI_RetainedMenuSoundPlayed();
 			}
 			continue;
 		}
@@ -5735,6 +5741,9 @@ void idSessionLocal::HandleMainMenuCommands( const char *menuCommand ) {
 					snd = "guisounds_menu_clickin";
 				}
 				menuSoundWorld->PlayShaderDirectly( snd, channel );
+				// openPR06: a retained menu's quiet cue for the same input stays
+				// silent beside this sound (UserInterfaceRetained.cpp).
+				UI_RetainedMenuSoundPlayed();
 
 			}
 			continue;
@@ -6142,6 +6151,10 @@ bool idSessionLocal::StartMenuServer() {
 			return false;
 		}
 	}
+
+	// openPR06: the bots the page asked for; the game fills free player
+	// slots with them once the map runs (idGameLocal::ReconcileArtificialPlayers).
+	cvarSystem->SetCVarInteger( "g_artificialPlayerCount", net_serverMenuBots.GetInteger() );
 
 	if ( dedicated ) {
 		cvarSystem->SetCVarInteger( "net_serverDedicated", 1 );
@@ -6927,6 +6940,10 @@ void idSessionLocal::MenuEvent( const sysEvent_t *event ) {
 	SyncMainMenuSettingsScrollPages( guiActive );
 }
 
+#ifndef ID_DEDICATED
+static void Session_SyncPreyOptionsVideoPreset( idUserInterface *page );
+#endif
+
 /*
 =================
 idSessionLocal::GuiFrameEvents
@@ -6970,6 +6987,11 @@ void idSessionLocal::GuiFrameEvents() {
 	UpdateRetainedMultiplayerPage();
 	UpdateRetainedJoinGame();
 	UpdateRetainedSettingsPage();
+#ifndef ID_DEDICATED
+	if ( guiRetainedSettingsPage != NULL && guiActive == guiRetainedSettingsPage ) {
+		Session_SyncPreyOptionsVideoPreset( guiActive );
+	}
+#endif
 	PrefetchRetainedNextPages();
 	UpdateRetainedNotices();
 	UpdateBrowserTooltip();
@@ -7693,7 +7715,7 @@ typedef struct retainedCreateSetting_s {
 static const retainedCreateSetting_t RETAINED_CREATE_SETTINGS[] = {
 	{ "createLan",			"lan",			"net_menulanserver",		0, 1,	false },
 	{ "createDedicated",	"dedicated",	"net_serverMenuDedicated",	0, 1,	true },
-	{ "createAutoBalance",	"autobalance",	"si_autobalance",			0, 1,	true },
+	{ "createAutoBalance",	"autobalance",	"g_balanceTDM",				0, 1,	true },	// openPR06: Prey's team balance
 	{ "createFragLimit",	"fraglimit",	"si_fragLimit",				0, 999,	false },
 	{ "createCaptureLimit",	"capturelimit",	"si_captureLimit",			1, 999,	false },
 	{ "createControlTime",	"controltime",	"si_controlTime",			1, 999,	false },
@@ -7713,7 +7735,7 @@ static const retainedCreateSetting_t RETAINED_CREATE_SETTINGS[] = {
 	{ "createWarmup",		"warmup",		"si_warmup",				0, 1,	true },
 	{ "createVoice",		"voice",		"si_voiceChat",				0, 1,	true },
 	{ "createBuying",		"buying",		"si_isBuyingEnabled",		0, 2,	false },	// Session_RetainedCreateValue
-	{ "createBots",			"bots",			"bot_minPlayers",			0, 16,	false },
+	{ "createBots",			"bots",			"net_serverMenuBots",		0, 31,	false },	// openPR06: StartMenuServer passes it on
 	{ "createBotSkill",		"botskill",		"bot_skill",				1, 5,	false },
 	// openQ4's match rules, on the advanced dialog's MATCH and RULES tabs.
 	{ "createShuffle",		"shuffle",		"si_shuffle",				0, 1,	true },
@@ -9451,6 +9473,36 @@ static void Session_PublishPreyChoiceList( idUserInterface *page, const char *pr
 	page->SetStateInt( prefix, selected );
 }
 
+// The Quality Preset row's entry for com_performancePreset.
+static int Session_PreyVideoPresetIndex( void ) {
+	int preset = 0;
+	for ( int i = 0; i < PREY_VIDEO_PRESET_COUNT; ++i ) {
+		if ( !idStr::Icmp( PREY_VIDEO_PRESETS[ i ], cvarSystem->GetCVarString( "com_performancePreset" ) ) ) {
+			preset = i;
+		}
+	}
+	return preset;
+}
+
+/*
+The Quality Preset row is the page's own state, not a CVar binding, so a
+preset applied from elsewhere (the console's applyPerformancePreset) left it
+naming the old preset while the rows the preset sets moved. Each frame the
+page is up, the row follows com_performancePreset. Apply Changes still lights,
+as it does for a preset picked on the page: the applied preset is unchanged
+until the video restart.
+*/
+static void Session_SyncPreyOptionsVideoPreset( idUserInterface *page ) {
+	if ( page == NULL ) {
+		return;
+	}
+	const int preset = Session_PreyVideoPresetIndex();
+	if ( page->State().GetInt( "video.preset" ) != preset ) {
+		page->SetStateInt( "video.preset", preset );
+		page->StateChanged( common->GetPresentationTime() );
+	}
+}
+
 static void Session_PublishPreyOptionsVideo( idUserInterface *page, bool applied ) {
 	if ( page == NULL ) {
 		return;
@@ -9468,13 +9520,7 @@ static void Session_PublishPreyOptionsVideo( idUserInterface *page, bool applied
 	Session_PublishPreyChoiceList( page, "video.refresh", PREY_VIDEO_REFRESH, names, values, cvarSystem->GetCVarString( "r_displayRefresh" ) );
 	BuildMainMenuFrameLimitChoices( names, values );
 	Session_PublishPreyChoiceList( page, "video.maxfps", PREY_VIDEO_MAXFPS, names, values, cvarSystem->GetCVarString( "com_maxfps" ) );
-	int preset = 0;
-	for ( int i = 0; i < PREY_VIDEO_PRESET_COUNT; ++i ) {
-		if ( !idStr::Icmp( PREY_VIDEO_PRESETS[ i ], cvarSystem->GetCVarString( "com_performancePreset" ) ) ) {
-			preset = i;
-		}
-	}
-	page->SetStateInt( "video.preset", preset );
+	page->SetStateInt( "video.preset", Session_PreyVideoPresetIndex() );
 	static idStr startedWithApi;
 	static bool haveStartedWithApi = false;
 	if ( !haveStartedWithApi ) {
@@ -11858,6 +11904,19 @@ void idSessionLocal::UpdateRetainedJoinGame() {
 	if ( join == NULL ) {
 		return;
 	}
+	// openPR06: MultiPrey's filter rows set their CVars directly; the list
+	// follows each change at once, as the stock page's Apply Filters did.
+	static idStr filtersApplied;
+	const idStr filters = va( "%d %d %d %d %s", cvarSystem->GetCVarInteger( "gui_filter_gameType" ),
+		cvarSystem->GetCVarInteger( "gui_filter_password" ), cvarSystem->GetCVarInteger( "gui_filter_players" ),
+		cvarSystem->GetCVarInteger( "gui_filter_idle" ), cvarSystem->GetCVarString( "gui_filter_mod" ) );
+	if ( filters != filtersApplied ) {
+		const bool first = filtersApplied.Length() == 0;
+		filtersApplied = filters;
+		if ( !first ) {
+			idAsyncNetwork::client.serverList.ApplyFilter();
+		}
+	}
 	// The list's view changed: the tiles' levelshots are published with the rows.
 	static int viewPublished = -1;
 	const bool viewChanged = ui_browserView.GetInteger() != viewPublished;
@@ -12748,8 +12807,8 @@ idSessionLocal::PrefetchRetainedNextPages
 The pages that load when first opened, parsed on the job workers while the
 page that leads to them shows. Most of a load is the document's parse and
 validation (about 180 of CONTROLS' 270 ms), so the page chosen then waits
-for its view alone: the title leads to the Single Player and SETTINGS
-pages, Single Player to Campaign, Campaign to its difficulty and CHAPTERS
+for its view alone: the title leads to the Single Player, SETTINGS and
+(openPR06) MULTIPREY pages, Single Player to Campaign, Campaign to its difficulty and CHAPTERS
 pages, the pauses to SETTINGS, and SETTINGS to CONTROLS, GAME OPTIONS,
 DISPLAY and AUDIO. Nothing parses for a page that is loaded, that the stock
 screen stands in for, or whose parse is already under way, and a parse no
@@ -12759,7 +12818,9 @@ page takes goes with the next level's unload (UI_RetainedPrefetchClear).
 void idSessionLocal::PrefetchRetainedNextPages() {
 #ifndef ID_DEDICATED
 	static const char *const leads[][5] = {
-		{ RETAINED_TITLE_GUI, RETAINED_SINGLEPLAYER_GUI, RETAINED_SETTINGSPAGE_GUI, NULL, NULL },
+		// openPR06: and to MULTIPREY, whose 3.5 MB document otherwise parsed on
+		// the main thread in the frame that opened it.
+		{ RETAINED_TITLE_GUI, RETAINED_SINGLEPLAYER_GUI, RETAINED_SETTINGSPAGE_GUI, RETAINED_MPPAGE_GUI, NULL },
 		{ RETAINED_PAUSE_GUI, RETAINED_SETTINGSPAGE_GUI, NULL, NULL, NULL },
 		{ RETAINED_PAUSE_STROGG_GUI, RETAINED_SETTINGSPAGE_GUI, NULL, NULL, NULL },
 		{ RETAINED_SINGLEPLAYER_GUI, RETAINED_CAMPAIGNS_GUI, NULL, NULL, NULL },

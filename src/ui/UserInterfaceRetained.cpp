@@ -45,6 +45,29 @@ constexpr int MaxStateBytes = 16 * 1024 * 1024;
 constexpr int MaxFrameBytes = static_cast<int>(Runtime::MaxSnapshotBytes) + MaxStateBytes + MaxStateEntries*8 + 64;
 std::vector<idUserInterfaceRetained*> diagnosticViews;
 
+#if defined(HUMANHEAD)
+// openPR06: the quiet cues the retained menus add to Prey's own menu sounds
+// (docs/dev/prey-ui-visual-design.md, section 8, "Feedback cues"). A hover or
+// keyboard move sounds openpr06_menu_hover, and a value step, toggle, list
+// opening or page turn that names no sound of its own sounds
+// openpr06_menu_step. A cue waits for the session to answer the input that
+// raised it: any menu sound that answer plays (a document's soundClick, a page
+// opening, the volume slider's sample) speaks for the input instead.
+idCVar ui_retainedCueSounds("ui_retainedCueSounds", "1", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE,
+	"play the menus' quiet hover and step sounds beside Prey's own menu sounds");
+constexpr const char* MenuHoverSound = "openpr06_menu_hover";
+constexpr const char* MenuStepSound = "openpr06_menu_step";
+// Seconds. Cues closer together than these are dropped, so a sweep across the
+// arc or a held arrow key patters rather than buzzes, and a slider dragged
+// across its rail ticks without a wall of clicks.
+constexpr double HoverCueSpacing = 0.075, StepCueSpacing = 0.055;
+// A hover this soon after a menu sound stays quiet: the pointer arriving over
+// the page a press just opened is not a new choice.
+constexpr double HoverQuietAfterSound = 0.18;
+unsigned menuSoundSerial = 0;
+double menuSoundAt = -1, menuCueAt = -1;
+#endif
+
 constexpr const char* NumberDraftPending = "ui.numberDraftsPending";
 constexpr const char* NumberDraftMessage = "ui.numberDraftMessage";
 bool NumberDraftState(const char* name) {
@@ -479,10 +502,12 @@ const PlayerSetting* FindPlayerSetting(const std::string& cvar) {
 		// Its MultiPrey page: Player Settings' data rate, Create Server's
 		// advanced rows that are not Create Server verbs, and Find Servers'
 		// filters (the players filter as the browser reads it: 1 hides full
-		// servers, 3 full and empty ones).
-		{"net_clientMaxRate",{0,0,0,true,{},{24000,32000,16000}}},{"net_serverReloadEngine",{0,0,1,true,{},{0,1}}},
+		// servers, 3 full and empty ones), Data Rate's stock three and openPR06's
+		// default, and Create Server's bot rows.
+		{"net_clientMaxRate",{0,0,0,true,{},{16000,24000,32000,128000}}},{"net_serverReloadEngine",{0,0,1,true,{},{0,1}}},
 		{"g_runMapCycle",{1}},{"gui_filter_gameType",{0,0,2,true,{},{0,1,2}}},{"gui_filter_password",{0,0,2,true,{},{0,1,2}}},
-		{"gui_filter_players",{0,0,3,true,{},{0,1,3}}},{"gui_filter_idle",{0,0,1,true,{},{0,1}}}};
+		{"gui_filter_players",{0,0,3,true,{},{0,1,3}}},{"gui_filter_idle",{0,0,1,true,{},{0,1}}},
+		{"bot_skillVariance",{0,0,2,false,{},{0,1,2}}},{"bot_chat",{0,0,2,true,{},{0,1,2}}},{"bot_characters",{1}}};
 	const auto found = settings.find(cvar);
 	return found == settings.end() ? nullptr : &found->second;
 }
@@ -901,9 +926,20 @@ struct idUserInterfaceRetained::Impl {
 	void PlayCues() {
 		auto* runtime = RuntimeView();
 		if (!runtime) return;
+#if defined(HUMANHEAD)
+		// The previous input's answer has run by now: settle its cue first.
+		SettleCue();
+#endif
 		auto cues = runtime->TakeCues();
 		if (shortcutCue) cues.push_back({*shortcutCue,{}});
 		shortcutCue.reset();
+#if defined(HUMANHEAD)
+		// A slider's step answers with no cue of the runtime's (a stock
+		// sliderDef ran no action as it moved); here it ticks, unless the
+		// session's answer sounds (the volume sliders' sample).
+		if (!sliderStep.empty()) cues.push_back({ControlCue::Kind::Activate,sliderStep});
+		sliderStep.clear();
+#endif
 		if (cues.empty()) return;
 		const auto chosen = std::find_if(cues.begin(),cues.end(),[](const ControlCue& cue) { return cue.kind == ControlCue::Kind::Activate; });
 		const auto& cue = chosen != cues.end() ? *chosen : cues.front();
@@ -913,8 +949,10 @@ struct idUserInterfaceRetained::Impl {
 #if defined(HUMANHEAD)
 		// openPR06: PREY declares neither stock cue. Its documents name the menu sound
 		// each event plays (soundClick, soundTick and the rest, Session_menu.cpp), as
-		// retail PREY's GUIs do, so the stream stays silent rather than play a
-		// default sound beside them.
+		// retail PREY's GUIs do. The cue waits for SettleCue, which plays
+		// openPR06's quieter hover or step only if that answer was silent.
+		shader = activate ? MenuStepSound : MenuHoverSound;
+		pendingCue = PendingCue{activate,cue.node,menuSoundSerial,RetainedUI_PresentationTime()};
 		const bool playStockCue = false;
 #else
 		const bool playStockCue = true;
@@ -927,6 +965,43 @@ struct idUserInterfaceRetained::Impl {
 				path.c_str(),activate ? "activate" : "focus",cue.node.c_str(),shader,playing,static_cast<unsigned>(cues.size()));
 		}
 	}
+#if defined(HUMANHEAD)
+	// The cue of the last input, until the session's answer to it has run
+	// (it runs in the same event, after PlayCues): the next input or the next
+	// frame settles it.
+	struct PendingCue { bool activate = false; std::string node; unsigned serial = 0; double at = 0; };
+	std::optional<PendingCue> pendingCue;
+	std::string sliderStep;
+	// Hover and step cues share a channel of their own: a hover never cuts a
+	// press short, nor the music on 3, and each cue cuts the one before it, so
+	// a sweep never piles up.
+	static constexpr int CueChannel = 4;
+	void SettleCue() {
+		if (!pendingCue) return;
+		const PendingCue cue = *pendingCue;
+		pendingCue.reset();
+		const double now = RetainedUI_PresentationTime();
+		const char* verdict = "played";
+		if (!ui_retainedCueSounds.GetBool()) verdict = "disabled";
+		// The answer played a menu sound of its own, which speaks for it.
+		else if (menuSoundSerial != cue.serial) verdict = "answered";
+		// Raised on a screen that has not drawn since: too late to mean anything.
+		else if (now - cue.at > 0.25) verdict = "stale";
+		else if (!cue.activate && menuSoundAt >= 0 && cue.at - menuSoundAt < HoverQuietAfterSound) verdict = "settling";
+		else if (menuCueAt >= 0 && now - menuCueAt < (cue.activate ? StepCueSpacing : HoverCueSpacing)) verdict = "spaced";
+		idSoundWorld* world = soundSystem != NULL ? soundSystem->GetPlayingSoundWorld() : NULL;
+		const char* shader = cue.activate ? MenuStepSound : MenuHoverSound;
+		if (!idStr::Cmp(verdict,"played")) {
+			if (world) world->PlayShaderDirectly(shader,CueChannel);
+			else verdict = "silent";
+			menuCueAt = now;
+		}
+		if (cvarSystem->GetCVarBool("ui_retainedTrace")) {
+			common->Printf("RETAINED_GUI_CUE path=%s cue=%s node=%s shader=%s verdict=%s\n",path.c_str(),
+				cue.activate ? "step" : "hover",cue.node.c_str(),shader,verdict);
+		}
+	}
+#endif
 	bool interactive = true, interactiveSet = false, unique = false, active = false;
 	bool suspended = false, close = false, worldReported = false;
 	// openq4_retainedGui pointer placed the cursor: it shows although the
@@ -1215,6 +1290,12 @@ struct idUserInterfaceRetained::Impl {
 				continue;
 			}
 			if (!RuntimeView()->CanDispatchControlAction(event,RetainedUI_PresentationTime())) { reject(); continue; }
+#if defined(HUMANHEAD)
+			if (event.proposal) {
+				const auto widget = RuntimeView()->GetWidgetState(event.node);
+				if (widget && widget->role == ControlRole::Slider) sliderStep = event.node;
+			}
+#endif
 			if (!event.event.empty()) { RunEvent(event.event); continue; }
 			ActionInvocation invocation; std::string error;
 			if (!RuntimeView()->ResolveAction(event.action,invocation,error,event.proposal ? &*event.proposal : nullptr) ||
@@ -1793,6 +1874,10 @@ void idUserInterfaceRetained::Trigger(int time) { HandleNamedEvent("onTrigger");
 void idUserInterfaceRetained::RunTimeEvents(int time) { /* Retained motion advances on the presentation clock in Frame. */ }
 void idUserInterfaceRetained::Redraw(int time, bool useAspectCorrection) {
 	impl->drawSucceeded = false;
+#if defined(HUMANHEAD)
+	// Every input of the frame and the session's answers to them have run.
+	impl->SettleCue();
+#endif
 	if (!useAspectCorrection) {
 		if (!impl->worldReported) { impl->Error("World-surface output is not implemented for retained menu documents"); impl->worldReported = true; }
 		return;
@@ -1829,8 +1914,9 @@ void idUserInterfaceRetained::DrawCursor() {
 	const float px = impl->cursorX*transform.sx+transform.ox, py = impl->cursorY*transform.sy+transform.oy;
 	if (impl->document.Model().canvasHeight > 0) viewport.canvasHeight = static_cast<float>(impl->document.Model().canvasHeight);
 	viewport.canvasMinWidth = static_cast<float>(impl->document.Model().canvasMinWidth);
-	// A texel of the stock cursor's 32-texel box is 1.5 dp. Over a number or
-	// text field, which a click would edit, the pointer is the I-beam; over
+	// Retail Prey's pointer box, 32 texels in 16 units of the 480-unit menu
+	// (section 11.6): a texel is 0.75 dp of the 720-dp canvas. Over a number
+	// or text field, which a click would edit, the pointer is the I-beam; over
 	// anything else, a control a press would reach included, it is the arrow.
 	auto* runtime = impl->RuntimeView();
 	const auto hovered = runtime ? runtime->HoveredControl() : std::string();
@@ -1838,7 +1924,7 @@ void idUserInterfaceRetained::DrawCursor() {
 	const bool oldViewport = renderSystem->GetUseUIViewportFor2D();
 	renderSystem->SetUseUIViewportFor2D(true);
 	UI_DrawPointerCursor(widget && widget->role == ControlRole::Number ? POINTER_TEXT : POINTER_ARROW,px,py,
-		viewport.width,viewport.height,1.5f*viewport.DpRatio());
+		viewport.width,viewport.height,.75f*viewport.DpRatio());
 	renderSystem->FlushGui(); renderSystem->SetUseUIViewportFor2D(oldViewport); renderSystem->SetColor4(1,1,1,1);
 }
 
@@ -2479,6 +2565,12 @@ bool UI_RetainedImageSource( const char *source ) {
 	return source != NULL && openq4::ui::ValidImageSource( source );
 }
 
+void UI_RetainedMenuSoundPlayed() {
+#if defined(HUMANHEAD)
+	++menuSoundSerial;
+	menuSoundAt = RetainedUI_PresentationTime();
+#endif
+}
 void UI_RetainedPrecacheImage( const char *source ) {
 	if ( source != NULL ) RetainedUI_PrecacheImage( source, false );
 }
@@ -2801,7 +2893,14 @@ void UI_RetainedSettleGameplayDocuments( bool multiplayer ) {
 	for (const char* document : GameplayDocuments(false)) DropPrefetched(document);
 }
 
+int RetainedUI_KeyGlyph( int key, idStr &label ) {
+	const KeyGlyph glyph = PromptGlyph(key);
+	label = glyph.label.c_str();
+	return glyph.kind;
+}
+
 #else
+int RetainedUI_KeyGlyph( int, idStr &label ) { label.Clear(); return 0; }
 void UI_RetainedPrefetchDocuments( const char *const *, int ) {}
 bool UI_RetainedPrefetchReady( const char * ) { return false; }
 void UI_RetainedPrefetchClear() {}
@@ -2810,5 +2909,6 @@ void UI_RetainedSettleGameplayDocuments( bool ) {}
 bool UI_RetainedPrefetched( const char * ) { return false; }
 bool UI_RetainedImageSource( const char * ) { return false; }
 void UI_RetainedPrecacheImage( const char * ) {}
+void UI_RetainedMenuSoundPlayed() {}
 void UI_RetainedReloadImage( const char * ) {}
 #endif

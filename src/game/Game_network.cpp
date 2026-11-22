@@ -1638,8 +1638,8 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 		case GAME_RELIABLE_MESSAGE_DB: {
 			idMultiplayerGame::msg_evt_t msg_evt = (idMultiplayerGame::msg_evt_t)msg.ReadByte();
 			int parm1, parm2;
-			parm1 = msg.ReadByte( );
-			parm2 = msg.ReadByte( );
+			parm1 = MP_EventParmFromByte( msg.ReadByte( ) );
+			parm2 = MP_EventParmFromByte( msg.ReadByte( ) );
 			mpGame.PrintMessageEvent( -1, msg_evt, parm1, parm2 );
 			break;
 		}
@@ -1647,8 +1647,8 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 		case GAME_RELIABLE_MESSAGE_DB_DEATH: {
 			idMultiplayerGame::msg_evt_t msg_evt = (idMultiplayerGame::msg_evt_t)msg.ReadByte();
 			int parm1, parm2;
-			parm1 = msg.ReadByte( );
-			parm2 = msg.ReadByte( );
+			parm1 = MP_EventParmFromByte( msg.ReadByte( ) );
+			parm2 = MP_EventParmFromByte( msg.ReadByte( ) );
 			int inflictorDef = gameLocal.ClientRemapDecl(DECL_ENTITYDEF, msg.ReadBits(gameLocal.entityDefBits));
 			mpGame.PrintDeathMessageEvent( -1, msg_evt, parm1, parm2, inflictorDef );
 			break;

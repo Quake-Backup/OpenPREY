@@ -9677,18 +9677,6 @@ void RB_T_FillDepthBuffer( const drawSurf_t *surf ) {
 	tri = surf->geo;
 	shader = surf->material;
 
-	// update the clip plane if needed
-	if ( backEnd.viewDef->numClipPlanes && surf->space != backEnd.currentSpace ) {
-		GL_SelectTexture( 1 );
-		
-		idPlane	plane;
-
-		R_GlobalPlaneToLocal( surf->space->modelMatrix, backEnd.viewDef->clipPlanes[0], plane );
-		plane[3] += 0.5;	// the notch is in the middle
-		glTexGenfv( GL_S, GL_OBJECT_PLANE, plane.ToFloatPtr() );
-		GL_SelectTexture( 0 );
-	}
-
 	if ( !shader->IsDrawn() ) {
 		return;
 	}
@@ -9865,8 +9853,12 @@ void RB_T_FillDepthBuffer( const drawSurf_t *surf ) {
 =====================
 RB_STD_FillDepthBuffer
 
-If we are rendering a subview with a near clip plane, use a second texture
-to force the alpha test to fail when behind that clip plane
+A mirror or portal view's clip plane is the projection's near plane
+(R_SetupObliqueNearPlane), so the depth fill needs no clip of its own. Doom 3
+also clipped here, through an alpha-notch texture on a second unit, but on
+this renderer that notch failed every alpha-tested surface in the view: the
+player model (perforated throughout) and alpha-tested decals vanished from
+OpenGL mirrors and portals while Vulkan, which never had the notch, drew them.
 =====================
 */
 void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs ) {
@@ -9876,15 +9868,6 @@ void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	}
 
 	RB_LogComment( "---------- RB_STD_FillDepthBuffer ----------\n" );
-
-	// enable the second texture for mirror plane clipping if needed
-	if ( backEnd.viewDef->numClipPlanes ) {
-		GL_SelectTexture( 1 );
-		globalImages->alphaNotchImage->Bind();
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glEnable( GL_TEXTURE_GEN_S );
-		glTexCoord2f( 1, 0.5 );
-	}
 
 	// the first texture will be used for alpha tested surfaces
 	GL_SelectTexture( 0 );
@@ -9902,13 +9885,6 @@ void RB_STD_FillDepthBuffer( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	glStencilFunc( GL_ALWAYS, 1, 255 );
 
 	RB_RenderDrawSurfListWithFunction( drawSurfs, numDrawSurfs, RB_T_FillDepthBuffer );
-
-	if ( backEnd.viewDef->numClipPlanes ) {
-		GL_SelectTexture( 1 );
-		globalImages->BindNull();
-		glDisable( GL_TEXTURE_GEN_S );
-		GL_SelectTexture( 0 );
-	}
 
 }
 
@@ -10017,14 +9993,6 @@ static int RB_STD_FillDepthBufferFiltered( drawSurf_t **drawSurfs, int numDrawSu
 		return 0;
 	}
 
-	if ( backEnd.viewDef->numClipPlanes ) {
-		GL_SelectTexture( 1 );
-		globalImages->alphaNotchImage->Bind();
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glEnable( GL_TEXTURE_GEN_S );
-		glTexCoord2f( 1, 0.5 );
-	}
-
 	GL_SelectTexture( 0 );
 	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
@@ -10035,13 +10003,6 @@ static int RB_STD_FillDepthBufferFiltered( drawSurf_t **drawSurfs, int numDrawSu
 	glStencilFunc( GL_ALWAYS, 1, 255 );
 
 	const int rendered = RB_RenderDrawSurfListWithFilter( drawSurfs, numDrawSurfs, RB_T_FillDepthBuffer, filter );
-
-	if ( backEnd.viewDef->numClipPlanes ) {
-		GL_SelectTexture( 1 );
-		globalImages->BindNull();
-		glDisable( GL_TEXTURE_GEN_S );
-		GL_SelectTexture( 0 );
-	}
 
 	return rendered;
 }
@@ -12961,11 +12922,15 @@ static bool RB_GlowEnabledForCurrentView( void ) {
 		&& globalImages->glowCompositeImage != NULL;
 }
 
+// The glow passes draw where the view is drawn: a tiled capture's offset moves
+// only a view drawn to the window, never one in a render target sized to the
+// whole capture (RB_TileOffsetX). Taking tr.viewportOffset there copied and
+// composited a rect off the target, and every tile but the first came out black.
 static void RB_GlowSetScreenRect( void ) {
 	const int viewportWidth = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
 	const int viewportHeight = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
-	const int viewportX = tr.viewportOffset[0] + backEnd.viewDef->viewport.x1;
-	const int viewportY = tr.viewportOffset[1] + backEnd.viewDef->viewport.y1;
+	const int viewportX = RB_TileOffsetX() + backEnd.viewDef->viewport.x1;
+	const int viewportY = RB_TileOffsetY() + backEnd.viewDef->viewport.y1;
 	glViewport( viewportX, viewportY, viewportWidth, viewportHeight );
 	glScissor(
 		viewportX + backEnd.viewDef->scissor.x1,
@@ -12985,11 +12950,18 @@ against stays the view's own) and box-filtered down to that 256x256 image.
 */
 static const int GLOW_IMAGE_SIZE = 256;
 
-// Viewport and scissor for a width x height rect at the view's origin, where
-// the glow image is reduced and blurred (the composite overwrites it).
+// The corner of the view where the glow image is reduced and blurred (the
+// composite overwrites it). A window-drawn capture tile can leave the view's
+// origin off the window, so the corner is the first visible pixel of the view.
+static void RB_GlowCornerOrigin( int &x, int &y ) {
+	x = Max( 0, RB_TileOffsetX() + backEnd.viewDef->viewport.x1 );
+	y = Max( 0, RB_TileOffsetY() + backEnd.viewDef->viewport.y1 );
+}
+
+// Viewport and scissor for a width x height rect at the glow corner.
 static void RB_GlowSetCornerRect( int width, int height ) {
-	const int viewportX = tr.viewportOffset[0] + backEnd.viewDef->viewport.x1;
-	const int viewportY = tr.viewportOffset[1] + backEnd.viewDef->viewport.y1;
+	int viewportX, viewportY;
+	RB_GlowCornerOrigin( viewportX, viewportY );
 	glViewport( viewportX, viewportY, width, height );
 	glScissor( viewportX, viewportY, width, height );
 }
@@ -13036,19 +13008,21 @@ static void RB_GlowDrawScreenQuad( float offsetX, float offsetY ) {
 	glEnd();
 }
 
+// Copies the whole view, or with a size the glow corner, into image.
 static void RB_GlowCopyViewToImage( idImage *image, int width = 0, int height = 0 ) {
 	if ( image == NULL ) {
 		return;
 	}
+	int x = RB_TileOffsetX() + backEnd.viewDef->viewport.x1;
+	int y = RB_TileOffsetY() + backEnd.viewDef->viewport.y1;
 	if ( width <= 0 || height <= 0 ) {
 		width = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
 		height = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+	} else {
+		RB_GlowCornerOrigin( x, y );
 	}
 	if ( width > 0 && height > 0 ) {
-		image->CopyFramebuffer(
-			tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
-			tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
-			width, height );
+		image->CopyFramebuffer( x, y, width, height );
 	}
 }
 

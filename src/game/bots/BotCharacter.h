@@ -118,17 +118,17 @@ typedef struct botTraits_s {
 	float			turnSpeed;				// degrees/second, hard cap on the view slew rate
 	float			turnAccel;				// degrees/second^2; low values make the view lag and then overshoot
 	float			turnDamping;			// damping ratio of the slew; below 1.0 overshoots and hunts, 1.0 settles cleanly
-	float			aimTrackTimeConst;		// seconds; first-order lag of the believed target position behind the real one
+	float			aimTrackTimeConst;		// seconds; how fast the believed target velocity, and the point that moves with it, follow the real ones
 	float			aimTremorDeg;			// degrees, amplitude of the continuous hand tremor
 	float			aimTremorRateHz;		// Hz, how fast that tremor wanders; low and wide reads as an unsteady hand
 	float			aimTrackError;			// degrees of cross-view lag per 100 degrees/second of target angular rate
 	float			aimSettleMsec;			// how long the aim must sit inside the fire cone before the trigger is allowed
 	float			aimLead;				// 0..1, how correctly a moving target is led with a projectile weapon
-	float			aimLeadError;			// 0..1, random fraction of the computed lead added or removed per shot
+	float			aimLeadError;			// 0..1, random fraction of the computed lead added or removed, drawn once per burst
 
 	// -- trigger --
 	float			fireConeDeg;			// half angle; the aim must be this close to the shot point to fire
-	float			holdFireTurnRate;		// degrees/second; the bot will not fire while the view is slewing faster than this
+	float			holdFireTurnRate;		// degrees/second; the bot will not fire while the view slews faster than this beyond following its aim point
 	float			burstMinMsec;			// automatic weapons: shortest burst
 	float			burstMaxMsec;			// automatic weapons: longest burst
 	float			burstPauseMsec;			// gap between bursts, during which the aim re-settles
@@ -158,7 +158,7 @@ typedef struct botTraits_s {
 	float			strafeRhythmMsec;		// base interval between combat strafe direction changes
 	float			strafeRhythmVarianceMsec;// random spread added to the strafe interval
 	float			weaponSwitchMsec;		// interval between range/weapon-choice re-evaluations
-	float			aimHeight;				// -0.4..0.4 of target height, personal vertical shot bias
+	float			aimHeight;				// -0.4..0.4 of target height above the body centre, personal vertical shot bias
 
 	// -- decision quality --
 	float			weaponSkill;			// 0..1, chance the range-correct weapon is chosen over merely the first available

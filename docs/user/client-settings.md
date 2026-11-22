@@ -16,6 +16,8 @@ openPR06 draws PREY's menus with its retained interface (`ui_retained 1`, the de
 
 The retained interface's Options page holds more: Mouse and Controller tabs, and HUD, Accessibility and System tabs under Game Options. Everything else is a console setting.
 
+Besides PREY's own menu sounds, the retained interface plays two quiet cues: a soft tick when you move between controls with the mouse, keys or a controller, and a softer click when a setting changes without a sound of its own. Set `ui_retainedCueSounds 0` to turn them off and keep only PREY's sounds.
+
 ## Recommended First Checks
 
 - Pick fullscreen or windowed mode, and borderless if you play windowed.

@@ -50,7 +50,14 @@ metadata absent from Prey's v7 game contract. The character system adds no
 virtual to the engine/game boundary and keeps `GAME_API_VERSION` at 7.
 
 `g_artificialPlayerCount` remains the compatibility count control. The server
-reconciles toward it one bot per frame, adding or removing as needed. The
+reconciles toward it one bot per frame, adding or removing as needed
+(`idGameLocal::ReconcileArtificialPlayers`, every frame; it ran in the debug
+pass, which a retail-configured build skips without `developer 1`; a listen
+server waits for the host's own player, whose slot a bot would otherwise
+take). MultiPrey's
+Create Server sets it from its Bots tab as the server starts (the menu's own
+archived `net_serverMenuBots`), beside `bot_skill`, `bot_skillVariance`,
+`bot_chat` and `bot_characters`. The
 named commands below update that count after a manual change so the automatic
 reconciler does not immediately undo the command. It is explicitly non-cheat,
 so those count updates work on an ordinary multiplayer server without enabling
@@ -71,24 +78,156 @@ The current bot movement is a bounded combat fallback:
 
 - enemies must be in the player's PVS and pass a line-of-sight trace before
   they are treated as visible;
-- idle bots may choose a visible item and otherwise wander; a goal that makes
-  less than 16 units of net progress in four seconds is ignored for five
-  seconds, so line of sight alone cannot trap a bot on an unreachable pickup;
+- idle bots may choose a visible item, or a visible game portal, and
+  otherwise wander; a goal that makes less than 16 units of net progress in
+  four seconds is ignored for five seconds, so line of sight alone cannot trap
+  a bot on an unreachable pickup;
 - aiming and movement use untransformed view angles, `GetEyeAxis()`, and bounds
   projection along the current gravity normal, so they remain meaningful when
   local gravity changes;
 - combat range, retreat health, aggression, patience, strafing rhythm, dodge
   reaction, and jump chance come from the resolved personality; and
-- a player-bounds sweep detects a nearby wall, reverses the strafe, turns the
-  wander direction, and may pulse jump.
+- every step is checked first (`hhArtificialPlayer::BotMoveBlocked`, below).
 
-That is enough for bots to fight, dodge, collect exposed pickups, and avoid
-walking continuously into a wall. It is not route planning: a bot cannot
-deliberately solve a multi-room path, choose a portal sequence, plan a
-wall-walk transition, or pursue an objective through unseen geometry. A future
-navigation layer must model Prey's changing gravity and portals before it can
-honestly promise broad map coverage. `mp_bot_navigation.py` remains deferred
-for this reason.
+### Prey's walkways, gravity, portals and voids
+
+The step check is built for Prey's arenas:
+
+- **It keeps its shape in any gravity.** It sweeps the player's own clip
+  model along the player's own axis, one step above the surface the bot stands
+  on and in that surface's plane, so it is the right box on a wall, a ceiling
+  or the inside of a sphere, and stairs or a pitched view do not read as
+  walls. The original check swept a world-aligned box from the bot's feet,
+  which started inside geometry on 13-50% of frames (on a ceiling, always)
+  and then reported a wall.
+- **A wall-walk surface ahead is a route.** Player physics carries a bot onto
+  it, so the check lets the bot walk on instead of turning away.
+- **It refuses a step off an edge.** It looks for floor beneath the step, near
+  and far, and farther still at speed. No floor within 384 units, a death volume
+  (`trigger_deathresurrection`) or an enabled `trigger_hurt` in the fall, or
+  stepping off a walkway where the restored gravity would not hold the bot
+  (off a ceiling or a wall), is a drop. A drop into an enabled gravity zone,
+  or round an outside corner of a walkway, is a route. A bot at an edge backs
+  away at full speed and turns once, and never takes a response step that is
+  itself a drop.
+- **It jumps only where the landing is level and safe.** A wall-contact jump
+  needs floor about the bot's own level just past the obstacle and a running
+  jump's length beyond it, and a wall-walking bot never jumps: in the air,
+  player physics restores normal gravity and drops it off the wall.
+- **It strafes on the side it checks.** Physics moves a positive `rightmove`
+  along the right vector, which is the negation of `idAngles::ToMat3()` row 1;
+  the original check swept the mirror side, so a strafing bot could walk off
+  an edge the check reported clear.
+- **It turns once per contact.** At a wall the bot turns 90 to 150 degrees and
+  keeps its new strafe side for 0.4 s. It had turned 80 degrees and reversed
+  its strafe every frame, which pinned it against the wall it was leaving.
+- **Portals are routes.** An idle bot treats a visible teleporting game portal
+  (`hhPortal::CanTeleport`) as a goal, weighted by its initiative. A portal
+  keeps the player's untransformed view angles, so the bot walks on away from
+  the exit; `Portalled` drops the goal and ignores that portal, and any within
+  256 units of the exit, for eight seconds, so it does not turn straight back.
+
+Measured on 22 November 2026 with six skill-3 bots (Tommy, Chuck, Trent, Roy,
+Jen, Becky) for about five minutes on each of the twelve retail deathmatch
+maps, from a dedicated server, with temporary counters in the game code.
+These figures come from one or two runs per map, and they vary by about a
+third between runs. `dmtunnelrat_8` has no portals, and in these runs no bot
+went through one of `dmescher2`'s four:
+
+| | Before | After |
+| --- | --- | --- |
+| Frames with the step check refusing a wall | 39-65% | 19-60% |
+| Wall sweeps that start inside geometry | 13-50% | 1-19% |
+| Falls per 100,000 bot-frames, `dmgravitylab_6` | 26 | 2-4 |
+| Falls per 100,000 bot-frames, `dmshuttle2` | 36 | 3 |
+| Falls per 100,000 bot-frames, `dmshuttle1` | 9 | 0-1 |
+| Portal trips in a run | at most 5 per map | 3-53 per map, on 10 of 12 maps |
+
+The time spent wall-walking or in redirected gravity rose on most wall-walk
+maps, because bots walk onto walkways instead of turning away. In the same
+runs, aim under redirected gravity was no worse than in normal gravity: the
+view after `hhPlayer::Think` matched the angles the bot set to within 1.5
+degrees on average, and the average firing error against the target's centre
+was similar either way.
+
+### Aim and hits
+
+`hhArtificialPlayer::UpdateBotAimAndFire` builds the shot in four steps:
+
+- **The aim point is the body.** It is the centre of the target's bounds,
+  moved along the target's own up axis by `aimHeight` of its height. When a
+  trace from the bot's eye to that point is blocked (sight is checked eye to
+  eye, so a target behind a rail can be visible with its body hidden), the
+  bot aims at the head instead. The original model aimed at the eye, the top
+  of the head, and the characters' positive `aimHeight` raised it further.
+- **It tracks with an estimate of the target's velocity.** The believed
+  velocity follows the real one with `aimTrackTimeConst`, and the believed
+  point moves with it while closing on the real point at the same rate. A
+  steady runner is tracked exactly; a change of direction opens an error that
+  peaks about one time constant later and then closes, so strafing beats a
+  slow tracker. The original model let the believed point trail the target by
+  its time constant and also subtracted a share of each frame's motion from
+  it, which kept a skill-3 bot about 90 units behind a running target.
+- **`aimTrackError` is a cross-view lag.** It holds the shot
+  `aimTrackError` degrees behind per 100 degrees a second of line-of-sight
+  rate, the bot's own movement included.
+- **The lead uses the weapon's projectile.** `BotProjectileSpeed` reads the
+  current weapon's fire info and its `def_projectile` (the `_mp` variant on a
+  server): 7000 u/s for the Hunter Rifle, 7500 for the autocannon, 1600 for a
+  multiplayer rocket, none for the wrench or the Leech Gun's beam. The
+  original model led every weapon as a 1200 u/s projectile, about six times
+  too far for the rifle. `aimLeadError` is drawn once per burst, not every
+  frame.
+
+The fire cone is measured from where the view ends up after the frame's turn,
+and `holdFireTurnRate` counts only the slew beyond following the aim point,
+so a bot can fire while tracking a crossing target. Each bot's tremor has its
+own phase.
+
+**Two player models could not be hit on a dedicated server.** Their
+multiplayer skins, `jen_mp` and `human2_body_mp` (Jen, and the Abducted
+model Victim uses), keep only a `skin.vfp` stage at shader level 3. A
+dedicated server never creates GL programs, so the stage lost its
+interaction role, the skin parsed as translucent, and
+`idRenderWorld::ModelTrace`, which projectiles use against player models,
+skipped it. Jen took 0 damage from 3908 firing frames aimed at her. The
+material parser now keeps the interaction role of a program it scanned but
+could not create, and both models take damage in proportion to the shots
+that reach them.
+
+Measured on 22 November 2026 from a dedicated server, with temporary counters
+in the game code, in five-minute deathmatch runs on `dmwallwalk2`,
+`dmtunnelrat_8`, `dmplanes_4`, `dmescher`, `dmsphere` and `dmgravitylab_6`.
+"Equal" is six skill-3 bots (Tommy, Jen, Trent, Roy, Victim, Hunter); the
+ladders mix skills 1-5 in one match, with the characters rotated between maps.
+A hit is a firing frame whose forward trace from the view meets the target's
+render model, which is what projectiles collide with. Before: 5 runs; after:
+16 runs over two batches, which agreed to within about a fifth.
+
+| | Before | After |
+| --- | --- | --- |
+| Equal skill 3: hits per firing frame | 9.7% | 26.4% |
+| Equal skill 3: kills per bot per five minutes | 0.58 | 1.46 |
+| Equal skill 3: mean error from the target's centre | 4.1 degrees | 2.7 degrees |
+| Ladder hits per firing frame, skill 1 / 2 / 3 / 4 / 5 | 2.5 / 1.7 / 13.1 / 11.3 / 3.9% | 8.0 / 13.5 / 21.2 / 40.3 / 52.9% |
+| Ladder damage per second an enemy is in sight, skill 1-5 | 0.3 / 0.1 / 3.3 / 7.9 / 3.8 | 1.0 / 3.4 / 6.8 / 15.8 / 24.8 |
+| Ladder kills per minute an enemy is in sight, skill 1-5 | 0 / 0 / 1.7 / 3.7 / 0.9 | 0 / 1.3 / 2.2 / 5.8 / 11.8 |
+
+Each level now beats the one below it, where skill 5 had trailed skill 4. A
+skill-5 bot hits about half its firing frames and deals about 25 damage a
+second while it has a target, so a player it sees loses a fight against it in
+a few seconds. Skill 1 still kills almost nothing: its turn rate of about 70
+degrees a second cannot follow a strafing target.
+
+That is enough for bots to fight, dodge, collect exposed pickups, use
+walkways and portals they meet, and stay out of Prey's voids. It is not route
+planning: a bot cannot deliberately solve a multi-room path, choose a portal
+sequence, climb to a walkway it cannot see, or pursue an objective through
+unseen geometry. It never uses spirit walk, so spirit bridges and spirit-only
+routes are closed to it, and it never boards the shuttles of `dmshuttle1`
+and `dmshuttle2`. A future navigation layer must model Prey's changing
+gravity, portals and spirit routes before it can honestly promise broad map
+coverage. `mp_bot_navigation.py` remains deferred for this reason.
 
 ## Personality resolution
 
@@ -151,20 +290,20 @@ the 48.
 | `turnSpeed` | Hard view-slew cap in degrees per second. |
 | `turnAccel` | Rate at which view slew reaches its cap. |
 | `turnDamping` | Slew damping; low values visibly lag and hunt. |
-| `aimTrackTimeConst` | First-order lag of believed target position. |
+| `aimTrackTimeConst` | Time constant with which the believed target velocity, and the point moving with it, follow the real ones. |
 | `aimTremorDeg` | Continuous aim tremor amplitude. |
 | `aimTremorRateHz` | Rate at which the tremor wanders. |
-| `aimTrackError` | Cross-view tracking lag against a moving target. |
+| `aimTrackError` | Degrees of cross-view lag per 100 degrees a second of line-of-sight rate, the bot's own movement included. |
 | `aimSettleMsec` | Time aim must remain inside the firing cone. |
-| `aimLead` | Fraction of computed projectile lead applied. |
-| `aimLeadError` | Per-shot error applied to that lead. |
+| `aimLead` | Fraction of the lead for the current weapon's projectile speed that is applied. |
+| `aimLeadError` | Error applied to that lead, drawn once per burst. |
 
 ### Trigger discipline (5)
 
 | Trait | Meaning |
 | --- | --- |
-| `fireConeDeg` | Maximum angular error accepted before firing. |
-| `holdFireTurnRate` | Maximum view slew allowed while firing. |
+| `fireConeDeg` | Maximum angular error, after this frame's turn, accepted before firing. |
+| `holdFireTurnRate` | Maximum view slew, beyond following the aim point, allowed while firing. |
 | `burstMinMsec` | Shortest automatic-weapon burst. |
 | `burstMaxMsec` | Longest automatic-weapon burst. |
 | `burstPauseMsec` | Pause between bursts. |
@@ -203,7 +342,7 @@ the 48.
 | `strafeRhythmMsec` | Base interval between changes of strafe direction. |
 | `strafeRhythmVarianceMsec` | Random spread added to that interval. |
 | `weaponSwitchMsec` | Delay between weapon-choice re-evaluations. |
-| `aimHeight` | Personal vertical bias within the target bounds. |
+| `aimHeight` | Personal vertical bias from the centre of the target bounds. |
 
 ### Decision quality (2)
 
@@ -383,7 +522,11 @@ excludes the immediately previous usable line when another is available.
 `killWrench` is the Prey-specific close-combat event corresponding to the
 upstream humiliation line.
 
-Lines may use `$self`, `$other`, `$weapon`, `$map`, and `$item`. The loader and
+Lines may use `$self`, `$other`, `$weapon`, `$map`, and `$item`. They name what a
+player sees: `$weapon` is the weapon's retail `weaponname` ("Hunter Rifle",
+"Crawler Launcher"), `$map` the mapDef's localized `name` ("Spindle Spheres",
+"Shuttle 2") and `$item` the item's translated `inv_name`, never a class name
+such as `weaponobj_rifle` or a path such as `game/dmsphere`. The loader and
 validation contract limit tokens to events that can supply them. At runtime a
 line whose required value is unavailable is skipped rather than sent as a
 broken sentence. Authored lines are limited to 160 characters and may not
@@ -504,6 +647,12 @@ checks:
   bot-to-human slot handoff, including the pending-connection reservation;
 - gravity-relative aim/movement, usable-weapon filtering, bounded item-goal
   progress, round-state cleanup, and clone-safe character reservations;
+- the step check: clip-model sweep in the bot's own plane, wall-walk
+  transitions, near and far landing probes, death-volume, hurt-trigger and
+  gravity-zone handling, safe jumps, the strafe sign and the once-per-contact
+  turn;
+- portal goals and the post-portal ignore window;
+- display names for `$weapon` and `$map`;
 - the seven documented cvars and the registered commands; and
 - packed-content and non-fatal parser contracts.
 
@@ -521,11 +670,22 @@ one room as evidence of general map navigation.
 ## Known limits
 
 - Bots do not have full map routing, portal planning, wall-walk transition
-  planning, or objective strategy.
+  planning, or objective strategy. They use the walkways and portals they
+  meet, not ones they would have to plan a route to.
+- Bots never spirit walk or board a shuttle, so spirit bridges, spirit-only
+  passages and the shuttle duels of `dmshuttle1` and `dmshuttle2` are out of
+  their reach.
+- Knockback can still throw a bot into a void; the step check prevents
+  walking and jumping into one, not being blown into one.
+- Bots meet rarely, so kill counts stay low even though their shots now land
+  (see [Aim and hits](#aim-and-hits)): with no route planning, a bot in a
+  six-bot match had an enemy in sight for 0-100 seconds of five minutes,
+  typically 10-40, in the 22 November 2026 runs.
 - Item goals are limited to currently visible candidates; a bot does not know
   a hidden pickup route.
-- Aim lead uses a general projectile approximation and does not model every
-  alternate-fire or ballistic arc independently.
+- Aim lead uses the current weapon's primary projectile speed in a straight
+  line. It does not allow for gravity arcs (thrown crawler grenades), and bots
+  never use alternate fire.
 - Personality content can make combat and communication distinct, but cannot
   compensate for unreachable geometry.
 - The roster intentionally stops at retail-selectable model slot 18.

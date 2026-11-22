@@ -33,9 +33,11 @@ sections 13.4 and 13.5):
   symbol (by position when the family is unknown), bumper, trigger, d-pad
   arm, stick, menu, view, home, touchpad, paddle or another labelled button.
   `in_promptStyle` changes them as it changes the prompts.
-- A row shows up to two keyboard or mouse keys, then up to two controller
-  buttons a little apart. `+N` counts any further keys, and a dim dash
-  stands for an action with none.
+- A row shows up to three keyboard or mouse keys, then up to three
+  controller buttons a little apart. `+N` counts any further keys, and a dim
+  dash stands for an action with none. On Prey's Options page a binding row
+  gives its action 43% of the row and its keys the rest, in 17 dp chips
+  0.22 em apart, so six glyphs fit beside `Alternate Attack`.
 - While the page waits for a key the row's glyphs give way to
   `Press any key...` in the focus colour, and Accept leaves the prompt bar,
   since the next key is the answer.
@@ -83,14 +85,15 @@ in 272 ms on the benchmark where GAME OPTIONS loads in 203 ms
 (`openq4-retained-ui-benchmark --screen`, `builddir`); a frame at rest
 measures the same as before.
 
-## Two keys of each family
+## Three keys of each family
 
 Both interfaces kept two keys on an action by counting every key together
 (the stock `bindunbindtwo`). Jump ships with Space, Insert and two controller
 buttons, so binding any key to it cleared all four. `idKeyInput::BindForMenu`
-keeps two keyboard or mouse keys and two controller buttons: a third key of a
-family replaces that family's two and leaves the other's. Both CONTROLS
-pages use it. The console command `bindunbindtwo` is unchanged.
+keeps up to three keyboard or mouse keys and three controller buttons
+(`idKeyInput::MAX_MENU_BINDS`): a fourth key of a family replaces that
+family's three and leaves the other's. Both CONTROLS pages use it. The
+console command `bindunbindtwo` is unchanged.
 
 ## The stock CONTROLS page
 

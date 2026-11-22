@@ -297,6 +297,9 @@ if get_option('build_native_tests')
   # The loading screen's name notch textures (stock screen), from their construction.
   test('openpr06-loading-notch', py,
     args: [files('tools/ui/loading_notch.py'), '--check'], timeout: 120)
+  # The campaign tips' controller plates and their materials, from their construction.
+  test('openpr06-pad-tip-plates', py,
+    args: [files('tools/ui/pad_tip_plates.py'), '--check'], timeout: 120)
   # Repaints the initializing screen's textures from their seeds: about a minute.
   test('openpr06-retained-initialization', py,
     args: [files('tools/ui/build_retained_initialization.py'), '--check'], timeout: 300)
@@ -953,6 +956,7 @@ if build_engine or get_option('build_native_tests')
     files('src/ui/retained/ScrollGeometry.cpp'),
     files('src/ui/retained/ScrollbarView.cpp'),
     files('src/ui/retained/PopupPlacement.cpp'),
+    files('src/ui/retained/PointerArt.cpp'),
     dependencies: [rmlui_project.get_variable('rmlui_dep'), jsoncpp_project.get_variable('jsoncpp_dep'), libtess2_project.get_variable('libtess2_dep')],
     pic: true,
     install: false,
@@ -987,6 +991,10 @@ if build_engine or get_option('build_native_tests')
       files('tools/tests/native/UiScrollGeometryTest.cpp'),
       dependencies: openq4_retained_dep, install: false)
     test('openq4-ui-scroll-geometry', openq4_ui_scroll_geometry_test, timeout: 30)
+    openq4_ui_pointer_art_test = executable('openq4-ui-pointer-art-test',
+      files('tools/tests/native/UiPointerArtTest.cpp'),
+      dependencies: openq4_retained_dep, install: false)
+    test('openq4-ui-pointer-art', openq4_ui_pointer_art_test, timeout: 30)
     openq4_ui_scrollbar_interaction_test = executable('openq4-ui-scrollbar-interaction-test',
       files('tools/tests/native/UiScrollbarInteractionTest.cpp'),
       include_directories: [root_include_dir, include_directories('src/ui/retained')],

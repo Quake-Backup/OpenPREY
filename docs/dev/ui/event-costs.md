@@ -4,7 +4,8 @@ A fifth round on 21 November 2026 measured what a retained document costs
 when something happens on it: a player's input raising an event (a focus
 move, a tab, a dialog), and the game changing a readout. It follows the
 [menu frame costs](menu-frame-costs.md) round of 20 November, which measured
-frames at rest and while the menus animate.
+frames at rest and while the menus animate. The [menu transitions](menu-transitions.md)
+round of 22 November follows it.
 
 ## What an event cost
 

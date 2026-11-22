@@ -3079,6 +3079,12 @@ void idSessionLocal::PrimeMainMenuGuiResources( void ) {
 	// The GUI buffers this command when it activates. Resolve the shader during
 	// startup/level load so the first in-game menu never parses it on demand.
 	declManager->FindSound( "main_menu_gameplay" );
+#if defined(HUMANHEAD)
+	// openPR06: the retained menus' hover and step cues (UserInterfaceRetained.cpp),
+	// which no GUI script names, so nothing else precaches them.
+	declManager->FindSound( "openpr06_menu_hover" );
+	declManager->FindSound( "openpr06_menu_step" );
+#endif
 }
 
 static void Session_DrawFallbackLoadingScreen() {

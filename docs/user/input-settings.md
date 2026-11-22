@@ -28,7 +28,9 @@ The stock **Options -> Controls** menu has these tabs:
 | Multiplayer | Chat, team chat, toggle team, spectate, ready, vote yes/no, scoreboard. |
 | Profiles | Saved control profiles. |
 
-To rebind an action, select its row and press the key, mouse button or controller button you want. Analog sticks are configured through the controller cvars instead of being rebound as buttons.
+To rebind an action, select its row and press the key, mouse button or controller button you want. An action keeps up to three keyboard or mouse keys and up to three controller buttons; binding a fourth of either kind replaces that kind's three and leaves the other kind's. Analog sticks are configured through the controller cvars instead of being rebound as buttons.
+
+The game's tips ("Press C to crouch") show the key of the device you used last: the keyboard's key or mouse button, or a picture of the controller button in the same style while you play on a controller (Xbox, PlayStation, Nintendo and Steam Deck buttons follow **Button Prompt Style**). When an action has no binding on the device you are using, the tip shows its binding on the other one.
 
 The retained interface (`ui_retained 1`, the default) adds **Mouse** and **Controller** tabs to Options -> Controls: acceleration, always run, toggle crouch, stick dead zone, look and move curves, invert look, trigger press point, rumble, gyro, touchpad, button prompt style and swapped confirm and back. Bound keys show as keycap, mouse and controller glyphs, and controllers have default bindings (`basepr/openpr06_bindings.cfg`). PREY's stock menus (`ui_retained 0`) have only the binding pages.
 
@@ -36,7 +38,7 @@ The retained interface (`ui_retained 1`, the default) adds **Mouse** and **Contr
 
 At startup, openPR06 loads config in this order:
 
-1. `default.cfg` from your PREY installation's `base` folder
+1. `default.cfg` from your PREY installation's `base` folder, then openPR06's `openpr06_bindings.cfg`, which adds the controller layout, Caps Lock for walk/run and Z for zoom (both only for fresh bindings: a first launch, or Reset Defaults -> Controls)
 2. `openpr06_defaults.cfg` (if present; openPR06 doesn't ship one yet)
 3. `openpr06_profile_<profile>.cfg` when a platform profile is active; openPR06 ships `openpr06_profile_steamdeck.cfg`
 4. `openPR06Config.cfg`

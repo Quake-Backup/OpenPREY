@@ -1,6 +1,6 @@
 # openPR06 UI Visual Design
 
-Specification version 1.28, 21 November 2026.
+Specification version 1.30, 22 November 2026.
 
 Status: reference survey and design contract. openPR06 presents the retained
 interface by default (`ui_retained 1`, since 0.15.0); `ui_retained 0` renders
@@ -630,7 +630,7 @@ openPR06 also bends it into the loading screen's name notch (section 12.1).
 | Main navigation | Label `prey.text.nav`; bar 0.60 | Label `#CCE6FF`; bar to 1.0 and 5 u toward the arc (6 u on the fourth entry); label 6–9 u toward the arc; 150 ms | `guisounds_menu_clickin` on press; action on press (Resume on release) | Hidden (Resume Game without a recent save) |
 | Bottom-bar action | `prey.text.bottom` | `#CCE6FF` | Click sound | Hidden in game |
 | Button | Label `#CCDEFA`; graded plate | Label white; `rollover_*` plate | Click sound | Label 0.30; `noevents 1`; still drawn |
-| Setting row | Label white 0.9, value `#B8C9E6` 0.9 | Value white; plate unchanged | Choice advances; no script sound | Value at 0.40 |
+| Setting row | Label white 0.9, value `#B8C9E6` 0.9 | Value white; plate unchanged | Choice advances; no script sound (the retained interface adds its step cue, section 8) | Value at 0.40 |
 | Check box | Border `#B8C9E6` 0.9 | Border white | Toggles the cross | Hidden or 0.40 |
 | Radio segment | Border `#CCDEFA`; clear fill | Label white | Fills `#99ABC7` 0.7; `guisounds_menu_tick` | — |
 | Tab | Label `#B5C9E3` 0.7 | Label `#CCDEFA`; plate tinted | `guisounds_menu_tabflip`; becomes active (label white) | — |
@@ -726,6 +726,47 @@ Use counts are for the retail main menu and `mpmain`. In openPR06's copies
 the three added Video pages bring `clickin` to 128 and `tabflip` to 46, and
 `tick` falls to 18 with the three Texture Quality segments (section 12.1).
 
+The stock menu makes no sound on hover, and none when a setting row's value
+changes, a slider moves (other than the volume sliders) or a field is taken.
+
+### Feedback cues
+
+The retained interface (section 12.5) adds two quiet cues to fill those
+gaps. They are openPR06's, not retail's. Both are retail samples, declared
+in `sound/openpr06_menu.sndshd` (pak0), so no new audio ships:
+
+| Cue | Sound | Level | Plays when |
+| --- | --- | --- | --- |
+| Hover | `openpr06_menu_hover`: `sound/arcade/generic_mouse_over`, Prey's own console mouse-over | -20 (11 dB under a press) | The lit control changes because of a device: the pointer moves onto a control, or an arrow key, the D-pad or the stick steps to one |
+| Step | `openpr06_menu_step`: `new_menuclickin01`, the press, softened | -16 (7 dB under a press) | A choice cycles, a toggle flips, a list opens, picks or closes, a field is taken or committed, a slider moves, or a list pages, wherever the screen plays no sound of its own |
+
+How the cues behave:
+
+- **They never double a sound.** A cue waits until the session has answered
+  the input. If that answer plays a menu sound (a document's `clickin` or
+  `tabflip`, a page's slide, the volume sliders' sample), that sound stands
+  for the input and the cue is dropped.
+- **Program focus is silent.** A page opening, a dialog restoring focus or a
+  program moving focus makes no hover sound. A pointer resting on a control
+  the keys have already lit makes none either.
+- **No chatter.** Hovers closer together than 75 ms, and steps closer than
+  55 ms, are dropped. A sweep across the arc or a held arrow key patters
+  rather than buzzes, and dragging a slider ticks without piling up. Both
+  cues share local channel 4, so each one cuts the one before it. They never
+  cut a press (channel 1), a slide (2) or the music (3).
+- **They stay out of a press's way.** A hover within 180 ms of a menu sound
+  is dropped, so the pointer arriving over a page a press just opened makes
+  no sound.
+- They play in the world the session has playing, as the documents' sounds
+  do: over the match in the in-game multiplayer menus, and not at all while
+  sound is muted for an unfocused window.
+- `ui_retainedCueSounds 0` (archived) turns both off and leaves the stock
+  sounds. The stock menu (`ui_retained 0`) never plays them.
+- `ui_retainedTrace 1` logs each cue as
+  `RETAINED_GUI_CUE ... cue=hover|step node=... verdict=...`, where the
+  verdict is `played`, `answered`, `settling`, `spaced`, `stale`, `disabled`
+  or `silent`.
+
 ### Reduced motion
 
 A reduced-motion setting keeps the order of events and drops their travel: the
@@ -782,7 +823,7 @@ in `guis/hud/`, `guis/mphud.gui`, `guis/scoreboard.gui` and `guis/cursor.gui`
 | Crosshair | 32x32 at 304,224 | Eight styles; red `#FF3C00` locked variant over damageable targets | `cursor.gui:7-104` |
 | Damage arcs | three 128x64 arcs on 480x480 rotators centred on the screen | Thin red crescents about 92 u wide at radius 134–150 u, turned toward the attacker | `hud/hud_damageindictor.guifragment:7-53` |
 | Boss and progress bar | 230x36 capsule at 210,70 when shown | Mirrored halves of `bossbarbg` around a 210x20 blood-red fill; caption in the alien face | `hud/hud_progressbar.guifragment:46-79` |
-| Tips | 420x164 window from 220,200 | A keycap image (96x48) with its key label, the tip text starting at the screen centre | `hud/hud_tips.guifragment:51-97` |
+| Tips | 420x164 window from 220,200 | A keycap image (96x48) with its key label, the tip text starting at the screen centre; a controller's plate while one is in use (section 12.1) | `hud/hud_tips.guifragment:51-97` |
 | Subtitles | 640x50 line at y 400, centred | Body face 0.5, white with shadow | `hud/hud_subtitles.guifragment:5-36` |
 | Letterbox | 50 u black bars | Hides everything except tips and subtitles during scripted scenes | `hud.gui:36-52`; `src/Prey/game_playerview.cpp:7-8` |
 
@@ -870,7 +911,9 @@ The HUD plays no sound for weapon switches or pickups; the player entity plays
 - The multiplayer HUD keeps the health, spirit, ammo and pickup groups and
   adds a top-right standings box (110x64 u in deathmatch, 110x31 u in team
   games; black 0.5 with a `#66738C` rim),
-  frag and timer icons with `#B3CCE6` counts, a vote line, a game-state line,
+  frag and timer icons with `#B3CCE6` counts (the box and the counts pinned
+  to the top-right corner under aspect expansion, `hud_mpmisc.guifragment`'s
+  `screenalignx right`, `screenaligny top`), a vote line, a game-state line,
   the player's name under the figure and the aimed player's name above the
   crosshair. Its weapon bar uses 60x50 u tiles without enlargement.
 - Team colours: red `#FF0000`, blue `#3380CC`, deathmatch yellow `#FFCC1A`
@@ -1201,6 +1244,28 @@ Doom 3's 32 and 64 (`idUserInterfaceLocal::DrawCursor` in `PREY.exe` 1.4). The
 hotspot is the box's top-left corner. With aspect correction the box stays
 square and scales with the canvas height, as the menu does.
 
+The retained menus and the console draw the arrow from vector art instead of
+the bitmap (`src/ui/retained/PointerArt.cpp`). It keeps the stock
+arrowhead's shape: a vertical left edge, a 45-degree right edge to a blunt
+corner, a shallow return to the notch and a 45-degree edge down to a rounded
+foot, with no tail. Its bevel rises to a peak low on the body and is lit from
+above as the stock art is: the upper right face near white (`#FFFFFF` to
+`#D5DCE5`), the left face silver (`#E8EBF0` to `#C0C8D3`), the lower right
+face in half shade (`#DCE1E8` to `#A4B0C0`) and the face over the notch dark
+(`#A3AEBE` to `#6A7585`). Light ridges run from the peak to the tip and to
+the corner. Two things are added for legibility on bright backdrops: a dark
+slate rim (`#29303A`, at least one pixel) and a soft shadow cast 0.8 texels
+right and 1.2 down. Over a number or text field the pointer is an I-beam in
+the same finish, its right half lit and its left half shaded, about nine
+tenths of the arrow's height.
+
+The hotspot is the arrow's tip, not the box's corner, so the pointer clicks
+where it points. The size is retail's: 32 texels in 16 units of the 480-unit
+menu, which is 0.75 dp a texel of the 720-dp retained canvas and a pointer
+about 31 pixels tall at 1080p. Each shape and size is rasterized once, with
+8x8 samples a pixel along its edges, and drawn texel for pixel as one quad
+(`_retainedPointer/<n>`). The classic GUIs keep the stock bitmaps.
+
 ### 11.7 Rules for device changes
 
 - Keep each family's palette and shape language; never mix families on one
@@ -1334,6 +1399,28 @@ vocabulary rather than replace it:
   the six Video tabs are 55 u tall (`textaligny 21`), where the stock three
   were 110 u (`textaligny 30`). A change that needs a video restart lights
   Apply Changes on every page, as in the stock.
+- **Controller tip plates.** The tutorial tips (section 10.1's Tips row,
+  `hud_tips.guifragment`), the shuttle's and the rifle scope's tips and the
+  multiplayer ready and vote tips name the key of the device in use: the
+  first bound key of the family the player touched last, or of the other
+  family when that one has none, so a tip never reads "unbound" while either
+  device can act. A controller button gets a plate in the hand of Prey's
+  `tips/key` and `tips/mouse*`: the keycap's thick `#BACFEB` edge, dark
+  extruded sides that lighten to the right, a steel top face with a darker
+  rim, 87.5% opacity, and the mouse's orange for a lit part. Twenty-one
+  plates (`textures/interface/tips/pad_*`, written by
+  `tools/ui/pad_tip_plates.py` into `pak1` with their materials in
+  `pak0/materials/openpr06_padtips.mtr`) follow the retained prompts' glyph
+  for the controller family (`RetainedUI_KeyGlyph`): a round face cap the
+  GUI writes the family's letter on, the PlayStation symbols, the four face
+  buttons as a diamond with one lit for a generic controller, a bumper and a
+  trigger cap labelled LB/L1/L or LT/L2/ZL, the d-pad with the lit arm, a
+  stick labelled LS or L3, menu, view, home, touchpad, and a paddle labelled
+  P1 or R4. A long label (`OPTIONS`, `CREATE`) takes the stock wide keycap.
+  The plates share the keycap's 256x128 frame and placement, so the GUI's
+  key text lands on a plate's top face as it does on a key's. A tip already
+  on screen swaps its plate within a second when the player changes device
+  (`idTarget_Tip`'s distance check).
 
 New pages and settings follow that precedent: build them from the stock plates,
 rows, tabs and faces, at stock sizes and colours, inside the claw frame.
@@ -1832,7 +1919,9 @@ Tommy's three New Game portraits, which are pictures, not furniture.
   set; Casino appears once `g_roadhouseCompleted` is.
 - Sounds are the stock ones, named by the documents' events: `clickin` on a
   press, `cancel` on No, `slideinsmall` and `slideoutsmall` as a frame grows
-  and shrinks.
+  and shrinks. Beside them, the hover and step cues of section 8 ("Feedback
+  cues") sound what the stock leaves silent: the lit control moving, and a
+  value, toggle, list or field changing with no sound of its own.
 - With reduced motion (`ui_retainedReducedMotion`) the retained interface
   applies the end of each move at once.
 
@@ -1986,10 +2075,10 @@ purpose as well: settings nothing in Prey reads (the weapon-wheel settings,
 remastered-HUD settings, which no Prey HUD document reads yet, and HRTF
 (`s_openALHRTF`), which needs the sound device reopened and has no verb yet.
 
-- **Controls.** A binding row's action takes the leading half and its keys
-  the trailing half, drawn as glyphs (`tools/ui/retained_key_glyphs.py`,
-  ported from openQ4 and recoloured): up to two keyboard or mouse keys, then up
-  to two controller buttons a little apart, `+N` for any more and a dim dash
+- **Controls.** A binding row's action takes the leading 43% and its keys
+  the rest, drawn as glyphs (`tools/ui/retained_key_glyphs.py`, ported from
+  openQ4 and recoloured): up to three keyboard or mouse keys, then up to
+  three controller buttons a little apart, `+N` for any more and a dim dash
   for none.
   - *Glyphs.* A keyboard key is a keycap with a 45-degree cut at its lower
     leading corner: a dark `#111A25` plate at 0.88 under a 1.2 dp
@@ -2001,11 +2090,12 @@ remastered-HUD settings, which no Prey HUD document reads yet, and HRTF
     generic controller's four positions as a diamond with one lit, bumpers,
     triggers, the d-pad's lit arm, sticks, paddles and the menu buttons) in
     the same plate, edge and ink. No glyph adds a hue: every mark is the
-    rail's pale blue-white. A chip is 20 dp tall and drawn in em of its
-    strip; every glyph's art is a shared symbol of the document.
+    rail's pale blue-white. A chip is 17 dp tall, 0.22 em from the next,
+    and drawn in em of its strip; every glyph's art is a shared symbol of
+    the document.
   - *Binding.* Accept or a click waits for a key, and the glyphs give way to
     "Press any key..." in white. The next key pressed joins the action's
-    keys, two of each device family, and plays `guisounds_menu_tick`.
+    keys, three of each device family, and plays `guisounds_menu_tick`.
     Escape, Start or Back cancel; Backspace or Delete clear the row. Out of
     a wait, Delete, Backspace or the west face button clears the focused
     row. The session takes the key (`idSessionLocal::RetainedControlsKey`)
@@ -2026,8 +2116,12 @@ remastered-HUD settings, which no Prey HUD document reads yet, and HRTF
     attack, south and east jump and crouch, west the lighter, north spirit
     walk, the bumpers and the d-pad's sides step the weapons, the d-pad's up
     and down throw a crawler grenade and zoom, the sticks walk and centre the
-    view, the touchpad shows the scoreboard and the paddles repeat the face
-    buttons. Start and Back open the menu and stay unbound.
+    view, the touchpad shows the scoreboard, the share or capture button
+    takes a screenshot and the paddles repeat the face buttons. Start and
+    Back open the menu and stay unbound; Quick Save, Quick Load and the
+    multiplayer actions are in the pause menu they open. The same file gives
+    the keyboard the two Controls actions Prey leaves unbound: Caps Lock
+    walks or runs and Z zooms.
 - **Choices.** The value shows the current option, named from its language
   list. Left and Right cycle it, as a click cycles the stock control; Accept
   or a click unfolds a list across the row, black with the `prey.separator`
@@ -2202,37 +2296,60 @@ the 570x370 u tab page as Options' do.
   frame) and name; and the 30 models' portraits on two numbered tabs, five
   across and three down (58 u on a 62 u pitch), drawn at 0.8 at rest and in
   full under the pointer or focus, the chosen one outlined. A portrait
-  chooses its model (`ui_modelNum`). A data rate the stock choices do not
-  offer (openPR06's default, 128000) shows as its number.
-- **Create Server.** The stock Create and Advanced side tabs (80 u wide,
-  sharing 310 u below a 40 u margin) beside the 440x350 u inner page. Create
-  names the server and shows the chosen map's picture (170x120 u) over Game
-  Map and the map list, beside Server Type, Game Type, Team Damage, Frag
-  Limit, Time Limit, Max Players, Do Warmup, Allow Spectators and Dedicated
-  (220x24 u rows, the values right-aligned as the stock choices are).
+  chooses its model (`ui_modelNum`). Data Rate offers the stock ISDN,
+  DSL/Cable and T1/LAN (16000, 24000 and 32000) and Broadband (128000,
+  openPR06's default), slowest first; another value shows as its number.
+- **Create Server.** The stock Create and Advanced side tabs and openPR06's
+  Bots (80 u wide, sharing 310 u below a 40 u margin) beside the 440x350 u
+  inner page. Create names the server and shows the chosen map's picture
+  (170x120 u) over Game Map and the map list, beside Server Type, Game Type,
+  Team Damage, Team Balance, Frag Limit, Time Limit, Max Players, Do Warmup,
+  Allow Spectators and Dedicated (220x24 u rows on a 27 u pitch, the values
+  right-aligned as the stock choices are). Team Damage and Team Balance
+  (`g_balanceTDM`) are drawn at 0.40 and take no input outside Team DM.
   Advanced has its heading bar and the password, remote console, reload,
-  server-side mods, map cycle, pure and rate rows. Create on either starts
-  the server as the stock button does (`StartMenuServer`, with its warnings).
+  server-side mods, map cycle, pure and rate rows; the password dims while
+  Use Password is No, the map cycle file while Run Map Cycle Script is No.
+  Bots has its heading bar, Number of Bots (0 to 31, `net_serverMenuBots`),
+  Bot Skill, Skill Spread, Bot Chat and Named Characters (`bot_skill`,
+  `bot_skillVariance`, `bot_chat`, `bot_characters`), the last four dimmed
+  while the count is 0, and a note at 0.26 in `#BFD1FF` at 0.72 on what bots
+  do. Typed values (the names, passwords, map cycle file and the numbers)
+  sit in a black well at 0.45 inset 3 u from the plate's top and foot and
+  clear of its slanted end, so an empty field still reads as one. Create on
+  each side tab (120x30 u, 284 u below the inner page's rows) starts the
+  server as the stock button does (`StartMenuServer`, with its warnings),
+  which hands the bot count to the game's `g_artificialPlayerCount`.
   The verbs are the Create Server page's (`HandleRetainedCreateServerRequest`),
-  which offer Prey's two game types and up to 32 players. Server Type and
+  which offer Prey's two game types, up to 32 players and a frag limit of
+  at most 100 (`MP_PLAYER_MAXFRAGS`). Server Type and
   Dedicated bind `net_menulanserver` and `net_serverMenuDedicated`, which the
   stock page now binds too: it kept them in GUI keys nothing read.
 - **Find Servers.** The server list with its column headings (each sorts its
-  column; the lock column sorts by password), the passworded servers' lock,
-  Quick Refresh, Refresh All and the Internet and LAN source; while the list
-  is empty the scan's notice stands in it. Under it the Selected Server tab
-  (Summary with the map's picture, Details with the address, map, game type,
-  password and players, and Players with the first eight names), the Filters
-  tab with the stock filter rows and Apply Filters, and IP Connect with its
+  column; the lock column, which leads, sorts by password, and Server takes
+  the 228 u the stock game and PunkBuster icon columns left), the passworded
+  servers' lock, Quick Refresh, Refresh All and the Internet and LAN source;
+  while the list is empty the scan's notice stands in it. Under it the
+  Selected Server tab (Summary with the map's picture, Details with the
+  address, map, game type, password and players, and Players with the first
+  eight names), the Filters tab with the stock filters as plated rows
+  (400x21 u on a 23 u pitch, at 0.29), which the list follows as each
+  changes (`idSessionLocal::UpdateRetainedJoinGame`), and IP Connect with its
   field and Connect to IP; a refused address says why in place of the
   instructions. A row chooses its server, and Accept on the chosen one, or
   Join Game, joins it. The verbs are the Join Game page's
   (`HandleRetainedJoinGameRequest`); a join that fails returns to the title.
 
 Differences from the stock page: PunkBuster, a discontinued service, has no
-row, column or filter; the game column's mod icons are not drawn; and the
-players filter's Hide both hides full and empty servers, as the browser reads
-the setting, where the stock choice wrote the value that hides empty ones only.
+row, column or filter; the game column is not drawn; the players filter's
+Hide both hides full and empty servers, as the browser reads the setting,
+where the stock choice wrote the value that hides empty ones only; the
+filters apply as they change, so Apply Filters has no button; Create Server
+has Team Balance and the Bots tab, and dims the rows that do not apply; Data
+Rate offers Broadband; and Run Map Cycle Script is in Title Case (the stock
+`#str_41025` is not). The page names `guis/loading/loading` until the
+session fills a portrait: the stock windows named
+`guis/assets/menu/questionmark`, which no retail archive holds.
 
 #### Message boxes
 
@@ -3004,6 +3121,27 @@ carries their summaries.
   (`def/consoles.def:497,534`), which are not in the archives.
 
 ## Appendix D. Change record
+
+### Version 1.30, 22 November 2026
+
+- Section 12.1: controller tip plates. The campaign's tips, and the shuttle,
+  rifle and multiplayer ones, show the button of the controller in use on a
+  plate drawn as Prey's keycap is.
+- Section 12.5, Options: a binding row shows up to three keys of each
+  device family, and keeps three; its action takes 43% of the row and its
+  17 dp chips the rest. The defaults add the share button's screenshot and
+  the keyboard's Caps Lock walk and Z zoom.
+
+### Version 1.29, 22 November 2026
+
+- Section 12.5, MultiPrey: an audit of the page's tree. Create Server gains
+  Team Balance and a Bots side tab (count, skill, skill spread, chat, named
+  characters); rows that do not apply (team rows outside Team DM, the
+  password, the map cycle file, the bot rows without bots) are drawn at 0.40;
+  typed values sit in visible wells; Frag Limit stops at 100. Data Rate
+  offers Broadband, and every three- and six-way choice offers all its
+  options. The server list drops its two empty icon columns, and the
+  filters are plated rows that apply as they change.
 
 ### Version 1.28, 21 November 2026
 

@@ -525,7 +525,7 @@ postprocess/nopostprocess sampling _postProcessAlbedo0), and playback renders
 the recorded scene directly, so replaying it would cover the scene with a
 stale target. Retained UI materials whose images exist only in the recording
 process: the coverage atlas, composition layers and masks, generated pixels,
-blurred backdrops, model previews and the pause scene; also a layer-sampling
+blurred backdrops, model previews, the pause scene and the menus' pointer; also a layer-sampling
 linear mask (slot 0 samples _white and replays).
 ================
 */
@@ -542,7 +542,7 @@ static bool R_GuiDemoSurfaceIsExcluded( const idMaterial *material ) {
 	}
 	static const char *const runtimeOnly[] = {
 		"_retainedAtlas/", "_retainedMultiplyAtlas/", "_retainedLayer/", "_retainedMask/",
-		"_retainedGenerated/", "_retainedBlur/", "_retainedModel", "_retainedPauseScene"
+		"_retainedGenerated/", "_retainedBlur/", "_retainedModel", "_retainedPauseScene", "_retainedPointer/"
 	};
 	for ( int i = 0; i < static_cast<int>( sizeof( runtimeOnly ) / sizeof( runtimeOnly[0] ) ); i++ ) {
 		if ( idStr::Icmpn( name, runtimeOnly[i], idStr::Length( runtimeOnly[i] ) ) == 0 ) {

@@ -78,24 +78,87 @@ The current bot movement is a bounded combat fallback:
 
 - enemies must be in the player's PVS and pass a line-of-sight trace before
   they are treated as visible;
-- idle bots may choose a visible item and otherwise wander; a goal that makes
-  less than 16 units of net progress in four seconds is ignored for five
-  seconds, so line of sight alone cannot trap a bot on an unreachable pickup;
+- idle bots may choose a visible item, or a visible game portal, and
+  otherwise wander; a goal that makes less than 16 units of net progress in
+  four seconds is ignored for five seconds, so line of sight alone cannot trap
+  a bot on an unreachable pickup;
 - aiming and movement use untransformed view angles, `GetEyeAxis()`, and bounds
   projection along the current gravity normal, so they remain meaningful when
   local gravity changes;
 - combat range, retreat health, aggression, patience, strafing rhythm, dodge
   reaction, and jump chance come from the resolved personality; and
-- a player-bounds sweep detects a nearby wall, reverses the strafe, turns the
-  wander direction, and may pulse jump.
+- every step is checked first (`hhArtificialPlayer::BotMoveBlocked`, below).
 
-That is enough for bots to fight, dodge, collect exposed pickups, and avoid
-walking continuously into a wall. It is not route planning: a bot cannot
-deliberately solve a multi-room path, choose a portal sequence, plan a
-wall-walk transition, or pursue an objective through unseen geometry. A future
-navigation layer must model Prey's changing gravity and portals before it can
-honestly promise broad map coverage. `mp_bot_navigation.py` remains deferred
-for this reason.
+### Prey's walkways, gravity, portals and voids
+
+The step check is built for Prey's arenas:
+
+- **It keeps its shape in any gravity.** It sweeps the player's own clip
+  model along the player's own axis, one step above the surface the bot stands
+  on and in that surface's plane, so it is the right box on a wall, a ceiling
+  or the inside of a sphere, and stairs or a pitched view do not read as
+  walls. The original check swept a world-aligned box from the bot's feet,
+  which started inside geometry on 13-50% of frames (on a ceiling, always)
+  and then reported a wall.
+- **A wall-walk surface ahead is a route.** Player physics carries a bot onto
+  it, so the check lets the bot walk on instead of turning away.
+- **It refuses a step off an edge.** It looks for floor beneath the step, near
+  and far, and farther still at speed. No floor within 384 units, a death volume
+  (`trigger_deathresurrection`) or an enabled `trigger_hurt` in the fall, or
+  stepping off a walkway where the restored gravity would not hold the bot
+  (off a ceiling or a wall), is a drop. A drop into an enabled gravity zone,
+  or round an outside corner of a walkway, is a route. A bot at an edge backs
+  away at full speed and turns once, and never takes a response step that is
+  itself a drop.
+- **It jumps only where the landing is level and safe.** A wall-contact jump
+  needs floor about the bot's own level just past the obstacle and a running
+  jump's length beyond it, and a wall-walking bot never jumps: in the air,
+  player physics restores normal gravity and drops it off the wall.
+- **It strafes on the side it checks.** Physics moves a positive `rightmove`
+  along the right vector, which is the negation of `idAngles::ToMat3()` row 1;
+  the original check swept the mirror side, so a strafing bot could walk off
+  an edge the check reported clear.
+- **It turns once per contact.** At a wall the bot turns 90 to 150 degrees and
+  keeps its new strafe side for 0.4 s. It had turned 80 degrees and reversed
+  its strafe every frame, which pinned it against the wall it was leaving.
+- **Portals are routes.** An idle bot treats a visible teleporting game portal
+  (`hhPortal::CanTeleport`) as a goal, weighted by its initiative. A portal
+  keeps the player's untransformed view angles, so the bot walks on away from
+  the exit; `Portalled` drops the goal and ignores that portal, and any within
+  256 units of the exit, for eight seconds, so it does not turn straight back.
+
+Measured on 22 November 2026 with six skill-3 bots (Tommy, Chuck, Trent, Roy,
+Jen, Becky) for about five minutes on each of the twelve retail deathmatch
+maps, from a dedicated server, with temporary counters in the game code.
+These figures come from one or two runs per map, and they vary by about a
+third between runs. `dmtunnelrat_8` has no portals, and in these runs no bot
+went through one of `dmescher2`'s four:
+
+| | Before | After |
+| --- | --- | --- |
+| Frames with the step check refusing a wall | 39-65% | 19-60% |
+| Wall sweeps that start inside geometry | 13-50% | 1-19% |
+| Falls per 100,000 bot-frames, `dmgravitylab_6` | 26 | 2-4 |
+| Falls per 100,000 bot-frames, `dmshuttle2` | 36 | 3 |
+| Falls per 100,000 bot-frames, `dmshuttle1` | 9 | 0-1 |
+| Portal trips in a run | at most 5 per map | 3-53 per map, on 10 of 12 maps |
+
+The time spent wall-walking or in redirected gravity rose on most wall-walk
+maps, because bots walk onto walkways instead of turning away. In the same
+runs, aim under redirected gravity was no worse than in normal gravity: the
+view after `hhPlayer::Think` matched the angles the bot set to within 1.5
+degrees on average, and the average firing error against the target's centre
+was similar either way.
+
+That is enough for bots to fight, dodge, collect exposed pickups, use
+walkways and portals they meet, and stay out of Prey's voids. It is not route
+planning: a bot cannot deliberately solve a multi-room path, choose a portal
+sequence, climb to a walkway it cannot see, or pursue an objective through
+unseen geometry. It never uses spirit walk, so spirit bridges and spirit-only
+routes are closed to it, and it never boards the shuttles of `dmshuttle1`
+and `dmshuttle2`. A future navigation layer must model Prey's changing
+gravity, portals and spirit routes before it can honestly promise broad map
+coverage. `mp_bot_navigation.py` remains deferred for this reason.
 
 ## Personality resolution
 
@@ -390,7 +453,11 @@ excludes the immediately previous usable line when another is available.
 `killWrench` is the Prey-specific close-combat event corresponding to the
 upstream humiliation line.
 
-Lines may use `$self`, `$other`, `$weapon`, `$map`, and `$item`. The loader and
+Lines may use `$self`, `$other`, `$weapon`, `$map`, and `$item`. They name what a
+player sees: `$weapon` is the weapon's retail `weaponname` ("Hunter Rifle",
+"Crawler Launcher"), `$map` the mapDef's localized `name` ("Spindle Spheres",
+"Shuttle 2") and `$item` the item's translated `inv_name`, never a class name
+such as `weaponobj_rifle` or a path such as `game/dmsphere`. The loader and
 validation contract limit tokens to events that can supply them. At runtime a
 line whose required value is unavailable is skipped rather than sent as a
 broken sentence. Authored lines are limited to 160 characters and may not
@@ -511,6 +578,12 @@ checks:
   bot-to-human slot handoff, including the pending-connection reservation;
 - gravity-relative aim/movement, usable-weapon filtering, bounded item-goal
   progress, round-state cleanup, and clone-safe character reservations;
+- the step check: clip-model sweep in the bot's own plane, wall-walk
+  transitions, near and far landing probes, death-volume, hurt-trigger and
+  gravity-zone handling, safe jumps, the strafe sign and the once-per-contact
+  turn;
+- portal goals and the post-portal ignore window;
+- display names for `$weapon` and `$map`;
 - the seven documented cvars and the registered commands; and
 - packed-content and non-fatal parser contracts.
 
@@ -528,7 +601,18 @@ one room as evidence of general map navigation.
 ## Known limits
 
 - Bots do not have full map routing, portal planning, wall-walk transition
-  planning, or objective strategy.
+  planning, or objective strategy. They use the walkways and portals they
+  meet, not ones they would have to plan a route to.
+- Bots never spirit walk or board a shuttle, so spirit bridges, spirit-only
+  passages and the shuttle duels of `dmshuttle1` and `dmshuttle2` are out of
+  their reach.
+- Knockback can still throw a bot into a void; the step check prevents
+  walking and jumping into one, not being blown into one.
+- Skill-3 bots meet often but kill rarely: in the November 2026 runs they saw
+  an enemy for 7-50% of their time and fired on 60-73% of those frames, yet
+  six of them scored only 0-15 kills per map in five minutes. The firing error is the
+  same in normal and redirected gravity, so this is skill tuning, not a Prey
+  gravity fault.
 - Item goals are limited to currently visible candidates; a bot does not know
   a hidden pickup route.
 - Aim lead uses a general projectile approximation and does not model every

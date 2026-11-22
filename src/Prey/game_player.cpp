@@ -7629,6 +7629,61 @@ bool hhArtificialPlayer::botReplyDispatchSuppressed = false;
 static const float BOT_ITEM_PROGRESS_DISTANCE = 16.0f;
 static const int BOT_ITEM_PROGRESS_TIMEOUT = 4000;
 static const int BOT_ITEM_IGNORE_TIME = 5000;
+static const float BOT_PROBE_DISTANCE = 72.0f;
+static const float BOT_PROBE_STEP = 18.0f;
+static const float BOT_PROBE_MAX_DROP = 384.0f;
+static const float BOT_PROBE_NEAR = 36.0f;
+static const float BOT_PROBE_MAX_REACH = 160.0f;
+static const float BOT_PROBE_REACH_TIME = 0.35f;
+static const int BOT_BLOCK_TURN_TIME = 400;
+static const float BOT_JUMP_CLEARANCE = 40.0f;
+static const float BOT_JUMP_REACH = 88.0f;
+static const float BOT_JUMP_MAX_DROP = 64.0f;
+static const float BOT_PORTAL_RANGE = 1500.0f;
+static const int BOT_PORTAL_IGNORE_TIME = 8000;
+
+/*
+================
+BotChatText / BotChatWeaponName / BotChatMapName
+
+openPR06: what a bot's chat line names.  Retail Prey keeps a weapon's player-
+facing name in its weaponobj_* def ("weaponname", e.g. "Hunter Rifle"), a
+map's in its mapDef ("name", a #str key) and an item's in "inv_name", so a
+line reads "The Hunter Rifle did its job" rather than "weaponobj_rifle", and
+"$map" names the arena rather than "game/dmwallwalk2".
+================
+*/
+static idStr BotChatText( const char *text ) {
+	if ( !text || !text[0] ) {
+		return "";
+	}
+	return text[0] == '#' ? common->GetLanguageDict()->GetString( text ) : text;
+}
+
+static idStr BotChatWeaponName( const char *weaponClass ) {
+	if ( !weaponClass || !weaponClass[0] ) {
+		return "";
+	}
+	const idDeclEntityDef *def = gameLocal.FindEntityDef( weaponClass, false );
+	idStr name = def ? BotChatText( def->dict.GetString( "weaponname" ) ) : idStr();
+	if ( name.IsEmpty() || !name.Icmp( "default" ) ) {
+		name = weaponClass;
+		name.StripLeadingOnce( "weaponobj_" );
+	}
+	return name;
+}
+
+static idStr BotChatMapName( void ) {
+	const char *mapName = gameLocal.serverInfo.GetString( "si_map" );
+	const idDecl *mapDecl = declManager->FindType( DECL_MAPDEF, mapName, false );
+	idStr name = mapDecl ?
+		BotChatText( static_cast<const idDeclEntityDef *>( mapDecl )->dict.GetString( "name" ) ) : idStr();
+	if ( name.IsEmpty() ) {
+		name = mapName;
+		name.StripPath();
+	}
+	return name;
+}
 
 static bool BotUserInfoMatches( const idDict *current, const idDict &incoming ) {
 	if ( !current || current->GetNumKeyVals() != incoming.GetNumKeyVals() ) {
@@ -7673,6 +7728,9 @@ hhArtificialPlayer::hhArtificialPlayer(void) {
 	botItemLastProgressTime = -1;
 	botItemBestDistance = idMath::INFINITY;
 	botWanderYaw = 0.0f;
+	botNextBlockTurnTime = 0;
+	botPortalExit = vec3_origin;
+	botPortalIgnoreUntil = 0;
 	botNextWeaponTime = 0;
 	botBurstEndTime = 0;
 	botNextBurstTime = 0;
@@ -8021,6 +8079,268 @@ void hhArtificialPlayer::UpdateBotWeapon( float enemyDistance ) {
 	}
 }
 
+/*
+================
+hhArtificialPlayer::Portalled
+
+openPR06: a bot that came through a portal walks on along the same local
+heading, which leads away from the exit.  It drops the portal as a goal and
+ignores the portal it used, and any beside the exit, for a while, so it does
+not turn around into the way back.
+================
+*/
+void hhArtificialPlayer::Portalled( idEntity *portal ) {
+	hhPlayer::Portalled( portal );
+	botLastPortal = portal;
+	botPortalExit = GetOrigin();
+	botPortalIgnoreUntil = gameLocal.time + BOT_PORTAL_IGNORE_TIME;
+	if ( botItemGoal.GetEntity() == portal || ( botItemGoal.IsValid() && botItemGoal->IsType( hhPortal::Type ) ) ) {
+		botItemGoal = NULL;
+		botItemCloseTime = 0;
+		botItemLastProgressTime = -1;
+		botItemBestDistance = idMath::INFINITY;
+	}
+}
+
+bool hhArtificialPlayer::BotPortalRecentlyUsed( const idEntity *portal ) const {
+	if ( gameLocal.time >= botPortalIgnoreUntil ) {
+		return false;
+	}
+	return portal == botLastPortal.GetEntity() ||
+		( portal->GetOrigin() - botPortalExit ).LengthSqr() < 256.0f * 256.0f;
+}
+
+/*
+================
+hhArtificialPlayer::BotFallIsHazardous
+
+openPR06: whether a fall from top to bottom passes through something that
+kills: a Prey death volume (trigger_deathresurrection, which sits above the
+floor beneath it) or an enabled hurt trigger. The player's clip mask does
+not include either, so a floor trace goes straight through them.
+================
+*/
+bool hhArtificialPlayer::BotFallIsHazardous( const idVec3 &top, const idVec3 &bottom ) const {
+	idBounds column( top );
+	column.AddPoint( bottom );
+	column.ExpandSelf( 16.0f );
+	idClipModel *touching[MAX_GENTITIES];
+	const int numTouching = gameLocal.clip.ClipModelsTouchingBounds( column,
+		CONTENTS_DEATHVOLUME | CONTENTS_TRIGGER, touching, MAX_GENTITIES );
+	for ( int i = 0; i < numTouching; ++i ) {
+		const idEntity *entity = touching[i]->GetEntity();
+		if ( entity && ( entity->IsType( hhSafeDeathVolume::Type ) ||
+			entity->IsType( idTrigger_Hurt::Type ) ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/*
+================
+hhArtificialPlayer::BotProbeLanding
+
+openPR06: what lies below ahead, a point one step above the surface the bot
+stands on (up is the bot's own up). BOT_MOVE_DROP when there is no floor
+within BOT_PROBE_MAX_DROP, when the fall passes through a death volume or a
+hurt trigger, or when a wall-walking bot would step off the walkway onto a
+surface the restored gravity does not hold it to. A drop into an enabled
+gravity zone, or around an outside corner of the walkway, is a route.
+================
+*/
+botMoveProbe_t hhArtificialPlayer::BotProbeLanding( const idVec3 &ahead, const idVec3 &up,
+	const idVec3 &moveDirection ) {
+	idPhysics *physics = GetPhysics();
+	idClipModel *clip = physics->GetClipModel();
+	const idMat3 &axis = physics->GetAxis();
+	const int clipMask = physics->GetClipMask();
+
+	trace_t trace;
+	const idVec3 floor = ahead - up * ( BOT_PROBE_STEP + BOT_PROBE_MAX_DROP );
+	gameLocal.clip.Translation( trace, ahead, floor, clip, axis, clipMask, this );
+	if ( BotFallIsHazardous( ahead, trace.endpos ) ) {
+		return BOT_MOVE_DROP;
+	}
+	if ( trace.fraction < 1.0f ) {
+		if ( !IsWallWalking() || gameLocal.GetMatterType( trace, NULL ) == SURFTYPE_WALLWALK ) {
+			return BOT_MOVE_CLEAR;
+		}
+		// Leaving the walkway restores the local gravity at once.  Where that
+		// would not keep this floor beneath the bot (a ceiling or a wall), the
+		// step drops it off.
+		idVec3 localUp = -hhUtils::GetLocalGravity( ahead, physics->GetBounds() );
+		if ( localUp.Normalize() > 0.0f && localUp * up >= 0.7f ) {
+			return BOT_MOVE_CLEAR;
+		}
+		return BOT_MOVE_DROP;
+	}
+
+	if ( IsWallWalking() ) {
+		// An outside corner: the walkway continues on the face below the edge,
+		// facing back toward the bot.
+		const idVec3 below = ahead - up * ( BOT_PROBE_STEP + 32.0f );
+		gameLocal.clip.TracePoint( trace, below, below - moveDirection * BOT_PROBE_DISTANCE,
+			clipMask, this );
+		if ( trace.fraction < 1.0f && gameLocal.GetMatterType( trace, NULL ) == SURFTYPE_WALLWALK ) {
+			return BOT_MOVE_CLEAR;
+		}
+	}
+
+	idBounds column( ahead );
+	column.AddPoint( floor );
+	column.ExpandSelf( 16.0f );
+	idClipModel *touching[MAX_GENTITIES];
+	const int numTouching = gameLocal.clip.ClipModelsTouchingBounds( column, CONTENTS_TRIGGER,
+		touching, MAX_GENTITIES );
+	for ( int i = 0; i < numTouching; ++i ) {
+		idEntity *entity = touching[i]->GetEntity();
+		if ( entity && entity->IsType( hhGravityZoneBase::Type ) &&
+			static_cast<hhGravityZoneBase *>( entity )->IsEnabled() ) {
+			return BOT_MOVE_CLEAR;
+		}
+	}
+	return BOT_MOVE_DROP;
+}
+
+/*
+================
+hhArtificialPlayer::BotMoveBlocked
+
+openPR06: whether the next step along moveDirection should be refused, and
+why: BOT_MOVE_WALL or BOT_MOVE_DROP, otherwise BOT_MOVE_CLEAR.
+The sweep uses the player's own clip model and axis, so it keeps its shape
+on walls and ceilings, and it runs one step above the floor in the plane the
+bot stands on, so stairs and a pitched view do not read as walls. A
+wall-walk surface ahead is not a wall: player physics carries the bot onto
+it. Standing on ground, the landing beyond the step is checked as well
+(BotProbeLanding).
+================
+*/
+botMoveProbe_t hhArtificialPlayer::BotMoveBlocked( idVec3 moveDirection ) {
+	idPhysics *physics = GetPhysics();
+	idClipModel *clip = physics->GetClipModel();
+	if ( !clip ) {
+		return BOT_MOVE_CLEAR;
+	}
+	const idMat3 &axis = physics->GetAxis();
+	const idVec3 up = axis[2];
+	const int clipMask = physics->GetClipMask();
+	moveDirection -= up * ( moveDirection * up );
+	if ( moveDirection.Normalize() <= 0.0f ) {
+		return BOT_MOVE_CLEAR;
+	}
+
+	trace_t trace;
+	gameLocal.clip.Translation( trace, GetOrigin(), GetOrigin() + up * BOT_PROBE_STEP,
+		clip, axis, clipMask, this );
+	const idVec3 start = trace.endpos;
+	gameLocal.clip.Translation( trace, start, start + moveDirection * BOT_PROBE_DISTANCE,
+		clip, axis, clipMask, this );
+	if ( trace.fraction < 0.65f ) {
+		if ( gameLocal.GetMatterType( trace, NULL ) == SURFTYPE_WALLWALK ) {
+			return BOT_MOVE_CLEAR;
+		}
+		return BOT_MOVE_WALL;
+	}
+	if ( !physics->HasGroundContacts() ) {
+		return BOT_MOVE_CLEAR;
+	}
+
+	// Probe the landing near and far: one point at the end of the sweep
+	// misses a gap narrower than the sweep, and a running bot covers more
+	// than the sweep before it can stop.
+	const float swept = trace.fraction * BOT_PROBE_DISTANCE;
+	if ( swept > BOT_PROBE_NEAR &&
+		BotProbeLanding( start + moveDirection * BOT_PROBE_NEAR, up, moveDirection ) == BOT_MOVE_DROP ) {
+		return BOT_MOVE_DROP;
+	}
+	if ( BotProbeLanding( trace.endpos, up, moveDirection ) == BOT_MOVE_DROP ) {
+		return BOT_MOVE_DROP;
+	}
+	const idVec3 velocity = physics->GetLinearVelocity() - up * ( physics->GetLinearVelocity() * up );
+	const float reach = idMath::ClampFloat( BOT_PROBE_DISTANCE, BOT_PROBE_MAX_REACH,
+		velocity.Length() * BOT_PROBE_REACH_TIME );
+	if ( swept >= BOT_PROBE_DISTANCE - 1.0f && reach > BOT_PROBE_DISTANCE + 8.0f ) {
+		const idVec3 sweptEnd = trace.endpos;
+		gameLocal.clip.Translation( trace, sweptEnd, start + moveDirection * reach,
+			clip, axis, clipMask, this );
+		if ( BotProbeLanding( trace.endpos, up, moveDirection ) == BOT_MOVE_DROP ) {
+			return BOT_MOVE_DROP;
+		}
+	}
+	return BOT_MOVE_CLEAR;
+}
+
+/*
+================
+hhArtificialPlayer::BotJumpIsSafe
+
+openPR06: a wall-contact jump only where it can clear the obstacle and land
+on safe ground. Without this check, railings at the edge of Prey's arenas
+are vaulted into the void. A wall-walking bot never jumps: in the air the
+physics restores normal gravity and drops it off the wall.
+================
+*/
+bool hhArtificialPlayer::BotJumpIsSafe( idVec3 moveDirection ) {
+	if ( IsWallWalking() ) {
+		return false;
+	}
+	idPhysics *physics = GetPhysics();
+	idClipModel *clip = physics->GetClipModel();
+	if ( !clip ) {
+		return false;
+	}
+	const idMat3 &axis = physics->GetAxis();
+	const idVec3 up = axis[2];
+	const int clipMask = physics->GetClipMask();
+	moveDirection -= up * ( moveDirection * up );
+	if ( moveDirection.Normalize() <= 0.0f ) {
+		return false;
+	}
+
+	trace_t trace;
+	gameLocal.clip.Translation( trace, GetOrigin(), GetOrigin() + up * BOT_JUMP_CLEARANCE,
+		clip, axis, clipMask, this );
+	if ( trace.fraction < 1.0f ) {
+		return false;
+	}
+	const idVec3 start = trace.endpos;
+	gameLocal.clip.Translation( trace, start, start + moveDirection * BOT_PROBE_DISTANCE,
+		clip, axis, clipMask, this );
+	if ( trace.fraction < 0.65f ) {
+		return false;	// too tall to clear
+	}
+	// A wall-contact jump is for getting onto or over something low, so both
+	// landings must be floor at about the bot's own level and outside any
+	// hazard.  A running jump carries on well past the obstacle, which is why
+	// the far landing counts too.  Railings at the edge of an arena fail this.
+	const idVec3 obstacleTop = trace.endpos;
+	if ( !BotJumpLandingIsLevel( obstacleTop, up ) ) {
+		return false;
+	}
+	gameLocal.clip.Translation( trace, obstacleTop, obstacleTop + moveDirection * BOT_JUMP_REACH,
+		clip, axis, clipMask, this );
+	return BotJumpLandingIsLevel( trace.endpos, up );
+}
+
+/*
+================
+hhArtificialPlayer::BotJumpLandingIsLevel
+
+openPR06: floor within BOT_JUMP_MAX_DROP of the bot's current floor beneath
+a point BOT_JUMP_CLEARANCE above that floor, with no hazard in between.
+================
+*/
+bool hhArtificialPlayer::BotJumpLandingIsLevel( const idVec3 &point, const idVec3 &up ) {
+	idPhysics *physics = GetPhysics();
+	trace_t trace;
+	const float maxDrop = BOT_JUMP_CLEARANCE + BOT_JUMP_MAX_DROP;
+	gameLocal.clip.Translation( trace, point, point - up * maxDrop, physics->GetClipModel(),
+		physics->GetAxis(), physics->GetClipMask(), this );
+	return trace.fraction < 1.0f && !BotFallIsHazardous( point, trace.endpos );
+}
+
 void hhArtificialPlayer::UpdateBotMovement( usercmd_t &cmd, const hhPlayer *enemy,
 	bool enemyVisible, float enemyDistance ) {
 	if ( health <= 0 || spectating ) {
@@ -8069,17 +8389,32 @@ void hhArtificialPlayer::UpdateBotMovement( usercmd_t &cmd, const hhPlayer *enem
 			botNextItemScanTime = gameLocal.time + 500 + gameLocal.random.RandomInt( 400 );
 			idEntity *oldItemGoal = botItemGoal.GetEntity();
 			botItemGoal = NULL;
-			if ( botTraits.itemFocus > 0.05f ) {
+			// A teleporting game portal is a route as well as a place: an idle
+			// bot that sees one may take it, the way it takes a visible pickup.
+			const float portalInterest = 0.15f + 0.35f * botTraits.initiative;
+			{
 				const float itemRange = 500.0f + 1500.0f * botTraits.itemFocus;
 				float bestItemScore = -1.0f;
 				for ( int entityNum = MAX_CLIENTS; entityNum < gameLocal.num_entities; ++entityNum ) {
 					idEntity *item = gameLocal.entities[entityNum];
-					if ( !item || !item->IsType( idItem::Type ) || item->IsHidden() ||
+					if ( !item || item->IsHidden() ||
 						( item == botIgnoredItem.GetEntity() && gameLocal.time < botItemIgnoreUntil ) ) {
 						continue;
 					}
+					float interest = 0.0f;
+					float range = 0.0f;
+					if ( item->IsType( idItem::Type ) && botTraits.itemFocus > 0.05f ) {
+						interest = botTraits.itemFocus;
+						range = itemRange;
+					} else if ( item->IsType( hhPortal::Type ) &&
+						static_cast<hhPortal *>( item )->CanTeleport() && !BotPortalRecentlyUsed( item ) ) {
+						interest = portalInterest;
+						range = BOT_PORTAL_RANGE;
+					} else {
+						continue;
+					}
 					const float itemDistance = ( item->GetOrigin() - GetOrigin() ).Length();
-					if ( itemDistance > itemRange ) {
+					if ( itemDistance > range ) {
 						continue;
 					}
 					trace_t itemTrace;
@@ -8088,7 +8423,7 @@ void hhArtificialPlayer::UpdateBotMovement( usercmd_t &cmd, const hhPlayer *enem
 					if ( itemTrace.fraction < 1.0f && itemTrace.c.entityNum != item->entityNumber ) {
 						continue;
 					}
-					const float score = botTraits.itemFocus / ( 64.0f + itemDistance );
+					const float score = interest / ( 64.0f + itemDistance );
 					if ( score > bestItemScore ) {
 						bestItemScore = score;
 						botItemGoal = item;
@@ -8130,7 +8465,23 @@ void hhArtificialPlayer::UpdateBotMovement( usercmd_t &cmd, const hhPlayer *enem
 				idVec3 localItemDirection;
 				GetEyeAxis().ProjectVector( itemDirection, localItemDirection );
 				botWanderYaw = localItemDirection.ToAngles().yaw;
-				if ( itemDistance > 48.0f ) {
+				if ( botItemGoal->IsType( hhPortal::Type ) ) {
+					// Walk through the portal plane; Portalled clears the goal.
+					forward = 1.0f;
+					if ( itemDistance > 48.0f ) {
+						botItemCloseTime = 0;
+					} else if ( botItemCloseTime == 0 ) {
+						botItemCloseTime = gameLocal.time;
+					}
+					if ( botItemCloseTime && gameLocal.time - botItemCloseTime >= 1000 ) {
+						botIgnoredItem = botItemGoal;
+						botItemIgnoreUntil = gameLocal.time + BOT_ITEM_IGNORE_TIME;
+						botItemGoal = NULL;
+						botItemCloseTime = 0;
+						botItemLastProgressTime = -1;
+						botItemBestDistance = idMath::INFINITY;
+					}
+				} else if ( itemDistance > 48.0f ) {
 					forward = 0.35f + 0.65f * botTraits.itemFocus;
 					botItemCloseTime = 0;
 				} else if ( botItemCloseTime == 0 ) {
@@ -8167,20 +8518,55 @@ void hhArtificialPlayer::UpdateBotMovement( usercmd_t &cmd, const hhPlayer *enem
 		strafe = (float)botStrafeDirection;
 	}
 
+	// idAngles::ToMat3 row 1 points left, while player physics moves a
+	// positive rightmove along the right vector, so a strafe is -axis[1].
 	const idMat3 worldViewAxis = GetUntransformedViewAngles().ToMat3() * GetEyeAxis();
-	idVec3 moveDirection = worldViewAxis[0] * forward + worldViewAxis[1] * strafe;
+	idVec3 moveDirection = worldViewAxis[0] * forward - worldViewAxis[1] * strafe;
 	if ( moveDirection.Normalize() > 0.0f ) {
-		trace_t trace;
-		gameLocal.clip.TraceBounds( trace, GetOrigin(), GetOrigin() + moveDirection * 72.0f,
-			GetPhysics()->GetBounds(), GetPhysics()->GetClipMask(), this );
-		if ( trace.fraction < 0.65f ) {
-			strafe = (float)-botStrafeDirection;
+		const botMoveProbe_t blocked = BotMoveBlocked( moveDirection );
+		if ( blocked == BOT_MOVE_DROP ) {
+			// Back away from the edge rather than creep or jump over it; the
+			// probe runs again next frame along whatever direction this gives.
+			// Reverse the whole step at full speed: a gentle back-pedal does not
+			// overcome a running bot's momentum before the edge.
+			if ( strafe != 0.0f ) {
+				botStrafeDirection = strafe > 0.0f ? -1 : 1;
+				strafe = (float)botStrafeDirection;
+			}
+			forward = forward > 0.0f ? -1.0f : ( forward < 0.0f ? 1.0f : 0.0f );
+			if ( gameLocal.time >= botNextBlockTurnTime ) {
+				botWanderYaw = idMath::AngleNormalize180( botWanderYaw +
+					( 120.0f + 60.0f * gameLocal.random.RandomFloat() ) * botStrafeDirection );
+				botNextBlockTurnTime = gameLocal.time + BOT_BLOCK_TURN_TIME;
+			}
+		} else if ( blocked == BOT_MOVE_WALL ) {
+			// Turn once per contact and keep the new strafe side: re-deciding
+			// every frame flips the strafe back and spins the heading, which
+			// pins a bot against the wall it is trying to leave.
+			if ( gameLocal.time >= botNextBlockTurnTime ) {
+				botStrafeDirection = -botStrafeDirection;
+				botWanderYaw = idMath::AngleNormalize180( botWanderYaw +
+					( 90.0f + 60.0f * gameLocal.random.RandomFloat() ) * botStrafeDirection );
+				botNextBlockTurnTime = gameLocal.time + BOT_BLOCK_TURN_TIME;
+			}
+			strafe = (float)botStrafeDirection;
 			forward *= 0.2f;
-			botWanderYaw = idMath::AngleNormalize180( botWanderYaw + 80.0f * botStrafeDirection );
+			// A jump leaves the walkway: player physics restores normal gravity
+			// in the air, which drops a bot off a wall or ceiling.
 			if ( gameLocal.time >= botNextJumpTime &&
-				gameLocal.random.RandomFloat() < botTraits.jumpChance ) {
+				gameLocal.random.RandomFloat() < botTraits.jumpChance && BotJumpIsSafe( moveDirection ) ) {
 				cmd.upmove = idMath::ClampChar( 127 );
 				botNextJumpTime = gameLocal.time + 900;
+			}
+		}
+
+		// The response picked a new step; never take one over an edge.
+		if ( blocked != BOT_MOVE_CLEAR ) {
+			idVec3 responseDirection = worldViewAxis[0] * forward - worldViewAxis[1] * strafe;
+			if ( responseDirection.Normalize() > 0.0f && BotMoveBlocked( responseDirection ) == BOT_MOVE_DROP ) {
+				forward = 0.0f;
+				strafe = 0.0f;
+				cmd.upmove = 0;
 			}
 		}
 	}
@@ -8315,10 +8701,12 @@ bool hhArtificialPlayer::QueueBotChat( rvBotChatEvent event, const idPlayer *oth
 	botChatTokens_t tokens;
 	tokens.self = BotDisplayName( this );
 	tokens.other = BotDisplayName( other );
-	const char *currentWeaponName = GetWeaponName( GetCurrentWeapon() );
-	tokens.weapon = weaponName && weaponName[0] ? weaponName :
-		( currentWeaponName ? currentWeaponName : "weapon" );
-	tokens.map = gameLocal.serverInfo.GetString( "si_map" );
+	tokens.weapon = BotChatWeaponName( weaponName && weaponName[0] ? weaponName :
+		GetWeaponName( GetCurrentWeapon() ) );
+	if ( tokens.weapon.IsEmpty() ) {
+		tokens.weapon = "weapon";
+	}
+	tokens.map = BotChatMapName();
 	tokens.item = itemName ? itemName : "item";
 	idStr line;
 	if ( !botCharacterManager.ChatLine( botCharacter, event, tokens, line ) ) {
@@ -8347,7 +8735,7 @@ bool hhArtificialPlayer::TryQueueBotReply( const idStr &normalizedText, bool sou
 	tokens.self = BotDisplayName( this );
 	tokens.other = BotDisplayName( other );
 	tokens.weapon = "";
-	tokens.map = gameLocal.serverInfo.GetString( "si_map" );
+	tokens.map = BotChatMapName();
 	tokens.item = "";
 	idStr line;
 	if ( !botCharacterManager.ReplyLine( botCharacter, normalizedText, sourceIsBot,
@@ -8423,7 +8811,7 @@ void hhArtificialPlayer::OnBotItemPickedUp( const idEntity *item, idPlayer *pick
 		return;
 	}
 
-	idStr itemName = item->spawnArgs.GetString( "inv_name" );
+	idStr itemName = BotChatText( item->spawnArgs.GetString( "inv_name" ) );
 	if ( itemName.IsEmpty() ) {
 		itemName = item->spawnArgs.GetString( "classname", "item" );
 	}
@@ -8455,6 +8843,9 @@ void hhArtificialPlayer::OnBotMatchStart( void ) {
 	botItemIgnoreUntil = 0;
 	botItemLastProgressTime = -1;
 	botItemBestDistance = idMath::INFINITY;
+	botNextBlockTurnTime = 0;
+	botLastPortal = NULL;
+	botPortalIgnoreUntil = 0;
 	botLeadKnown = false;
 	// Dialogue queued in the previous round must not suppress or leak past the
 	// new round's level-start line.

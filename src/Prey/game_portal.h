@@ -58,6 +58,8 @@ public:
 	bool			PortalEntity( idEntity *ent, const idVec3 &point );
 	bool			PortalTeleport( idEntity *ent, const idVec3 &origin, const idMat3 &axis, const idMat3 &sourceAxis, const idMat3 &destAxis );
 	bool			IsActive(void) { return(portalState < PORTAL_CLOSING); }
+	// openPR06: a portal that moves what enters it somewhere (bot route goals)
+	bool			CanTeleport( void ) const { return !bNoTeleport && cameraTarget != NULL; }
 	virtual void	SetGravity( const idVec3& newGravity ) { portalGravity = newGravity; }
 	const idVec3&	GetGravity( void ) const { return portalGravity; }
 	void			PostSpawn( void );

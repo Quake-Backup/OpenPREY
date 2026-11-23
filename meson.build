@@ -294,6 +294,9 @@ if get_option('build_native_tests')
     args: [files('tools/build/vulkan_material_sources.py'), '--check'], timeout: 30)
   test('openpr06-retained-screens', py,
     args: [files('tools/ui/build_retained_screens.py'), '--check'], timeout: 30)
+  # The multiplayer scoreboard's compact layouts for 32 players.
+  test('openpr06-scoreboard', py,
+    args: [files('tools/ui/build_scoreboard.py'), '--check'], timeout: 30)
   # The loading screen's name notch textures (stock screen), from their construction.
   test('openpr06-loading-notch', py,
     args: [files('tools/ui/loading_notch.py'), '--check'], timeout: 120)

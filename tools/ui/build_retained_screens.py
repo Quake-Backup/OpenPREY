@@ -3011,6 +3011,7 @@ MP_MODELS, MP_MODELS_PAGE = 30, 15           # the player definition's models, a
 MP_MAP_ROWS = 64                             # RETAINED_CREATE_MAP_ROWS in the session
 MP_SERVER_ROWS = 64                          # RETAINED_JOIN_ROWS in the session
 MP_SERVER_ROW_H = 16                         # u: a server row
+MP_PLAYER_ROWS = 16                          # Selected Server's Players: two columns of up to 16 (MAX_ASYNC_CLIENTS)
 MP_MAP_ROW_H = 16                            # u: a map row at the stock list's textscale
 MP_NAME_BYTES = 40                           # Multiplayer_Settings_PlayerNameEdit's maxchars
 MP_TEXT_VALUE = rgb("#B8C9E6", 0.9)          # EDITABLE_FORECOLOR
@@ -3426,8 +3427,9 @@ def mp_find_page(doc: Document) -> tuple[list[dict], str]:
         doc.state[f"join.{key}"] = {"type": kind, "initial": initial}
     for key in ("notice", "status", "shot", "address", "addressError", "clientip",
                 *[f"sel.{field}" for field in ("name", "map", "type", "players", "address", "password")],
-                *[f"sel.player{index}" for index in range(8)]):
+                *[f"sel.player{index}" for index in range(2 * MP_PLAYER_ROWS)]):
         doc.state[f"join.{key}"] = {"type": "string", "initial": ""}
+    doc.state["join.sel.rows"] = {"type": "number", "initial": 4}
     tick, click = doc.session("soundTick"), doc.session("soundClick")
     nodes = []
     # The headings sort by their column, as the stock buttons do.
@@ -3556,11 +3558,32 @@ def mp_find_page(doc: Document) -> tuple[list[dict], str]:
                          shadow=True)
         details += info(f"find-det{at}", state, (125, 20 + 15 * at, 180, 15), 0.25)
     details.append(join_button("find_join1", (ox, oy)))
+    # Players: the stock's two boxes of four, the first half of the names
+    # down the leading box and the rest down the other. A server of more
+    # than eight (openPR06's take 32) lengthens both columns, which scroll
+    # together inside the boxes. The session publishes the names a pair a
+    # row (join.sel.player<2 row + column>) and the rows in use.
     players = [box_fill("find-players-a", (ox + 20, oy + 15, 140, 80), [0, 0, 0, 0.3], border=SEPARATOR),
                box_fill("find-players-b", (ox + 159, oy + 15, 140, 80), [0, 0, 0, 0.3], border=SEPARATOR)]
-    for index in range(8):
-        players += info(f"find-player{index}", f"join.sel.player{index}",
-                        (25 + 139 * (index // 4), 25 + 15 * (index % 4), 130, 14), 0.25)
+    pairs = []
+    for row_index in range(MP_PLAYER_ROWS):
+        cells = []
+        for column in range(2):
+            index = 2 * row_index + column
+            # the trailing column stops short of the scroll bar
+            cells += bound(doc, label(f"find-player{index}", PLACEHOLDER, (4 + 139 * column, 0, 116 if column else 130, 14), BODY,
+                                      0.25, MP_TEXT_VALUE, align="left", shadow=True, overflow=keyword("hidden"), **ELLIPSIS),
+                           f"join.sel.player{index}")
+        pair = group(f"find-players-row{row_index}", {"position": keyword("relative"), "display": keyword("none"),
+                                                      "width": ul(277), "height": ul(15), "flex-shrink": number(0), **PASSIVE}, cells)
+        doc.bind(pair["id"], "display", {"op": "select", "args": [{"op": "<", "args": [row_index, {"state": "join.sel.rows"}]},
+                                                                  "block", "none"]})
+        pairs.append(pair)
+    players.append(group("find-players-list", {**absolute(ox + 21, oy + 25, 277, 60), "overflow": keyword("auto")}, [
+        group("find-players-column", {"position": keyword("relative"), "display": keyword("flex"),
+                                      "flex-direction": keyword("column")}, pairs)]))
+    players.append(shown_when(doc, scrollbar(doc, "find_players_scroll", "find-players-list", (ox + 284, oy + 16, 14, 78), "#str_20173",
+                                             15), {"op": ">", "args": [{"state": "join.sel.rows"}, 4]}))
     players += label("find-players-title", "#str_20191", (ox + 310, oy + 15, 130, 25), BODY, 0.3, TEXT_LABEL, shadow=True)
     players += info("find-players-limit", "join.sel.players", (340, 40, 70, 20), 0.3)
     players.append(join_button("find_join2", (ox, oy)))

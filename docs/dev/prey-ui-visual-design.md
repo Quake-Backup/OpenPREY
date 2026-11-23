@@ -1,6 +1,6 @@
 # openPR06 UI Visual Design
 
-Specification version 1.30, 22 November 2026.
+Specification version 1.31, 23 November 2026.
 
 Status: reference survey and design contract. openPR06 presents the retained
 interface by default (`ui_retained 1`, since 0.15.0); `ui_retained 0` renders
@@ -916,6 +916,15 @@ The HUD plays no sound for weapon switches or pickups; the player entity plays
   `screenalignx right`, `screenaligny top`), a vote line, a game-state line,
   the player's name under the figure and the aimed player's name above the
   crosshair. Its weapon bar uses 60x50 u tiles without enlargement.
+- In deathmatch the standings box holds four lines and marks the player's
+  own with the scoreboard's bar tint (`#B3CCE6` at 0.2). openPR06 servers
+  take 32 players, so past the top four its last line is the player's own
+  (the followed player's while spectating), under the three leaders.
+  Human Head's place counter, written but commented out of the retail HUD
+  (`SelfRank`, `gui::self_rankstring`, "12/24" in `#B3CCE6` at 0.7, the body
+  face at 0.53), stands left of the frag icon at 490,66 (60x25 u, raised
+  from the stock 72 so the scoreboard's top edge clears it), pinned to the
+  top-right corner with the box; Team DM hides it.
 - Team colours: red `#FF0000`, blue `#3380CC`, deathmatch yellow `#FFCC1A`
   for names; `#CC3333` and `#3333CC` in the standings.
 - The scoreboard is a 477x355 u slate panel (`#334D66` at 0.6, 1 u `#B3CCE6`
@@ -924,7 +933,32 @@ The HUD plays no sound for weapon switches or pickups; the player entity plays
   18 u portraits; team games list two blocks of 8 rows on a 15 u pitch under
   solid red `#BF0000` and blue `#0000A6` heading strips carrying each team's
   score. The local player's row takes a `#B3CCE6` 0.2 bar. Rows use the body
-  face at 0.25, headings 0.3.
+  face at 0.25, headings 0.3. The footer names the game type by its menu
+  name (`#str_20150`, "Deathmatch" or "Team DM"; the stock printed the
+  server's token, "deathmatch").
+- **Past eight a list** (openPR06 servers take 32, `MAX_CLIENTS`; retail's
+  took 8) the board keeps its furniture and tightens its rows to the stock
+  team rows' construction: a 13 u line with a 13 u portrait, the body face
+  at 0.25, names that stop at their column instead of wrapping. The game
+  picks the layout and the pitch (`sb_layout`, `sb_pitch`, `sb_split`,
+  `sb_count`, `red_count`, `blue_count`); `tools/ui/build_scoreboard.py`
+  writes the windows that draw it into `guis/scoreboard.gui`. The panel
+  thickens to 0.8 behind compact rows, so the chat and HUD beneath stop
+  competing with them (section 12.3, rule 5).
+  - *Deathmatch, 9 to 16 lines:* one column in the stock panel and wells,
+    the pitch 286 u shared over the lines (24 u at most, 17 u at 16 lines).
+  - *Deathmatch, 17 to 32 lines:* the panel widens to 620x355 u at 10,90
+    with two 300 u tables at 17 and 323, each with its own headings (Name
+    129 u, Frags 63, Wins 49, Ping 56); the leading table takes the first
+    half of the lines, and the footer spans both.
+  - *Team DM past 8 a team:* the wide panel with red leading and blue
+    trailing, each under its 15 u strip at 119 with its rows from 136,
+    the pitch 269 u over the longer team (24 u at most, 12 u at least).
+    A team longer than 22 ends in a "+N" row, and keeps the local
+    player's row beneath it.
+  - Spectators and connecting players are listed after the players, dimmed
+    to 0.45 (the stock deathmatch board hid them). The local player's bar is
+    as tall as the pitch allows, up to 17 u.
 - Chat shows ten lines (600x15 u from 0,220) at 0.25 with shadow, pinned to
   the screen's left edge under aspect expansion as the health figure is
   (`chat.gui`'s `History`, `screenalignx left`); the message
@@ -2331,8 +2365,11 @@ the 570x370 u tab page as Options' do.
   servers' lock, Quick Refresh, Refresh All and the Internet and LAN source;
   while the list is empty the scan's notice stands in it. Under it the
   Selected Server tab (Summary with the map's picture, Details with the
-  address, map, game type, password and players, and Players with the first
-  eight names), the Filters tab with the stock filters as plated rows
+  address, map, game type, password and players, and Players with every
+  name: the first half down the stock's leading box of four and the rest
+  down the other, as the stock's eight were; past eight both columns
+  lengthen and scroll together by whole 15 u rows inside the boxes, with a
+  scroll bar at the trailing box's edge), the Filters tab with the stock filters as plated rows
   (400x21 u on a 23 u pitch, at 0.29), which the list follows as each
   changes (`idSessionLocal::UpdateRetainedJoinGame`), and IP Connect with its
   field and Connect to IP; a refused address says why in place of the
@@ -2477,7 +2514,8 @@ coordinates, so the retained document is the stock screen redrawn.
   the Advanced 2 page's driver box, whose button opens a web page, and the
   crosshair's picture beside its name.
 - The multiplayer scoreboard, spectate and chat overlays, which are HUD
-  (section 10) rather than menus, and the HUD itself.
+  (section 10) rather than menus, and the HUD itself. The scoreboard's
+  layouts for openPR06's 32 players are stock windows (section 10.6).
 - The hook bars and the arc are the Atlas's reconstructions and are lighter
   than the stock art: the stock hook is about 15 u wide where the vector one
   is 11 u, and the stock arc carries a socket where each bar joins it.
@@ -2637,7 +2675,7 @@ sections it draws:
 | 07 Controls | The Options page at its stock size: top and side tabs joined to their page, openPR06's Video page row for row, stock binding rows, an example page of list, radio segments and check boxes, an edit field and the Reset Defaults dialog | 6, 7, 9, 12.1 |
 | 08 HUD | The single-player HUD with live gauges, weapon bar, pickups, damage arcs, tips, the eight crosshairs and the spirit walk | 10.1 to 10.5 |
 | 09 Rifle scope | The scope overlay: raising, zoom, heading and aspect | 10.8 |
-| 10 Scoreboard | Deathmatch and team layouts | 10.6 |
+| 10 Scoreboard | Deathmatch and team layouts: the stock board and openPR06's compact layouts for 32 players | 10.6 |
 | 11 Devices | A force-field console with its overlay stack and the translation reveal; one tile for each device family | 11 |
 | 12 Loading and credits | The loading screen and the credits' fly-in | 8, 9, 12.1 |
 
@@ -3101,6 +3139,20 @@ carries their summaries.
   row bound `togglehelp`, which nothing registers; the retained page leaves
   it out, and the stock page still shows it.
 
+- **The multiplayer UI at 32 players** (uncommitted, 23 November 2026):
+  retail Prey's servers took 8 players and its scoreboard listed 8 lines a
+  list (`MAX_SCOREBOARD_NAMES`). openPR06's take 32, so players past the
+  eighth, the local player among them, were missing from the board, the
+  HUD's standings never showed the player's own line, and Find Servers'
+  Players page listed the first eight names. The board's compact layouts,
+  the standings' own line and place counter, and the Players page's
+  scrolling columns are section 10.6's and section 12.5's. Checked on
+  `game/dmwallwalk2` with 5, 15, 23 and 31 bots and in Team DM with 19, at
+  1280x720 under OpenGL; the Players page with a 12-name roster under
+  `testGUI`. The stock deathmatch board's footer printed the server's
+  `si_gameType` token ("deathmatch") and hid spectators, and the place
+  string went stale while spectating; all three are fixed.
+
 ### C.3 Retail data
 
 - The Earth layer's last texel column (`preymenu/background2.tga`) is brighter
@@ -3121,6 +3173,18 @@ carries their summaries.
   (`def/consoles.def:497,534`), which are not in the archives.
 
 ## Appendix D. Change record
+
+### Version 1.31, 23 November 2026
+
+- Section 10.6: the multiplayer UI at openPR06's 32 players. The scoreboard
+  keeps the stock board up to eight a list, then tightens to compact 13 u
+  rows in one column (to 16 lines) and widens into two tables, the teams
+  side by side; spectators are listed, dimmed. The deathmatch standings mark
+  the player's own line and show it past the top four, with Human Head's
+  place counter beside the frag icon.
+- Section 12.5, MultiPrey: Find Servers' Players page lists every name, the
+  two stock boxes scrolling together past eight.
+- Section 14: the Atlas's scoreboard sheet draws the compact layouts.
 
 ### Version 1.30, 22 November 2026
 

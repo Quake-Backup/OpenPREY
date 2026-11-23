@@ -11883,7 +11883,10 @@ void idSessionLocal::PublishRetainedJoinGame( idUserInterface *gui ) {
 	gui->SetStateString( "join.shot", chosen >= 0 ? retainedJoinShot.c_str() : RETAINED_LOAD_GENERIC_SHOT );
 	// openPR06: the chosen server as Prey's Selected Server tab shows it: its
 	// name, map, game type, players and address, whether it asks for a
-	// password, and the first eight players' names.
+	// password, and its players' names, the first half down the Players
+	// page's leading box and the rest down the other, as the stock's eight
+	// were; a pair a row (join.sel.player<2 row + column>), with the rows in
+	// use (join.sel.rows), which scroll past the boxes' four.
 	{
 		const networkServer_t *server = chosen >= 0 ? &servers[ chosen ] : NULL;
 		const idDict *info = server != NULL ? &server->serverInfo : NULL;
@@ -11896,9 +11899,13 @@ void idSessionLocal::PublishRetainedJoinGame( idUserInterface *gui ) {
 		gui->SetStateString( "join.sel.address", server != NULL ? Sys_NetAdrToString( server->adr ) : "" );
 		gui->SetStateString( "join.sel.password", info == NULL ? "" :
 			common->GetLanguageDict()->GetString( info->GetBool( "si_usePass" ) ? "#str_107703" : "#str_107704" ) );
-		for ( int i = 0; i < 8; ++i ) {
-			gui->SetStateString( va( "join.sel.player%d", i ), server != NULL && i < Min( server->clients, MAX_ASYNC_CLIENTS ) ?
-				Session_RetainedPlayerText( server->nickname[ i ], 64, 1 ).c_str() : "" );
+		const int players = server != NULL ? idMath::ClampInt( 0, MAX_ASYNC_CLIENTS, server->clients ) : 0;
+		const int rows = Max( 4, ( players + 1 ) / 2 );
+		gui->SetStateInt( "join.sel.rows", rows );
+		for ( int i = 0; i < MAX_ASYNC_CLIENTS; ++i ) {
+			const int player = ( i / 2 ) + ( i % 2 ) * rows;
+			gui->SetStateString( va( "join.sel.player%d", i ), player < players ?
+				Session_RetainedPlayerText( server->nickname[ player ], 64, 1 ).c_str() : "" );
 		}
 	}
 	gui->SetStateBool( "join.favorite", chosen >= 0 && servers.IsFavoriteServer( chosen ) );

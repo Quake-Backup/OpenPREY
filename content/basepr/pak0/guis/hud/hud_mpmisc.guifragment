@@ -147,6 +147,14 @@
 					bordercolor	0.4, 0.45, 0.55, 1
 					bordersize	1
 				}
+
+				// openPR06: the player's own line, in the scoreboard's BarSelf tint. Past
+				// the top four the game puts the player on the last line (UpdateHud).
+				windowDef TopFourSelf {
+					rect		18, ( ( "gui::rank_self" - 1 ) * 16 ), 108, 16
+					backcolor	0.7, 0.8, 0.9, 0.2
+					visible		( "gui::rank_self" != 0 )
+				}
 				
 				windowDef TopFourIcon1 {
 					rect		0, 0, 16, 15
@@ -234,14 +242,22 @@
 				}
 			}
 
-//			windowDef SelfRank {
-//				rect		510, 72, 40, 25
-//				text		"gui::self_rankstring"
-//				textscale	0.53
-//				textalign	2
-//				textaligny	-5
-//				forecolor	0.7, 0.8, 0.9, 0.7
-//			}
+			// openPR06: Human Head's place counter ("12/24"), left out of the retail HUD,
+			// back for deathmatch, where a crowded server can leave the player far
+			// below the box. Widened to the left for two-digit places, and raised
+			// from 72 so the scoreboard's top edge (90) clears it.
+			windowDef SelfRank {
+				rect		490, 66, 60, 25
+				screenalignx	right
+				screenaligny	top
+				text		"gui::self_rankstring"
+				shadow		1
+				textscale	0.53
+				textalign	2
+				textaligny	-5
+				forecolor	0.7, 0.8, 0.9, 0.7
+				visible		( "gui::teamdm" == 0 )
+			}
 
 			windowDef FragStuff {
 				rect		0, 0, 640, 480

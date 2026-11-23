@@ -17,6 +17,39 @@
 
 idCVar g_spectatorChat( "g_spectatorChat", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "let spectators talk to everyone during game" );
 
+// openPR06: Prey's scoreboard lists eight players a list (MAX_SCOREBOARD_NAMES),
+// as many as its servers took; openPR06's take MAX_CLIENTS. Up to eight a list
+// the stock layout stands. Past that guis/scoreboard.gui lays the rows out by
+// sb_layout (1: one compact column in the stock panel, 2: two columns in a
+// wider one, the teams side by side) and sb_pitch, the row pitch in units
+// (docs/dev/prey-ui-visual-design.md, section 10.6).
+static const int SB_LAYOUT_CLASSIC		= 0;
+static const int SB_LAYOUT_COLUMN		= 1;
+static const int SB_LAYOUT_COLUMNS		= 2;
+static const int SB_COLUMN_ROWS			= 16;		// the most rows one compact column takes
+static const int SB_LIST_BAND			= 286;		// units of the column wells a compact list fills
+static const int SB_TEAM_BAND			= 269;		// the same under a team's heading strip
+static const int SB_MAX_PITCH			= 24;
+static const int SB_MIN_PITCH			= 12;
+static const int SB_TEAM_ROWS			= SB_TEAM_BAND / SB_MIN_PITCH;	// 22: a longer team ends in a "+N" row
+static const int HUD_STANDINGS			= 4;		// the HUD's standings box (hud_mpmisc.guifragment)
+
+idCVar g_forceScoreboard( "g_forceScoreboard", "0", CVAR_GAME | CVAR_BOOL | CVAR_NOCHEAT, "keep the scoreboard up as if the scores button were held (for scripted captures)" );
+
+static int ScoreboardPitch( int band, int rows ) {
+	return idMath::ClampInt( SB_MIN_PITCH, SB_MAX_PITCH, band / Max( 1, rows ) );
+}
+
+// openPR06: one scoreboard row, gathered before any row is written.
+typedef struct scoreboardLine_s {
+	idStr	name;
+	idStr	portrait;
+	idStr	score;
+	idStr	wins;
+	int		ping;
+	bool	visible;
+} scoreboardLine_t;
+
 // global sounds transmitted by index - 0 .. SND_COUNT
 // sounds in this list get precached on MP start
 const char *idMultiplayerGame::GlobalSoundStrings[] = {
@@ -380,68 +413,56 @@ void idMultiplayerGame::UpdatePlayerRanks() {
 ================
 idMultiplayerGame::UpdateTeamScoreboard
 	HUMANHEAD pdm
+	openPR06: each team's lines are gathered before any row is written, so a
+	team longer than its column (SB_TEAM_ROWS) ends in a "+N" row and still
+	shows the local player's own row
 ================
 */
 void idMultiplayerGame::UpdateTeamScoreboard( idUserInterface *scoreBoard, idPlayer *player ) {
-	int i, j, iline, k;
+	int i, j, k;
 	idEntity *ent;
 	idPlayer *p;
 	int value;
-	idStr playerName;
-	idStr playerPortrait;
-	idStr playerScore;		// Must be string field because it's used for string info sometimes
-	idStr playerWins;		// Must be string field because it's used for string info sometimes
-	int playerPing;
-	bool playerVisible;
 	int redScore = 0;
 	int blueScore = 0;
 	int team = 0;
-
-	int playersBlue = 0;
-	int playersRed = 0;
+	scoreboardLine_t lines[ 2 ][ MAX_CLIENTS ];		// [0] blue, [1] red, in the order shown
+	int counts[ 2 ] = { 0, 0 };
+	int self[ 2 ] = { -1, -1 };
 
 	scoreBoard->SetStateString("teamdm", "1");
-
-	iline = 0; // the display lines
+	scoreBoard->SetStateInt( "rank_self", 0 );
 
 	// Ranked players first
 	if ( gameState != WARMUP ) {
 		for ( i = 0; i < numRankedPlayers; i++ ) {
-			// ranked player
-			iline++;
-
 			// Update player stats
 			team = ( idStr::Icmp( rankedPlayers[ i ]->GetUserInfo()->GetString( "ui_team" ), "Red" ) == 0 );
-			char *teamStr;
-			int n;
 			if (team) {
-				teamStr = "red";
 				redScore = idMath::ClampInt( MP_PLAYER_MINFRAGS, MP_PLAYER_MAXFRAGS, playerState[ rankedPlayers[ i ]->entityNumber ].teamFragCount );
-				n = playersRed++;
 			}
 			else {
-				teamStr = "blue";
 				blueScore = idMath::ClampInt( MP_PLAYER_MINFRAGS, MP_PLAYER_MAXFRAGS, playerState[ rankedPlayers[ i ]->entityNumber ].teamFragCount );
-				n = playersBlue++;
 			}
+			if ( counts[ team ] >= MAX_CLIENTS ) {
+				continue;
+			}
+			scoreboardLine_t &line = lines[ team ][ counts[ team ] ];
 
 			if ( rankedPlayers[ i ]->entityNumber == player->entityNumber ) {
 				// highlight who we are
-				scoreBoard->SetStateInt( "rank_self", n+1 );
+				self[ team ] = counts[ team ];
 			}
 
 			value = idMath::ClampInt( MP_PLAYER_MINFRAGS, MP_PLAYER_MAXFRAGS, playerState[ rankedPlayers[ i ]->entityNumber ].fragCount );
-			playerScore = va("%i", value);
+			line.score = va("%i", value);
 			value = idMath::ClampInt( 0, MP_PLAYER_MAXWINS, playerState[ rankedPlayers[ i ]->entityNumber ].wins );
-			playerWins = va("%i", value);
-			playerPing = playerState[ rankedPlayers[ i ]->entityNumber ].ping;
-
-			scoreBoard->SetStateBool( va( "%s%i_rank", teamStr, n+1 ), true );
-			scoreBoard->SetStateString( va( "%s%i", teamStr, n+1 ), rankedPlayers[ i ]->GetUserInfo()->GetString( "ui_name" ) );
-			scoreBoard->SetStateString( va( "%s%i_portrait", teamStr, n+1 ), rankedPlayers[ i ]->GetModelPortraitName(true) );
-			scoreBoard->SetStateString( va( "%s%i_score", teamStr, n+1 ), playerScore.c_str() );
-			scoreBoard->SetStateString( va( "%s%i_wins", teamStr, n+1 ), playerWins.c_str() );
-			scoreBoard->SetStateInt( va( "%s%i_ping", teamStr, n+1 ), playerPing );
+			line.wins = va("%i", value);
+			line.ping = playerState[ rankedPlayers[ i ]->entityNumber ].ping;
+			line.name = rankedPlayers[ i ]->GetUserInfo()->GetString( "ui_name" );
+			line.portrait = rankedPlayers[ i ]->GetModelPortraitName(true);
+			line.visible = true;
+			counts[ team ]++;
 		}
 	}
 
@@ -473,86 +494,106 @@ void idMultiplayerGame::UpdateTeamScoreboard( idUserInterface *scoreBoard, idPla
 					continue;
 				}
 			}
-	
-			iline++;
-			if ( !playerState[ i ].ingame ) {
-				playerName = common->GetLanguageDict()->GetString( "#str_04244" );		// "New Player"
-				playerPortrait = "";
-				playerScore = common->GetLanguageDict()->GetString( "#str_04245" );		// "Connecting"
-				playerVisible = true;
-			} else {
-				playerName = gameLocal.userInfo[ i ].GetString( "ui_name" );
-				playerPortrait = p->GetModelPortraitName(true);
-				if ( gameState == WARMUP ) {
-					if ( p->spectating ) {
-						playerScore = common->GetLanguageDict()->GetString( "#str_04246" );		// "Spectating"
-						playerVisible = true;
-					} else {
-						if (p->IsReady()) {
-							playerScore = common->GetLanguageDict()->GetString( "#str_04247" );	// "Ready"
-						}
-						else {
-							playerScore = common->GetLanguageDict()->GetString( "#str_04248" );	// "Not Ready"
-						}
-						playerVisible = true;
-					}
-				} else {	// Not ranked but in game, must be spectator
-					playerScore = common->GetLanguageDict()->GetString( "#str_04246" );			// "Spectating"
-					playerVisible = true;
-				}
-			}
-
-			playerWins = "";
-			playerPing = playerState[ i ].ping;
 
 			team = ( idStr::Icmp( gameLocal.userInfo[ ent->entityNumber ].GetString( "ui_team" ), "Red" ) == 0 );
-			char *teamStr;
-			int n;
-			if (!team) {
-				teamStr = "blue";
-				n = playersBlue++;
+			if ( counts[ team ] >= MAX_CLIENTS ) {
+				continue;
 			}
-			else {
-				teamStr = "red";
-				n = playersRed++;
+			scoreboardLine_t &line = lines[ team ][ counts[ team ] ];
+
+			if ( !playerState[ i ].ingame ) {
+				line.name = common->GetLanguageDict()->GetString( "#str_04244" );		// "New Player"
+				line.portrait = "";
+				line.score = common->GetLanguageDict()->GetString( "#str_04245" );		// "Connecting"
+			} else {
+				line.name = gameLocal.userInfo[ i ].GetString( "ui_name" );
+				line.portrait = p->GetModelPortraitName(true);
+				if ( gameState == WARMUP && !p->spectating ) {
+					if (p->IsReady()) {
+						line.score = common->GetLanguageDict()->GetString( "#str_04247" );	// "Ready"
+					}
+					else {
+						line.score = common->GetLanguageDict()->GetString( "#str_04248" );	// "Not Ready"
+					}
+				} else {	// spectating in warmup, or not ranked but in game
+					line.score = common->GetLanguageDict()->GetString( "#str_04246" );		// "Spectating"
+				}
 			}
+			line.visible = true;
+			line.wins = "";
+			line.ping = playerState[ i ].ping;
 
 			if ( i == player->entityNumber ) {
 				// highlight who we are
-				scoreBoard->SetStateInt( "rank_self", n+1 );
+				self[ team ] = counts[ team ];
 			}
-
-			scoreBoard->SetStateBool( va( "%s%i_rank", teamStr, n+1 ), playerVisible );
-			scoreBoard->SetStateString( va( "%s%i", teamStr, n+1 ), playerName.c_str() );
-			scoreBoard->SetStateString( va( "%s%i_portrait", teamStr, n+1 ), playerPortrait.c_str() );
-			scoreBoard->SetStateString( va( "%s%i_score", teamStr, n+1 ), playerScore.c_str() );
-			scoreBoard->SetStateString( va( "%s%i_wins", teamStr, n+1 ), playerWins.c_str() );
-			scoreBoard->SetStateInt( va( "%s%i_ping", teamStr, n+1 ), playerPing );
+			counts[ team ]++;
 		}
 	}
 
-	// clear empty slots
-	while (playersRed < MAX_CLIENTS) {
-		scoreBoard->SetStateBool( va( "red%i_rank", playersRed+1 ), false );
-		scoreBoard->SetStateString( va( "red%i", playersRed+1 ), "" );
-		scoreBoard->SetStateString( va( "red%i_score", playersRed+1 ), "" );
-		scoreBoard->SetStateString( va( "red%i_wins", playersRed+1 ), "" );
-		scoreBoard->SetStateString( va( "red%i_ping", playersRed+1 ), "" );
-		scoreBoard->SetStateString( va( "red%i_portrait", playersRed+1 ), "" );
-		playersRed++;
-	}
-	while (playersBlue < MAX_CLIENTS) {
-		//HUMANHEAD PCF rww 05/26/06 - was playersRed, changed to playersBlue
-		scoreBoard->SetStateBool( va( "blue%i_rank", playersBlue+1 ), false );
-		//HUMANHEAD END
-		scoreBoard->SetStateString( va( "blue%i", playersBlue+1 ), "" );
-		scoreBoard->SetStateString( va( "blue%i_score", playersBlue+1 ), "" );
-		scoreBoard->SetStateString( va( "blue%i_wins", playersBlue+1 ), "" );
-		scoreBoard->SetStateString( va( "blue%i_ping", playersBlue+1 ), "" );
-		//HUMANHEAD PCF rww 05/26/06 - was playersRed, changed to playersBlue
-		scoreBoard->SetStateString( va( "blue%i_portrait", playersBlue+1 ), "" );
-		//HUMANHEAD END
-		playersBlue++;
+	// openPR06: lay the board out, then write each team's rows
+	const int longest = Max( counts[ 0 ], counts[ 1 ] );
+	const int layout = longest > MAX_SCOREBOARD_NAMES ? SB_LAYOUT_COLUMNS : SB_LAYOUT_CLASSIC;
+	scoreBoard->SetStateInt( "sb_layout", layout );
+	scoreBoard->SetStateInt( "sb_pitch", ScoreboardPitch( SB_TEAM_BAND, Min( longest, SB_TEAM_ROWS ) ) );
+
+	for ( team = 0; team < 2; team++ ) {
+		const char *teamStr = team ? "red" : "blue";
+		int order[ MAX_CLIENTS ];	// the line each row shows; -1 for the "+N" row
+		int rows = counts[ team ];
+		int more = 0;
+		if ( layout == SB_LAYOUT_COLUMNS && rows > SB_TEAM_ROWS ) {
+			// the local player's own row stays, last, under the "+N" row
+			const bool keepSelf = self[ team ] >= SB_TEAM_ROWS - 1;
+			const int leading = keepSelf ? SB_TEAM_ROWS - 2 : SB_TEAM_ROWS - 1;
+			for ( i = 0; i < leading; i++ ) {
+				order[ i ] = i;
+			}
+			order[ leading ] = -1;
+			if ( keepSelf ) {
+				order[ leading + 1 ] = self[ team ];
+			}
+			more = rows - ( SB_TEAM_ROWS - 1 );
+			rows = SB_TEAM_ROWS;
+		} else {
+			for ( i = 0; i < rows; i++ ) {
+				order[ i ] = i;
+			}
+		}
+
+		for ( i = 0; i < rows; i++ ) {
+			if ( order[ i ] < 0 ) {
+				scoreBoard->SetStateBool( va( "%s%i_rank", teamStr, i+1 ), true );
+				scoreBoard->SetStateString( va( "%s%i", teamStr, i+1 ), va( "+%i", more ) );
+				scoreBoard->SetStateString( va( "%s%i_portrait", teamStr, i+1 ), "" );
+				scoreBoard->SetStateString( va( "%s%i_score", teamStr, i+1 ), "" );
+				scoreBoard->SetStateString( va( "%s%i_wins", teamStr, i+1 ), "" );
+				scoreBoard->SetStateString( va( "%s%i_ping", teamStr, i+1 ), "" );
+				continue;
+			}
+			const scoreboardLine_t &line = lines[ team ][ order[ i ] ];
+			if ( order[ i ] == self[ team ] ) {
+				scoreBoard->SetStateInt( "rank_self", i+1 );
+			}
+			scoreBoard->SetStateBool( va( "%s%i_rank", teamStr, i+1 ), line.visible );
+			scoreBoard->SetStateString( va( "%s%i", teamStr, i+1 ), line.name.c_str() );
+			scoreBoard->SetStateString( va( "%s%i_portrait", teamStr, i+1 ), line.portrait.c_str() );
+			scoreBoard->SetStateString( va( "%s%i_score", teamStr, i+1 ), line.score.c_str() );
+			scoreBoard->SetStateString( va( "%s%i_wins", teamStr, i+1 ), line.wins.c_str() );
+			scoreBoard->SetStateInt( va( "%s%i_ping", teamStr, i+1 ), line.ping );
+		}
+		scoreBoard->SetStateInt( va( "%s_count", teamStr ), rows );
+
+		// clear empty slots
+		//HUMANHEAD PCF rww 05/26/06 - the blue rows were cleared with the red count
+		for ( ; rows < MAX_CLIENTS; rows++ ) {
+			scoreBoard->SetStateBool( va( "%s%i_rank", teamStr, rows+1 ), false );
+			scoreBoard->SetStateString( va( "%s%i", teamStr, rows+1 ), "" );
+			scoreBoard->SetStateString( va( "%s%i_score", teamStr, rows+1 ), "" );
+			scoreBoard->SetStateString( va( "%s%i_wins", teamStr, rows+1 ), "" );
+			scoreBoard->SetStateString( va( "%s%i_ping", teamStr, rows+1 ), "" );
+			scoreBoard->SetStateString( va( "%s%i_portrait", teamStr, rows+1 ), "" );
+		}
 	}
 
 	if (gameLocal.GetLocalPlayer()) {
@@ -590,6 +631,7 @@ void idMultiplayerGame::UpdateDMScoreboard( idUserInterface *scoreBoard, idPlaye
 	int value;
 
 	scoreBoard->SetStateString("teamdm", "0");
+	scoreBoard->SetStateInt( "rank_self", 0 );
 
 	iline = 0; // the display lines
 	if ( gameState != WARMUP ) {
@@ -676,9 +718,19 @@ void idMultiplayerGame::UpdateDMScoreboard( idUserInterface *scoreBoard, idPlaye
 		}
 	}
 
-	// clear empty slots
+	// openPR06: lay the board out (SB_LAYOUT_*): past one compact column, the
+	// leading column takes the first half of the lines
+	const int lines = iline;
+	const int layout = lines <= MAX_SCOREBOARD_NAMES ? SB_LAYOUT_CLASSIC : lines <= SB_COLUMN_ROWS ? SB_LAYOUT_COLUMN : SB_LAYOUT_COLUMNS;
+	const int split = layout == SB_LAYOUT_COLUMNS ? ( lines + 1 ) / 2 : lines;
+	scoreBoard->SetStateInt( "sb_layout", layout );
+	scoreBoard->SetStateInt( "sb_count", lines );
+	scoreBoard->SetStateInt( "sb_split", split );
+	scoreBoard->SetStateInt( "sb_pitch", ScoreboardPitch( SB_LIST_BAND, split ) );
+
+	// clear empty slots (openPR06: all of them; the stock stopped at MAX_SCOREBOARD_NAMES)
 	iline++;
-	while ( iline <= MAX_SCOREBOARD_NAMES ) {
+	while ( iline <= MAX_CLIENTS ) {
 		scoreBoard->SetStateString( va( "player%i", iline ), "" );
 		scoreBoard->SetStateString( va( "player%i_score", iline ), "" );
 		scoreBoard->SetStateString( va( "player%i_portrait", iline ), "" );
@@ -708,7 +760,17 @@ void idMultiplayerGame::UpdateScoreboard( idUserInterface *scoreBoard, idPlayer 
 	}
 
 	// Update game info
-	gameinfo = va( "%s: %s", common->GetLanguageDict()->GetString( "#str_02376" ), gameLocal.serverInfo.GetString( "si_gameType" ) );
+	// openPR06: the game type by its menu name ("Deathmatch;Team DM"), where the
+	// stock printed the server's token ("deathmatch")
+	idStr typeName = gameLocal.serverInfo.GetString( "si_gameType" );
+	if ( gameLocal.gameType == GAME_DM || gameLocal.gameType == GAME_TDM ) {
+		const idStr names = common->GetLanguageDict()->GetString( "#str_20150" );
+		const int semicolon = names.Find( ';' );
+		if ( semicolon > 0 ) {
+			typeName = gameLocal.gameType == GAME_TDM ? names.Right( names.Length() - semicolon - 1 ) : names.Left( semicolon );
+		}
+	}
+	gameinfo = va( "%s: %s", common->GetLanguageDict()->GetString( "#str_02376" ), typeName.c_str() );
 	livesinfo = va( "%s: %i", common->GetLanguageDict()->GetString( "#str_01982" ), gameLocal.serverInfo.GetInt( "si_fragLimit" ) );
 
 	if ( gameLocal.serverInfo.GetInt( "si_timeLimit" ) > 0 ) {
@@ -2634,13 +2696,25 @@ void idMultiplayerGame::UpdateHud( idPlayer *player, idUserInterface *hud ) {
 			i = 2;	// Zero out the rest
 		}
 		else {
-			while (i < numRankedPlayers) {
-
-				hud->SetStateString( va( "player%i", i+1 ), rankedPlayers[ i ]->GetUserInfo()->GetString( "ui_name" ) );
-				hud->SetStateInt( va( "player%i_score", i+1 ), playerState[ rankedPlayers[ i ]->entityNumber ].fragCount );
-				hud->SetStateString( va( "player%i_portrait", i+1 ), rankedPlayers[ i ]->GetModelPortraitName(true) );
+			// openPR06: the box shows four standings. Past the top four its
+			// last line is the player's own, so a crowded match still shows
+			// where the player stands against the leaders (self_rankstring
+			// gives the place).
+			int selfPlace = -1;
+			for ( int place = 0; place < numRankedPlayers; place++ ) {
+				if ( rankedPlayers[ place ] == player ) {
+					selfPlace = place;
+					break;
+				}
+			}
+			const int shown = Min( numRankedPlayers, HUD_STANDINGS );
+			while (i < shown) {
+				const int place = ( i == HUD_STANDINGS - 1 && selfPlace >= HUD_STANDINGS ) ? selfPlace : i;
+				hud->SetStateString( va( "player%i", i+1 ), rankedPlayers[ place ]->GetUserInfo()->GetString( "ui_name" ) );
+				hud->SetStateInt( va( "player%i_score", i+1 ), playerState[ rankedPlayers[ place ]->entityNumber ].fragCount );
+				hud->SetStateString( va( "player%i_portrait", i+1 ), rankedPlayers[ place ]->GetModelPortraitName(true) );
 				hud->SetStateInt( va( "rank%i", i+1 ), 1 );
-				if ( rankedPlayers[ i ] == player ) {
+				if ( place == selfPlace ) {
 					hud->SetStateInt( "rank_self", i+1 );
 				}
 				i++;
@@ -2656,12 +2730,15 @@ void idMultiplayerGame::UpdateHud( idPlayer *player, idUserInterface *hud ) {
 	}
 
 	//HUMANHEAD rww
-	if (player && player->entityNumber == gameLocal.localClientNum) {
+	// openPR06: the place of the player in view (hud_mpmisc.guifragment's
+	// SelfRank), the followed player's while spectating; it was the local
+	// client's alone and went stale while following someone
+	if (player) {
 		char *selfRankStr;
 		if (gameState == GAMEON) {
 			int myPlaceRank = -1;
 			for (i = 0; i < numRankedPlayers; i++) {
-				if (rankedPlayers[i]->entityNumber == gameLocal.localClientNum) {
+				if (rankedPlayers[i] == player) {
 					myPlaceRank = i+1;
 					break;
 				}
@@ -2687,7 +2764,7 @@ idMultiplayerGame::DrawScoreBoard
 ================
 */
 void idMultiplayerGame::DrawScoreBoard( idPlayer *player ) {
-	if ( player->scoreBoardOpen || gameState == GAMEREVIEW ) {
+	if ( player->scoreBoardOpen || gameState == GAMEREVIEW || g_forceScoreboard.GetBool() ) {	// openPR06: g_forceScoreboard
 		if ( !playerState[ player->entityNumber ].scoreBoardUp ) {
 			scoreBoard->Activate( true, gameLocal.time );
 			playerState[ player->entityNumber ].scoreBoardUp = true;

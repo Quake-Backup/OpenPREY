@@ -205,6 +205,31 @@
   "join.sel.player5": {"type": "string", "initial": ""},
   "join.sel.player6": {"type": "string", "initial": ""},
   "join.sel.player7": {"type": "string", "initial": ""},
+  "join.sel.player8": {"type": "string", "initial": ""},
+  "join.sel.player9": {"type": "string", "initial": ""},
+  "join.sel.player10": {"type": "string", "initial": ""},
+  "join.sel.player11": {"type": "string", "initial": ""},
+  "join.sel.player12": {"type": "string", "initial": ""},
+  "join.sel.player13": {"type": "string", "initial": ""},
+  "join.sel.player14": {"type": "string", "initial": ""},
+  "join.sel.player15": {"type": "string", "initial": ""},
+  "join.sel.player16": {"type": "string", "initial": ""},
+  "join.sel.player17": {"type": "string", "initial": ""},
+  "join.sel.player18": {"type": "string", "initial": ""},
+  "join.sel.player19": {"type": "string", "initial": ""},
+  "join.sel.player20": {"type": "string", "initial": ""},
+  "join.sel.player21": {"type": "string", "initial": ""},
+  "join.sel.player22": {"type": "string", "initial": ""},
+  "join.sel.player23": {"type": "string", "initial": ""},
+  "join.sel.player24": {"type": "string", "initial": ""},
+  "join.sel.player25": {"type": "string", "initial": ""},
+  "join.sel.player26": {"type": "string", "initial": ""},
+  "join.sel.player27": {"type": "string", "initial": ""},
+  "join.sel.player28": {"type": "string", "initial": ""},
+  "join.sel.player29": {"type": "string", "initial": ""},
+  "join.sel.player30": {"type": "string", "initial": ""},
+  "join.sel.player31": {"type": "string", "initial": ""},
+  "join.sel.rows": {"type": "number", "initial": 4},
   "join.row0.name": {"type": "string", "initial": ""},
   "join.row0.ping": {"type": "string", "initial": ""},
   "join.row0.players": {"type": "string", "initial": ""},
@@ -9155,6 +9180,12 @@
    "value": {"state": "join.sel.player1"}
   },
   {
+   "id": "find-players-row0.display",
+   "node": "find-players-row0",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [0, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
    "id": "find-player2-shadow.text",
    "node": "find-player2-shadow",
    "property": "text",
@@ -9177,6 +9208,12 @@
    "node": "find-player3",
    "property": "text",
    "value": {"state": "join.sel.player3"}
+  },
+  {
+   "id": "find-players-row1.display",
+   "node": "find-players-row1",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [1, {"state": "join.sel.rows"}]}, "block", "none"]}
   },
   {
    "id": "find-player4-shadow.text",
@@ -9203,6 +9240,12 @@
    "value": {"state": "join.sel.player5"}
   },
   {
+   "id": "find-players-row2.display",
+   "node": "find-players-row2",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [2, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
    "id": "find-player6-shadow.text",
    "node": "find-player6-shadow",
    "property": "text",
@@ -9225,6 +9268,378 @@
    "node": "find-player7",
    "property": "text",
    "value": {"state": "join.sel.player7"}
+  },
+  {
+   "id": "find-players-row3.display",
+   "node": "find-players-row3",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [3, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player8-shadow.text",
+   "node": "find-player8-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player8"}
+  },
+  {
+   "id": "find-player8.text",
+   "node": "find-player8",
+   "property": "text",
+   "value": {"state": "join.sel.player8"}
+  },
+  {
+   "id": "find-player9-shadow.text",
+   "node": "find-player9-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player9"}
+  },
+  {
+   "id": "find-player9.text",
+   "node": "find-player9",
+   "property": "text",
+   "value": {"state": "join.sel.player9"}
+  },
+  {
+   "id": "find-players-row4.display",
+   "node": "find-players-row4",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [4, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player10-shadow.text",
+   "node": "find-player10-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player10"}
+  },
+  {
+   "id": "find-player10.text",
+   "node": "find-player10",
+   "property": "text",
+   "value": {"state": "join.sel.player10"}
+  },
+  {
+   "id": "find-player11-shadow.text",
+   "node": "find-player11-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player11"}
+  },
+  {
+   "id": "find-player11.text",
+   "node": "find-player11",
+   "property": "text",
+   "value": {"state": "join.sel.player11"}
+  },
+  {
+   "id": "find-players-row5.display",
+   "node": "find-players-row5",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [5, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player12-shadow.text",
+   "node": "find-player12-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player12"}
+  },
+  {
+   "id": "find-player12.text",
+   "node": "find-player12",
+   "property": "text",
+   "value": {"state": "join.sel.player12"}
+  },
+  {
+   "id": "find-player13-shadow.text",
+   "node": "find-player13-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player13"}
+  },
+  {
+   "id": "find-player13.text",
+   "node": "find-player13",
+   "property": "text",
+   "value": {"state": "join.sel.player13"}
+  },
+  {
+   "id": "find-players-row6.display",
+   "node": "find-players-row6",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [6, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player14-shadow.text",
+   "node": "find-player14-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player14"}
+  },
+  {
+   "id": "find-player14.text",
+   "node": "find-player14",
+   "property": "text",
+   "value": {"state": "join.sel.player14"}
+  },
+  {
+   "id": "find-player15-shadow.text",
+   "node": "find-player15-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player15"}
+  },
+  {
+   "id": "find-player15.text",
+   "node": "find-player15",
+   "property": "text",
+   "value": {"state": "join.sel.player15"}
+  },
+  {
+   "id": "find-players-row7.display",
+   "node": "find-players-row7",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [7, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player16-shadow.text",
+   "node": "find-player16-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player16"}
+  },
+  {
+   "id": "find-player16.text",
+   "node": "find-player16",
+   "property": "text",
+   "value": {"state": "join.sel.player16"}
+  },
+  {
+   "id": "find-player17-shadow.text",
+   "node": "find-player17-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player17"}
+  },
+  {
+   "id": "find-player17.text",
+   "node": "find-player17",
+   "property": "text",
+   "value": {"state": "join.sel.player17"}
+  },
+  {
+   "id": "find-players-row8.display",
+   "node": "find-players-row8",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [8, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player18-shadow.text",
+   "node": "find-player18-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player18"}
+  },
+  {
+   "id": "find-player18.text",
+   "node": "find-player18",
+   "property": "text",
+   "value": {"state": "join.sel.player18"}
+  },
+  {
+   "id": "find-player19-shadow.text",
+   "node": "find-player19-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player19"}
+  },
+  {
+   "id": "find-player19.text",
+   "node": "find-player19",
+   "property": "text",
+   "value": {"state": "join.sel.player19"}
+  },
+  {
+   "id": "find-players-row9.display",
+   "node": "find-players-row9",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [9, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player20-shadow.text",
+   "node": "find-player20-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player20"}
+  },
+  {
+   "id": "find-player20.text",
+   "node": "find-player20",
+   "property": "text",
+   "value": {"state": "join.sel.player20"}
+  },
+  {
+   "id": "find-player21-shadow.text",
+   "node": "find-player21-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player21"}
+  },
+  {
+   "id": "find-player21.text",
+   "node": "find-player21",
+   "property": "text",
+   "value": {"state": "join.sel.player21"}
+  },
+  {
+   "id": "find-players-row10.display",
+   "node": "find-players-row10",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [10, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player22-shadow.text",
+   "node": "find-player22-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player22"}
+  },
+  {
+   "id": "find-player22.text",
+   "node": "find-player22",
+   "property": "text",
+   "value": {"state": "join.sel.player22"}
+  },
+  {
+   "id": "find-player23-shadow.text",
+   "node": "find-player23-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player23"}
+  },
+  {
+   "id": "find-player23.text",
+   "node": "find-player23",
+   "property": "text",
+   "value": {"state": "join.sel.player23"}
+  },
+  {
+   "id": "find-players-row11.display",
+   "node": "find-players-row11",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [11, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player24-shadow.text",
+   "node": "find-player24-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player24"}
+  },
+  {
+   "id": "find-player24.text",
+   "node": "find-player24",
+   "property": "text",
+   "value": {"state": "join.sel.player24"}
+  },
+  {
+   "id": "find-player25-shadow.text",
+   "node": "find-player25-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player25"}
+  },
+  {
+   "id": "find-player25.text",
+   "node": "find-player25",
+   "property": "text",
+   "value": {"state": "join.sel.player25"}
+  },
+  {
+   "id": "find-players-row12.display",
+   "node": "find-players-row12",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [12, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player26-shadow.text",
+   "node": "find-player26-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player26"}
+  },
+  {
+   "id": "find-player26.text",
+   "node": "find-player26",
+   "property": "text",
+   "value": {"state": "join.sel.player26"}
+  },
+  {
+   "id": "find-player27-shadow.text",
+   "node": "find-player27-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player27"}
+  },
+  {
+   "id": "find-player27.text",
+   "node": "find-player27",
+   "property": "text",
+   "value": {"state": "join.sel.player27"}
+  },
+  {
+   "id": "find-players-row13.display",
+   "node": "find-players-row13",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [13, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player28-shadow.text",
+   "node": "find-player28-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player28"}
+  },
+  {
+   "id": "find-player28.text",
+   "node": "find-player28",
+   "property": "text",
+   "value": {"state": "join.sel.player28"}
+  },
+  {
+   "id": "find-player29-shadow.text",
+   "node": "find-player29-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player29"}
+  },
+  {
+   "id": "find-player29.text",
+   "node": "find-player29",
+   "property": "text",
+   "value": {"state": "join.sel.player29"}
+  },
+  {
+   "id": "find-players-row14.display",
+   "node": "find-players-row14",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [14, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find-player30-shadow.text",
+   "node": "find-player30-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player30"}
+  },
+  {
+   "id": "find-player30.text",
+   "node": "find-player30",
+   "property": "text",
+   "value": {"state": "join.sel.player30"}
+  },
+  {
+   "id": "find-player31-shadow.text",
+   "node": "find-player31-shadow",
+   "property": "text",
+   "value": {"state": "join.sel.player31"}
+  },
+  {
+   "id": "find-player31.text",
+   "node": "find-player31",
+   "property": "text",
+   "value": {"state": "join.sel.player31"}
+  },
+  {
+   "id": "find-players-row15.display",
+   "node": "find-players-row15",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": "<", "args": [15, {"state": "join.sel.rows"}]}, "block", "none"]}
+  },
+  {
+   "id": "find_players_scroll.display",
+   "node": "find_players_scroll",
+   "property": "display",
+   "value": {"op": "select", "args": [{"op": ">", "args": [{"state": "join.sel.rows"}, 4]}, "block", "none"]}
   },
   {
    "id": "find-players-limit-shadow.text",
@@ -39558,6 +39973,89 @@
       {"atMs": 0, "value": {"type": "color", "value": [0.7098, 0.7882, 0.8902, 0.3]}},
       {"atMs": 1, "value": {"type": "color", "value": [0.7098, 0.7882, 0.8902, 0.3]}}
      ]
+    }
+   ]
+  },
+  {
+   "id": "find_players_scroll.default",
+   "durationMs": 1,
+   "tracks": [
+    {
+     "node": "find_players_scroll-thumb-base",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 1}}, {"atMs": 1, "value": {"type": "number", "value": 1}}]
+    },
+    {
+     "node": "find_players_scroll-thumb-lit",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 0}}, {"atMs": 1, "value": {"type": "number", "value": 0}}]
+    }
+   ]
+  },
+  {
+   "id": "find_players_scroll.hover",
+   "durationMs": 1,
+   "tracks": [
+    {
+     "node": "find_players_scroll-thumb-base",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 0}}, {"atMs": 1, "value": {"type": "number", "value": 0}}]
+    },
+    {
+     "node": "find_players_scroll-thumb-lit",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 1}}, {"atMs": 1, "value": {"type": "number", "value": 1}}]
+    }
+   ]
+  },
+  {
+   "id": "find_players_scroll.focus",
+   "durationMs": 1,
+   "tracks": [
+    {
+     "node": "find_players_scroll-thumb-base",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 0}}, {"atMs": 1, "value": {"type": "number", "value": 0}}]
+    },
+    {
+     "node": "find_players_scroll-thumb-lit",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 1}}, {"atMs": 1, "value": {"type": "number", "value": 1}}]
+    }
+   ]
+  },
+  {
+   "id": "find_players_scroll.pressed",
+   "durationMs": 60,
+   "tracks": [
+    {
+     "node": "find_players_scroll-thumb-base",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 0}}, {"atMs": 60, "value": {"type": "number", "value": 0}}]
+    },
+    {
+     "node": "find_players_scroll-thumb-lit",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 1}}, {"atMs": 60, "value": {"type": "number", "value": 1}}]
+    }
+   ]
+  },
+  {
+   "id": "find_players_scroll.disabled",
+   "durationMs": 1,
+   "tracks": [
+    {
+     "node": "find_players_scroll-thumb-base",
+     "property": "opacity",
+     "keys": [
+      {"atMs": 0, "value": {"type": "number", "value": 0.4}},
+      {"atMs": 1, "value": {"type": "number", "value": 0.4}}
+     ]
+    },
+    {
+     "node": "find_players_scroll-thumb-lit",
+     "property": "opacity",
+     "keys": [{"atMs": 0, "value": {"type": "number", "value": 0}}, {"atMs": 1, "value": {"type": "number", "value": 0}}]
     }
    ]
   },
@@ -78492,339 +78990,1740 @@
                   }
                  },
                  {
-                  "id": "find-player0-shadow",
-                  "type": "text",
+                  "id": "find-players-list",
+                  "type": "group",
                   "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
                    "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 250.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 506.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
+                   "left": {"type": "length", "value": 240.0, "unit": "dp"},
+                   "top": {"type": "length", "value": 502.5, "unit": "dp"},
+                   "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                   "height": {"type": "length", "value": 90.0, "unit": "dp"},
+                   "overflow": {"type": "keyword", "value": "auto"}
+                  },
+                  "children": [
+                   {
+                    "id": "find-players-column",
+                    "type": "group",
+                    "properties": {
+                     "position": {"type": "keyword", "value": "relative"},
+                     "display": {"type": "keyword", "value": "flex"},
+                     "flex-direction": {"type": "keyword", "value": "column"}
+                    },
+                    "children": [
+                     {
+                      "id": "find-players-row0",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player0-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player0",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player1-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player1",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row1",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player2-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player2",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player3-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player3",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row2",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player4-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player4",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player5-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player5",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row3",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player6-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player6",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player7-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player7",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row4",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player8-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player8",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player9-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player9",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row5",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player10-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player10",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player11-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player11",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row6",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player12-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player12",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player13-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player13",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row7",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player14-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player14",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player15-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player15",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row8",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player16-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player16",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player17-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player17",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row9",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player18-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player18",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player19-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player19",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row10",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player20-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player20",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player21-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player21",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row11",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player22-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player22",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player23-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player23",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row12",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player24-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player24",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player25-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player25",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row13",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player26-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player26",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player27-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player27",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row14",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player28-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player28",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player29-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player29",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find-players-row15",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "relative"},
+                       "display": {"type": "keyword", "value": "none"},
+                       "width": {"type": "length", "value": 415.5, "unit": "dp"},
+                       "height": {"type": "length", "value": 22.5, "unit": "dp"},
+                       "flex-shrink": {"type": "number", "value": 0},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "children": [
+                       {
+                        "id": "find-player30-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 10.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player30",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 9.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 195.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       },
+                       {
+                        "id": "find-player31-shadow",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 219.0, "unit": "dp"},
+                         "top": {"type": "length", "value": 3.816, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0, 0, 0, 0.95]}
+                        }
+                       },
+                       {
+                        "id": "find-player31",
+                        "type": "text",
+                        "properties": {
+                         "text": {"type": "text", "value": "#str_20128"},
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 217.5, "unit": "dp"},
+                         "top": {"type": "length", "value": 2.316, "unit": "dp"},
+                         "width": {"type": "length", "value": 174.0, "unit": "dp"},
+                         "height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "font-family": {"type": "font", "value": "chain"},
+                         "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
+                         "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
+                         "text-align": {"type": "keyword", "value": "left"},
+                         "white-space": {"type": "keyword", "value": "nowrap"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "overflow": {"type": "keyword", "value": "hidden"},
+                         "text-overflow": {"type": "keyword", "value": "ellipsis"},
+                         "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                        }
+                       }
+                      ]
+                     }
+                    ]
+                   }
+                  ]
                  },
                  {
-                  "id": "find-player0",
-                  "type": "text",
+                  "id": "find_players_scroll",
+                  "type": "group",
                   "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
                    "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 249.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 504.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
-                  }
-                 },
-                 {
-                  "id": "find-player1-shadow",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 250.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 528.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
-                 },
-                 {
-                  "id": "find-player1",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 249.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 527.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
-                  }
-                 },
-                 {
-                  "id": "find-player2-shadow",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 250.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 551.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
-                 },
-                 {
-                  "id": "find-player2",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 249.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 549.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
-                  }
-                 },
-                 {
-                  "id": "find-player3-shadow",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 250.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 573.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
-                 },
-                 {
-                  "id": "find-player3",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 249.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 572.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
-                  }
-                 },
-                 {
-                  "id": "find-player4-shadow",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 459.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 506.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
-                 },
-                 {
-                  "id": "find-player4",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 457.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 504.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
-                  }
-                 },
-                 {
-                  "id": "find-player5-shadow",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 459.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 528.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
-                 },
-                 {
-                  "id": "find-player5",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 457.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 527.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
-                  }
-                 },
-                 {
-                  "id": "find-player6-shadow",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 459.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 551.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
-                 },
-                 {
-                  "id": "find-player6",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 457.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 549.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
-                  }
-                 },
-                 {
-                  "id": "find-player7-shadow",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 459.0, "unit": "dp"},
-                   "top": {"type": "length", "value": 573.816, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0, 0, 0, 0.95]}
-                  }
-                 },
-                 {
-                  "id": "find-player7",
-                  "type": "text",
-                  "properties": {
-                   "text": {"type": "text", "value": "#str_20128"},
-                   "position": {"type": "keyword", "value": "absolute"},
-                   "left": {"type": "length", "value": 457.5, "unit": "dp"},
-                   "top": {"type": "length", "value": 572.316, "unit": "dp"},
-                   "width": {"type": "length", "value": 195.0, "unit": "dp"},
-                   "height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "font-family": {"type": "font", "value": "chain"},
-                   "font-size": {"type": "length", "value": 19.08, "unit": "dp"},
-                   "line-height": {"type": "length", "value": 21.0, "unit": "dp"},
-                   "text-align": {"type": "keyword", "value": "left"},
-                   "white-space": {"type": "keyword", "value": "nowrap"},
-                   "pointer-events": {"type": "keyword", "value": "none"},
-                   "overflow": {"type": "keyword", "value": "hidden"},
-                   "text-overflow": {"type": "keyword", "value": "ellipsis"},
-                   "color": {"type": "color", "value": [0.7216, 0.7882, 0.902, 0.9]}
+                   "left": {"type": "length", "value": 634.5, "unit": "dp"},
+                   "top": {"type": "length", "value": 489.0, "unit": "dp"},
+                   "width": {"type": "length", "value": 21.0, "unit": "dp"},
+                   "height": {"type": "length", "value": 117.0, "unit": "dp"},
+                   "display": {"type": "keyword", "value": "none"}
+                  },
+                  "children": [
+                   {
+                    "id": "find_players_scroll-track",
+                    "type": "group",
+                    "properties": {
+                     "position": {"type": "keyword", "value": "relative"},
+                     "display": {"type": "keyword", "value": "block"},
+                     "width": {"type": "length", "value": 21.0, "unit": "dp"},
+                     "height": {"type": "length", "value": 100, "unit": "%"}
+                    },
+                    "children": [
+                     {
+                      "id": "find_players_scroll-trough",
+                      "type": "vector",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "absolute"},
+                       "left": {"type": "length", "value": 0, "unit": "dp"},
+                       "top": {"type": "length", "value": 0, "unit": "dp"},
+                       "width": {"type": "length", "value": 100, "unit": "%"},
+                       "height": {"type": "length", "value": 100, "unit": "%"},
+                       "pointer-events": {"type": "keyword", "value": "none"}
+                      },
+                      "paths": [
+                       {
+                        "id": "rail",
+                        "commands": [
+                         {"id": "p0", "op": "move", "points": [[4.5, 0]]},
+                         {"id": "p1", "op": "line", "points": [[16.5, 0]]},
+                         {"id": "p2", "op": "line", "points": [[21.0, 4.5]]},
+                         {"id": "p3", "op": "line", "points": [[21.0, {"fraction": 1, "dp": -4.5}]]},
+                         {"id": "p4", "op": "line", "points": [[16.5, {"fraction": 1, "dp": 0}]]},
+                         {"id": "p5", "op": "line", "points": [[4.5, {"fraction": 1, "dp": 0}]]},
+                         {"id": "p6", "op": "line", "points": [[0, {"fraction": 1, "dp": -4.5}]]},
+                         {"id": "p7", "op": "line", "points": [[0, 4.5]]},
+                         {"id": "close", "op": "close"}
+                        ],
+                        "fill": {"type": "solid", "color": {"type": "color", "value": [0.6784, 0.7725, 0.8902, 0.35]}}
+                       }
+                      ]
+                     },
+                     {
+                      "id": "find_players_scroll-thumb",
+                      "type": "group",
+                      "properties": {
+                       "position": {"type": "keyword", "value": "absolute"},
+                       "left": {"type": "length", "value": 0, "unit": "dp"},
+                       "top": {"type": "length", "value": 0, "unit": "dp"},
+                       "width": {"type": "length", "value": 21.0, "unit": "dp"},
+                       "height": {"type": "length", "value": 36, "unit": "dp"}
+                      },
+                      "children": [
+                       {
+                        "id": "find_players_scroll-thumb-base",
+                        "type": "vector",
+                        "properties": {
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 0, "unit": "dp"},
+                         "top": {"type": "length", "value": 0, "unit": "dp"},
+                         "width": {"type": "length", "value": 100, "unit": "%"},
+                         "height": {"type": "length", "value": 100, "unit": "%"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "opacity": {"type": "number", "value": 1}
+                        },
+                        "paths": [
+                         {
+                          "id": "thumb",
+                          "commands": [
+                           {"id": "p0", "op": "move", "points": [[7.5, 3]]},
+                           {"id": "p1", "op": "line", "points": [[13.5, 3]]},
+                           {"id": "p2", "op": "line", "points": [[18.0, 7.5]]},
+                           {"id": "p3", "op": "line", "points": [[18.0, {"fraction": 1, "dp": -7.5}]]},
+                           {"id": "p4", "op": "line", "points": [[13.5, {"fraction": 1, "dp": -3}]]},
+                           {"id": "p5", "op": "line", "points": [[7.5, {"fraction": 1, "dp": -3}]]},
+                           {"id": "p6", "op": "line", "points": [[3, {"fraction": 1, "dp": -7.5}]]},
+                           {"id": "p7", "op": "line", "points": [[3, 7.5]]},
+                           {"id": "close", "op": "close"}
+                          ],
+                          "fill": {"type": "solid", "color": {"type": "color", "value": [0.7412, 0.8275, 0.9412, 0.85]}}
+                         }
+                        ]
+                       },
+                       {
+                        "id": "find_players_scroll-thumb-lit",
+                        "type": "vector",
+                        "properties": {
+                         "position": {"type": "keyword", "value": "absolute"},
+                         "left": {"type": "length", "value": 0, "unit": "dp"},
+                         "top": {"type": "length", "value": 0, "unit": "dp"},
+                         "width": {"type": "length", "value": 100, "unit": "%"},
+                         "height": {"type": "length", "value": 100, "unit": "%"},
+                         "pointer-events": {"type": "keyword", "value": "none"},
+                         "opacity": {"type": "number", "value": 0}
+                        },
+                        "paths": [
+                         {
+                          "id": "thumb",
+                          "commands": [
+                           {"id": "p0", "op": "move", "points": [[7.5, 3]]},
+                           {"id": "p1", "op": "line", "points": [[13.5, 3]]},
+                           {"id": "p2", "op": "line", "points": [[18.0, 7.5]]},
+                           {"id": "p3", "op": "line", "points": [[18.0, {"fraction": 1, "dp": -7.5}]]},
+                           {"id": "p4", "op": "line", "points": [[13.5, {"fraction": 1, "dp": -3}]]},
+                           {"id": "p5", "op": "line", "points": [[7.5, {"fraction": 1, "dp": -3}]]},
+                           {"id": "p6", "op": "line", "points": [[3, {"fraction": 1, "dp": -7.5}]]},
+                           {"id": "p7", "op": "line", "points": [[3, 7.5]]},
+                           {"id": "close", "op": "close"}
+                          ],
+                          "fill": {"type": "solid", "color": {"type": "color", "value": [1.0, 1.0, 1.0, 1.0]}}
+                         }
+                        ]
+                       }
+                      ]
+                     }
+                    ]
+                   }
+                  ],
+                  "control": {
+                   "role": "scrollbar",
+                   "label": "#str_20173",
+                   "viewport": "find-players-list",
+                   "orientation": "vertical",
+                   "lineStep": 22.5,
+                   "minimumThumb": 36,
+                   "parts": {"track": "find_players_scroll-track", "thumb": "find_players_scroll-thumb"},
+                   "states": {
+                    "default": "find_players_scroll.default",
+                    "hover": "find_players_scroll.hover",
+                    "focus": "find_players_scroll.focus",
+                    "pressed": "find_players_scroll.pressed",
+                    "disabled": "find_players_scroll.disabled"
+                   }
                   }
                  },
                  {

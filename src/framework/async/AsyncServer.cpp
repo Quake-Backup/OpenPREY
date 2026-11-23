@@ -963,6 +963,24 @@ float idAsyncServer::GetClientIncomingPacketLoss( int clientNum ) const {
 
 /*
 ==================
+idAsyncServer::CopyClientAddress
+==================
+*/
+bool idAsyncServer::CopyClientAddress( int clientNum, char *out, int outSize ) const {
+	if ( out == NULL || outSize <= 0 ) {
+		return false;
+	}
+	out[ 0 ] = '\0';
+	if ( clientNum < 0 || clientNum >= MAX_ASYNC_CLIENTS || clientNum == localClientNum ||
+		clients[ clientNum ].clientState == SCS_FREE ) {
+		return false;
+	}
+	idStr::Copynz( out, Sys_NetAdrToString( clients[ clientNum ].channel.GetRemoteAddress() ), outSize );
+	return true;
+}
+
+/*
+==================
 idAsyncServer::GetNumClients
 ==================
 */
@@ -1311,6 +1329,11 @@ void idAsyncServer::DropClient( int clientNum, const char *reason ) {
 			}
 		}
 	}
+
+	// openQ4 MP-18: the game's disconnect call carries no reason. Publish it first,
+	// so the game's admin log can tell a kick typed at the console from a lost
+	// connection without a change to the game interface.
+	idAsyncNetwork::serverLastDrop.SetString( va( "%d %s", clientNum, reason ) );
 
 	reason = common->GetLanguageDict()->GetString( reason );
 	common->Printf( "client %d %s\n", clientNum, reason );
@@ -2962,6 +2985,31 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 		serverClient_t &client = clients[ i ];
 		if ( client.clientState >= SCS_PUREWAIT ) {
 			numClients++;
+		}
+	}
+
+	// openQ4 MP-18: net_serverMaxClientsPerAddress. Without it one address can
+	// hold every slot. Players behind one router share an address, so the cap
+	// is the operator's number and 0 (the default) leaves it off. The slot this
+	// connect would take over is the same connection, not another one.
+	const int perAddressLimit = idAsyncNetwork::serverMaxClientsPerAddress.GetInteger();
+	if ( perAddressLimit > 0 ) {
+		int sameAddress = 0;
+		for ( i = 0; i < MAX_ASYNC_CLIENTS; i++ ) {
+			const serverClient_t &client = clients[ i ];
+			if ( client.clientState < SCS_PUREWAIT || !Sys_CompareNetAdrBase( from, client.channel.GetRemoteAddress() ) ) {
+				continue;
+			}
+			if ( clientId == client.clientId || from.port == client.channel.GetRemoteAddress().port ) {
+				continue;
+			}
+			sameAddress++;
+		}
+		if ( sameAddress >= perAddressLimit ) {
+			common->DPrintf( "connect from %s refused: %d clients already hold this address (net_serverMaxClientsPerAddress %d)\n",
+				Sys_NetAdrToString( from ), sameAddress, perAddressLimit );
+			PrintOOB( from, SERVER_PRINT_MISC, "#str_232640" );
+			return;
 		}
 	}
 

@@ -87,6 +87,7 @@ openPR06's files sit in the `basepr/` folder inside it. To keep a separate set, 
 
 - The staged package carries everything it needs: the static runtime, so no Visual C++ redistributable, and the `OpenAL32.dll` that [BUILDING.md](../../BUILDING.md#windows-openal-runtime) has you prepare before staging.
 - If openPR06 crashes, look in the `crashes/` folder beside the executable for the crash log and minidump.
+- If openPR06 stops with an error window instead, the error and everything the window shows are saved to `basepr\logs\fatal.log` in your save folder, and the window's last line names the file. Each new error replaces it.
 
 ### Linux
 
@@ -115,7 +116,7 @@ For more on paths and file layout, see the [Technical Reference](../../TECHNICAL
 
 ## Reporting a Problem
 
-Open an [issue](https://github.com/themuffinator/openPR06/issues) with your setup and a log. Launch with `+set logFile 2`, reproduce the problem, and attach the `qconsole.log` it writes to `basepr/` in your save folder. On Windows, attach anything new in `crashes/` too.
+Open an [issue](https://github.com/themuffinator/openPR06/issues) with your setup and a log. Launch with `+set logFile 2`, reproduce the problem, and attach the `qconsole.log` it writes to `basepr/` in your save folder. On Windows, attach anything new in `crashes/` too, and `basepr\logs\fatal.log` if the game stopped with an error window.
 
 ## Next Steps
 

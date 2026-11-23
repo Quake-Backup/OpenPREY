@@ -4558,6 +4558,11 @@ void idSessionLocal::Clear() {
 	retainedGameParent = NULL;
 	retainedGameParentHandle = NULL;
 	guiRetainedControls = NULL;
+	guiOnScreenKeyboard = NULL;
+	oskOwner = NULL;
+	oskLayer = 0;
+	oskShift = false;
+	oskEnding = false;
 	retainedControlsParent = NULL;
 	retainedControlsParentHandle = NULL;
 	retainedControlsCapture = -1;
@@ -5470,8 +5475,7 @@ static void Session_OpenQ4GuiFocus_f( const idCmdArgs &args ) {
 }
 
 /*
-================
-Session_OpenQ4GuiCursor_f
+=========Session_OpenQ4GuiCursor_f
 
 openPR06: openq4_guiCursor <x> <y> places the active classic GUI's pointer at
 x,y of its 640x480 canvas, as the mouse would, touching no device, so a
@@ -5487,6 +5491,7 @@ static void Session_OpenQ4GuiCursor_f( const idCmdArgs &args ) {
 	gui->SetCursor( atof( args.Argv( 1 ) ), atof( args.Argv( 2 ) ) );
 	common->Printf( "GUI_CURSOR %.1f %.1f\n", gui->CursorX(), gui->CursorY() );
 }
+void Session_OnScreenKeyboard_f( const idCmdArgs &args );	// Session_menu.cpp
 
 static void Session_RetainedGui_f( const idCmdArgs &args ) {
 #ifndef ID_DEDICATED
@@ -8416,9 +8421,9 @@ void idSessionLocal::ExecuteMapChange( bool noFadeWipe ) {
 
 	// cause prints to force screen updates as a pacifier,
 	// and draw the loading gui instead of game draws
-	startupLoadingHandoff = false;
 	openq4::NativeInputBeforeSessionChange();
 	insideExecuteMapChange = true;
+	startupLoadingHandoff = false;
 	LoadingPresentation_Begin( "map" );
 
 	// if this works out we will probably want all the sizes in a def file although this solution will 
@@ -10272,8 +10277,12 @@ bool idSessionLocal::ProcessEvent( const sysEvent_t *event ) {
 	// hitting escape anywhere brings up the menu
 	// openQ4: except with the console down, where Escape first puts away the
 	// console (idConsoleLocal::KeyDownEvent); a second press brings up the menu
+	// The controller's Menu button does the same whatever it is bound to, so a
+	// pad can always reach the menu. The View button does not (PAD-06): in play
+	// it follows its binding, the scoreboard or the objectives while held, as
+	// the shipped layout and section 13.5 have it; inside a menu it goes back.
 	if ( !guiActive && !guiTest && !RetainedUI_IsOpen() && event->evType == SE_KEY && event->evValue2 == 1 &&
-		( ( event->evValue == K_ESCAPE && !console->Active() ) || event->evValue == K_JOY7 || event->evValue == K_JOY8 ) ) {
+		( ( event->evValue == K_ESCAPE && !console->Active() ) || event->evValue == K_JOY7 ) ) {
 		console->Close();
 		if (!NativeInput_SessionCurrent()) return true;
 		if ( IsDemoPlaybackActive() ) {
@@ -11112,6 +11121,9 @@ void idSessionLocal::Draw() {
 		guiLoadingHold->Redraw( presentationTime );
 	}
 
+	// the on-screen keyboard stands over whichever screen holds the field it types into
+	DrawOnScreenKeyboard( presentationTime );
+
 	// draw the wipe material on top of this if it hasn't completed yet
 	RetainedUI_Draw();
 	DrawWipeModel();
@@ -11727,6 +11739,7 @@ void idSessionLocal::Init() {
 	cmdSystem->AddCommand( "testGUI", Session_TestGUI_f, CMD_FL_SYSTEM, "tests a gui" );
 #ifndef ID_DEDICATED
 	cmdSystem->AddCommand( "openq4_retainedGui", Session_RetainedGui_f, CMD_FL_SYSTEM, "inspect a normal retained GUI or submit semantic diagnostics without device input" );
+	cmdSystem->AddCommand( "openq4_onScreenKeyboard", Session_OnScreenKeyboard_f, CMD_FL_SYSTEM, "report the on-screen keyboard or press its keys without device input" );
 	cmdSystem->AddCommand( "openq4_summaryChat", Session_SummaryChat_f, CMD_FL_SYSTEM, "type, move the caret in, stop or send the match summary card's chat entry without device input" );
 	cmdSystem->AddCommand( "openq4_system", Session_SystemSettings_f, CMD_FL_SYSTEM, "open, return or inspect the opt-in normal SYSTEM child without device input" );
 	cmdSystem->AddCommand( "ui_retainedStatus", Session_RetainedStatus_f, CMD_FL_SYSTEM, "report the ui_retained gate and the live retained screens" );

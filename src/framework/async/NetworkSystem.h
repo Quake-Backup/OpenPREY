@@ -210,7 +210,11 @@ public:
 	// RAVEN BEGIN
 // ddynerman: added some utility functions
 	// uses a static buffer, copy it before calling in game again
-	const char* GetClientAddress(int clientNum) { return 0; }
+	// openQ4 MP-18: a connected remote client's endpoint as Sys_NetAdrToString
+	// prints it; "" for a free slot, the listen server's own player and an
+	// inactive server. A bot reads "bot". Non-virtual in openPR06: Prey's v7
+	// vtable ends at ClientGetIncomingPacketLoss.
+	const char*		GetClientAddress(int clientNum);
 	void			AddFriend(int clientNum) { }
 	void			RemoveFriend(int clientNum) { }
 	// for MP games

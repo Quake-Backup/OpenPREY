@@ -194,10 +194,15 @@ public:
 	static idCVar			clientMaxRate;					// maximum rate from server requested by client
 	static idCVar			serverMaxUsercmdRelay;			// maximum number of usercmds relayed to other clients
 	static idCVar			serverZombieTimeout;			// time out in seconds for zombie clients
+	static idCVar			serverMaxClientsPerAddress;		// most clients one address may hold; 0 for no limit
+	static idCVar			serverLastDrop;					// "<slot> <reason>" of the client the server last removed
 	static idCVar			serverClientTimeout;			// time out in seconds for connected clients
 	static idCVar			clientServerTimeout;			// time out in seconds for server
 	static idCVar			serverDrawClient;				// the server draws the view of this client
 	static idCVar			serverRemoteConsolePassword;	// remote console password
+	static idCVar			serverAdminPassword;			// the game's admin password, read at map start and cleared
+	static idCVar			serverRefereePassword;			// g_refPassword: the game's referee password, declared here to be private from startup
+	static idCVar			clientAdminPassword;			// the admin password this client logs in with
 	static idCVar			serverAllowLegacyRcon;			// explicit plaintext compatibility opt-in
 	static idCVar			clientPrediction;				// how many additional milliseconds the clients runs ahead
 	static idCVar			clientMaxPrediction;			// max milliseconds into the future a client can run prediction
